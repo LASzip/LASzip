@@ -261,7 +261,7 @@ int read_bytes = 0;
 
 inline unsigned int ArithmeticDecoder::get_inbyte()
 {
-  unsigned int c;
+  int c;
   if (fp)
   {
     read_bytes++;
