@@ -235,8 +235,8 @@ void RangeEncoder::writeInt(unsigned int i)
 
 void RangeEncoder::writeInt64(U64 l)
 {
-  writeInt((unsigned int)(l % 4294967296)); // lower 32 bits
-  writeInt((unsigned int)(l / 4294967296)); // UPPER 32 bits
+  writeInt((unsigned int)(l % 4294967296ull)); // lower 32 bits
+  writeInt((unsigned int)(l / 4294967296ull)); // UPPER 32 bits
 }
 
 void RangeEncoder::writeFloat(float f)
