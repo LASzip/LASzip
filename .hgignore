@@ -63,3 +63,4 @@ src/liblas.a
 Debug
 Release
 .DS_Store
+laszip-config
