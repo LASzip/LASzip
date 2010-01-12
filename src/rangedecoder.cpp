@@ -208,7 +208,7 @@ U64 RangeDecoder::readInt64()
 {
   U64 lowerInt = readInt();
   U64 upperInt = readInt();
-  return upperInt*4294967296+lowerInt;
+  return upperInt*4294967296ull+lowerInt;
 }
 
 /* Decode a double without modelling                         */
