@@ -1,4 +1,4 @@
-SUBDIRS = src . include
+SUBDIRS = . src include
 
 lib_LTLIBRARIES = liblaszip.la
 
