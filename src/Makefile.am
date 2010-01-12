@@ -1,4 +1,4 @@
-SUBDIRS = alternate_coder_src . 
+SUBDIRS = . 
 
 AM_CPPFLAGS = -I../include
 noinst_LTLIBRARIES = liblibrary.la 
@@ -16,4 +16,3 @@ liblibrary_la_SOURCES =	 integercompressor_newer.cpp \
 						rangeencoder.cpp \
 						rangemodel.cpp 
 
-liblibrary_la_LIBADD =	 alternate_coder_src/liblaszip_alternate.la
