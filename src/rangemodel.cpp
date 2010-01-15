@@ -1,21 +1,20 @@
 /******************************************************************************
  *
- * Project:  laszip - http://liblas.org - 
- * Purpose:  
+ * Project:  laszip - http://liblas.org -
+ * Purpose:
  * Author:   Martin Isenburg
- *           martin.isenburg at gmail.com
+ *           isenburg at cs.unc.edu
  *
  ******************************************************************************
  * Copyright (c) 2009, Martin Isenburg
- * 
+ *
  * This is free software; you can redistribute and/or modify it under
  * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation. 
+ * by the Free Software Foundation.
  *
  * See the COPYING file for more information.
  *
  ****************************************************************************/
-
 
 /*
 ===============================================================================
@@ -55,7 +54,7 @@
 /* compress  set to 1 on compression, 0 on decompression */
 /* targetrescale  desired rescaling interval, should be < 1<<(lg_totf+1) */
 /* lg_totf  base2 log of total frequency count         */
-RangeModel::RangeModel(unsigned int n, unsigned int *init, int compress, int targetrescale, int lg_totf)
+RangeModel::RangeModel(U32 n, U32 *init, int compress, int targetrescale, int lg_totf)
 {
   this->n = n;
   this->targetrescale = targetrescale;
@@ -154,7 +153,7 @@ void RangeModel::dorescale()
 
 /* reinitialisation of qsmodel                         */
 /* init  array of int's to be used for initialisation (NULL ok) */
-void RangeModel::reset(unsigned int *init)
+void RangeModel::reset(U32 *init)
 {
   int i, end, initval;
   rescale = n >> 4 | 2;
@@ -212,16 +211,16 @@ void RangeModel::reset(unsigned int *init)
 /* sy_f frequency of that symbol                       */
 /* lt_f frequency of all smaller symbols together      */
 /* the total frequency is 1<<LG_TOTF                   */
-void RangeModel::getfreq(unsigned int sym, unsigned int *sy_f, unsigned int *lt_f )
+void RangeModel::getfreq(U32 sym, U32 *sy_f, U32 *lt_f )
 {
   *sy_f = cf[sym+1] - (*lt_f = cf[sym]);
 }
 
 /* find out symbol for a given cumulative frequency    */
 /* lt_f  cumulative frequency                          */
-unsigned int RangeModel::getsym(unsigned int lt_f)
+U32 RangeModel::getsym(U32 lt_f)
 {
-  unsigned int lo, hi;
+  U32 lo, hi;
   unsigned short *tmp;
   tmp = search+(lt_f>>searchshift);
   lo = *tmp;
@@ -243,7 +242,7 @@ unsigned int RangeModel::getsym(unsigned int lt_f)
 
 /* update model                                        */
 /* sym  symbol that occurred (must be <n from init)    */
-void RangeModel::update(unsigned int sym)
+void RangeModel::update(U32 sym)
 {
   if (left <= 0)
   {

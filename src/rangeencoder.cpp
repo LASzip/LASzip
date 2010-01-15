@@ -1,21 +1,20 @@
 /******************************************************************************
  *
- * Project:  laszip - http://liblas.org - 
- * Purpose:  
+ * Project:  laszip - http://liblas.org -
+ * Purpose:
  * Author:   Martin Isenburg
- *           martin.isenburg at gmail.com
+ *           isenburg at cs.unc.edu
  *
  ******************************************************************************
  * Copyright (c) 2009, Martin Isenburg
- * 
+ *
  * This is free software; you can redistribute and/or modify it under
  * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation. 
+ * by the Free Software Foundation.
  *
  * See the COPYING file for more information.
  *
  ****************************************************************************/
-
 
 /*
 ===============================================================================
@@ -63,7 +62,7 @@ RangeEncoder::RangeEncoder(FILE* fp, bool store_chars)
     this->fp = 0;
     if (store_chars)
     {
-      chars = (unsigned char*)malloc(sizeof(unsigned char)*1000);
+      chars = (U8*)malloc(sizeof(U8)*1000);
       number_chars = 0;
       allocated_chars = 1000;
     }
@@ -81,14 +80,14 @@ RangeEncoder::RangeEncoder(FILE* fp, bool store_chars)
   bytecount = 0;
 }
 
-void RangeEncoder::encode(RangeModel* rm, unsigned int sym)
+void RangeEncoder::encode(RangeModel* rm, U32 sym)
 {
-  unsigned int syfreq;
-  unsigned int ltfreq;
-  unsigned int r, tmp;
-  unsigned int lg_totf = rm->lg_totf;
+  U32 syfreq;
+  U32 ltfreq;
+  U32 r, tmp;
+  U32 lg_totf = rm->lg_totf;
 
-  assert(sym >= 0 && sym < (unsigned int)rm->n);
+  assert(sym >= 0 && sym < (U32)rm->n);
   
   rm->getfreq(sym,&syfreq,&ltfreq);
 
@@ -112,18 +111,18 @@ void RangeEncoder::encode(RangeModel* rm, unsigned int sym)
   rm->update(sym);
 }
 
-void RangeEncoder::writeBits(unsigned int bits, unsigned int sym)
+void RangeEncoder::writeBits(U32 bits, U32 sym)
 {
   assert(bits && (sym < (1u<<bits)));
 
   if (bits > 21) // 22 bits
   {
-    writeShort(sym&65535);
+    writeShort(sym&U16_MAX);
     sym = sym >> 16;
     bits = bits - 16;
   }
 
-  unsigned int r, tmp;
+  U32 r, tmp;
   normalize();
   r = range >> bits;
   tmp = r * sym;
@@ -142,18 +141,18 @@ void RangeEncoder::writeBits(unsigned int bits, unsigned int sym)
 #endif
 }
 
-void RangeEncoder::writeRange(unsigned int range, unsigned int sym)
+void RangeEncoder::writeRange(U32 range, U32 sym)
 {
   assert(range && (sym < range));
 
   if (range > 4194303) // 22 bits
   {
-    writeShort(sym&65535);
+    writeShort(sym&U16_MAX);
     sym = sym >> 16;
     range = range >> 16;
     range++;
   }
-  unsigned int r, tmp;
+  U32 r, tmp;
   normalize();
   r = this->range / range;
   tmp = r * sym;
@@ -175,27 +174,27 @@ void RangeEncoder::writeRange(unsigned int range, unsigned int sym)
 void RangeEncoder::writeRange64(U64 range, U64 sym)
 {
   assert(sym < range);
-  if (range > 4294967295) // 32 bits
+  if (range > U32_MAX) // 32 bits
   {
-    writeInt((unsigned int)(sym&4294967295));
+    writeInt((U32)(sym&U32_MAX));
     sym = sym >> 32;
     range = range >> 32;
     range++;
   }
-  writeRange((unsigned int)range, (unsigned int)sym);
+  writeRange((U32)range, (U32)sym);
 }
 
-void RangeEncoder::writeByte(unsigned char c)
+void RangeEncoder::writeByte(U8 sym)
 {
-  unsigned int r, tmp;
+  U32 r, tmp;
   normalize();
   r = range >> 8;
-  tmp = r * (unsigned int)(c);
+  tmp = r * (U32)(sym);
   low += tmp;
 #ifdef EXTRAFAST
   range = r;
 #else
-  if (((unsigned int)(c)+1) >> 8)
+  if (((U32)(sym)+1) >> 8)
   {
     range -= tmp;
   }
@@ -206,17 +205,17 @@ void RangeEncoder::writeByte(unsigned char c)
 #endif
 }
 
-void RangeEncoder::writeShort(unsigned short s)
+void RangeEncoder::writeShort(U16 sym)
 {
-  unsigned int r, tmp;
+  U32 r, tmp;
   normalize();
   r = range >> 16;
-  tmp = r * (unsigned int)(s);
+  tmp = r * (U32)(sym);
   low += tmp;
 #ifdef EXTRAFAST
   range = r;
 #else
-  if (((unsigned int)(s)+1) >> 16)
+  if (((U32)(sym)+1) >> 16)
   {
     range -= tmp;
   }
@@ -227,26 +226,30 @@ void RangeEncoder::writeShort(unsigned short s)
 #endif
 }
 
-void RangeEncoder::writeInt(unsigned int i)
+void RangeEncoder::writeInt(U32 sym)
 {
-  writeShort((unsigned short)(i % 65536)); // lower 16 bits
-  writeShort((unsigned short)(i / 65536)); // UPPER 16 bits
+  writeShort((U16)(sym % U16_MAX_PLUS_ONE)); // lower 16 bits
+  writeShort((U16)(sym / U16_MAX_PLUS_ONE)); // UPPER 16 bits
 }
 
-void RangeEncoder::writeInt64(U64 l)
+void RangeEncoder::writeInt64(U64 sym)
 {
-  writeInt((unsigned int)(l % 4294967296ull)); // lower 32 bits
-  writeInt((unsigned int)(l / 4294967296ull)); // UPPER 32 bits
+  writeInt((U32)(sym % U32_MAX_PLUS_ONE)); // lower 32 bits
+  writeInt((U32)(sym / U32_MAX_PLUS_ONE)); // UPPER 32 bits
 }
 
-void RangeEncoder::writeFloat(float f)
+void RangeEncoder::writeFloat(F32 sym)
 {
-  writeInt(*((unsigned int*)(&f)));
+  U32F32 u32f32;
+  u32f32.f32 = sym;
+  writeInt(u32f32.u32);
 }
 
-void RangeEncoder::writeDouble(double d)
+void RangeEncoder::writeDouble(F64 sym)
 {
-  writeInt64(*((U64*)(&d)));
+  U64F64 u64f64;
+  u64f64.f64 = sym;
+  writeInt64(u64f64.u64);
 }
 
 /* I do the normalization before I need a defined state instead of */
@@ -255,14 +258,14 @@ inline void RangeEncoder::normalize()
 {
   while(range <= BOTTOM_VALUE) /* do we need renormalisation?  */
   {
-    if (low < (unsigned int)0xff<<SHIFT_BITS)  /* no carry possible --> output */
+    if (low < (U32)0xff<<SHIFT_BITS)  /* no carry possible --> output */
     {
       outbyte(buffer);
       for(; help; help--)
       {
         outbyte(0xff);
       }
-      buffer = (unsigned char)(low >> SHIFT_BITS);
+      buffer = (U8)(low >> SHIFT_BITS);
     }
     else if (low & TOP_VALUE) /* carry now, no future carry */
     {
@@ -271,7 +274,7 @@ inline void RangeEncoder::normalize()
       {
         outbyte(0);
       }
-      buffer = (unsigned char)(low >> SHIFT_BITS);
+      buffer = (U8)(low >> SHIFT_BITS);
     }
     else                      /* passes on a potential carry */
     {
@@ -287,9 +290,9 @@ inline void RangeEncoder::normalize()
 /* actually not that many bytes need to be output, but who   */
 /* cares. I output them because decode will read them :)     */
 /* the return value is the number of bytes written           */
-unsigned int RangeEncoder::done()
+U32 RangeEncoder::done()
 {
-  unsigned int tmp;
+  U32 tmp;
   normalize();     /* now we have a normalized state */
   bytecount += 5;
   if ((low & (BOTTOM_VALUE-1)) < ((bytecount&0xffffffL)>>1))
@@ -331,27 +334,22 @@ RangeEncoder::~RangeEncoder()
   }
 }
 
-unsigned char* RangeEncoder::getChars()
+U8* RangeEncoder::getChars()
 {
   return chars;
 }
   
-int RangeEncoder::getNumberChars()
+U32 RangeEncoder::getNumberChars()
 {
   return number_chars;
 }
 
-long RangeEncoder::getNumberBits()
-{
-  return bytecount*8;
-}
-
-int RangeEncoder::getNumberBytes()
+U32 RangeEncoder::getNumberBytes()
 {
   return bytecount;
 }
 
-inline void RangeEncoder::outbyte(unsigned int c)
+inline void RangeEncoder::outbyte(U32 c)
 {
   if (fp)
   {
@@ -363,8 +361,8 @@ inline void RangeEncoder::outbyte(unsigned int c)
     {
       if (number_chars == allocated_chars)
       {
-        unsigned char* newchars = (unsigned char*) malloc(sizeof(unsigned char)*allocated_chars*2);
-        memcpy(newchars,chars,sizeof(unsigned char)*allocated_chars);
+        U8* newchars = (U8*)malloc(sizeof(U8)*allocated_chars*2);
+        memcpy(newchars,chars,sizeof(U8)*allocated_chars);
         free(chars);
         chars = newchars;
         allocated_chars = allocated_chars*2;

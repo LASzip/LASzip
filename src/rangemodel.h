@@ -1,21 +1,20 @@
 /******************************************************************************
  *
- * Project:  laszip - http://liblas.org - 
- * Purpose:  
+ * Project:  laszip - http://liblas.org -
+ * Purpose:
  * Author:   Martin Isenburg
- *           martin.isenburg at gmail.com
+ *           isenburg at cs.unc.edu
  *
  ******************************************************************************
  * Copyright (c) 2009, Martin Isenburg
- * 
+ *
  * This is free software; you can redistribute and/or modify it under
  * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation. 
+ * by the Free Software Foundation.
  *
  * See the COPYING file for more information.
  *
  ****************************************************************************/
-
 
 /*
 ===============================================================================
@@ -49,12 +48,14 @@
 #ifndef RANGEMODEL_H
 #define RANGEMODEL_H
 
+#include "mydefs.h"
+
 /* this header byte needs to change in case incompatible change happen */
 #define HEADERBYTE 1
 
 /* definitions for the rangeencoder and rangedecoder */
 #define CODE_BITS 32
-#define TOP_VALUE ((unsigned int)1 << (CODE_BITS-1))
+#define TOP_VALUE ((U32)1 << (CODE_BITS-1))
 #define SHIFT_BITS (CODE_BITS - 9)
 #define EXTRA_BITS ((CODE_BITS-2) % 8 + 1)
 #define BOTTOM_VALUE (TOP_VALUE >> 8)
@@ -71,7 +72,7 @@ public:
 /* compress  set to 1 on compression, 0 on decompression */
 /* targetrescale  desired rescaling interval, should be < 1<<(lg_totf+1) */
 /* lg_totf  base2 log of total frequency count         */
-  RangeModel(unsigned int n, unsigned int *init, int compress, int targetrescale=2000, int lg_totf=14);
+  RangeModel(U32 n, U32 *init, int compress, int targetrescale=2000, int lg_totf=14);
 
 /* deletion of qsmodel                                 */
   ~RangeModel();
@@ -79,7 +80,7 @@ public:
 /* reinitialisation of qsmodel                         */
 /* init  array to be used for initialisation (NULL ok) */
 
-  void reset(unsigned int *init);
+  void reset(U32 *init);
 
 /* retrieval of estimated frequencies for a symbol     */
 /* sym  symbol for which data is desired; must be <n   */
@@ -87,17 +88,17 @@ public:
 /* lt_f frequency of all smaller symbols together      */
 /* the total frequency is 1<<lg_totf                   */
 
-  void getfreq(unsigned int sym, unsigned int *sy_f, unsigned int *lt_f);
+  void getfreq(U32 sym, U32 *sy_f, U32 *lt_f);
 
 /* find out symbol for a given cumulative frequency    */
 /* lt_f  cumulative frequency                          */
 
-  unsigned int getsym(unsigned int lt_f);
+  U32 getsym(U32 lt_f);
 
 /* update model                                        */
 /* sym  symbol that occurred (must be <n from init)    */
 
-  void update(unsigned int sym);
+  void update(U32 sym);
 
   int n;             /* number of symbols */
 

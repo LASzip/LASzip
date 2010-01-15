@@ -1,21 +1,20 @@
 /******************************************************************************
  *
- * Project:  laszip - http://liblas.org - 
- * Purpose:  
+ * Project:  laszip - http://liblas.org -
+ * Purpose:
  * Author:   Martin Isenburg
- *           martin.isenburg at gmail.com
+ *           isenburg at cs.unc.edu
  *
  ******************************************************************************
  * Copyright (c) 2009, Martin Isenburg
- * 
+ *
  * This is free software; you can redistribute and/or modify it under
  * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation. 
+ * by the Free Software Foundation.
  *
  * See the COPYING file for more information.
  *
  ****************************************************************************/
-
 
 /*
 ===============================================================================
@@ -51,7 +50,7 @@
 
 #include "rangemodel.h"
 #include "rangedecoder.h"
-#include "integercompressor_newer.h"
+#include "integercompressor_context.h"
 
 #include <stdio.h>
 
@@ -69,8 +68,8 @@ private:
   int last_x_diff[2][3];
   int last_y_diff[2][3];
   int last_incr[2];
-  double last_gps_time;
-  int last_gps_time_diff;
+  I64F64 last_gps_time;
+  I32 last_gps_time_diff;
   unsigned short last_rgb[3];
   void init_decoder();
   RangeDecoder* rd;

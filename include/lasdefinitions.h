@@ -1,21 +1,20 @@
 /******************************************************************************
  *
- * Project:  laszip - http://liblas.org - 
- * Purpose:  
+ * Project:  laszip - http://liblas.org -
+ * Purpose:
  * Author:   Martin Isenburg
- *           martin.isenburg at gmail.com
+ *           isenburg at cs.unc.edu
  *
  ******************************************************************************
  * Copyright (c) 2009, Martin Isenburg
- * 
+ *
  * This is free software; you can redistribute and/or modify it under
  * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation. 
+ * by the Free Software Foundation.
  *
  * See the COPYING file for more information.
  *
  ****************************************************************************/
-
 
 /*
 ===============================================================================
@@ -166,7 +165,7 @@ public:
 
   LASheader()
   {
-    for (int i = 0; i < sizeof(LASheader); i++) ((char*)this)[i] = 0;
+    for (unsigned int i = 0; i < sizeof(LASheader); i++) ((char*)this)[i] = 0;
     file_signature[0] = 'L'; file_signature[1] = 'A'; file_signature[2] = 'S'; file_signature[3] = 'F';
     version_major = 1;
     version_minor = 1;

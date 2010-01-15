@@ -3,7 +3,7 @@ SUBDIRS = .
 AM_CPPFLAGS = -I../include
 noinst_LTLIBRARIES = liblibrary.la 
 
-liblibrary_la_SOURCES =	 integercompressor_newer.cpp \
+liblibrary_la_SOURCES =	 integercompressor_context.cpp \
 						laspointreader0compressed.cpp \
 						laspointreader1compressed.cpp \
 						laspointreader2compressed.cpp \

@@ -1,21 +1,20 @@
 /******************************************************************************
  *
- * Project:  laszip - http://liblas.org - 
- * Purpose:  
+ * Project:  laszip - http://liblas.org -
+ * Purpose:
  * Author:   Martin Isenburg
- *           martin.isenburg at gmail.com
+ *           isenburg at cs.unc.edu
  *
  ******************************************************************************
  * Copyright (c) 2009, Martin Isenburg
- * 
+ *
  * This is free software; you can redistribute and/or modify it under
  * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation. 
+ * by the Free Software Foundation.
  *
  * See the COPYING file for more information.
  *
  ****************************************************************************/
-
 
 /*
 ===============================================================================
@@ -48,43 +47,42 @@
 #include <stdio.h>
 
 #include "rangemodel.h"
-#include "mydefs.h"
 
 class RangeDecoder
 {
 public:
 
 /* Start the decoder                                         */
-  RangeDecoder(unsigned char* chars, int number_chars);
+  RangeDecoder(U8* chars, U32 number_chars);
   RangeDecoder(FILE* fp);
 
   ~RangeDecoder();
 
 /* Decode with modelling                                     */
-  unsigned int decode(RangeModel* rm);
+  U32 decode(RangeModel* rm);
 
 /* Decode bits without modelling                             */
-  unsigned int readBits(unsigned int bits);
+  U32 readBits(U32 bits);
 
 /* Decode a range without modelling                          */
-  unsigned int readRange(unsigned int range);
+  U32 readRange(U32 range);
 
 /* Decode a range without modelling                          */
   U64 readRange64(U64 range);
 
 /* Decode an unsigned char without modelling                 */
-  unsigned char readByte();
+  U8 readByte();
 
 /* Decode an unsigned short without modelling                */
-  unsigned short readShort();
+  U16 readShort();
 
 /* Decode an unsigned int without modelling                  */
-  unsigned int readInt();
+  U32 readInt();
 
-/* Decode a float without modelling (endian-ness dependent)  */
-  float readFloat();
+/* Decode a float without modelling                          */
+  F32 readFloat();
 
-/* Decode an unsigned int64 without modelling                */
+/* Decode an unsigned 64 bit int without modelling           */
   U64 readInt64();
 
 /* Decode a double without modelling                         */
@@ -94,31 +92,31 @@ public:
   void done();
 
 private:
-/* Calculate culmulative frequency for next symbol. Does NO update!*/
+/* Calculate culmulative frequency for next symbol, no update*/
 /* tot_f is the total frequency                              */
 /* or: totf is 1<<shift                                      */
 /* returns the <= culmulative frequency                      */
-  unsigned int culshift( unsigned int shift );
+  U32 culshift(U32 shift);
 
 /* Update decoding state                                     */
 /* sy_f is the interval length (frequency of the symbol)     */
 /* lt_f is the lower end (frequency sum of < symbols)        */
 /* tot_f is the total interval length (total frequency sum)  */
-  void update( unsigned int sy_f, unsigned int lt_f, unsigned int tot_f);
+  void update(U32 sy_f, U32 lt_f, U32 tot_f);
 
   inline void normalize();
-  inline unsigned int inbyte();
+  inline U32 inbyte();
 
   FILE* fp;
 
-  unsigned char* chars;
-  int current_char;
-  int number_chars;
+  U8* chars;
+  U32 current_char;
+  U32 number_chars;
 
-  unsigned int low;         /* low end of interval */
-  unsigned int range;       /* length of interval */
-  unsigned int help;        /* bytes_to_follow resp. intermediate value */
-  unsigned char buffer;      /* buffer for output */
+  U32 low;         /* low end of interval */
+  U32 range;       /* length of interval */
+  U32 help;        /* bytes_to_follow resp. intermediate value */
+  U8 buffer;       /* buffer for output */
 };
 
 #endif

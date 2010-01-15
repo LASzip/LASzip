@@ -1,26 +1,25 @@
 /******************************************************************************
  *
- * Project:  laszip - http://liblas.org - 
- * Purpose:  
+ * Project:  laszip - http://liblas.org -
+ * Purpose:
  * Author:   Martin Isenburg
- *           martin.isenburg at gmail.com
+ *           isenburg at cs.unc.edu
  *
  ******************************************************************************
  * Copyright (c) 2009, Martin Isenburg
- * 
+ *
  * This is free software; you can redistribute and/or modify it under
  * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation. 
+ * by the Free Software Foundation.
  *
  * See the COPYING file for more information.
  *
  ****************************************************************************/
 
-
 /*
 ===============================================================================
 
-  FILE:  integercompressor_newer.h
+  FILE:  integercompressor_context.h
   
   CONTENTS:
  
@@ -59,44 +58,42 @@
   
 ===============================================================================
 */
-#ifndef INTEGER_COMPRESSOR_NEWER_H
-#define INTEGER_COMPRESSOR_NEWER_H
-
-#include "mydefs.h"
+#ifndef INTEGER_COMPRESSOR_CONTEXT_H
+#define INTEGER_COMPRESSOR_CONTEXT_H
 
 #include "rangeencoder.h"
 #include "rangedecoder.h"
-#include "rangemodel.h"
 
 class IntegerCompressorContext
 {
 public:
 
   // SetPrecision:
-  void SetPrecision(I32 iBits);
+  void SetPrecision(U32 bits) {this->bits = bits;};
   // GetPrecision:
-  I32 GetPrecision();
+  U32 GetPrecision() const {return bits;};
 
   // SetRange:
-  void SetRange(I32 iRange);
+  void SetRange(U32 range) {this->range = range;};
   // GetRange:
-  I32 GetRange();
+  U32 GetRange() const {return range;};
 
   // SetupCompressor:
-  void SetupCompressor(RangeEncoder* re, int contexts=1, int BITS_HIGH=8);
+  void SetupCompressor(RangeEncoder* re, U32 contexts=1, U32 BITS_HIGH=8);
   void FinishCompressor();
 
   // Compress:
-  I32 CompressNone(I32 iReal);
-  I32 CompressLast(I32 iPred, I32 iReal, int context=0);
+  void Compress(I32 iPred, I32 iReal, U32 context=0);
 
   // SetupDecompressor:
-  void SetupDecompressor(RangeDecoder* rd, int contexts=1, int BITS_HIGH=8);
+  void SetupDecompressor(RangeDecoder* rd, U32 contexts=1, U32 BITS_HIGH=8);
   void FinishDecompressor();
 
-  // Deompress:
-  I32 DecompressNone();
-  I32 DecompressLast(I32 iPred, int context=0);
+  // Decompress:
+  I32 Decompress(I32 iPred, U32 context=0);
+
+  // Get the k corrector bits from the last compress/decompress call
+  U32 GetK() const {return k;};
 
   // Constructor:
   IntegerCompressorContext();
@@ -105,28 +102,27 @@ public:
 
 private:
   // Private Functions
-  I32 writeCorrector(I32 c, RangeModel* rmBits);
+  void writeCorrector(I32 c, RangeModel* rmBits);
   I32 readCorrector(RangeModel* amBits);
 
-  int contexts;
-  int bits_high;
+  U32 k;
+
+  U32 contexts;
+  U32 bits_high;
 
   // Private Variables
-  int bits;
-  int range;
+  U32 bits;
+  U32 range;
 
-  int corr_bits;
-  int corr_range;
-  int corr_max;
-  int corr_min;
-
-  int last;
+  U32 corr_bits;
+  U32 corr_range;
+  I32 corr_min;
+  I32 corr_max;
 
   RangeEncoder* re;
   RangeDecoder* rd;
 
-  RangeModel* rmBitsNone;
-  RangeModel** rmBitsLast;
+  RangeModel** rmBits;
 
   RangeModel** rmCorrector;
 

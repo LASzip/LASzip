@@ -1,21 +1,20 @@
 /******************************************************************************
  *
- * Project:  laszip - http://liblas.org - 
- * Purpose:  
+ * Project:  laszip - http://liblas.org -
+ * Purpose:
  * Author:   Martin Isenburg
- *           martin.isenburg at gmail.com
+ *           isenburg at cs.unc.edu
  *
  ******************************************************************************
  * Copyright (c) 2009, Martin Isenburg
- * 
+ *
  * This is free software; you can redistribute and/or modify it under
  * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation. 
+ * by the Free Software Foundation.
  *
  * See the COPYING file for more information.
  *
  ****************************************************************************/
-
 
 /*
 ===============================================================================
@@ -49,7 +48,6 @@
 #include <stdio.h>
 
 #include "rangemodel.h"
-#include "mydefs.h"
 
 class RangeEncoder
 {
@@ -60,60 +58,59 @@ public:
   ~RangeEncoder();
 
 /* Encode with modelling                                     */
-  void encode(RangeModel* rm, unsigned int sym);
+  void encode(RangeModel* rm, U32 sym);
 
-/* Encode bits without modelling                            */
-  void writeBits(unsigned int bits, unsigned int sym);
-
-/* Encode a range without modelling                          */
-  void writeRange(unsigned int range, unsigned int sym);
+/* Encode bits without modelling                             */
+  void writeBits(U32 bits, U32 sym);
 
 /* Encode a range without modelling                          */
-  void writeRange64( U64 range,  U64 sym);
+  void writeRange(U32 range, U32 sym);
+
+/* Encode a range without modelling                          */
+  void writeRange64(U64 range, U64 sym);
 
 /* Encode an unsigned char without modelling                 */
-  void writeByte(unsigned char b);
+  void writeByte(U8 sym);
 
 /* Encode an unsigned short without modelling                */
-  void writeShort(unsigned short s);
+  void writeShort(U16 sym);
 
 /* Encode an unsigned int without modelling                  */
-  void writeInt(unsigned int i);
+  void writeInt(U32 sym);
 
 /* Encode a float without modelling                          */
-  void writeFloat(float f);
+  void writeFloat(F32 sym);
 
-/* Encode an unsigned int64 without modelling                */
-  void writeInt64( U64 l);
+/* Encode an unsigned 64 bit int without modelling           */
+  void writeInt64(U64 sym);
 
 /* Encode a double without modelling                         */
-  void writeDouble(double d);
+  void writeDouble(F64 sym);
 
 /* Finish encoding, returns number of bytes written          */
-  unsigned int done();
+  U32 done();
 
-  unsigned char* getChars();
-  int getNumberChars();
+  U8* getChars();
+  U32 getNumberChars();
 
-  long getNumberBits();
-  int getNumberBytes();
+  U32 getNumberBytes();
 
 private:
   inline void normalize();
-  inline void outbyte(unsigned int byte);
+  inline void outbyte(U32 byte);
 
   FILE* fp;
 
-  unsigned char* chars;
-  int number_chars;
-  int allocated_chars;
+  U8* chars;
+  U32 number_chars;
+  U32 allocated_chars;
 
-  unsigned int low;           /* low end of interval */
-  unsigned int range;         /* length of interval */
-  unsigned int help;          /* bytes_to_follow resp. intermediate value */
-  unsigned char buffer;       /* buffer for input/output */
+  U32 low;           /* low end of interval */
+  U32 range;         /* length of interval */
+  U32 help;          /* bytes_to_follow resp. intermediate value */
+  U8 buffer;         /* buffer for input/output */
   /* the following is used only when encoding */
-  unsigned int bytecount;     /* counter for outputed bytes  */
+  U32 bytecount;     /* counter for output bytes  */
 };
 
 #endif

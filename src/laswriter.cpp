@@ -1,21 +1,20 @@
 /******************************************************************************
  *
- * Project:  laszip - http://liblas.org - 
- * Purpose:  
+ * Project:  laszip - http://liblas.org -
+ * Purpose:
  * Author:   Martin Isenburg
- *           martin.isenburg at gmail.com
+ *           isenburg at cs.unc.edu
  *
  ******************************************************************************
  * Copyright (c) 2009, Martin Isenburg
- * 
+ *
  * This is free software; you can redistribute and/or modify it under
  * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation. 
+ * by the Free Software Foundation.
  *
  * See the COPYING file for more information.
  *
  ****************************************************************************/
-
 
 /*
 ===============================================================================
@@ -521,8 +520,13 @@ bool LASwriter::write_point(double x, double y, double z)
   return write_point(&point);
 }
 
-void LASwriter::close()
+int LASwriter::close(bool update_header)
 {
+  if (pointWriter) 
+  {
+    delete pointWriter;
+    pointWriter = 0;
+  }
   if (created_header)
   {
     unsigned int number_of_point_records = (unsigned int)p_count;
@@ -569,14 +573,28 @@ void LASwriter::close()
     header = 0;
     npoints = p_count;
   }
-  else if (npoints && p_count != npoints) fprintf(stderr,"WARNING: written %d points but expected %d points\n", p_count, npoints);
-  p_count = -1;
-  file = 0;
-  if (pointWriter) 
+  else if (p_count != npoints)
   {
-    delete pointWriter;
-    pointWriter = 0;
+    if (update_header)
+    {
+      if (file == stdout)
+      {
+	fprintf(stderr,"WARNING: cannot update header when using stdout\n");
+      }
+      else
+      {
+	fseek(file, 107, SEEK_SET);
+	fwrite(&p_count, sizeof(unsigned int), 1, file);
+	fseek(file, 0, SEEK_END);
+      }
+    }
+    else if (npoints) fprintf(stderr,"WARNING: written %d points but expected %d points\n", p_count, npoints);
+    npoints = p_count;
   }
+  p_count = -1;
+  int total_bytes = ftell(file);
+  file = 0;
+  return total_bytes;
 }
 
 LASwriter::LASwriter()

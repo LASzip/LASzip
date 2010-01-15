@@ -1,21 +1,20 @@
 /******************************************************************************
  *
- * Project:  laszip - http://liblas.org - 
- * Purpose:  
+ * Project:  laszip - http://liblas.org -
+ * Purpose:
  * Author:   Martin Isenburg
- *           martin.isenburg at gmail.com
+ *           isenburg at cs.unc.edu
  *
  ******************************************************************************
  * Copyright (c) 2009, Martin Isenburg
- * 
+ *
  * This is free software; you can redistribute and/or modify it under
  * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation. 
+ * by the Free Software Foundation.
  *
  * See the COPYING file for more information.
  *
  ****************************************************************************/
-
 
 /*
 ===============================================================================
@@ -45,7 +44,7 @@
 ===============================================================================
 */
 
-#include "integercompressor_newer.h"
+#include "integercompressor_context.h"
 
 #define COMPRESS_ONLY_K
 #undef COMPRESS_ONLY_K
@@ -65,28 +64,26 @@ IntegerCompressorContext::IntegerCompressorContext()
   bits = 16;
   range = 0;
 
-  last = 0;
+  k = 0;
 
   re = 0;
   rd = 0;
 
-  rmBitsNone = 0;
-  rmBitsLast = 0;
+  rmBits = 0;
 
   rmCorrector = 0;
 }
 
 IntegerCompressorContext::~IntegerCompressorContext()
 {
-  int i;
-  if (rmBitsNone) delete rmBitsNone;
-  if (rmBitsLast)
+  U32 i;
+  if (rmBits)
   {
     for (i = 0; i < contexts; i++)
     {
-      delete rmBitsLast[i];
+      delete rmBits[i];
     }
-    free(rmBitsLast);
+    free(rmBits);
   }
   if (rmCorrector)
   {
@@ -101,9 +98,9 @@ IntegerCompressorContext::~IntegerCompressorContext()
   }
 }
 
-void IntegerCompressorContext::SetupCompressor(RangeEncoder* re, int contexts, int bits_high)
+void IntegerCompressorContext::SetupCompressor(RangeEncoder* re, U32 contexts, U32 bits_high)
 {
-  int i;
+  U32 i;
 
   this->re = re;
   this->contexts = contexts;
@@ -120,36 +117,37 @@ void IntegerCompressorContext::SetupCompressor(RangeEncoder* re, int contexts, i
       range = range >> 1;
       corr_bits++;
     }
-    if (corr_range == (1 << (corr_bits-1)))
+    if (corr_range == (1u << (corr_bits-1)))
     {
       corr_bits--;
     }
-		// the corrector must fall into this interval
-		corr_min = -(corr_range/2);
+    // the corrector must fall into this interval
+    corr_min = -((I32)(corr_range/2));
+    corr_max = corr_min + corr_range - 1;
   }
   else if (bits && bits < 32)
   {
     corr_bits = bits;
     corr_range = 1 << bits;
-		// the corrector must fall into this interval
-		corr_min = -(corr_range/2);
+    // the corrector must fall into this interval
+    corr_min = -((I32)(corr_range/2));
+    corr_max = corr_min + corr_range - 1;
   }
-	else
-	{
+  else
+  {
     corr_bits = 32;
-		corr_range = 0;
-		// the corrector must fall into this interval
-	  corr_min = -(1 << 31);
-	}
-	corr_max = corr_min + corr_range - 1;
+    corr_range = 0;
+    // the corrector must fall into this interval
+    corr_min = I32_MIN;
+    corr_max = I32_MAX;
+  }
 
   // allocate the arithmetic range tables 
 
-  rmBitsNone = new RangeModel(corr_bits+1,0,1,512,16);
-  rmBitsLast = (RangeModel**)malloc(sizeof(RangeModel*) * (contexts));
+  rmBits = (RangeModel**)malloc(sizeof(RangeModel*) * (contexts));
   for (i = 0; i < contexts; i++)
   {
-    rmBitsLast[i] = new RangeModel(corr_bits+1,0,1,512,16);
+    rmBits[i] = new RangeModel(corr_bits+1,0,1,512,16);
   }
 
 #if defined(COMPRESS_ONLY_K)
@@ -177,16 +175,15 @@ void IntegerCompressorContext::SetupCompressor(RangeEncoder* re, int contexts, i
 
 void IntegerCompressorContext::FinishCompressor()
 {
-  int i;
-  if (rmBitsNone) {delete rmBitsNone; rmBitsNone = 0;}
-  if (rmBitsLast)
+  U32 i;
+  if (rmBits)
   {
     for (i = 0; i < contexts; i++)
     {
-      delete rmBitsLast[i];
+      delete rmBits[i];
     }
-    free(rmBitsLast);
-    rmBitsLast = 0;
+    free(rmBits);
+    rmBits = 0;
   }
   if (rmCorrector)
   {
@@ -232,9 +229,9 @@ void IntegerCompressorContext::FinishCompressor()
 #endif
 }
 
-void IntegerCompressorContext::SetupDecompressor(RangeDecoder* rd, int contexts, int bits_high)
+void IntegerCompressorContext::SetupDecompressor(RangeDecoder* rd, U32 contexts, U32 bits_high)
 {
-  int i;
+  U32 i;
 
   this->rd = rd;
   this->contexts = contexts;
@@ -251,36 +248,37 @@ void IntegerCompressorContext::SetupDecompressor(RangeDecoder* rd, int contexts,
       range = range >> 1;
       corr_bits++;
     }
-    if (corr_range == (1 << (corr_bits-1)))
+    if (corr_range == (1u << (corr_bits-1)))
     {
       corr_bits--;
     }
-		// the corrector must fall into this interval
-		corr_min = -(corr_range/2);
+    // the corrector must fall into this interval
+    corr_min = -((I32)(corr_range/2));
+    corr_max = corr_min + corr_range - 1;
   }
   else if (bits && bits < 32)
   {
     corr_bits = bits;
-    corr_range = 1 << bits;
-		// the corrector must fall into this interval
-		corr_min = -(corr_range/2);
+    corr_range = 1u << bits;
+    // the corrector must fall into this interval
+    corr_min = -((I32)(corr_range/2));
+    corr_max = corr_min + corr_range - 1;
   }
-	else
-	{
+  else
+  {
     corr_bits = 32;
-		corr_range = 0;
-		// the corrector must fall into this interval
-	  corr_min = -(1 << 31);
-	}
-  corr_max = corr_min + corr_range - 1;
+    corr_range = 0;
+    // the corrector must fall into this interval
+    corr_min = I32_MIN;
+    corr_max = I32_MAX;
+  }
 
   // allocate the arithmetic range tables 
 
-  rmBitsNone = new RangeModel(corr_bits+1,0,0,512,16);
-  rmBitsLast = (RangeModel**)malloc(sizeof(RangeModel*) * (contexts));
+  rmBits = (RangeModel**)malloc(sizeof(RangeModel*) * (contexts));
   for (i = 0; i < contexts; i++)
   {
-    rmBitsLast[i] = new RangeModel(corr_bits+1,0,0,512,16);
+    rmBits[i] = new RangeModel(corr_bits+1,0,0,512,16);
   }
 
 #if defined(COMPRESS_ONLY_K)
@@ -296,16 +294,15 @@ void IntegerCompressorContext::SetupDecompressor(RangeDecoder* rd, int contexts,
 
 void IntegerCompressorContext::FinishDecompressor()
 {
-  int i;
-  if (rmBitsNone) {delete rmBitsNone; rmBitsNone = 0;}
-  if (rmBitsLast)
+  U32 i;
+  if (rmBits)
   {
     for (i = 0; i < contexts; i++)
     {
-      delete rmBitsLast[i];
+      delete rmBits[i];
     }
-    free(rmBitsLast);
-    rmBitsLast = 0;
+    free(rmBits);
+    rmBits = 0;
   }
 
   if (rmCorrector)
@@ -323,28 +320,11 @@ void IntegerCompressorContext::FinishDecompressor()
 }
 
 //-----------------------------------------------------------------------------
-// SetPrecision:
-//-----------------------------------------------------------------------------
-void IntegerCompressorContext::SetPrecision(I32 iBits)
-{
-  bits = iBits;
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-// SetRange:
-//-----------------------------------------------------------------------------
-void IntegerCompressorContext::SetRange(I32 iRange)
-{
-  range = iRange;
-}
-
-//-----------------------------------------------------------------------------
 // writeCorrector:
 //-----------------------------------------------------------------------------
-I32 IntegerCompressorContext::writeCorrector(I32 c, RangeModel* rmBits)
+void IntegerCompressorContext::writeCorrector(I32 c, RangeModel* rmBits)
 {
-  I32 c1, k;
+  I32 c1;
 
   // find the tighest interval [ - (2^k - 1)  ...  + (2^k) ] that contains c
 
@@ -458,29 +438,16 @@ I32 IntegerCompressorContext::writeCorrector(I32 c, RangeModel* rmBits)
     re->encode(rmCorrector[0],c);
   }
 #endif // COMPRESS_ONLY_K
-	return k;
 }
 
-I32 IntegerCompressorContext::CompressNone(I32 real)
-{
-  // the corrector will be within the interval [ - (corr_range - 1)  ...  + (corr_range - 1) ]
-  int corr = real - last;
-  // we fold the corrector into the interval [ corr_min  ...  corr_max ]
-  if (corr < corr_min) corr += corr_range;
-  else if (corr > corr_max) corr -= corr_range;
-  last = real;
-  return writeCorrector(corr, rmBitsNone);
-}
-
-I32 IntegerCompressorContext::CompressLast(I32 pred, I32 real, int context)
+void IntegerCompressorContext::Compress(I32 pred, I32 real, U32 context)
 {
   // the corrector will be within the interval [ - (corr_range - 1)  ...  + (corr_range - 1) ]
   int corr = real - pred;
   // we fold the corrector into the interval [ corr_min  ...  corr_max ]
   if (corr < corr_min) corr += corr_range;
   else if (corr > corr_max) corr -= corr_range;
-  last = real;
-  return writeCorrector(corr, rmBitsLast[context]);
+  writeCorrector(corr, rmBits[context]);
 }
 
 I32 IntegerCompressorContext::readCorrector(RangeModel* rmBits)
@@ -489,7 +456,7 @@ I32 IntegerCompressorContext::readCorrector(RangeModel* rmBits)
 
   // decode within which interval the corrector is falling
 
-  int k = rd->decode(rmBits);
+  k = rd->decode(rmBits);
 
 //  printf("k%d ", k);
 
@@ -577,20 +544,10 @@ I32 IntegerCompressorContext::readCorrector(RangeModel* rmBits)
   return c;
 }
 
-I32 IntegerCompressorContext::DecompressNone()
+I32 IntegerCompressorContext::Decompress(I32 pred, U32 context)
 {
-  I32 real = last + readCorrector(rmBitsNone);
+  I32 real = pred + readCorrector(rmBits[context]);
   if (real < 0) real += corr_range;
-  else if (real >= corr_range) real -= corr_range;
-  last = real;
-  return real;
-}
-
-I32 IntegerCompressorContext::DecompressLast(I32 pred, int context)
-{
-  I32 real = pred + readCorrector(rmBitsLast[context]);
-  if (real < 0) real += corr_range;
-  else if (real >= corr_range) real -= corr_range;
-  last = real;
+  else if ((U32)(real) >= corr_range) real -= corr_range;
   return real;
 }
