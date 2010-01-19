@@ -403,7 +403,7 @@ bool LASwriter::open(FILE* file, LASheader* header, int compression)
 
 #ifdef ENABLE_LAS_COMPRESSION
   // change the format to compressed back to what it was
-  header->point_data_format &= 127;
+  header->point_data_format &= 63;
 #endif // ENABLE_LAS_COMPRESSION
 
   // write any number of user-defined bytes that might have been added into the header
