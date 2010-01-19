@@ -118,7 +118,6 @@ AC_CONFIG_FILES([
 	Makefile
 	include/Makefile
 	src/Makefile
-	src/alternate_coder_src/Makefile
 	laszip-config
 
 ])
