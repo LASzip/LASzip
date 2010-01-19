@@ -19,13 +19,13 @@ liblibrary_la_SOURCES =				rangemodel.cpp \
 						arithmeticdecoder.cpp \
 						arithmeticencoder.cpp \
 						arithmeticintegercompressor.cpp \
-                                                laspointreader0compressedarithmetic.cpp \
-                                                laspointreader1compressedarithmetic.cpp \
-                                                laspointreader2compressedarithmetic.cpp \
-                                                laspointreader3compressedarithmetic.cpp \
-                                                laspointwriter0compressedarithmetic.cpp \
-                                                laspointwriter1compressedarithmetic.cpp \
-                                                laspointwriter2compressedarithmetic.cpp \
-                                                laspointwriter3compressedarithmetic.cpp \
+						laspointreader0compressedarithmetic.cpp \
+						laspointreader1compressedarithmetic.cpp \
+						laspointreader2compressedarithmetic.cpp \
+						laspointreader3compressedarithmetic.cpp \
+						laspointwriter0compressedarithmetic.cpp \
+						laspointwriter1compressedarithmetic.cpp \
+						laspointwriter2compressedarithmetic.cpp \
+						laspointwriter3compressedarithmetic.cpp \
 						lasreader.cpp \
 						laswriter.cpp
