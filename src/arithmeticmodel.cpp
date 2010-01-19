@@ -50,7 +50,7 @@
 
 void AC_ERROR(const char* msg) {
   fprintf(stderr, "Arithmetic coding ERROR: %s\n", msg); exit(1);
-};
+}
 
 ArithmeticModel::ArithmeticModel(unsigned int n, unsigned int *init, int compress)
 {
