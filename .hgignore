@@ -64,3 +64,4 @@ Debug
 Release
 .DS_Store
 laszip-config
+tools/laszip
