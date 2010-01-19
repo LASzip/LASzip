@@ -1,21 +1,3 @@
-/******************************************************************************
- *
- * Project:  laszip - http://liblas.org -
- * Purpose:
- * Author:   Martin Isenburg
- *           isenburg at cs.unc.edu
- *
- ******************************************************************************
- * Copyright (c) 2009, Martin Isenburg
- *
- * This is free software; you can redistribute and/or modify it under
- * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation.
- *
- * See the COPYING file for more information.
- *
- ****************************************************************************/
-
 /*
 ===============================================================================
 
@@ -45,20 +27,21 @@
 */
 #include "lasreader.h"
 
-#define ENABLE_LAS_COMPRESSION_SUPPORT
-//#undef ENABLE_LAS_COMPRESSION_SUPPORT
-
 #include "laspointreader0raw.h"
 #include "laspointreader1raw.h"
 #include "laspointreader2raw.h"
 #include "laspointreader3raw.h"
 
-#ifdef ENABLE_LAS_COMPRESSION_SUPPORT
+#ifdef ENABLE_LAS_COMPRESSION
 #include "laspointreader0compressed.h"
 #include "laspointreader1compressed.h"
 #include "laspointreader2compressed.h"
 #include "laspointreader3compressed.h"
-#endif // ENABLE_LAS_COMPRESSION_SUPPORT
+#include "laspointreader0compressedarithmetic.h"
+#include "laspointreader1compressedarithmetic.h"
+#include "laspointreader2compressedarithmetic.h"
+#include "laspointreader3compressedarithmetic.h"
+#endif // ENABLE_LAS_COMPRESSION
 
 #ifdef _WIN32
 #include <fcntl.h>
@@ -280,7 +263,7 @@ bool LASreader::open(FILE* file, bool skip_all_headers)
   {
     fprintf(stderr,"WARNING: number of point records is %d\n", header.number_of_point_records);
   }
-  if ((header.point_data_format & 127) == 0)
+  if ((header.point_data_format & 63) == 0)
   {
     if (header.point_data_record_length != 20)
     {
@@ -293,7 +276,7 @@ bool LASreader::open(FILE* file, bool skip_all_headers)
       header.point_data_record_length = 20;
     }
   }
-  else if ((header.point_data_format & 127) == 1)
+  else if ((header.point_data_format & 63) == 1)
   {
     if (header.point_data_record_length != 28)
     {
@@ -306,7 +289,7 @@ bool LASreader::open(FILE* file, bool skip_all_headers)
       header.point_data_record_length = 28;
     }
   }
-  else if ((header.point_data_format & 127) == 2)
+  else if ((header.point_data_format & 63) == 2)
   {
     if (header.point_data_record_length != 26)
     {
@@ -319,7 +302,7 @@ bool LASreader::open(FILE* file, bool skip_all_headers)
       header.point_data_record_length = 26;
     }
   }
-  else if ((header.point_data_format & 127) == 3)
+  else if ((header.point_data_format & 63) == 3)
   {
     if (header.point_data_record_length != 34)
     {
@@ -376,7 +359,7 @@ bool LASreader::open(FILE* file, bool skip_all_headers)
 
   if (header.point_data_format & 128)
   {
-#ifdef ENABLE_LAS_COMPRESSION_SUPPORT
+#ifdef ENABLE_LAS_COMPRESSION
     // change the format to uncompressed
     header.point_data_format &= 127;
     switch (header.point_data_format)
@@ -402,10 +385,43 @@ bool LASreader::open(FILE* file, bool skip_all_headers)
       points_have_rgb = true;
       break;
     }
-#else // ENABLE_LAS_COMPRESSION_SUPPORT
+#else // ENABLE_LAS_COMPRESSION
     fprintf(stderr,"ERROR: this version of the lasreader does not support compression\n");
     return false;
-#endif // ENABLE_LAS_COMPRESSION_SUPPORT
+#endif // ENABLE_LAS_COMPRESSION
+  }
+  else if (header.point_data_format & 64)
+  {
+#ifdef ENABLE_LAS_COMPRESSION
+    // change the format to uncompressed
+    header.point_data_format &= 63;
+    switch (header.point_data_format)
+    {
+    case 0:
+      pointReader = new LASpointReader0compressedArithmetic(file);
+      points_have_gps_time = false;
+      points_have_rgb = false;
+      break;
+    case 1:
+      pointReader = new LASpointReader1compressedArithmetic(file);
+      points_have_gps_time = true;
+      points_have_rgb = false;
+      break;
+    case 2:
+      pointReader = new LASpointReader2compressedArithmetic(file);
+      points_have_gps_time = false;
+      points_have_rgb = true;
+      break;
+    case 3:
+      pointReader = new LASpointReader3compressedArithmetic(file);
+      points_have_gps_time = true;
+      points_have_rgb = true;
+      break;
+    }
+#else // ENABLE_LAS_COMPRESSION
+    fprintf(stderr,"ERROR: this version of the lasreader does not support compression\n");
+    return false;
+#endif // ENABLE_LAS_COMPRESSION
   }
   else
   {

@@ -1,21 +1,3 @@
-/******************************************************************************
- *
- * Project:  laszip - http://liblas.org -
- * Purpose:
- * Author:   Martin Isenburg
- *           isenburg at cs.unc.edu
- *
- ******************************************************************************
- * Copyright (c) 2009, Martin Isenburg
- *
- * This is free software; you can redistribute and/or modify it under
- * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation.
- *
- * See the COPYING file for more information.
- *
- ****************************************************************************/
-
 /*
 ===============================================================================
 
@@ -184,9 +166,9 @@ void LASpointWriter0compressed::init_encoder()
 {
   re = new RangeEncoder(file,false);
 
-  ic_dx = new IntegerCompressorContext();
-  ic_dy = new IntegerCompressorContext();
-  ic_z = new IntegerCompressorContext();
+  ic_dx = new RangeIntegerCompressor();
+  ic_dy = new RangeIntegerCompressor();
+  ic_z = new RangeIntegerCompressor();
 
   ic_dx->SetPrecision(32); 
   ic_dy->SetPrecision(32); 
@@ -198,20 +180,20 @@ void LASpointWriter0compressed::init_encoder()
 
   rm_changed_values = new RangeModel(64,0,1);
 
-  ic_intensity = new IntegerCompressorContext();
+  ic_intensity = new RangeIntegerCompressor();
   ic_intensity->SetPrecision(16);
   ic_intensity->SetupCompressor(re);
 
   rm_bit_byte = new RangeModel(256,0,1);
   rm_classification = new RangeModel(256,0,1);
 
-  ic_scan_angle_rank = new IntegerCompressorContext();
+  ic_scan_angle_rank = new RangeIntegerCompressor();
   ic_scan_angle_rank->SetPrecision(8);
   ic_scan_angle_rank->SetupCompressor(re, 2);
 
   rm_user_data = new RangeModel(256,0,1);
 
-  ic_point_source_ID = new IntegerCompressorContext();
+  ic_point_source_ID = new RangeIntegerCompressor();
   ic_point_source_ID->SetPrecision(16);
   ic_point_source_ID->SetupCompressor(re);
 }

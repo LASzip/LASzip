@@ -1,21 +1,3 @@
-/******************************************************************************
- *
- * Project:  laszip - http://liblas.org -
- * Purpose:
- * Author:   Martin Isenburg
- *           isenburg at cs.unc.edu
- *
- ******************************************************************************
- * Copyright (c) 2009, Martin Isenburg
- *
- * This is free software; you can redistribute and/or modify it under
- * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation.
- *
- * See the COPYING file for more information.
- *
- ****************************************************************************/
-
 /*
 ===============================================================================
 
@@ -94,6 +76,14 @@ U32 RangeDecoder::decode(RangeModel* rm)
   rm->update(sym);
 
   return sym;
+}
+
+U32 RangeDecoder::readBit()
+{
+  U32 tmp;
+  tmp = culshift(1);
+  update(1, tmp, 2);
+  return tmp;
 }
 
 U32 RangeDecoder::readBits(U32 bits)

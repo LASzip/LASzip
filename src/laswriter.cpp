@@ -1,21 +1,3 @@
-/******************************************************************************
- *
- * Project:  laszip - http://liblas.org -
- * Purpose:
- * Author:   Martin Isenburg
- *           isenburg at cs.unc.edu
- *
- ******************************************************************************
- * Copyright (c) 2009, Martin Isenburg
- *
- * This is free software; you can redistribute and/or modify it under
- * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation.
- *
- * See the COPYING file for more information.
- *
- ****************************************************************************/
-
 /*
 ===============================================================================
 
@@ -45,20 +27,21 @@
 */
 #include "laswriter.h"
 
-#define ENABLE_LAS_COMPRESSION_SUPPORT
-//#undef ENABLE_LAS_COMPRESSION_SUPPORT
-
 #include "laspointwriter0raw.h"
 #include "laspointwriter1raw.h"
 #include "laspointwriter2raw.h"
 #include "laspointwriter3raw.h"
 
-#ifdef ENABLE_LAS_COMPRESSION_SUPPORT
+#ifdef ENABLE_LAS_COMPRESSION
 #include "laspointwriter0compressed.h"
 #include "laspointwriter1compressed.h"
 #include "laspointwriter2compressed.h"
 #include "laspointwriter3compressed.h"
-#endif // ENABLE_LAS_COMPRESSION_SUPPORT
+#include "laspointwriter0compressedarithmetic.h"
+#include "laspointwriter1compressedarithmetic.h"
+#include "laspointwriter2compressedarithmetic.h"
+#include "laspointwriter3compressedarithmetic.h"
+#endif // ENABLE_LAS_COMPRESSION
 
 #ifdef _WIN32
 #include <fcntl.h>
@@ -168,9 +151,9 @@ bool LASwriter::open(FILE* file, LASheader* header, int compression)
 
   // create the right point writer in dependance on compression and point data format
 
-  if (compression)
+  if (compression == LAS_COMPRESSION_RANGE)
   {
-#ifdef ENABLE_LAS_COMPRESSION_SUPPORT
+#ifdef ENABLE_LAS_COMPRESSION
     switch (header->point_data_format)
     {
     case 0:
@@ -188,10 +171,35 @@ bool LASwriter::open(FILE* file, LASheader* header, int compression)
     }
     // change the format to compressed
     header->point_data_format |= 128;
-#else // ENABLE_LAS_COMPRESSION_SUPPORT
+#else // ENABLE_LAS_COMPRESSION
     fprintf(stderr,"ERROR: this version of the laswriter does not support compression\n");
     return false;
-#endif // ENABLE_LAS_COMPRESSION_SUPPORT
+#endif // ENABLE_LAS_COMPRESSION
+  }
+  else if (compression == LAS_COMPRESSION_ARITHMETIC)
+  {
+#ifdef ENABLE_LAS_COMPRESSION
+    switch (header->point_data_format)
+    {
+    case 0:
+      pointWriter = new LASpointWriter0compressedArithmetic(file);
+      break;
+    case 1:
+      pointWriter = new LASpointWriter1compressedArithmetic(file);
+      break;
+    case 2:
+      pointWriter = new LASpointWriter2compressedArithmetic(file);
+      break;
+    case 3:
+      pointWriter = new LASpointWriter3compressedArithmetic(file);
+      break;
+    }
+    // change the format to compressed
+    header->point_data_format |= 64;
+#else // ENABLE_LAS_COMPRESSION
+    fprintf(stderr,"ERROR: this version of the laswriter does not support compression\n");
+    return false;
+#endif // ENABLE_LAS_COMPRESSION
   }
   else
   {
@@ -375,10 +383,10 @@ bool LASwriter::open(FILE* file, LASheader* header, int compression)
     return false;
   }
 
-#ifdef ENABLE_LAS_COMPRESSION_SUPPORT
+#ifdef ENABLE_LAS_COMPRESSION
   // change the format to compressed back to what it was
   header->point_data_format &= 127;
-#endif // ENABLE_LAS_COMPRESSION_SUPPORT
+#endif // ENABLE_LAS_COMPRESSION
 
   // write any number of user-defined bytes that might have been added into the header
 

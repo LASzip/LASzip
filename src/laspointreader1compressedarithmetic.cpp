@@ -1,7 +1,7 @@
 /*
 ===============================================================================
 
-  FILE:  laspointreader1compressed.cpp
+  FILE:  laspointreader1compressedarithmetic.cpp
   
   CONTENTS:
   
@@ -26,15 +26,15 @@
 ===============================================================================
 */
 
-#include "laspointreader1compressed.h"
+#include "laspointreader1compressedarithmetic.h"
 
 #define MULTI_MAX 512
 
-bool LASpointReader1compressed::read_point(LASpoint* point, double* gps_time, unsigned short* rgb)
+bool LASpointReader1compressedArithmetic::read_point(LASpoint* point, double* gps_time, unsigned short* rgb)
 {
-  if (rd)
-  {
-    *point = last_point;
+	if (dec)
+	{
+		*point = last_point;
 
     // find the median difference among the three preceding differences
     int median_x;
@@ -88,48 +88,48 @@ bool LASpointReader1compressed::read_point(LASpoint* point, double* gps_time, un
     point->z = ic_z->Decompress(last_point.z, k_bits);
 
     // decompress which other values have changed
-    int changed_values = rd->decode(rm_changed_values);
+		int changed_values = dec->decode(m_changed_values);
 
-    // decompress the intensity if it has changed
-    if (changed_values & 32)
-    {
-      point->intensity = ic_intensity->Decompress(last_point.intensity);
-    }
+		// decompress the intensity if it has changed
+		if (changed_values & 32)
+		{
+			point->intensity = ic_intensity->Decompress(last_point.intensity);
+		}
 
-    // decompress the edge_of_flight_line, scan_direction_flag, ... if it has changed
-    if (changed_values & 16)
-    {
-      ((unsigned char*)point)[14] = rd->decode(rm_bit_byte);
-    }
+		// decompress the edge_of_flight_line, scan_direction_flag, ... if it has changed
+		if (changed_values & 16)
+		{
+			((unsigned char*)point)[14] = dec->decode(m_bit_byte);
+		}
 
-    // decompress the classification ... if it has changed
-    if (changed_values & 8)
-    {
-      point->classification = rd->decode(rm_classification);
-    }
-    
-    // decompress the scan_angle_rank ... if it has changed
-    if (changed_values & 4)
-    {
-      point->scan_angle_rank = ic_scan_angle_rank->Decompress(last_point.scan_angle_rank, k_bits < 3); 
-    }
+		// decompress the classification ... if it has changed
+		if (changed_values & 8)
+		{
+			point->classification = dec->decode(m_classification);
+		}
+		
+		// decompress the scan_angle_rank ... if it has changed
+		if (changed_values & 4)
+		{
+			point->scan_angle_rank = ic_scan_angle_rank->Decompress(last_point.scan_angle_rank, k_bits < 3);
+		}
 
-    // decompress the user_data ... if it has changed
-    if (changed_values & 2)
-    {
-      point->user_data = rd->decode(rm_user_data);
-    }
+		// decompress the user_data ... if it has changed
+		if (changed_values & 2)
+		{
+			point->user_data = dec->decode(m_user_data);
+		}
 
-    // decompress the point_source_ID ... if it has changed
-    if (changed_values & 1)
-    {
-      point->point_source_ID = ic_point_source_ID->Decompress(last_point.point_source_ID);
-    }
+		// decompress the point_source_ID ... if it has changed
+		if (changed_values & 1)
+		{
+			point->point_source_ID = ic_point_source_ID->Decompress(last_point.point_source_ID);
+		}
 
-    // decompress the gps_time ... if it has changed
-    if (changed_values & 64)
-    {
-      int multi = rd->decode(rm_gps_time_multi[k_bits < 3]);
+		// decompress the gps_time ... if it has changed
+		if (changed_values & 64)
+		{
+			int multi = dec->decode(m_gps_time_multi[k_bits < 3]);
 
       if (multi <  MULTI_MAX-1)
       {
@@ -172,7 +172,7 @@ bool LASpointReader1compressed::read_point(LASpoint* point, double* gps_time, un
       }
       else
       {
-        last_gps_time.f64 = rd->readDouble();
+        last_gps_time.f64 = dec->readDouble();
       }
     }
 
@@ -185,97 +185,97 @@ bool LASpointReader1compressed::read_point(LASpoint* point, double* gps_time, un
       last_incr[last_dir]++;
       if (last_incr[last_dir] > 2) last_incr[last_dir] = 0;
     }
-  }
-  else
-  {
-    fread(point, sizeof(LASpoint), 1, file);
-    fread(&last_gps_time, sizeof(double), 1, file);
-    init_decoder();
-  }
+	}
+	else
+	{
+		fread(point, sizeof(LASpoint), 1, file);
+		fread(&(last_gps_time.f64), sizeof(double), 1, file);
+		init_decoder();
+	}
 
   last_dir = point->scan_direction_flag;
-  last_point = *point;
-  *gps_time = last_gps_time.f64;
+	last_point = *point;
+	*gps_time = last_gps_time.f64;
 
-  return true;
+	return true;
 }
 
-LASpointReader1compressed::LASpointReader1compressed(FILE* file)
+LASpointReader1compressedArithmetic::LASpointReader1compressedArithmetic(FILE* file)
 {
-  this->file = file;
+	this->file = file;
   last_dir = 0;
-  last_x_diff[0][0] = last_x_diff[0][1] = last_x_diff[0][2] = last_x_diff[1][0] = last_x_diff[1][1] = last_x_diff[1][2] = 0;
-  last_y_diff[0][0] = last_y_diff[0][1] = last_y_diff[0][2] = last_y_diff[1][0] = last_y_diff[1][1] = last_y_diff[1][2] = 0;
+	last_x_diff[0][0] = last_x_diff[0][1] = last_x_diff[0][2] = last_x_diff[1][0] = last_x_diff[1][1] = last_x_diff[1][2] = 0;
+	last_y_diff[0][0] = last_y_diff[0][1] = last_y_diff[0][2] = last_y_diff[1][0] = last_y_diff[1][1] = last_y_diff[1][2] = 0;
   last_incr[0] = last_incr[1] = 0;
-  last_gps_time.f64 = 0;
-  last_gps_time_diff = 0;
-  rd = 0;
+	last_gps_time.f64 = 0;
+	last_gps_time_diff = 0;
+	dec = 0;
 }
 
-void LASpointReader1compressed::init_decoder()
+void LASpointReader1compressedArithmetic::init_decoder()
 {
-  rd = new RangeDecoder(file);
+	dec = new ArithmeticDecoder(file);
 
-  ic_dx = new RangeIntegerCompressor();
-  ic_dy = new RangeIntegerCompressor();
-  ic_z = new RangeIntegerCompressor();
+	ic_dx = new ArithmeticIntegerCompressor();
+	ic_dy = new ArithmeticIntegerCompressor();
+	ic_z = new ArithmeticIntegerCompressor();
 
-  ic_dx->SetPrecision(32); 
-  ic_dy->SetPrecision(32); 
-  ic_z->SetPrecision(32); 
+	ic_dx->SetPrecision(32); 
+	ic_dy->SetPrecision(32); 
+	ic_z->SetPrecision(32); 
 
-  ic_dx->SetupDecompressor(rd, 2);
-  ic_dy->SetupDecompressor(rd, 33);
-  ic_z->SetupDecompressor(rd, 33);
+  ic_dx->SetupDecompressor(dec, 2);
+  ic_dy->SetupDecompressor(dec, 33);
+  ic_z->SetupDecompressor(dec, 33);
 
-  rm_changed_values = new RangeModel(128,0,0);
+	m_changed_values = new ArithmeticModel(128,0,0);
 
-  ic_intensity = new RangeIntegerCompressor();
-  ic_intensity->SetPrecision(16);
-  ic_intensity->SetupDecompressor(rd);
+	ic_intensity = new ArithmeticIntegerCompressor();
+	ic_intensity->SetPrecision(16);
+  ic_intensity->SetupDecompressor(dec);
 
-  rm_bit_byte = new RangeModel(256,0,0);
-  rm_classification = new RangeModel(256,0,0);
+	m_bit_byte = new ArithmeticModel(256,0,0);
+	m_classification = new ArithmeticModel(256,0,0);
 
-  ic_scan_angle_rank = new RangeIntegerCompressor();
-  ic_scan_angle_rank->SetPrecision(8);
-  ic_scan_angle_rank->SetupDecompressor(rd, 2);
+	ic_scan_angle_rank = new ArithmeticIntegerCompressor();
+	ic_scan_angle_rank->SetPrecision(8);
+  ic_scan_angle_rank->SetupDecompressor(dec, 2);
 
-  rm_user_data = new RangeModel(256,0,0);
+	m_user_data = new ArithmeticModel(256,0,0);
 
-  ic_point_source_ID = new RangeIntegerCompressor();
-  ic_point_source_ID->SetPrecision(16);
-  ic_point_source_ID->SetupDecompressor(rd);
+	ic_point_source_ID = new ArithmeticIntegerCompressor();
+	ic_point_source_ID->SetPrecision(16);
+  ic_point_source_ID->SetupDecompressor(dec);
 
-  rm_gps_time_multi = new RangeModel*[2];
-  for (int i = 0; i < 2; i++) rm_gps_time_multi[i] = new RangeModel(MULTI_MAX,0,0);
+  m_gps_time_multi = new ArithmeticModel*[2];
+  for (int i = 0; i < 2; i++) m_gps_time_multi[i] = new ArithmeticModel(MULTI_MAX,0,0);
 
-  ic_gps_time = new RangeIntegerCompressor();
-  ic_gps_time->SetPrecision(32);
-  ic_gps_time->SetupDecompressor(rd, 4);
+  ic_gps_time = new ArithmeticIntegerCompressor();
+	ic_gps_time->SetPrecision(32);
+  ic_gps_time->SetupDecompressor(dec, 4);
 
-  multi_extreme_counter = 0;
+	multi_extreme_counter = 0;
 }
 
-LASpointReader1compressed::~LASpointReader1compressed()
+LASpointReader1compressedArithmetic::~LASpointReader1compressedArithmetic()
 {
-  if (rd)
-  {
-    rd->done();
+	if (dec)
+	{
+		dec->done();
 
-    delete rd;
-    delete ic_dx;
-    delete ic_dy;
-    delete ic_z;
-    delete rm_changed_values;
-    delete ic_intensity;
-    delete rm_bit_byte;
-    delete rm_classification;
-    delete ic_scan_angle_rank;
-    delete rm_user_data;
-    delete ic_point_source_ID;
-    for (int i = 0; i < 2; i++) delete rm_gps_time_multi[i];
-    delete [] rm_gps_time_multi;
-    delete ic_gps_time;
-  }
+		delete dec;
+		delete ic_dx;
+		delete ic_dy;
+		delete ic_z;
+		delete m_changed_values;
+		delete ic_intensity;
+		delete m_bit_byte;
+		delete m_classification;
+		delete ic_scan_angle_rank;
+		delete m_user_data;
+		delete ic_point_source_ID;
+    for (int i = 0; i < 2; i++) delete m_gps_time_multi[i];
+		delete [] m_gps_time_multi;
+		delete ic_gps_time;
+	}
 }
