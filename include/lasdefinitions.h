@@ -1,21 +1,3 @@
-/******************************************************************************
- *
- * Project:  laszip - http://liblas.org -
- * Purpose:
- * Author:   Martin Isenburg
- *           isenburg at cs.unc.edu
- *
- ******************************************************************************
- * Copyright (c) 2009, Martin Isenburg
- *
- * This is free software; you can redistribute and/or modify it under
- * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation.
- *
- * See the COPYING file for more information.
- *
- ****************************************************************************/
-
 /*
 ===============================================================================
 
@@ -44,6 +26,7 @@
   
   CHANGE HISTORY:
   
+    17 January 2010 -- added arithmetic coder  
     7 September 2008 -- updated to support LAS format 1.2 
     11 June 2007 -- number of return / scan direction bitfield order was wrong
     18 February 2007 -- created after repairing 2 vacuum cleaners in the garden
@@ -52,6 +35,14 @@
 */
 #ifndef LAS_DEFINITIONS_H
 #define LAS_DEFINITIONS_H
+
+#define ENABLE_LAS_COMPRESSION
+//#undef ENABLE_LAS_COMPRESSION
+
+#ifdef ENABLE_LAS_COMPRESSION
+#define LAS_COMPRESSION_RANGE 1
+#define LAS_COMPRESSION_ARITHMETIC 2
+#endif // ENABLE_LAS_COMPRESSION
 
 class LASpoint
 {
@@ -244,41 +235,6 @@ public:
   {
     clean();
   };
-};
-
-static const char * LASpointClassification [] = {
-  "Created, never classified",
-  "Unclassified",
-  "Ground",
-  "Low Vegetation",
-  "Medium Vegetation",
-  "High Vegetation",
-  "Building",
-  "Low Point (noise)",
-  "Model Key-point (mass point)",
-  "Water",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Overlap Points",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition",
-  "Reserved for ASPRS Definition"
 };
 
 #endif

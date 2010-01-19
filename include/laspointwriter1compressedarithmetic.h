@@ -1,7 +1,7 @@
 /*
 ===============================================================================
 
-  FILE:  laspointwriter1compressed.h
+  FILE:  laspointwriter1compressedarithmetic.h
   
   CONTENTS:
   
@@ -21,28 +21,29 @@
   
   CHANGE HISTORY:
   
+    31 October 2009 -- updated to use the new Arithmetic Coder 
     7 September 2008 -- updated to support LAS format 1.2 
     21 February 2007 -- created after having the longest talk ever with my aunt
   
 ===============================================================================
 */
-#ifndef LAS_POINT_WRITER_1COMPRESSED_H
-#define LAS_POINT_WRITER_1COMPRESSED_H
+#ifndef LAS_POINT_WRITER_1COMPRESSED_ARITHMETIC_H
+#define LAS_POINT_WRITER_1COMPRESSED_ARITHMETIC_H
 
 #include "laspointwriter.h"
 
-#include "rangemodel.h"
-#include "rangeencoder.h"
-#include "rangeintegercompressor.h"
+#include "arithmeticmodel.h"
+#include "arithmeticencoder.h"
+#include "arithmeticintegercompressor.h"
 
 #include <stdio.h>
 
-class LASpointWriter1compressed : public LASpointWriter
+class LASpointWriter1compressedArithmetic : public LASpointWriter
 {
 public:
   bool write_point(LASpoint* point, double gps_time = 0, unsigned short* rgb = 0);
-  LASpointWriter1compressed(FILE* file);
-  ~LASpointWriter1compressed();
+  LASpointWriter1compressedArithmetic(FILE* file);
+  ~LASpointWriter1compressedArithmetic();
 
 private:
   FILE* file;
@@ -54,19 +55,19 @@ private:
   I64F64 last_gps_time;
   I32 last_gps_time_diff;
   void init_encoder();
-  RangeEncoder* re;
-  RangeIntegerCompressor* ic_dx;
-  RangeIntegerCompressor* ic_dy;
-  RangeIntegerCompressor* ic_z;
-  RangeModel* rm_changed_values;
-  RangeIntegerCompressor* ic_intensity;
-  RangeModel* rm_bit_byte;
-  RangeModel* rm_classification;
-  RangeIntegerCompressor* ic_scan_angle_rank;
-  RangeModel* rm_user_data;
-  RangeIntegerCompressor* ic_point_source_ID;
-  RangeIntegerCompressor* ic_gps_time;
-  RangeModel** rm_gps_time_multi;
+  ArithmeticEncoder* enc;
+  ArithmeticIntegerCompressor* ic_dx;
+  ArithmeticIntegerCompressor* ic_dy;
+  ArithmeticIntegerCompressor* ic_z;
+  ArithmeticModel* m_changed_values;
+  ArithmeticIntegerCompressor* ic_intensity;
+  ArithmeticModel* m_bit_byte;
+  ArithmeticModel* m_classification;
+  ArithmeticIntegerCompressor* ic_scan_angle_rank;
+  ArithmeticModel* m_user_data;
+  ArithmeticIntegerCompressor* ic_point_source_ID;
+  ArithmeticIntegerCompressor* ic_gps_time;
+  ArithmeticModel** m_gps_time_multi;
   int multi_extreme_counter;
 };
 

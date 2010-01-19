@@ -1,7 +1,7 @@
 /*
 ===============================================================================
 
-  FILE:  laspointreader0compressed.h
+  FILE:  laspointreader0compressedarithmetic.h
   
   CONTENTS:
   
@@ -21,28 +21,29 @@
   
   CHANGE HISTORY:
   
+    31 October 2009 -- updated to use the new Arithmetic Coder 
     7 September 2008 -- updated to support LAS format 1.2 
     22 February 2007 -- created 45 minutes before henna's 32nd birthday
   
 ===============================================================================
 */
-#ifndef LAS_POINT_READER_0COMPRESSED_H
-#define LAS_POINT_READER_0COMPRESSED_H
+#ifndef LAS_POINT_READER_0COMPRESSED_ARITHMETIC_H
+#define LAS_POINT_READER_0COMPRESSED_ARITHMETIC_H
 
 #include "laspointreader.h"
 
-#include "rangemodel.h"
-#include "rangedecoder.h"
-#include "rangeintegercompressor.h"
+#include "arithmeticmodel.h"
+#include "arithmeticdecoder.h"
+#include "arithmeticintegercompressor.h"
 
 #include <stdio.h>
 
-class LASpointReader0compressed : public LASpointReader
+class LASpointReader0compressedArithmetic : public LASpointReader
 {
 public:
   bool read_point(LASpoint* point, double* gps_time = 0, unsigned short* rgb = 0);
-  LASpointReader0compressed(FILE* file);
-  ~LASpointReader0compressed();
+  LASpointReader0compressedArithmetic(FILE* file);
+  ~LASpointReader0compressedArithmetic();
 
 private:
   FILE* file;
@@ -52,17 +53,17 @@ private:
   int last_y_diff[2][3];
   int last_incr[2];
   void init_decoder();
-  RangeDecoder* rd;
-  RangeIntegerCompressor* ic_dx;
-  RangeIntegerCompressor* ic_dy;
-  RangeIntegerCompressor* ic_z;
-  RangeModel* rm_changed_values;
-  RangeIntegerCompressor* ic_intensity;
-  RangeModel* rm_bit_byte;
-  RangeModel* rm_classification;
-  RangeIntegerCompressor* ic_scan_angle_rank;
-  RangeModel* rm_user_data;
-  RangeIntegerCompressor* ic_point_source_ID;
+  ArithmeticDecoder* dec;
+  ArithmeticIntegerCompressor* ic_dx;
+  ArithmeticIntegerCompressor* ic_dy;
+  ArithmeticIntegerCompressor* ic_z;
+  ArithmeticModel* m_changed_values;
+  ArithmeticIntegerCompressor* ic_intensity;
+  ArithmeticModel* m_bit_byte;
+  ArithmeticModel* m_classification;
+  ArithmeticIntegerCompressor* ic_scan_angle_rank;
+  ArithmeticModel* m_user_data;
+  ArithmeticIntegerCompressor* ic_point_source_ID;
 };
 
 #endif
