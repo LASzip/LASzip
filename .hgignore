@@ -1,6 +1,9 @@
 syntax: glob
 .deps
+install_manifest.txt
+tools/lasdiff
 .libs
+bin
 *~
 *.dll
 *.embed.manifest

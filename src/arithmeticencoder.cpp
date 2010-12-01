@@ -43,7 +43,7 @@
   
 ===============================================================================
 */
-#include "arithmeticencoder.h"
+#include "arithmeticencoder.hpp"
 
 #include <stdlib.h>
 #include <string.h>

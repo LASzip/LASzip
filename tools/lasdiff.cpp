@@ -31,7 +31,7 @@
 ===============================================================================
 */
 
-#include "lasreader.h"
+#include "lasreader.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>

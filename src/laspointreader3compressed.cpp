@@ -44,7 +44,7 @@
 ===============================================================================
 */
 
-#include "laspointreader3compressed.h"
+#include "laspointreader3compressed.hpp"
 
 #define MULTI_MAX 512
 

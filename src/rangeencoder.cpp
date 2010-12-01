@@ -43,7 +43,7 @@
   
 ===============================================================================
 */
-#include "rangeencoder.h"
+#include "rangeencoder.hpp"
 
 #include <stdlib.h>
 #include <string.h>

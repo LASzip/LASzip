@@ -116,7 +116,7 @@ dnl #########################################################################
 
 AC_CONFIG_FILES([
 	Makefile
-	include/Makefile
+	include/laszip/Makefile
 	src/Makefile
 	tools/Makefile
 	laszip-config
@@ -130,7 +130,7 @@ dnl Print configuration summary
 dnl #########################################################################
 
 LOC_MSG()
-LOC_MSG([libLAS configuration summary:])
+LOC_MSG([laszip configuration summary:])
 LOC_MSG()
 LOC_MSG([  Version..................: ${RELEASE_VERSION}])
 LOC_MSG([  Installation directory...: ${prefix}])
@@ -141,7 +141,6 @@ LOC_MSG([  Debugging support........: ${enable_debug}])
 LOC_MSG()
 LOC_MSG([  LIBS.....................: ${LIBS}])
 LOC_MSG()
-LOC_MSG([  libLAS - http://liblas.org])
 LOC_MSG()
 
 dnl EOF

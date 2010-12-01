@@ -44,7 +44,7 @@
 ===============================================================================
 */
 
-#include "laspointreader2compressedarithmetic.h"
+#include "laspointreader2compressedarithmetic.hpp"
 
 bool LASpointReader2compressedArithmetic::read_point(LASpoint* point, double* gps_time, unsigned short* rgb)
 {

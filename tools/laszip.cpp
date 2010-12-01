@@ -36,8 +36,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "lasreader.h"
-#include "laswriter.h"
+#include "lasreader.hpp"
+#include "laswriter.hpp"
 
 #ifdef _WIN32
 extern "C" FILE* fopenGzipped(const char* filename, const char* mode);

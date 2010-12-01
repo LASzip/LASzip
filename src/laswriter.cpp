@@ -43,22 +43,22 @@
   
 ===============================================================================
 */
-#include "laswriter.h"
+#include "laswriter.hpp"
 
-#include "laspointwriter0raw.h"
-#include "laspointwriter1raw.h"
-#include "laspointwriter2raw.h"
-#include "laspointwriter3raw.h"
+#include "laspointwriter0raw.hpp"
+#include "laspointwriter1raw.hpp"
+#include "laspointwriter2raw.hpp"
+#include "laspointwriter3raw.hpp"
 
 #ifdef ENABLE_LAS_COMPRESSION
-#include "laspointwriter0compressed.h"
-#include "laspointwriter1compressed.h"
-#include "laspointwriter2compressed.h"
-#include "laspointwriter3compressed.h"
-#include "laspointwriter0compressedarithmetic.h"
-#include "laspointwriter1compressedarithmetic.h"
-#include "laspointwriter2compressedarithmetic.h"
-#include "laspointwriter3compressedarithmetic.h"
+#include "laspointwriter0compressed.hpp"
+#include "laspointwriter1compressed.hpp"
+#include "laspointwriter2compressed.hpp"
+#include "laspointwriter3compressed.hpp"
+#include "laspointwriter0compressedarithmetic.hpp"
+#include "laspointwriter1compressedarithmetic.hpp"
+#include "laspointwriter2compressedarithmetic.hpp"
+#include "laspointwriter3compressedarithmetic.hpp"
 #endif // ENABLE_LAS_COMPRESSION
 
 #ifdef _WIN32

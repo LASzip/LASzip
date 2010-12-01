@@ -44,7 +44,7 @@
 ===============================================================================
 */
 
-#include "laspointwriter2compressed.h"
+#include "laspointwriter2compressed.hpp"
 
 bool LASpointWriter2compressed::write_point(LASpoint* point, double gps_time, unsigned short* rgb)
 {

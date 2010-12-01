@@ -44,7 +44,7 @@
 ===============================================================================
 */
 
-#include "arithmeticintegercompressor.h"
+#include "arithmeticintegercompressor.hpp"
 
 #define COMPRESS_ONLY_K
 #undef COMPRESS_ONLY_K

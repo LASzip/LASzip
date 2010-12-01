@@ -1,6 +1,6 @@
 SUBDIRS = . 
 
-AM_CPPFLAGS = -I../include
+AM_CPPFLAGS = -I../include -I../include/laszip
 noinst_LTLIBRARIES = liblibrary.la 
 
 liblibrary_la_SOURCES =				rangemodel.cpp \

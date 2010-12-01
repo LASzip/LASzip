@@ -43,7 +43,7 @@
   
 ===============================================================================
 */
-#include "rangedecoder.h"
+#include "rangedecoder.hpp"
 
 inline void RangeDecoder::normalize()
 {

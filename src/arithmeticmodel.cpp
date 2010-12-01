@@ -43,7 +43,7 @@
 
 ===============================================================================
 */
-#include "arithmeticmodel.h"
+#include "arithmeticmodel.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>

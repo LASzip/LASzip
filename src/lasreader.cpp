@@ -43,22 +43,22 @@
   
 ===============================================================================
 */
-#include "lasreader.h"
+#include "lasreader.hpp"
 
-#include "laspointreader0raw.h"
-#include "laspointreader1raw.h"
-#include "laspointreader2raw.h"
-#include "laspointreader3raw.h"
+#include "laspointreader0raw.hpp"
+#include "laspointreader1raw.hpp"
+#include "laspointreader2raw.hpp"
+#include "laspointreader3raw.hpp"
 
 #ifdef ENABLE_LAS_COMPRESSION
-#include "laspointreader0compressed.h"
-#include "laspointreader1compressed.h"
-#include "laspointreader2compressed.h"
-#include "laspointreader3compressed.h"
-#include "laspointreader0compressedarithmetic.h"
-#include "laspointreader1compressedarithmetic.h"
-#include "laspointreader2compressedarithmetic.h"
-#include "laspointreader3compressedarithmetic.h"
+#include "laspointreader0compressed.hpp"
+#include "laspointreader1compressed.hpp"
+#include "laspointreader2compressed.hpp"
+#include "laspointreader3compressed.hpp"
+#include "laspointreader0compressedarithmetic.hpp"
+#include "laspointreader1compressedarithmetic.hpp"
+#include "laspointreader2compressedarithmetic.hpp"
+#include "laspointreader3compressedarithmetic.hpp"
 #endif // ENABLE_LAS_COMPRESSION
 
 #ifdef _WIN32

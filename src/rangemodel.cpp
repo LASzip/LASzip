@@ -43,7 +43,7 @@
 
 ===============================================================================
 */
-#include "rangemodel.h"
+#include "rangemodel.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>

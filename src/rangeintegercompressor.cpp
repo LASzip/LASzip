@@ -44,7 +44,7 @@
 ===============================================================================
 */
 
-#include "rangeintegercompressor.h"
+#include "rangeintegercompressor.hpp"
 
 #define COMPRESS_ONLY_K
 #undef COMPRESS_ONLY_K

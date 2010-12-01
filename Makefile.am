@@ -1,4 +1,4 @@
-SUBDIRS = src . include tools
+SUBDIRS = src . include/laszip tools
 
 lib_LTLIBRARIES = liblaszip.la
 

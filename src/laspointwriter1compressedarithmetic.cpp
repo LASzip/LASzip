@@ -45,7 +45,7 @@
 */
 
 #include <math.h>
-#include "laspointwriter1compressedarithmetic.h"
+#include "laspointwriter1compressedarithmetic.hpp"
 
 #define MULTI_MAX 512
 
