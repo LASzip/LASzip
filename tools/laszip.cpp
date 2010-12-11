@@ -31,6 +31,10 @@
 ===============================================================================
 */
 
+#ifdef _WIN32
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,9 +43,6 @@
 #include "lasreader.hpp"
 #include "laswriter.hpp"
 
-#ifdef _WIN32
-extern "C" FILE* fopenGzipped(const char* filename, const char* mode);
-#endif
 
 void usage(bool wait=false)
 {
@@ -173,19 +174,7 @@ int main(int argc, char *argv[])
   FILE* file_in = 0;
   if (file_name_in)
   {
-    if (strstr(file_name_in, ".gz"))
-    {
-#ifdef _WIN32
-      file_in = fopenGzipped(file_name_in, "rb");
-#else
-      fprintf(stderr, "ERROR: no support for gzipped input\n");
-      byebye(argc==1);
-#endif
-    }
-    else
-    {
-      file_in = fopen(file_name_in, "rb");
-    }
+    file_in = fopen(file_name_in, "rb");
     if (file_in == 0)
     {
       fprintf(stderr, "ERROR: could not open '%s'\n",file_name_in);

@@ -31,15 +31,16 @@
 ===============================================================================
 */
 
+#ifdef _WIN32
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include "lasreader.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _WIN32
-extern "C" FILE* fopenGzipped(const char* filename, const char* mode);
-#endif
 
 void usage(bool wait=false)
 {
@@ -124,19 +125,7 @@ int main(int argc, char *argv[])
   FILE* file_in1 = 0;
   if (file_name_in1)
   {
-    if (strstr(file_name_in1, ".gz"))
-    {
-#ifdef _WIN32
-      file_in1 = fopenGzipped(file_name_in1, "rb");
-#else
-      fprintf(stderr, "ERROR: no support for gzipped input\n");
-      byebye(argc==1);
-#endif
-    }
-    else
-    {
-      file_in1 = fopen(file_name_in1, "rb");
-    }
+    file_in1 = fopen(file_name_in1, "rb");
     if (file_in1 == 0)
     {
       fprintf (stderr, "ERROR: could not open file '%s'\n", file_name_in1);
@@ -159,19 +148,7 @@ int main(int argc, char *argv[])
   FILE* file_in2 = 0;
   if (file_name_in2)
   {
-    if (strstr(file_name_in2, ".gz"))
-    {
-#ifdef _WIN32
-      file_in2 = fopenGzipped(file_name_in2, "rb");
-#else
-      fprintf(stderr, "ERROR: no support for gzipped input\n");
-      byebye(argc==1);
-#endif
-    }
-    else
-    {
-      file_in2 = fopen(file_name_in2, "rb");
-    }
+    file_in2 = fopen(file_name_in2, "rb");
     if (file_in2 == 0)
     {
       fprintf (stderr, "ERROR: could not open file '%s'\n", file_name_in2);
