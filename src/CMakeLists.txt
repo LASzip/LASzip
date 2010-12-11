@@ -40,6 +40,7 @@ set(LASZIP_HPP
   ${LASZIP_HEADERS_DIR}/lasreader.hpp
   ${LASZIP_HEADERS_DIR}/laspointreader3raw.hpp
   ${LASZIP_HEADERS_DIR}/laswriter.hpp
+  ${LASZIP_HEADERS_DIR}/liblaszip.hpp
 )
 
 set(LASZIP_CPP
@@ -69,6 +70,7 @@ set(LASZIP_CPP
     rangeintegercompressor.cpp
     laspointwriter0compressed.cpp
     rangemodel.cpp
+    liblaszip.cpp
 )
 
 set(LASZIP_SOURCES
