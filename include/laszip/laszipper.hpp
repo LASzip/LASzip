@@ -47,7 +47,13 @@
 #define LAS_ZIPPER_H
 
 #include <stdio.h>
+
+#ifdef _MSC_VER
 #include <ostream.h>
+#else
+#include <fstream>
+#endif
+
 
 #include "laszip.hpp"
 
@@ -59,7 +65,7 @@ class LASzipper
 public:
 
   bool open(FILE* outfile, unsigned int num_items, LASitem* items, unsigned int compression=0);
-  bool open(ostream* outstream, unsigned int num_items, LASitem* items, unsigned int compression=0);
+  bool open(std::ostream* outstream, unsigned int num_items, LASitem* items, unsigned int compression=0);
   bool write(unsigned char** point);
   bool chunk(LASchunk* chunk);
   bool close(LASchunk* chunk=0);

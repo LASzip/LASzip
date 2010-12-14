@@ -46,12 +46,16 @@
 
 #include "bytestreamout.hpp"
 
+#ifdef _MSC_VER
 #include <ostream.h>
+#else
+#include <fstream>
+#endif
 
 class ByteStreamOutOstream : public ByteStreamOut
 {
 public:
-  ByteStreamOutOstream(ostream* stream);
+  ByteStreamOutOstream(std::ostream* stream);
 /* write a single byte                                       */
   bool putByte(unsigned char byte);
 /* write an array of bytes                                   */
@@ -63,11 +67,11 @@ public:
 /* destructor                                                */
   ~ByteStreamOutOstream(){};
 private:
-  ostream* stream;
-  long start;
+  std::ostream* stream;
+  std::ios::pos_type start;
 };
 
-ByteStreamOutOstream::ByteStreamOutOstream(ostream* stream)
+ByteStreamOutOstream::ByteStreamOutOstream(std::ostream* stream)
 {
   this->stream = stream;
   resetCount();
@@ -81,13 +85,15 @@ bool ByteStreamOutOstream::putByte(unsigned char byte)
 
 bool ByteStreamOutOstream::putBytes(unsigned char* bytes, unsigned int num_bytes)
 {
-  stream->write(bytes, num_bytes);
+  stream->write((char*)bytes, num_bytes);
   return !!(stream->good());
 }
 
 unsigned int ByteStreamOutOstream::byteCount() const
 {
-  return (stream->tellp() - start);
+  std::ios::pos_type end = stream->tellp();
+  std::ios::off_type size = end - start;
+  return static_cast<unsigned int>(size);
 }
 
 void ByteStreamOutOstream::resetCount()

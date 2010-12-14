@@ -61,7 +61,7 @@ bool LASzipper::open(FILE* outfile, unsigned int num_items, LASitem* items, unsi
   return true;
 }
 
-bool LASzipper::open(ostream* outstream, unsigned int num_items, LASitem* items, unsigned int compression)
+bool LASzipper::open(std::ostream* outstream, unsigned int num_items, LASitem* items, unsigned int compression)
 {
   count = 0;
   stream = new ByteStreamOutOstream(outstream);

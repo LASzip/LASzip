@@ -16,11 +16,13 @@ set(APPS_CPP_DEPENDENCIES
     ${LASZIP_LIB_NAME})
     
 
-set(LASZIP laszip)
-set(LASDIFF lasdiff)
+#set(LASZIP laszip)
+#set(LASDIFF lasdiff)
+set(LASZIPPERTEST laszippertest)
+
 
 set(LASZIP_UTILITIES
-    ${LASZIP} ${LASDIFF}
+    ${LASZIP} ${LASDIFF} ${LASZIPPERTEST}
     )
     
 
@@ -46,6 +48,11 @@ endif()
 if(LASDIFF)
     add_executable(${LASDIFF} lasdiff.cpp)
     target_link_libraries(${LASDIFF} ${APPS_CPP_DEPENDENCIES} )
+endif()
+
+if(LASZIPPERTEST)
+    add_executable(${LASZIPPERTEST} laszippertest.cpp)
+    target_link_libraries(${LASZIPPERTEST} ${APPS_CPP_DEPENDENCIES} )
 endif()
 
 ###############################################################################

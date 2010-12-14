@@ -48,9 +48,14 @@
 #include "laszipper.hpp"
 #include "lasunzipper.hpp"
 
+#ifdef _MSC_VER
 #include <istream.h>
 #include <ostream.h>
 #include <fstream.h>
+#else
+#include <fstream>
+#endif
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,16 +66,16 @@ int main(int argc, char *argv[])
   unsigned int i, j;
   unsigned int num_points = 10000000;
   unsigned int num_errors = 0;
-  filebuf ofb1;
-  filebuf ofb2;
-  ostream* ostream1 = 0;
-  ostream* ostream2 = 0;
+  std::filebuf ofb1;
+  std::filebuf ofb2;
+  std::ostream* ostream1 = 0;
+  std::ostream* ostream2 = 0;
   FILE* ofile1 = 0;
   FILE* ofile2 = 0;
-  filebuf ifb1;
-  filebuf ifb2;
-  istream* istream1 = 0;
-  istream* istream2 = 0;
+  std::filebuf ifb1;
+  std::filebuf ifb2;
+  std::istream* istream1 = 0;
+  std::istream* istream2 = 0;
   FILE* ifile1 = 0;
   FILE* ifile2 = 0;
   
@@ -117,16 +122,16 @@ int main(int argc, char *argv[])
 
   if (use_iostream)
   {
-    ofb1.open("test1.lax", ios::out);
-    ostream* ostream1 = new ostream(&ofb1);
+    ofb1.open("test1.lax", std::ios::out);
+    std::ostream* ostream1 = new std::ostream(&ofb1);
     if (!laszipper1->open(ostream1, num_items, items, LASZIP_COMPRESSION_NONE))
     {
       fprintf(stderr, "ERROR: could not open laszipper1\n");
       exit(1);
     }
 
-    ofb2.open("test2.lax", ios::out);
-    ostream* ostream2 = new ostream(&ofb2);
+    ofb2.open("test2.lax", std::ios::out);
+    std::ostream* ostream2 = new std::ostream(&ofb2);
     if (!laszipper2->open(ostream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
     {
       fprintf(stderr, "ERROR: could not open laszipper2\n");
@@ -188,15 +193,15 @@ int main(int argc, char *argv[])
 
   if (use_iostream)
   {
-    ifb1.open("test1.lax", ios::in);
-    istream1 = new istream(&ifb1);
+    ifb1.open("test1.lax", std::ios::in);
+    istream1 = new std::istream(&ifb1);
     if (!lasunzipper1->open(istream1, num_items, items, LASZIP_COMPRESSION_NONE))
     {
       fprintf(stderr, "ERROR: could not open lasunzipper1\n");
       exit(1);
     }
-    ifb2.open("test2.lax", ios::in);
-    istream2 = new istream(&ifb2);
+    ifb2.open("test2.lax", std::ios::in);
+    istream2 = new std::istream(&ifb2);
     if (!lasunzipper2->open(istream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
     {
       fprintf(stderr, "ERROR: could not open lasunzipper2\n");

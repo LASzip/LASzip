@@ -37,14 +37,14 @@ set(LASZIP_HPP
 set(LASZIP_CPP
     arithmeticdecoder.cpp
     arithmeticencoder.cpp
-	integercompressor.cpp
+    arithmeticmodel.cpp
+    integercompressor.cpp
     lasreaditemcompressed_v1.cpp
     lasreadpoint.cpp
     lasunzipper.cpp
     laswriteitemcompressed_v1.cpp
     laswritepoint.cpp
-	laszipper.cpp
-	laszippertest.cpp
+    laszipper.cpp
 )
 
 set(LASZIP_SOURCES

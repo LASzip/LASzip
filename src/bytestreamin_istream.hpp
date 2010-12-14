@@ -46,7 +46,11 @@
 
 #include "bytestreamin.hpp"
 
+#ifdef _MSC_VER
+#include <istream.h>
+#else
 #include <fstream>
+#endif
 
 class ByteStreamInIstream : public ByteStreamIn
 {
@@ -81,7 +85,10 @@ inline bool ByteStreamInIstream::getBytes(unsigned char* bytes, unsigned int num
 {
     // http://stackoverflow.com/questions/604431/c-reading-unsigned-char-from-file-stream
     // std::ifstream only provides a specialization for char, not unsigned char.  
-  stream->read(bytes, num_bytes);
+    
+    // WARNING, unsafe cast!!! -- hobu
+    
+  stream->read( (char*)bytes, num_bytes);
   return !!(stream->good());
 }
 
