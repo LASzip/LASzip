@@ -46,6 +46,7 @@
 #ifndef LAS_UNZIPPER_H
 #define LAS_UNZIPPER_H
 
+#include <stdio.h>
 #include <istream.h>
 
 #include "laszip.hpp"
@@ -57,7 +58,8 @@ class LASunzipper
 {
 public:
 
-  bool open(istream* istream, unsigned int num_items, const LASitem* items, unsigned int compression=0);
+  bool open(FILE* file, unsigned int num_items, const LASitem* items, unsigned int compression=0);
+  bool open(istream* stream, unsigned int num_items, const LASitem* items, unsigned int compression=0);
   bool read(unsigned char** point);
   bool close();
 
