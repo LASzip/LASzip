@@ -48,6 +48,20 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LASZIP_BUILD_OUTPUT_DIRECTORY})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${LASZIP_BUILD_OUTPUT_DIRECTORY}) 
 
 ###############################################################################
+# Platform and compiler specific settings
+
+if(WIN32)
+  if (MSVC)
+    if (MSVC80 OR MSVC90 OR MSVC10)
+      add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+      add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+      add_definitions(-D_CRT_NONSTDC_NO_WARNING)
+      add_definitions(-D_SCL_SECURE_NO_WARNINGS)
+    endif()
+  endif()
+endif()
+
+###############################################################################
 # Installation settings
 
 if(WIN32)

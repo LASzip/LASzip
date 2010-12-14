@@ -9,68 +9,42 @@
 set(LASZIP_HEADERS_DIR ../include/laszip)
 
 set(LASZIP_HPP
-  ${LASZIP_HEADERS_DIR}/lasdefinitions.hpp
-  ${LASZIP_HEADERS_DIR}/laspointreader.hpp
-  ${LASZIP_HEADERS_DIR}/laspointwriter.hpp
-  ${LASZIP_HEADERS_DIR}/lasdefinitions.hpp
-  ${LASZIP_HEADERS_DIR}/laspointwriter0compressed.hpp
-  ${LASZIP_HEADERS_DIR}/laspointreader.hpp
-  ${LASZIP_HEADERS_DIR}/laspointwriter0compressedarithmetic.hpp
-  ${LASZIP_HEADERS_DIR}/laspointreader0compressed.hpp
-  ${LASZIP_HEADERS_DIR}/laspointwriter0raw.hpp
-  ${LASZIP_HEADERS_DIR}/laspointreader0compressedarithmetic.hpp
-  ${LASZIP_HEADERS_DIR}/laspointwriter1compressed.hpp
-  ${LASZIP_HEADERS_DIR}/laspointreader0raw.hpp
-  ${LASZIP_HEADERS_DIR}/laspointwriter1compressedarithmetic.hpp
-  ${LASZIP_HEADERS_DIR}/laspointreader1compressed.hpp
-  ${LASZIP_HEADERS_DIR}/laspointwriter1raw.hpp
-  ${LASZIP_HEADERS_DIR}/laspointreader1compressedarithmetic.hpp
-  ${LASZIP_HEADERS_DIR}/laspointwriter2compressed.hpp
-  ${LASZIP_HEADERS_DIR}/laspointreader1raw.hpp
-  ${LASZIP_HEADERS_DIR}/laspointwriter2compressedarithmetic.hpp
-  ${LASZIP_HEADERS_DIR}/laspointreader2compressed.hpp
-  ${LASZIP_HEADERS_DIR}/laspointwriter2raw.hpp
-  ${LASZIP_HEADERS_DIR}/laspointreader2compressedarithmetic.hpp
-  ${LASZIP_HEADERS_DIR}/laspointwriter3compressed.hpp
-  ${LASZIP_HEADERS_DIR}/laspointreader2raw.hpp
-  ${LASZIP_HEADERS_DIR}/laspointwriter3compressedarithmetic.hpp
-  ${LASZIP_HEADERS_DIR}/laspointreader3compressed.hpp
-  ${LASZIP_HEADERS_DIR}/laspointwriter3raw.hpp
-  ${LASZIP_HEADERS_DIR}/laspointreader3compressedarithmetic.hpp
-  ${LASZIP_HEADERS_DIR}/lasreader.hpp
-  ${LASZIP_HEADERS_DIR}/laspointreader3raw.hpp
-  ${LASZIP_HEADERS_DIR}/laswriter.hpp
-  ${LASZIP_HEADERS_DIR}/liblaszip.hpp
-)
+  ${LASZIP_HEADERS_DIR}/laszip.hpp
+  ${LASZIP_HEADERS_DIR}/laszipper.hpp
+  ${LASZIP_HEADERS_DIR}/lasunzipper.hpp
+  arithmeticdecoder.hpp
+  arithmeticencoder.hpp
+  arithmeticmodel.hpp
+  bytestreamin.hpp
+  bytestreamin_file.hpp
+  bytestreamin_istream.hpp
+  bytestreamout.hpp
+  bytestreamout_file.hpp
+  bytestreamout_ostream.hpp
+  entropydecoder.hpp
+  entropyencoder.hpp
+  integercompressor.hpp
+  lasreaditem.hpp
+  lasreaditemcompressed_v1.hpp
+  lasreaditemraw.hpp
+  lasreadpoint.hpp
+  laswriteitem.hpp
+  laswriteitemcompressed_v1.hpp
+  laswriteitemraw.hpp
+  laswritepoint.hpp
+ )
 
 set(LASZIP_CPP
     arithmeticdecoder.cpp
-    laspointwriter0compressedarithmetic.cpp
     arithmeticencoder.cpp
-    laspointwriter1compressed.cpp
-    arithmeticintegercompressor.cpp
-    laspointwriter1compressedarithmetic.cpp
-    arithmeticmodel.cpp
-    laspointwriter2compressed.cpp
-    laspointreader0compressed.cpp
-    laspointwriter2compressedarithmetic.cpp
-    laspointreader0compressedarithmetic.cpp
-    laspointwriter3compressed.cpp
-    laspointreader1compressed.cpp
-    laspointwriter3compressedarithmetic.cpp
-    laspointreader1compressedarithmetic.cpp
-    lasreader.cpp
-    laspointreader2compressed.cpp
-    laswriter.cpp
-    laspointreader2compressedarithmetic.cpp
-    rangedecoder.cpp
-    laspointreader3compressed.cpp
-    rangeencoder.cpp
-    laspointreader3compressedarithmetic.cpp
-    rangeintegercompressor.cpp
-    laspointwriter0compressed.cpp
-    rangemodel.cpp
-    liblaszip.cpp
+	integercompressor.cpp
+    lasreaditemcompressed_v1.cpp
+    lasreadpoint.cpp
+    lasunzipper.cpp
+    laswriteitemcompressed_v1.cpp
+    laswritepoint.cpp
+	laszipper.cpp
+	laszippertest.cpp
 )
 
 set(LASZIP_SOURCES
