@@ -57,25 +57,29 @@
 
 int main(int argc, char *argv[])
 {
-  int i, j;
   unsigned char c;
-  bool range = false;
-  int num_points = 1000;
-  int num_errors = 0;
-
-  // open the out files
-
-  filebuf fb_out1;
-  fb_out1.open("test1.lax", ios::out);
-  ostream* ostream1 = new ostream(&fb_out1);
-
-  filebuf fb_out2;
-  fb_out2.open("test2.lax", ios::out);
-  ostream* ostream2 = new ostream(&fb_out2);
+  unsigned int i, j;
+  unsigned int num_points = 10000000;
+  unsigned int num_errors = 0;
+  filebuf ofb1;
+  filebuf ofb2;
+  ostream* ostream1 = 0;
+  ostream* ostream2 = 0;
+  FILE* ofile1 = 0;
+  FILE* ofile2 = 0;
+  filebuf ifb1;
+  filebuf ifb2;
+  istream* istream1 = 0;
+  istream* istream2 = 0;
+  FILE* ifile1 = 0;
+  FILE* ifile2 = 0;
   
+  bool range = false;
+  bool use_iostream = false;
+
   // describe the point structure
 
-  int num_items = 1;
+  unsigned int num_items = 4;
   LASitem items[4];
 
   items[0].type = LASitem::POINT10;
@@ -94,31 +98,56 @@ int main(int argc, char *argv[])
   items[3].size = 7;
   items[3].version = 0;
 
+  // compute the point size
+  unsigned int point_size = 0;
+  for (i = 0; i < num_items; i++) point_size += items[i].size;
+
   // create the point data
-
-  unsigned char* point[4];
-  unsigned char point_data[20+8+6+7];
-  point[0] = &(point_data[0]);
-  point[1] = &(point_data[20]);
-  point[2] = &(point_data[28]);
-  point[3] = &(point_data[34]);
-
-  // create a zipper without compression
-
-  LASzipper* laszipper1 = new LASzipper();
-  if (!laszipper1->open(ostream1, num_items, items, LASZIP_COMPRESSION_NONE))
+  unsigned int point_offset = 0;
+  unsigned char** point = new unsigned char*[num_items];
+  unsigned char* point_data = new unsigned char[point_size];
+  for (i = 0; i < num_items; i++)
   {
-    fprintf(stderr, "ERROR: could not open laszipper1\n");
-    exit(1);
+    point[i] = &(point_data[point_offset]);
+    point_offset += items[i].size;
   }
 
-  // create a zipper with arithmetic compression
+  LASzipper* laszipper1 = new LASzipper(); // without compression
+  LASzipper* laszipper2 = new LASzipper(); // with arithmetic compression
 
-  LASzipper* laszipper2 = new LASzipper();
-  if (!laszipper2->open(ostream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
+  if (use_iostream)
   {
-    fprintf(stderr, "ERROR: could not open laszipper2\n");
-    exit(1);
+    ofb1.open("test1.lax", ios::out);
+    ostream* ostream1 = new ostream(&ofb1);
+    if (!laszipper1->open(ostream1, num_items, items, LASZIP_COMPRESSION_NONE))
+    {
+      fprintf(stderr, "ERROR: could not open laszipper1\n");
+      exit(1);
+    }
+
+    ofb2.open("test2.lax", ios::out);
+    ostream* ostream2 = new ostream(&ofb2);
+    if (!laszipper2->open(ostream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
+    {
+      fprintf(stderr, "ERROR: could not open laszipper2\n");
+      exit(1);
+    }
+  }
+  else
+  {
+    ofile1 = fopen("test1.lax", "wb");
+    if (!laszipper1->open(ofile1, num_items, items, LASZIP_COMPRESSION_NONE))
+    {
+      fprintf(stderr, "ERROR: could not open laszipper1\n");
+      exit(1);
+    }
+
+    ofile2 = fopen("test2.lax", "wb");
+    if (!laszipper2->open(ofile2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
+    {
+      fprintf(stderr, "ERROR: could not open laszipper2\n");
+      exit(1);
+    }
   }
 
   // compress 1000 points with "random" data
@@ -126,7 +155,11 @@ int main(int argc, char *argv[])
   c = 0;
   for (i = 0; i < num_points; i++)
   {
-    for (j = 0; j < (20+8+6+7); j++) point_data[j] = c++;
+    for (j = 0; j < point_size; j++)
+    {
+      point_data[j] = c;
+      c++;
+    }
     laszipper1->write(point);
     laszipper2->write(point);
   }
@@ -134,50 +167,73 @@ int main(int argc, char *argv[])
   laszipper1->close();
   laszipper2->close();
 
-  delete ostream1;
-  delete ostream2;
-
   delete laszipper1;
   delete laszipper2;
 
-  // open the in files
-
-  filebuf fb_in1;
-  fb_in1.open("test1.lax", ios::in);
-  istream* istream1 = new istream(&fb_in1);
-
-  // create an unzipper without compression
-
-  LASunzipper* lasunzipper1 = new LASunzipper();
-  if (!lasunzipper1->open(istream1, num_items, items, LASZIP_COMPRESSION_NONE))
+  if (use_iostream)
   {
-    fprintf(stderr, "ERROR: could not open lasunzipper1\n");
-    exit(1);
+    ofb1.close();
+    ofb2.close();
+    delete ostream1;
+    delete ostream2;
+  }
+  else
+  {
+    fclose(ofile1);
+    fclose(ofile2);
   }
 
-  // decompress 1000 points with "random" data
+  LASunzipper* lasunzipper1 = new LASunzipper(); // without compression
+  LASunzipper* lasunzipper2 = new LASunzipper(); // with arithmetic compression
+
+  if (use_iostream)
+  {
+    ifb1.open("test1.lax", ios::in);
+    istream1 = new istream(&ifb1);
+    if (!lasunzipper1->open(istream1, num_items, items, LASZIP_COMPRESSION_NONE))
+    {
+      fprintf(stderr, "ERROR: could not open lasunzipper1\n");
+      exit(1);
+    }
+    ifb2.open("test2.lax", ios::in);
+    istream2 = new istream(&ifb2);
+    if (!lasunzipper2->open(istream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
+    {
+      fprintf(stderr, "ERROR: could not open lasunzipper2\n");
+      exit(1);
+    }
+  }
+  else
+  {
+    ifile1 = fopen("test1.lax", "rb");
+    if (!lasunzipper1->open(ifile1, num_items, items, LASZIP_COMPRESSION_NONE))
+    {
+      fprintf(stderr, "ERROR: could not open lasunzipper1\n");
+      exit(1);
+    }
+    ifile2 = fopen("test2.lax", "rb");
+    if (!lasunzipper2->open(ifile2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
+    {
+      fprintf(stderr, "ERROR: could not open lasunzipper2\n");
+      exit(1);
+    }
+  }
+
+  // read 1000 points with "random" data
 
   num_errors = 0;
   c = 0;
   for (i = 0; i < num_points; i++)
   {
     lasunzipper1->read(point);
-    for (j = 0; j < (20+8+6+7); j++) if (point_data[j] != c++) num_errors++;
+    for (j = 0; j < point_size; j++)
+    {
+      if (point_data[j] != c) num_errors++;
+      c++;
+    }
   }
   if (num_errors) fprintf(stderr, "ERROR: with lasunzipper1 %d\n", num_errors);
-
-  // create an unzipper with arithmetic compression
-
-  filebuf fb_in2;
-  fb_in2.open("test2.lax", ios::in);
-  istream* istream2 = new istream(&fb_in2);
-
-  LASunzipper* lasunzipper2 = new LASunzipper();
-  if (!lasunzipper2->open(istream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
-  {
-    fprintf(stderr, "ERROR: could not open lasunzipper2\n");
-    exit(1);
-  }
+  else fprintf(stderr, "SUCCESS: lasunzipper1 read %d points correclty\n", num_points);
 
   // decompress 1000 points with "random" data
 
@@ -186,9 +242,38 @@ int main(int argc, char *argv[])
   for (i = 0; i < num_points; i++)
   {
     lasunzipper2->read(point);
-    for (j = 0; j < (20+8+6+7); j++) if (point_data[j] != c++) num_errors++;
+    for (j = 0; j < point_size; j++)
+    {
+      if (point_data[j] != c)
+      {
+        fprintf(stderr, "%d %d %d != %d\n", i, j, point_data[j], c);
+        num_errors++;
+        if (num_errors > 20) return -1;
+      }
+      c++;
+    }
   }
   if (num_errors) fprintf(stderr, "ERROR: with lasunzipper2 %d\n", num_errors);
+  else fprintf(stderr, "SUCCESS: lasunzipper2 read %d points correclty\n", num_points);
+
+  lasunzipper1->close();
+  lasunzipper2->close();
+
+  delete lasunzipper1;
+  delete lasunzipper2;
+
+  if (use_iostream)
+  {
+    ifb1.close();
+    ifb2.close();
+    delete istream1;
+    delete istream2;
+  }
+  else
+  {
+    fclose(ifile1);
+    fclose(ifile2);
+  }
 
   return 0;
 }
