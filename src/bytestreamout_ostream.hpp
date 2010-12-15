@@ -76,25 +76,25 @@ private:
 #endif
 };
 
-ByteStreamOutOstream::ByteStreamOutOstream(ostream* stream)
+inline ByteStreamOutOstream::ByteStreamOutOstream(ostream* stream)
 {
   this->stream = stream;
   resetCount();
 }
 
-bool ByteStreamOutOstream::putByte(unsigned char byte)
+inline bool ByteStreamOutOstream::putByte(unsigned char byte)
 {
   stream->put(byte);
   return !!(stream->good());
 }
 
-bool ByteStreamOutOstream::putBytes(unsigned char* bytes, unsigned int num_bytes)
+inline bool ByteStreamOutOstream::putBytes(unsigned char* bytes, unsigned int num_bytes)
 {
-  stream->write(bytes, num_bytes);
+  stream->write( (char*) bytes, num_bytes);
   return !!(stream->good());
 }
 
-unsigned int ByteStreamOutOstream::byteCount() const
+inline unsigned int ByteStreamOutOstream::byteCount() const
 {
 #if _MSC_VER < 1300
   return (stream->tellp() - start);
@@ -105,7 +105,7 @@ unsigned int ByteStreamOutOstream::byteCount() const
 #endif
 }
 
-void ByteStreamOutOstream::resetCount()
+inline void ByteStreamOutOstream::resetCount()
 {
   start = stream->tellp();
 }
