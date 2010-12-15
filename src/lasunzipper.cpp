@@ -49,6 +49,7 @@
 #include "bytestreamin_istream.hpp"
 #include "lasreadpoint.hpp"
 
+
 bool LASunzipper::open(FILE* infile, unsigned int num_items, const LASitem* items, unsigned int compression)
 {
   count = 0;
@@ -61,7 +62,7 @@ bool LASunzipper::open(FILE* infile, unsigned int num_items, const LASitem* item
   return true;
 }
 
-bool LASunzipper::open(std::istream* instream, unsigned int num_items, const LASitem* items, unsigned int compression)
+bool LASunzipper::open(istream* instream, unsigned int num_items, const LASitem* items, unsigned int compression)
 {
   count = 0;
   stream = new ByteStreamInIstream(instream);

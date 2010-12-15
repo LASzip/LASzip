@@ -52,10 +52,12 @@
 #include <fstream>
 #endif
 
+using namespace std;
+
 class ByteStreamOutOstream : public ByteStreamOut
 {
 public:
-  ByteStreamOutOstream(std::ostream* stream);
+  ByteStreamOutOstream(ostream* stream);
 /* write a single byte                                       */
   bool putByte(unsigned char byte);
 /* write an array of bytes                                   */
@@ -67,11 +69,11 @@ public:
 /* destructor                                                */
   ~ByteStreamOutOstream(){};
 private:
-  std::ostream* stream;
-  std::ios::pos_type start;
+  ostream* stream;
+  ios::pos_type start;
 };
 
-ByteStreamOutOstream::ByteStreamOutOstream(std::ostream* stream)
+ByteStreamOutOstream::ByteStreamOutOstream(ostream* stream)
 {
   this->stream = stream;
   resetCount();
@@ -91,8 +93,8 @@ bool ByteStreamOutOstream::putBytes(unsigned char* bytes, unsigned int num_bytes
 
 unsigned int ByteStreamOutOstream::byteCount() const
 {
-  std::ios::pos_type end = stream->tellp();
-  std::ios::off_type size = end - start;
+  ios::pos_type end = stream->tellp();
+  ios::off_type size = end - start;
   return static_cast<unsigned int>(size);
 }
 
