@@ -82,7 +82,7 @@ inline ByteStreamInIstream::ByteStreamInIstream(istream* stream)
 inline unsigned int ByteStreamInIstream::getByte()
 {
   int byte = stream->get();
-  if (stream->bad())
+  if (stream->eof())
   {
     byte = 0;
   }
