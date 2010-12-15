@@ -52,10 +52,12 @@
 #include <fstream>
 #endif
 
+using namespace std;
+
 class ByteStreamInIstream : public ByteStreamIn
 {
 public:
-  ByteStreamInIstream(std::istream* stream);
+  ByteStreamInIstream(istream* stream);
 /* read a single byte                                        */
   unsigned int getByte();
 /* read an array of bytes                                    */
@@ -63,10 +65,10 @@ public:
 /* destructor                                                */
   ~ByteStreamInIstream(){};
 private:
-  std::istream* stream;
+  istream* stream;
 };
 
-inline ByteStreamInIstream::ByteStreamInIstream(std::istream* stream)
+inline ByteStreamInIstream::ByteStreamInIstream(istream* stream)
 {
   this->stream = stream;
 }
