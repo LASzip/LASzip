@@ -49,7 +49,6 @@
 #include "bytestreamin_istream.hpp"
 #include "lasreadpoint.hpp"
 
-
 bool LASunzipper::open(FILE* infile, unsigned int num_items, const LASitem* items, unsigned int compression)
 {
   count = 0;
@@ -80,15 +79,16 @@ bool LASunzipper::read(unsigned char** point)
   return reader->read(point);
 }
 
-bool LASunzipper::close()
+unsigned int LASunzipper::close()
 {
   if (!reader->done()) return false;
   count = 0;
   if (reader) delete reader;
   reader = 0;
+  unsigned int byteCount = stream->byteCount();
   if (stream) delete stream;
   stream = 0;
-  return true;
+  return byteCount;
 }
 
 LASunzipper::LASunzipper()

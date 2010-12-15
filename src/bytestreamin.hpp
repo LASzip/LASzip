@@ -51,6 +51,10 @@ public:
   virtual unsigned int getByte() = 0;
 /* read an array of bytes                                    */
   virtual bool getBytes(unsigned char* bytes, unsigned int num_bytes) = 0;
+/* returns how many bytes were read since last reset         */
+  virtual unsigned int byteCount() const = 0;
+/* reset byte counter                                        */
+  virtual void resetCount() = 0;
 /* destructor                                                */
   virtual ~ByteStreamIn() {};
 };

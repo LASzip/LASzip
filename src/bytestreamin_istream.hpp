@@ -47,12 +47,11 @@
 #include "bytestreamin.hpp"
 
 #if _MSC_VER < 1300
-#include <istream.h>
+#include <fstream.h>
 #else
 #include <fstream>
-#endif
-
 using namespace std;
+#endif
 
 class ByteStreamInIstream : public ByteStreamIn
 {
@@ -70,41 +69,45 @@ public:
   ~ByteStreamInIstream(){};
 private:
   istream* stream;
+#if _MSC_VER < 1300
+  long start;
+#else
   ios::off_type start;
+#endif
 };
 
-inline ByteStreamInIstream::ByteStreamInIstream(istream* stream)
+ByteStreamInIstream::ByteStreamInIstream(istream* stream)
 {
   this->stream = stream;
   resetCount();
 }
 
-inline unsigned int ByteStreamInIstream::getByte()
+unsigned int ByteStreamInIstream::getByte()
 {
   int byte = stream->get();
   if (stream->eof())
   {
+    fprintf(stderr, "reading EOF\n");
     byte = 0;
   }
   return (unsigned int)byte;
 }
 
-inline bool ByteStreamInIstream::getBytes(unsigned char* bytes, unsigned int num_bytes)
+bool ByteStreamInIstream::getBytes(unsigned char* bytes, unsigned int num_bytes)
 {
-    // http://stackoverflow.com/questions/604431/c-reading-unsigned-char-from-file-stream
-    // std::ifstream only provides a specialization for char, not unsigned char.  
-    
-    // WARNING, unsafe cast!!! -- hobu
-    
-  stream->read( (char*)bytes, num_bytes);
+  stream->read(bytes, num_bytes);
   return !!(stream->good());
 }
 
 unsigned int ByteStreamInIstream::byteCount() const
 {
+#if _MSC_VER < 1300
+  return (stream->tellg() - start);
+#else
   ios::pos_type end = stream->tellg();
   ios::off_type size = end - start;
   return static_cast<unsigned int>(size);
+#endif
 }
 
 void ByteStreamInIstream::resetCount()

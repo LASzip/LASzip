@@ -56,22 +56,29 @@ public:
   unsigned int getByte();
 /* read an array of bytes                                    */
   bool getBytes(unsigned char* bytes, unsigned int num_bytes);
+/* returns how many bytes were read since last reset         */
+  unsigned int byteCount() const;
+/* reset byte counter                                        */
+  void resetCount();
 /* destructor                                                */
   ~ByteStreamInFile(){};
 private:
-  FILE* fp;
+  FILE* file;
+  long start;
 };
 
 ByteStreamInFile::ByteStreamInFile(FILE* file)
 {
-  fp = file;
+  this->file = file;
+  resetCount();
 }
 
 unsigned int ByteStreamInFile::getByte()
 {
-  int byte = getc(fp);
+  int byte = getc(file);
   if (byte == EOF)
   {
+    fprintf(stderr, "reading EOF\n");
     byte = 0;
   }
   return (unsigned int)byte;
@@ -79,7 +86,17 @@ unsigned int ByteStreamInFile::getByte()
 
 bool ByteStreamInFile::getBytes(unsigned char* bytes, unsigned int num_bytes)
 {
-  return (fread(bytes, 1, num_bytes, fp) != num_bytes);
+  return (fread(bytes, 1, num_bytes, file) != num_bytes);
+}
+
+unsigned int ByteStreamInFile::byteCount() const
+{
+  return ftell(file)-start;
+}
+
+void ByteStreamInFile::resetCount()
+{
+  start = ftell(file);
 }
 
 #endif

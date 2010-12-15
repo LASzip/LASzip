@@ -48,7 +48,6 @@
 #include "bytestreamout_file.hpp"
 #include "bytestreamout_ostream.hpp"
 #include "laswritepoint.hpp"
-using namespace std;
 
 bool LASzipper::open(FILE* outfile, unsigned int num_items, LASitem* items, unsigned int compression)
 {
@@ -91,7 +90,7 @@ bool LASzipper::chunk(LASchunk* chunk)
   return true;
 }
 
-bool LASzipper::close(LASchunk* chunk)
+unsigned int LASzipper::close(LASchunk* chunk)
 {
   if (!writer->done()) return false;
   if (chunk)
@@ -102,9 +101,10 @@ bool LASzipper::close(LASchunk* chunk)
   count = 0;
   if (writer) delete writer;
   writer = 0;
+  unsigned int byteCount = stream->byteCount();
   if (stream) delete stream;
   stream = 0;
-  return true;
+  return byteCount;
 }
 
 LASzipper::LASzipper()
