@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 {
   unsigned char c;
   unsigned int i, j;
-  unsigned int num_points = 10000000;
+  unsigned int num_points = 100000;
   unsigned int num_errors = 0;
   std::filebuf ofb1;
   std::filebuf ofb2;
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
   FILE* ifile2 = 0;
   
   bool range = false;
-  bool use_iostream = false;
+  bool use_iostream = true;
 
   // describe the point structure
 
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
   if (use_iostream)
   {
     ofb1.open("test1.lax", std::ios::out);
-    std::ostream* ostream1 = new std::ostream(&ofb1);
+    ostream1 = new std::ostream(&ofb1);
     if (!laszipper1->open(ostream1, num_items, items, LASZIP_COMPRESSION_NONE))
     {
       fprintf(stderr, "ERROR: could not open laszipper1\n");
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     }
 
     ofb2.open("test2.lax", std::ios::out);
-    std::ostream* ostream2 = new std::ostream(&ofb2);
+    ostream2 = new std::ostream(&ofb2);
     if (!laszipper2->open(ostream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
     {
       fprintf(stderr, "ERROR: could not open laszipper2\n");
@@ -177,10 +177,12 @@ int main(int argc, char *argv[])
 
   if (use_iostream)
   {
-    ofb1.close();
-    ofb2.close();
+    ostream1.flush();
+    ostream2.flush();
     delete ostream1;
     delete ostream2;
+    ofb1.close();
+    ofb2.close();
   }
   else
   {
@@ -269,10 +271,10 @@ int main(int argc, char *argv[])
 
   if (use_iostream)
   {
-    ifb1.close();
-    ifb2.close();
     delete istream1;
     delete istream2;
+    ifb1.close();
+    ifb2.close();
   }
   else
   {
