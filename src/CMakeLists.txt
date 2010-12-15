@@ -45,6 +45,9 @@ set(LASZIP_CPP
     laswriteitemcompressed_v1.cpp
     laswritepoint.cpp
     laszipper.cpp
+    rangeencoder.cpp
+    rangedecoder.cpp
+    rangemodel.cpp
 )
 
 set(LASZIP_SOURCES

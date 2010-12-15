@@ -48,11 +48,18 @@
 #include "laszipper.hpp"
 #include "lasunzipper.hpp"
 
+#if defined(_MSC_VER)
 #if _MSC_VER < 1300
-#include <fstream.h>
+    #include <fstream.h>
 #else
-#include <fstream>
-using namespace std;
+    #include <istream>
+    #include <fstream>
+
+#endif
+#else
+    #include <istream>
+    #include <fstream>
+    using namespace std;
 #endif
 
 #include <time.h>
@@ -72,18 +79,42 @@ int main(int argc, char *argv[])
   filebuf ofb1;
   filebuf ofb2;
   filebuf ofb3;
+
+
+#if defined(_MSC_VER)
+#if _MSC_VER < 1300
   ostream* ostream1 = 0;
   ostream* ostream2 = 0;
   ostream* ostream3 = 0;
+  istream* istream1 = 0;
+  istream* istream2 = 0;
+  istream* istream3 = 0;  
+#else
+  ofstream* ostream1 = 0;
+  ofstream* ostream2 = 0;
+  ofstream* ostream3 = 0;
+  ifstream* istream1 = 0;
+  ifstream* istream2 = 0;
+  ifstream* istream3 = 0;  
+#endif
+#else
+  ofstream* ostream1 = 0;
+  ofstream* ostream2 = 0;
+  ofstream* ostream3 = 0;
+  ifstream* istream1 = 0;
+  ifstream* istream2 = 0;
+  ifstream* istream3 = 0;  
+#endif
+
+
+
   FILE* ofile1 = 0;
   FILE* ofile2 = 0;
   FILE* ofile3 = 0;
   filebuf ifb1;
   filebuf ifb2;
   filebuf ifb3;
-  istream* istream1 = 0;
-  istream* istream2 = 0;
-  istream* istream3 = 0;
+
   FILE* ifile1 = 0;
   FILE* ifile2 = 0;
   FILE* ifile3 = 0;
@@ -132,27 +163,67 @@ int main(int argc, char *argv[])
 
   if (use_iostream)
   {
+
+#if defined(_MSC_VER)
+#if _MSC_VER < 1300
     ofb1.open("test1.lax", ios::out);
     ofb1.setmode(filebuf::binary);
     ostream1 = new ostream(&ofb1);
+#else
+    ostream1 = new ofstream();
+    ostream1->open("test1.lax", std::ios::in | std::ios::binary );
+
+#endif
+#else
+    ostream1 = new ofstream();
+    ostream1->open("test1.lax", std::ios::in | std::ios::binary );
+#endif
+
+
+
     if (!laszipper1->open(ostream1, num_items, items, LASZIP_COMPRESSION_NONE))
     {
       fprintf(stderr, "ERROR: could not open laszipper1\n");
       return 0;
     }
 
+#if defined(_MSC_VER)
+#if _MSC_VER < 1300
     ofb2.open("test2.lax", ios::out);
     ofb2.setmode(filebuf::binary);
     ostream2 = new ostream(&ofb2);
+#else
+    ostream2 = new ofstream();
+    ostream2->open("test2.lax", std::ios::in | std::ios::binary );
+
+#endif
+#else
+    ostream2 = new ofstream();
+    ostream2->open("test2.lax", std::ios::in | std::ios::binary );
+#endif
+
     if (!laszipper2->open(ostream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
     {
       fprintf(stderr, "ERROR: could not open laszipper2\n");
       return 0;
     }
 
+#if defined(_MSC_VER)
+#if _MSC_VER < 1300
     ofb3.open("test3.lax", ios::out);
     ofb3.setmode(filebuf::binary);
     ostream3 = new ostream(&ofb3);
+#else
+    ostream3 = new ofstream();
+    ostream3->open("test3.lax", std::ios::in | std::ios::binary );
+
+#endif
+#else
+    ostream3 = new ofstream();
+    ostream3->open("test3.lax", std::ios::in | std::ios::binary );
+#endif
+
+
     if (!laszipper3->open(ostream3, num_items, items, LASZIP_COMPRESSION_RANGE))
     {
       fprintf(stderr, "ERROR: could not open laszipper3\n");
@@ -256,25 +327,65 @@ int main(int argc, char *argv[])
 
   if (use_iostream)
   {
+
+#if defined(_MSC_VER)
+#if _MSC_VER < 1300
     ifb1.open("test1.lax", ios::in);
     ifb1.setmode(filebuf::binary);
     istream1 = new istream(&ifb1);
+#else
+    istream1 = new ifstream();
+    istream1->open("test1.lax", std::ios::in | std::ios::binary );
+
+#endif
+#else
+    istream1 = new ifstream();
+    istream1->open("test1.lax", std::ios::in | std::ios::binary );
+#endif
+
+
     if (!lasunzipper1->open(istream1, num_items, items, LASZIP_COMPRESSION_NONE))
     {
       fprintf(stderr, "ERROR: could not open lasunzipper1\n");
       return 0;
     }
+
+#if defined(_MSC_VER)
+#if _MSC_VER < 1300
     ifb2.open("test2.lax", ios::in);
     ifb2.setmode(filebuf::binary);
     istream2 = new istream(&ifb2);
+#else
+    istream2 = new ifstream();
+    istream2->open("test2.lax", std::ios::in | std::ios::binary );
+
+#endif
+#else
+    istream2 = new ifstream();
+    istream2->open("test2.lax", std::ios::in | std::ios::binary );
+#endif
+
     if (!lasunzipper2->open(istream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
     {
       fprintf(stderr, "ERROR: could not open lasunzipper2\n");
       return 0;
     }
+
+#if defined(_MSC_VER)
+#if _MSC_VER < 1300
     ifb3.open("test3.lax", ios::in);
     ifb3.setmode(filebuf::binary);
     istream3 = new istream(&ifb3);
+#else
+    istream3 = new ifstream();
+    istream3->open("test3.lax", std::ios::in | std::ios::binary );
+
+#endif
+#else
+    istream2 = new ifstream();
+    istream3->open("test3.lax", std::ios::in | std::ios::binary );
+#endif
+
     if (!lasunzipper3->open(istream3, num_items, items, LASZIP_COMPRESSION_RANGE))
     {
       fprintf(stderr, "ERROR: could not open lasunzipper3\n");

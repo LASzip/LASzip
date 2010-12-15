@@ -48,11 +48,18 @@
 
 #include <stdio.h>
 
+#if defined(_MSC_VER)
 #if _MSC_VER < 1300
-#include <fstream.h>
+    #include <fstream.h>
 #else
-#include <fstream>
-using namespace std;
+    #include <istream>
+    #include <fstream>
+
+#endif
+#else
+    #include <istream>
+    #include <fstream>
+    using namespace std;
 #endif
 
 #include "laszip.hpp"

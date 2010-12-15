@@ -69,11 +69,17 @@ public:
   ~ByteStreamOutOstream(){};
 private:
   ostream* stream;
+  
+#if defined(_MSC_VER)
 #if _MSC_VER < 1300
-  long start;
+    long start;
 #else
-  ios::off_type start;
+    ios::off_type start;
 #endif
+#else
+    ios::off_type start;
+#endif
+
 };
 
 inline ByteStreamOutOstream::ByteStreamOutOstream(ostream* stream)
@@ -96,13 +102,23 @@ inline bool ByteStreamOutOstream::putBytes(unsigned char* bytes, unsigned int nu
 
 inline unsigned int ByteStreamOutOstream::byteCount() const
 {
+
+#if defined(_MSC_VER)
 #if _MSC_VER < 1300
   return (stream->tellp() - start);
 #else
   ios::pos_type end = stream->tellp();
   ios::off_type size = end - start;
   return static_cast<unsigned int>(size);
+
 #endif
+#else
+  ios::pos_type end = stream->tellp();
+  ios::off_type size = end - start;
+  return static_cast<unsigned int>(size);
+#endif
+
+
 }
 
 inline void ByteStreamOutOstream::resetCount()

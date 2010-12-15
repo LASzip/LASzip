@@ -46,11 +46,18 @@
 
 #include "bytestreamin.hpp"
 
+#if defined(_MSC_VER)
 #if _MSC_VER < 1300
-#include <fstream.h>
+    #include <fstream.h>
 #else
-#include <fstream>
-using namespace std;
+    #include <istream>
+    #include <fstream>
+
+#endif
+#else
+    #include <istream>
+    #include <fstream>
+    using namespace std;
 #endif
 
 class ByteStreamInIstream : public ByteStreamIn
@@ -69,11 +76,19 @@ public:
   ~ByteStreamInIstream(){};
 private:
   istream* stream;
+ 
+
+#if defined(_MSC_VER)
 #if _MSC_VER < 1300
-  long start;
+    long start;
 #else
-  ios::off_type start;
+    ios::off_type start;
 #endif
+#else
+    ios::off_type start;
+#endif
+
+
 };
 
 inline ByteStreamInIstream::ByteStreamInIstream(istream* stream)
@@ -105,13 +120,20 @@ inline bool ByteStreamInIstream::getBytes(unsigned char* bytes, unsigned int num
 
 inline unsigned int ByteStreamInIstream::byteCount() const
 {
+
+#if defined(_MSC_VER)
 #if _MSC_VER < 1300
-  return (stream->tellg() - start);
+    return (stream->tellg() - start);
 #else
-  ios::pos_type end = stream->tellg();
-  ios::off_type size = end - start;
+  ios::off_type size = stream->tellg() - start;
+  return static_cast<unsigned int>(size);
+
+#endif
+#else
+  ios::off_type size = stream->tellg() - start;
   return static_cast<unsigned int>(size);
 #endif
+
 }
 
 inline void ByteStreamInIstream::resetCount()
