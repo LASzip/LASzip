@@ -76,13 +76,13 @@ private:
 #endif
 };
 
-ByteStreamInIstream::ByteStreamInIstream(istream* stream)
+inline ByteStreamInIstream::ByteStreamInIstream(istream* stream)
 {
   this->stream = stream;
   resetCount();
 }
 
-unsigned int ByteStreamInIstream::getByte()
+inline unsigned int ByteStreamInIstream::getByte()
 {
   int byte = stream->get();
   if (stream->eof())
@@ -93,13 +93,17 @@ unsigned int ByteStreamInIstream::getByte()
   return (unsigned int)byte;
 }
 
-bool ByteStreamInIstream::getBytes(unsigned char* bytes, unsigned int num_bytes)
+inline bool ByteStreamInIstream::getBytes(unsigned char* bytes, unsigned int num_bytes)
 {
-  stream->read(bytes, num_bytes);
+
+  // http://stackoverflow.com/questions/604431/c-reading-unsigned-char-from-file-stream
+  // WARNING, unsafe cast!!! -- hobu  
+
+  stream->read( (char*) bytes, num_bytes);
   return !!(stream->good());
 }
 
-unsigned int ByteStreamInIstream::byteCount() const
+inline unsigned int ByteStreamInIstream::byteCount() const
 {
 #if _MSC_VER < 1300
   return (stream->tellg() - start);
@@ -110,7 +114,7 @@ unsigned int ByteStreamInIstream::byteCount() const
 #endif
 }
 
-void ByteStreamInIstream::resetCount()
+inline void ByteStreamInIstream::resetCount()
 {
   start = stream->tellg();
 }
