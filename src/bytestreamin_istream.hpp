@@ -60,6 +60,10 @@ public:
   unsigned int getByte();
 /* read an array of bytes                                    */
   bool getBytes(unsigned char* bytes, unsigned int num_bytes);
+/* returns how many bytes were read since last reset         */
+  unsigned int byteCount() const;
+/* reset byte counter                                        */
+  void resetCount();
 /* destructor                                                */
   ~ByteStreamInIstream(){};
 private:
