@@ -382,7 +382,7 @@ int main(int argc, char *argv[])
 
 #endif
 #else
-    istream2 = new ifstream();
+    istream3 = new ifstream();
     istream3->open("test3.lax", std::ios::in | std::ios::binary );
 #endif
 
