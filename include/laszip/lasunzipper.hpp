@@ -48,12 +48,15 @@
 
 #include <stdio.h>
 
+#if _MSC_VER < 1300
+#include <fstream.h>
+#else
 #include <fstream>
+using namespace std;
+#endif
 
 #include "laszip.hpp"
 
-using namespace std;
-    
 class ByteStreamIn;
 class LASreadPoint;
 
@@ -64,7 +67,7 @@ public:
   bool open(FILE* file, unsigned int num_items, const LASitem* items, unsigned int compression=0);
   bool open(istream* stream, unsigned int num_items, const LASitem* items, unsigned int compression=0);
   bool read(unsigned char** point);
-  bool close();
+  unsigned int close();
 
   LASunzipper();
   ~LASunzipper();

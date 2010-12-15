@@ -49,12 +49,11 @@
 #include <stdio.h>
 
 #if _MSC_VER < 1300
-#include <ostream.h>
+#include <fstream.h>
 #else
 #include <fstream>
-#endif
-
 using namespace std;
+#endif
 
 #include "laszip.hpp"
 
@@ -69,7 +68,7 @@ public:
   bool open(ostream* outstream, unsigned int num_items, LASitem* items, unsigned int compression=0);
   bool write(unsigned char** point);
   bool chunk(LASchunk* chunk);
-  bool close(LASchunk* chunk=0);
+  unsigned int close(LASchunk* chunk=0);
 
   LASzipper();
   ~LASzipper();
