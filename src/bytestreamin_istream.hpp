@@ -64,11 +64,13 @@ public:
   ~ByteStreamInIstream(){};
 private:
   std::istream* stream;
+  std::ios::off_type start;
 };
 
 inline ByteStreamInIstream::ByteStreamInIstream(std::istream* stream)
 {
   this->stream = stream;
+  resetCount();
 }
 
 inline unsigned int ByteStreamInIstream::getByte()
@@ -90,6 +92,18 @@ inline bool ByteStreamInIstream::getBytes(unsigned char* bytes, unsigned int num
     
   stream->read( (char*)bytes, num_bytes);
   return !!(stream->good());
+}
+
+unsigned int ByteStreamInIstream::byteCount() const
+{
+  std::ios::pos_type end = stream->tellg();
+  std::ios::off_type size = end - start;
+  return static_cast<unsigned int>(size);
+}
+
+void ByteStreamInIstream::resetCount()
+{
+  start = stream->tellg();
 }
 
 #endif
