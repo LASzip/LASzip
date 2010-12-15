@@ -47,6 +47,7 @@
 #include "laswritepoint.hpp"
 
 #include "arithmeticencoder.hpp"
+#include "rangeencoder.hpp"
 #include "laswriteitemraw.hpp"
 #include "laswriteitemrawendianswapped.hpp"
 #include "laswriteitemcompressed_v1.hpp"
@@ -95,9 +96,9 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, U32 compression)
   case LASZIP_COMPRESSION_NONE:
     enc = 0;
     break;
-//  case LASZIP_COMPRESSION_RANGE:
-//    enc = new RangeEncoder();
-//    break;
+  case LASZIP_COMPRESSION_RANGE:
+    enc = new RangeEncoder();
+    break;
   case LASZIP_COMPRESSION_ARITHMETIC:
     enc = new ArithmeticEncoder();
     break;

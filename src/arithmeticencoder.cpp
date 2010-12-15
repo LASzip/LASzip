@@ -98,6 +98,11 @@ void ArithmeticEncoder::done()
   U32 buffer_size = outbyte - outbuffer;
   if (buffer_size) outstream->putBytes(outbuffer, buffer_size);
 
+  // write three zero bytes to be sure the decoder does not read past the array
+  outstream->putByte(0);
+  outstream->putByte(0);
+  outstream->putByte(0);
+
   outstream = 0;
 }
 
