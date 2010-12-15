@@ -48,6 +48,7 @@
 
 #include "arithmeticdecoder.hpp"
 #include "lasreaditemraw.hpp"
+#include "lasreaditemrawendianswapped.hpp"
 #include "lasreaditemcompressed_v1.hpp"
 
 #include <string.h>
@@ -151,13 +152,22 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, U32 compression)
     switch (items[i].type)
     {
     case LASitem::POINT10:
-      readers_raw[i] = new LASreadItemRaw_POINT10();
+      if (IS_LITTLE_ENDIAN())
+        readers_raw[i] = new LASreadItemRaw_POINT10();
+      else
+        readers_raw[i] = new LASreadItemRawEndianSwapped_POINT10();
       break;
     case LASitem::GPSTIME:
-      readers_raw[i] = new LASreadItemRaw_GPSTIME();
+      if (IS_LITTLE_ENDIAN())
+        readers_raw[i] = new LASreadItemRaw_GPSTIME();
+      else
+        readers_raw[i] = new LASreadItemRawEndianSwapped_GPSTIME();
       break;
     case LASitem::RGB:
-      readers_raw[i] = new LASreadItemRaw_RGB();
+      if (IS_LITTLE_ENDIAN())
+        readers_raw[i] = new LASreadItemRaw_RGB();
+      else
+        readers_raw[i] = new LASreadItemRawEndianSwapped_RGB();
       break;
     case LASitem::BYTE:
       readers_raw[i] = new LASreadItemRaw_BYTE(items[i].size);

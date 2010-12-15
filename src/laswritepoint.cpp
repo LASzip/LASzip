@@ -48,6 +48,7 @@
 
 #include "arithmeticencoder.hpp"
 #include "laswriteitemraw.hpp"
+#include "laswriteitemrawendianswapped.hpp"
 #include "laswriteitemcompressed_v1.hpp"
 
 #include <string.h>
@@ -115,13 +116,22 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, U32 compression)
     switch (items[i].type)
     {
     case LASitem::POINT10:
-      writers_raw[i] = new LASwriteItemRaw_POINT10();
+      if (IS_LITTLE_ENDIAN())
+        writers_raw[i] = new LASwriteItemRaw_POINT10();
+      else
+        writers_raw[i] = new LASwriteItemRawEndianSwapped_POINT10();
       break;
     case LASitem::GPSTIME:
-      writers_raw[i] = new LASwriteItemRaw_GPSTIME();
+      if (IS_LITTLE_ENDIAN())
+        writers_raw[i] = new LASwriteItemRaw_GPSTIME();
+      else
+        writers_raw[i] = new LASwriteItemRawEndianSwapped_GPSTIME();
       break;
     case LASitem::RGB:
-      writers_raw[i] = new LASwriteItemRaw_RGB();
+      if (IS_LITTLE_ENDIAN())
+        writers_raw[i] = new LASwriteItemRaw_RGB();
+      else
+        writers_raw[i] = new LASwriteItemRawEndianSwapped_RGB();
       break;
     case LASitem::BYTE:
       writers_raw[i] = new LASwriteItemRaw_BYTE(items[i].size);
