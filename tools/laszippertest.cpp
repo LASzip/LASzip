@@ -48,7 +48,7 @@
 #include "laszipper.hpp"
 #include "lasunzipper.hpp"
 
-#ifdef _MSC_VER
+#if _MSC_VER < 1300
 #include <istream.h>
 #include <ostream.h>
 #include <fstream.h>

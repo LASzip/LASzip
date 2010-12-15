@@ -46,7 +46,7 @@
 
 #include "bytestreamout.hpp"
 
-#ifdef _MSC_VER
+#if _MSC_VER < 1300
 #include <ostream.h>
 #else
 #include <fstream>
