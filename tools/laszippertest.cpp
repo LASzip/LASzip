@@ -49,24 +49,19 @@
 #include "lasunzipper.hpp"
 
 #if _MSC_VER < 1300
-#include <istream.h>
-#include <ostream.h>
 #include <fstream.h>
 #else
 #include <fstream>
+using namespace std;
 #endif
 
-
-using namespace std;
-
 #include <stdio.h>
-#include <stdlib.h>
 
 int main(int argc, char *argv[])
 {
   unsigned char c;
   unsigned int i, j;
-  unsigned int num_points = 100000;
+  unsigned int num_points = 5;
   unsigned int num_errors = 0;
   filebuf ofb1;
   filebuf ofb2;
@@ -125,19 +120,21 @@ int main(int argc, char *argv[])
   if (use_iostream)
   {
     ofb1.open("test1.lax", ios::out);
+    ofb1.setmode(filebuf::binary);
     ostream1 = new ostream(&ofb1);
     if (!laszipper1->open(ostream1, num_items, items, LASZIP_COMPRESSION_NONE))
     {
       fprintf(stderr, "ERROR: could not open laszipper1\n");
-      exit(1);
+      return 0;
     }
 
     ofb2.open("test2.lax", ios::out);
+    ofb2.setmode(filebuf::binary);
     ostream2 = new ostream(&ofb2);
     if (!laszipper2->open(ostream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
     {
       fprintf(stderr, "ERROR: could not open laszipper2\n");
-      exit(1);
+      return 0;
     }
   }
   else
@@ -146,18 +143,18 @@ int main(int argc, char *argv[])
     if (!laszipper1->open(ofile1, num_items, items, LASZIP_COMPRESSION_NONE))
     {
       fprintf(stderr, "ERROR: could not open laszipper1\n");
-      exit(1);
+      return 0;
     }
 
     ofile2 = fopen("test2.lax", "wb");
     if (!laszipper2->open(ofile2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
     {
       fprintf(stderr, "ERROR: could not open laszipper2\n");
-      exit(1);
+      return 0;
     }
   }
 
-  // compress 1000 points with "random" data
+  // write / compress num_points with "random" data
 
   c = 0;
   for (i = 0; i < num_points; i++)
@@ -171,16 +168,16 @@ int main(int argc, char *argv[])
     laszipper2->write(point);
   }
 
-  laszipper1->close();
-  laszipper2->close();
+  fprintf(stderr, "laszipper1 wrote %d bytes\n", laszipper1->close());
+  fprintf(stderr, "laszipper2 wrote %d bytes\n", laszipper2->close());
 
   delete laszipper1;
   delete laszipper2;
 
   if (use_iostream)
   {
-    ostream1.flush();
-    ostream2.flush();
+    ostream1->flush();
+    ostream2->flush();
     delete ostream1;
     delete ostream2;
     ofb1.close();
@@ -198,18 +195,20 @@ int main(int argc, char *argv[])
   if (use_iostream)
   {
     ifb1.open("test1.lax", ios::in);
+    ifb1.setmode(filebuf::binary);
     istream1 = new istream(&ifb1);
     if (!lasunzipper1->open(istream1, num_items, items, LASZIP_COMPRESSION_NONE))
     {
       fprintf(stderr, "ERROR: could not open lasunzipper1\n");
-      exit(1);
+      return 0;
     }
     ifb2.open("test2.lax", ios::in);
+    ifb2.setmode(filebuf::binary);
     istream2 = new istream(&ifb2);
     if (!lasunzipper2->open(istream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
     {
       fprintf(stderr, "ERROR: could not open lasunzipper2\n");
-      exit(1);
+      return 0;
     }
   }
   else
@@ -218,17 +217,17 @@ int main(int argc, char *argv[])
     if (!lasunzipper1->open(ifile1, num_items, items, LASZIP_COMPRESSION_NONE))
     {
       fprintf(stderr, "ERROR: could not open lasunzipper1\n");
-      exit(1);
+      return 0;
     }
     ifile2 = fopen("test2.lax", "rb");
     if (!lasunzipper2->open(ifile2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
     {
       fprintf(stderr, "ERROR: could not open lasunzipper2\n");
-      exit(1);
+      return 0;
     }
   }
 
-  // read 1000 points with "random" data
+  // read num_points with "random" data
 
   num_errors = 0;
   c = 0;
@@ -244,7 +243,7 @@ int main(int argc, char *argv[])
   if (num_errors) fprintf(stderr, "ERROR: with lasunzipper1 %d\n", num_errors);
   else fprintf(stderr, "SUCCESS: lasunzipper1 read %d points correclty\n", num_points);
 
-  // decompress 1000 points with "random" data
+  // decompress num_points with "random" data
 
   num_errors = 0;
   c = 0;
@@ -265,18 +264,18 @@ int main(int argc, char *argv[])
   if (num_errors) fprintf(stderr, "ERROR: with lasunzipper2 %d\n", num_errors);
   else fprintf(stderr, "SUCCESS: lasunzipper2 read %d points correclty\n", num_points);
 
-  lasunzipper1->close();
-  lasunzipper2->close();
+  fprintf(stderr, "lasunzipper1 read %d bytes\n", lasunzipper1->close());
+  fprintf(stderr, "lasunzipper2 read %d bytes\n", lasunzipper2->close());
 
   delete lasunzipper1;
   delete lasunzipper2;
 
   if (use_iostream)
   {
-    delete istream1;
-    delete istream2;
     ifb1.close();
     ifb2.close();
+    delete istream1;
+    delete istream2;
   }
   else
   {
