@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
     ostream1 = new ostream(&ofb1);
 #else
     ostream1 = new ofstream();
-    ostream1->open("test1.lax", std::ios::in | std::ios::binary );
+    ostream1->open("test1.lax", std::ios::out | std::ios::binary );
 #endif
 
 
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
     ostream2 = new ostream(&ofb2);
 #else
     ostream2 = new ofstream();
-    ostream2->open("test2.lax", std::ios::in | std::ios::binary );
+    ostream2->open("test2.lax", std::ios::out | std::ios::binary );
 #endif
 
     if (!laszipper2->open(ostream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
     ostream3 = new ostream(&ofb3);
 #else
     ostream3 = new ofstream();
-    ostream3->open("test3.lax", std::ios::in | std::ios::binary );
+    ostream3->open("test3.lax", std::ios::out | std::ios::binary );
 #endif
 
 
