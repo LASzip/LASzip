@@ -46,14 +46,8 @@
 
 #include "bytestreamin.hpp"
 
-#if defined(_MSC_VER)
-#if _MSC_VER < 1300
+#ifdef LZ_WIN32_VC6
     #include <fstream.h>
-#else
-    #include <istream>
-    #include <fstream>
-
-#endif
 #else
     #include <istream>
     #include <fstream>
@@ -78,12 +72,8 @@ private:
   istream* stream;
  
 
-#if defined(_MSC_VER)
-#if _MSC_VER < 1300
+#ifdef LZ_WIN32_VC6
     long start;
-#else
-    ios::off_type start;
-#endif
 #else
     ios::off_type start;
 #endif
@@ -121,14 +111,8 @@ inline bool ByteStreamInIstream::getBytes(unsigned char* bytes, unsigned int num
 inline unsigned int ByteStreamInIstream::byteCount() const
 {
 
-#if defined(_MSC_VER)
-#if _MSC_VER < 1300
+#ifdef LZ_WIN32_VC6
     return (stream->tellg() - start);
-#else
-  ios::off_type size = stream->tellg() - start;
-  return static_cast<unsigned int>(size);
-
-#endif
 #else
   ios::off_type size = stream->tellg() - start;
   return static_cast<unsigned int>(size);

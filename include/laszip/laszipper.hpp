@@ -48,14 +48,8 @@
 
 #include <stdio.h>
 
-#if defined(_MSC_VER)
-#if _MSC_VER < 1300
+#ifdef LZ_WIN32_VC6
     #include <fstream.h>
-#else
-    #include <istream>
-    #include <fstream>
-
-#endif
 #else
     #include <istream>
     #include <fstream>

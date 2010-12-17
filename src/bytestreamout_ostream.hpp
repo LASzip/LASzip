@@ -46,7 +46,7 @@
 
 #include "bytestreamout.hpp"
 
-#if _MSC_VER < 1300
+#ifdef LZ_WIN32_VC6
 #include <fstream.h>
 #else
 #include <fstream>
@@ -70,12 +70,8 @@ public:
 private:
   ostream* stream;
   
-#if defined(_MSC_VER)
-#if _MSC_VER < 1300
+#ifdef LZ_WIN32_VC6
     long start;
-#else
-    ios::off_type start;
-#endif
 #else
     ios::off_type start;
 #endif
@@ -103,15 +99,8 @@ inline bool ByteStreamOutOstream::putBytes(unsigned char* bytes, unsigned int nu
 inline unsigned int ByteStreamOutOstream::byteCount() const
 {
 
-#if defined(_MSC_VER)
-#if _MSC_VER < 1300
+#ifdef LZ_WIN32_VC6
   return (stream->tellp() - start);
-#else
-  ios::pos_type end = stream->tellp();
-  ios::off_type size = end - start;
-  return static_cast<unsigned int>(size);
-
-#endif
 #else
   ios::pos_type end = stream->tellp();
   ios::off_type size = end - start;

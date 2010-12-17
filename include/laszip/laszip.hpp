@@ -47,6 +47,11 @@
 #ifndef LASZIP_H
 #define LASZIP_H
 
+#if defined(_MSC_VER) && (_MSC_VER < 1300)
+// VC6 is very special wrt C++ streams
+#define LZ_WIN32_VC6
+#endif
+
 #define LASZIP_COMPRESSION_NONE 0
 #define LASZIP_COMPRESSION_RANGE 1
 #define LASZIP_COMPRESSION_ARITHMETIC 2
