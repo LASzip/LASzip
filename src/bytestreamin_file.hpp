@@ -122,17 +122,17 @@ inline bool ByteStreamInFile::getBytes(unsigned char* bytes, unsigned int num_by
 
 inline bool ByteStreamInFile::get16bits(unsigned char* bytes)
 {
-  return (fread(bytes, 1, 2, file) == 2);
+  return getBytes(bytes, 2);
 }
 
 inline bool ByteStreamInFile::get32bits(unsigned char* bytes)
 {
-  return (fread(bytes, 1, 4, file) == 4);
+  return getBytes(bytes, 4);
 }
 
 inline bool ByteStreamInFile::get64bits(unsigned char* bytes)
 {
-  return (fread(bytes, 1, 8, file) == 8);
+  return getBytes(bytes, 8);
 }
 
 inline bool ByteStreamInFile::isSeekable() const
@@ -167,7 +167,7 @@ inline ByteStreamInFileEndianSwapped::ByteStreamInFileEndianSwapped(FILE* file) 
 
 inline bool ByteStreamInFileEndianSwapped::get16bits(unsigned char* bytes)
 {
-  if (fread(swapped, 1, 2, file) == 2)
+  if (getBytes(swapped, 2))
   {
     bytes[0] = swapped[1];
     bytes[1] = swapped[0];
@@ -178,7 +178,7 @@ inline bool ByteStreamInFileEndianSwapped::get16bits(unsigned char* bytes)
 
 inline bool ByteStreamInFileEndianSwapped::get32bits(unsigned char* bytes)
 {
-  if (fread(swapped, 1, 4, file) == 4)
+  if (getBytes(swapped, 4))
   {
     bytes[0] = swapped[3];
     bytes[1] = swapped[2];
@@ -191,7 +191,7 @@ inline bool ByteStreamInFileEndianSwapped::get32bits(unsigned char* bytes)
 
 inline bool ByteStreamInFileEndianSwapped::get64bits(unsigned char* bytes)
 {
-  if (fread(swapped, 1, 8, file) == 8)
+  if (getBytes(swapped, 8))
   {
     bytes[0] = swapped[7];
     bytes[1] = swapped[6];
