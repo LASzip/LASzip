@@ -23,7 +23,7 @@
   
   CONTENTS:
   
-    Writes (optionally compressed) LIDAR points to LAS formats 1.0 - 1.3
+    Reads (optionally compressed) LIDAR points to LAS formats 1.0 - 1.3
 
   PROGRAMMERS:
   
