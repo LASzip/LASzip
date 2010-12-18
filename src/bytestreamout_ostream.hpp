@@ -49,6 +49,7 @@
 #ifdef LZ_WIN32_VC6
 #include <fstream.h>
 #else
+#include <istream>
 #include <fstream>
 using namespace std;
 #endif
@@ -61,27 +62,57 @@ public:
   bool putByte(unsigned char byte);
 /* write an array of bytes                                   */
   bool putBytes(unsigned char* bytes, unsigned int num_bytes);
+/* write 16 bit field (for implementing endian swap)         */
+  virtual bool put16bits(unsigned char* bytes);
+/* write 32 bit field (for implementing endian swap)         */
+  virtual bool put32bits(unsigned char* bytes);
+/* write 64 bit field (for implementing endian swap)         */
+  virtual bool put64bits(unsigned char* bytes);
+/* is the stream seekable (e.g. standard out is not)         */
+  bool isSeekable() const;
+/* save position in the stream for (forward) seeking later   */
+  bool saveSeekPosition();
+/* seek by offset from saved position (or start of file)     */
+  bool seek(long offset);
+/* seek to the end of the file                               */
+  bool seekEnd();
 /* returns how many bytes were written since last reset      */
   unsigned int byteCount() const;
 /* reset byte counter                                        */
   void resetCount();
 /* destructor                                                */
   ~ByteStreamOutOstream(){};
-private:
+protected:
   ostream* stream;
-  
+private:
 #ifdef LZ_WIN32_VC6
-    long start;
+  long start;
+  long seek_position;
 #else
-    ios::off_type start;
+  ios::off_type start;
+  ios::off_type seek_position;
 #endif
+};
 
+class ByteStreamOutOstreamEndianSwapped : public ByteStreamOutOstream
+{
+public:
+  ByteStreamOutOstreamEndianSwapped(ostream* stream);
+/* write 16 bit field (for implementing endian swap)         */
+  bool put16bits(unsigned char* bytes);
+/* write 32 bit field (for implementing endian swap)         */
+  bool put32bits(unsigned char* bytes);
+/* write 64 bit field (for implementing endian swap)         */
+  bool put64bits(unsigned char* bytes);
+private:
+  unsigned char swapped[8];
 };
 
 inline ByteStreamOutOstream::ByteStreamOutOstream(ostream* stream)
 {
   this->stream = stream;
-  resetCount();
+  start = stream->tellp();
+  seek_position = stream->tellp();
 }
 
 inline bool ByteStreamOutOstream::putByte(unsigned char byte)
@@ -92,13 +123,53 @@ inline bool ByteStreamOutOstream::putByte(unsigned char byte)
 
 inline bool ByteStreamOutOstream::putBytes(unsigned char* bytes, unsigned int num_bytes)
 {
-  stream->write( (char*) bytes, num_bytes);
+  stream->write(bytes, num_bytes);
+  return !!(stream->good());
+}
+
+inline bool ByteStreamOutOstream::put16bits(unsigned char* bytes)
+{
+  stream->write(bytes, 2);
+  return !!(stream->good());
+}
+
+inline bool ByteStreamOutOstream::put32bits(unsigned char* bytes)
+{
+  stream->write(bytes, 4);
+  return !!(stream->good());
+}
+
+inline bool ByteStreamOutOstream::put64bits(unsigned char* bytes)
+{
+  stream->write(bytes, 8);
+  return !!(stream->good());
+}
+
+inline bool ByteStreamOutOstream::isSeekable() const
+{
+  return (!!(static_cast<ofstream&>(*stream)));
+}
+
+inline bool ByteStreamOutOstream::saveSeekPosition()
+{
+  seek_position = stream->tellp();
+  return !!(stream->good());
+}
+
+inline bool ByteStreamOutOstream::seek(long offset)
+{
+  stream->seekp(seek_position+offset);
+  return !!(stream->good());
+}
+
+inline bool ByteStreamOutOstream::seekEnd()
+{
+  stream->seekp(0, ios::end);
   return !!(stream->good());
 }
 
 inline unsigned int ByteStreamOutOstream::byteCount() const
 {
-
 #ifdef LZ_WIN32_VC6
   return (stream->tellp() - start);
 #else
@@ -106,13 +177,47 @@ inline unsigned int ByteStreamOutOstream::byteCount() const
   ios::off_type size = end - start;
   return static_cast<unsigned int>(size);
 #endif
-
-
 }
 
 inline void ByteStreamOutOstream::resetCount()
 {
   start = stream->tellp();
+}
+
+inline ByteStreamOutOstreamEndianSwapped::ByteStreamOutOstreamEndianSwapped(ostream* stream) : ByteStreamOutOstream(stream)
+{
+}
+
+inline bool ByteStreamOutOstreamEndianSwapped::put16bits(unsigned char* bytes)
+{
+  swapped[0] = bytes[1];
+  swapped[1] = bytes[0];
+  stream->write(swapped, 2);
+  return !!(stream->good());
+}
+
+inline bool ByteStreamOutOstreamEndianSwapped::put32bits(unsigned char* bytes)
+{
+  swapped[0] = bytes[3];
+  swapped[1] = bytes[2];
+  swapped[2] = bytes[1];
+  swapped[3] = bytes[0];
+  stream->write(swapped, 4);
+  return !!(stream->good());
+}
+
+inline bool ByteStreamOutOstreamEndianSwapped::put64bits(unsigned char* bytes)
+{
+  swapped[0] = bytes[7];
+  swapped[1] = bytes[6];
+  swapped[2] = bytes[5];
+  swapped[3] = bytes[4];
+  swapped[4] = bytes[3];
+  swapped[5] = bytes[2];
+  swapped[6] = bytes[1];
+  swapped[7] = bytes[0];
+  stream->write(swapped, 8);
+  return !!(stream->good());
 }
 
 #endif

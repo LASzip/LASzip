@@ -53,6 +53,20 @@ public:
   virtual bool putByte(unsigned char byte) = 0;
 /* write an array of bytes                                   */
   virtual bool putBytes(unsigned char* bytes, unsigned int num_bytes) = 0;
+/* write 16 bit field (for implementing endian swap)         */
+  virtual bool put16bits(unsigned char* bytes) = 0;
+/* write 32 bit field (for implementing endian swap)         */
+  virtual bool put32bits(unsigned char* bytes) = 0;
+/* write 64 bit field (for implementing endian swap)         */
+  virtual bool put64bits(unsigned char* bytes) = 0;
+/* is the stream seekable (e.g. standard out is not)         */
+  virtual bool isSeekable() const = 0;
+/* save position in the stream for (forward) seeking later   */
+  virtual bool saveSeekPosition() = 0;
+/* seek forward from last saved position (or start of file)  */
+  virtual bool seek(long offset) = 0;
+/* seek to the end of the file                               */
+  virtual bool seekEnd() = 0;
 /* returns how many bytes were written since reset           */
   virtual unsigned int byteCount() const = 0;
 /* returns how many bytes were written                       */
