@@ -48,15 +48,15 @@
 
 #include <stdio.h>
 
-#ifdef LZ_WIN32_VC6
-    #include <fstream.h>
-#else
-    #include <istream>
-    #include <fstream>
-    using namespace std;
-#endif
-
 #include "laszip.hpp"
+
+#ifdef LZ_WIN32_VC6
+#include <fstream.h>
+#else
+#include <istream>
+#include <fstream>
+using namespace std;
+#endif
 
 class ByteStreamIn;
 class LASreadPoint;
