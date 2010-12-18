@@ -63,9 +63,41 @@ class LASitem
 {
 public:
 
-  enum { BYTE = 0, SHORT, INT, LONG, FLOAT, DOUBLE, POINT10, GPSTIME, RGB, WAVEPACKET } type;
+  enum Type { BYTE = 0, SHORT, INT, LONG, FLOAT, DOUBLE, POINT10, GPSTIME, RGB, WAVEPACKET } type;
   unsigned short size;
   unsigned short version;
+
+  // convenience function (not done as a ctor, since these items are usually allocated as an array)
+  void set(LASitem::Type type)
+  {
+      LASitem& x = *this;
+      switch (type)
+      {
+      case LASitem::POINT10:
+          x.type = LASitem::POINT10;
+          x.size = 20;
+          x.version = 0;
+          break;
+      case LASitem::GPSTIME:
+          x.type = LASitem::GPSTIME;
+          x.size = 8;
+          x.version = 0;
+          break;
+      case LASitem::RGB:
+          x.type = LASitem::RGB;
+          x.size = 6;
+          x.version = 0;
+          break;
+      case LASitem::WAVEPACKET:
+          x.type = LASitem::WAVEPACKET;
+          x.size = 29;
+          x.version = 0;
+          break;
+      default:
+          throw 0; // BUG
+      }
+      return;
+  }
 
   bool supported_type() const
   {
