@@ -125,20 +125,17 @@ inline bool ByteStreamInIstream::getBytes(unsigned char* bytes, unsigned int num
 
 inline bool ByteStreamInIstream::get16bits(unsigned char* bytes)
 {
-  stream->read((char*)bytes, 2);
-  return !!(stream->good());
+  return getBytes(bytes, 2);
 }
 
 inline bool ByteStreamInIstream::get32bits(unsigned char* bytes)
 {
-  stream->read((char*)bytes, 4);
-  return !!(stream->good());
+  return getBytes(bytes, 4);
 }
 
 inline bool ByteStreamInIstream::get64bits(unsigned char* bytes)
 {
-  stream->read((char*)bytes, 8);
-  return !!(stream->good());
+  return getBytes(bytes, 8);
 }
 
 inline bool ByteStreamInIstream::isSeekable() const
@@ -168,34 +165,43 @@ inline ByteStreamInIstreamEndianSwapped::ByteStreamInIstreamEndianSwapped(istrea
 
 inline bool ByteStreamInIstreamEndianSwapped::get16bits(unsigned char* bytes)
 {
-  stream->read((char*)swapped, 2);
-  bytes[0] = swapped[1];
-  bytes[1] = swapped[0];
-  return !!(stream->good());
+  if (getBytes(swapped, 2))
+  {
+    bytes[0] = swapped[1];
+    bytes[1] = swapped[0];
+    return true;
+  }
+  return false;
 }
 
 inline bool ByteStreamInIstreamEndianSwapped::get32bits(unsigned char* bytes)
 {
-  stream->read((char*)swapped, 4);
-  bytes[0] = swapped[3];
-  bytes[1] = swapped[2];
-  bytes[2] = swapped[1];
-  bytes[3] = swapped[0];
-  return !!(stream->good());
+  if (getBytes(swapped, 4))
+  {
+    bytes[0] = swapped[3];
+    bytes[1] = swapped[2];
+    bytes[2] = swapped[1];
+    bytes[3] = swapped[0];
+    return true;
+  }
+  return false;
 }
 
 inline bool ByteStreamInIstreamEndianSwapped::get64bits(unsigned char* bytes)
 {
-  stream->read((char*)swapped, 8);
-  bytes[0] = swapped[7];
-  bytes[1] = swapped[6];
-  bytes[2] = swapped[5];
-  bytes[3] = swapped[4];
-  bytes[4] = swapped[3];
-  bytes[5] = swapped[2];
-  bytes[6] = swapped[1];
-  bytes[7] = swapped[0];
-  return !!(stream->good());
+  if (getBytes(swapped, 8))
+  {
+    bytes[0] = swapped[7];
+    bytes[1] = swapped[6];
+    bytes[2] = swapped[5];
+    bytes[3] = swapped[4];
+    bytes[4] = swapped[3];
+    bytes[5] = swapped[2];
+    bytes[6] = swapped[1];
+    bytes[7] = swapped[0];
+    return true;
+  }
+  return false;
 }
 
 #endif

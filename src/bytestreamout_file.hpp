@@ -55,13 +55,13 @@ public:
 /* write a single byte                                       */
   bool putByte(unsigned char byte);
 /* write an array of bytes                                   */
-  bool putBytes(unsigned char* bytes, unsigned int num_bytes);
+  bool putBytes(const unsigned char* bytes, unsigned int num_bytes);
 /* write 16 bit field (for implementing endian swap)         */
-  virtual bool put16bits(unsigned char* bytes);
+  virtual bool put16bits(const unsigned char* bytes);
 /* write 32 bit field (for implementing endian swap)         */
-  virtual bool put32bits(unsigned char* bytes);
+  virtual bool put32bits(const unsigned char* bytes);
 /* write 64 bit field (for implementing endian swap)         */
-  virtual bool put64bits(unsigned char* bytes);
+  virtual bool put64bits(const unsigned char* bytes);
 /* is the stream seekable (e.g. standard out is not)         */
   bool isSeekable() const;
 /* save position in the stream for (forward) seeking later   */
@@ -88,11 +88,11 @@ class ByteStreamOutFileEndianSwapped : public ByteStreamOutFile
 public:
   ByteStreamOutFileEndianSwapped(FILE* file);
 /* write 16 bit field (for implementing endian swap)         */
-  bool put16bits(unsigned char* bytes);
+  bool put16bits(const unsigned char* bytes);
 /* write 32 bit field (for implementing endian swap)         */
-  bool put32bits(unsigned char* bytes);
+  bool put32bits(const unsigned char* bytes);
 /* write 64 bit field (for implementing endian swap)         */
-  bool put64bits(unsigned char* bytes);
+  bool put64bits(const unsigned char* bytes);
 private:
   unsigned char swapped[8];
 };
@@ -109,24 +109,24 @@ inline bool ByteStreamOutFile::putByte(unsigned char byte)
   return (fputc(byte, file) == byte);
 }
 
-inline bool ByteStreamOutFile::putBytes(unsigned char* bytes, unsigned int num_bytes)
+inline bool ByteStreamOutFile::putBytes(const unsigned char* bytes, unsigned int num_bytes)
 {
   return (fwrite(bytes, 1, num_bytes, file) == num_bytes);
 }
 
-inline bool ByteStreamOutFile::put16bits(unsigned char* bytes)
+inline bool ByteStreamOutFile::put16bits(const unsigned char* bytes)
 {
-  return (fwrite(bytes, 1, 2, file) == 2);
+  return putBytes(bytes, 2);
 }
 
-inline bool ByteStreamOutFile::put32bits(unsigned char* bytes)
+inline bool ByteStreamOutFile::put32bits(const unsigned char* bytes)
 {
-  return (fwrite(bytes, 1, 4, file) == 4);
+  return putBytes(bytes, 4);
 }
 
-inline bool ByteStreamOutFile::put64bits(unsigned char* bytes)
+inline bool ByteStreamOutFile::put64bits(const unsigned char* bytes)
 {
-  return (fwrite(bytes, 1, 8, file) == 8);
+  return putBytes(bytes, 8);
 }
 
 inline bool ByteStreamOutFile::isSeekable() const
@@ -164,23 +164,23 @@ inline ByteStreamOutFileEndianSwapped::ByteStreamOutFileEndianSwapped(FILE* file
 {
 }
 
-inline bool ByteStreamOutFileEndianSwapped::put16bits(unsigned char* bytes)
+inline bool ByteStreamOutFileEndianSwapped::put16bits(const unsigned char* bytes)
 {
   swapped[0] = bytes[1];
   swapped[1] = bytes[0];
-  return (fwrite(swapped, 1, 2, file) == 2);
+  return putBytes(swapped, 2);
 }
 
-inline bool ByteStreamOutFileEndianSwapped::put32bits(unsigned char* bytes)
+inline bool ByteStreamOutFileEndianSwapped::put32bits(const unsigned char* bytes)
 {
   swapped[0] = bytes[3];
   swapped[1] = bytes[2];
   swapped[2] = bytes[1];
   swapped[3] = bytes[0];
-  return (fwrite(swapped, 1, 4, file) == 4);
+  return putBytes(swapped, 4);
 }
 
-inline bool ByteStreamOutFileEndianSwapped::put64bits(unsigned char* bytes)
+inline bool ByteStreamOutFileEndianSwapped::put64bits(const unsigned char* bytes)
 {
   swapped[0] = bytes[7];
   swapped[1] = bytes[6];
@@ -190,7 +190,7 @@ inline bool ByteStreamOutFileEndianSwapped::put64bits(unsigned char* bytes)
   swapped[5] = bytes[2];
   swapped[6] = bytes[1];
   swapped[7] = bytes[0];
-  return (fwrite(swapped, 1, 8, file) == 8);
+  return putBytes(swapped, 8);
 }
 
 #endif
