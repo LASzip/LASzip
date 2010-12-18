@@ -123,26 +123,23 @@ inline bool ByteStreamOutOstream::putByte(unsigned char byte)
 
 inline bool ByteStreamOutOstream::putBytes(unsigned char* bytes, unsigned int num_bytes)
 {
-  stream->write(bytes, num_bytes);
+  stream->write((const char*)bytes, num_bytes);
   return !!(stream->good());
 }
 
 inline bool ByteStreamOutOstream::put16bits(unsigned char* bytes)
 {
-  stream->write(bytes, 2);
-  return !!(stream->good());
+  return putBytes(bytes, 2);
 }
 
 inline bool ByteStreamOutOstream::put32bits(unsigned char* bytes)
 {
-  stream->write(bytes, 4);
-  return !!(stream->good());
+  return putBytes(bytes, 4);
 }
 
 inline bool ByteStreamOutOstream::put64bits(unsigned char* bytes)
 {
-  stream->write(bytes, 8);
-  return !!(stream->good());
+  return putBytes(bytes, 8);
 }
 
 inline bool ByteStreamOutOstream::isSeekable() const
@@ -192,8 +189,7 @@ inline bool ByteStreamOutOstreamEndianSwapped::put16bits(unsigned char* bytes)
 {
   swapped[0] = bytes[1];
   swapped[1] = bytes[0];
-  stream->write(swapped, 2);
-  return !!(stream->good());
+  return putBytes(swapped, 2);
 }
 
 inline bool ByteStreamOutOstreamEndianSwapped::put32bits(unsigned char* bytes)
@@ -202,8 +198,7 @@ inline bool ByteStreamOutOstreamEndianSwapped::put32bits(unsigned char* bytes)
   swapped[1] = bytes[2];
   swapped[2] = bytes[1];
   swapped[3] = bytes[0];
-  stream->write(swapped, 4);
-  return !!(stream->good());
+  return putBytes(swapped, 4);
 }
 
 inline bool ByteStreamOutOstreamEndianSwapped::put64bits(unsigned char* bytes)
@@ -216,8 +211,7 @@ inline bool ByteStreamOutOstreamEndianSwapped::put64bits(unsigned char* bytes)
   swapped[5] = bytes[2];
   swapped[6] = bytes[1];
   swapped[7] = bytes[0];
-  stream->write(swapped, 8);
-  return !!(stream->good());
+  return putBytes(swapped, 8);
 }
 
 #endif
