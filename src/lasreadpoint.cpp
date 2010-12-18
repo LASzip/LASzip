@@ -49,7 +49,6 @@
 #include "arithmeticdecoder.hpp"
 #include "rangedecoder.hpp"
 #include "lasreaditemraw.hpp"
-#include "lasreaditemrawendianswapped.hpp"
 #include "lasreaditemcompressed_v1.hpp"
 
 #include <string.h>
@@ -71,59 +70,7 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, U32 compression)
   // check if we support the items
   for (i = 0; i < num_items; i++)
   {
-    switch (items[i].type)
-    {
-    case LASitem::POINT10:
-      if (items[i].size != 20) return FALSE;
-      break;
-    case LASitem::GPSTIME:
-      if (items[i].size != 8) return FALSE;
-      break;
-    case LASitem::RGB:
-      if (items[i].size != 6) return FALSE;
-      break;
-    case LASitem::BYTE:
-      if (items[i].size < 1) return FALSE;
-      break;
-    default:
-      return FALSE;
-    }
-  }
-
-  // check if we support the compression
-  if (compression)
-  {
-    // check if we support the entropy decoder
-    switch (compression)
-    {
-    case LASZIP_COMPRESSION_RANGE:
-    case LASZIP_COMPRESSION_ARITHMETIC:
-      break;
-    default:
-      return FALSE;
-    }
-
-    // check if we support the compressor versions
-    for (i = 0; i < num_items; i++)
-    {
-      switch (items[i].type)
-      {
-      case LASitem::POINT10:
-        if ((items[i].version < 1) || (items[i].version > 1)) return FALSE;
-        break;
-      case LASitem::GPSTIME:
-        if ((items[i].version < 1) || (items[i].version > 1)) return FALSE;
-        break;
-      case LASitem::RGB:
-        if ((items[i].version < 1) || (items[i].version > 1)) return FALSE;
-        break;
-      case LASitem::BYTE:
-        if ((items[i].version < 1) || (items[i].version > 1)) return FALSE;
-        break;
-      default:
-        return FALSE;
-      }
-    }
+    if (!items[i].supported()) return FALSE;
   }
 
   // create entropy decoder (if requested)
@@ -139,6 +86,7 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, U32 compression)
     dec = new ArithmeticDecoder();
     break;
   default:
+    // entropy coder not supported
     return FALSE;
   }
  
@@ -153,22 +101,16 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, U32 compression)
     switch (items[i].type)
     {
     case LASitem::POINT10:
-      if (IS_LITTLE_ENDIAN())
-        readers_raw[i] = new LASreadItemRaw_POINT10();
-      else
-        readers_raw[i] = new LASreadItemRawEndianSwapped_POINT10();
+      readers_raw[i] = new LASreadItemRaw_POINT10();
       break;
     case LASitem::GPSTIME:
-      if (IS_LITTLE_ENDIAN())
-        readers_raw[i] = new LASreadItemRaw_GPSTIME();
-      else
-        readers_raw[i] = new LASreadItemRawEndianSwapped_GPSTIME();
+      readers_raw[i] = new LASreadItemRaw_GPSTIME();
       break;
     case LASitem::RGB:
-      if (IS_LITTLE_ENDIAN())
-        readers_raw[i] = new LASreadItemRaw_RGB();
-      else
-        readers_raw[i] = new LASreadItemRawEndianSwapped_RGB();
+      readers_raw[i] = new LASreadItemRaw_RGB();
+      break;
+    case LASitem::WAVEPACKET:
+      readers_raw[i] = new LASreadItemRaw_BYTE(items[i].size);
       break;
     case LASitem::BYTE:
       readers_raw[i] = new LASreadItemRaw_BYTE(items[i].size);
@@ -184,16 +126,34 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, U32 compression)
       switch (items[i].type)
       {
       case LASitem::POINT10:
-        readers_compressed[i] = new LASreadItemCompressed_POINT10_v1(dec);
+        if (items[i].version == 1)
+          readers_compressed[i] = new LASreadItemCompressed_POINT10_v1(dec);
+        else
+          return FALSE;
         break;
       case LASitem::GPSTIME:
-        readers_compressed[i] = new LASreadItemCompressed_GPSTIME_v1(dec);
+        if (items[i].version == 1)
+          readers_compressed[i] = new LASreadItemCompressed_GPSTIME_v1(dec);
+        else
+          return FALSE;
         break;
       case LASitem::RGB:
-        readers_compressed[i] = new LASreadItemCompressed_RGB_v1(dec);
+        if (items[i].version == 1)
+          readers_compressed[i] = new LASreadItemCompressed_RGB_v1(dec);
+        else
+          return FALSE;
+        break;
+      case LASitem::WAVEPACKET:
+        if (items[i].version == 1)
+          readers_compressed[i] = new LASreadItemCompressed_BYTE_v1(dec, items[i].size);
+        else
+          return FALSE;
         break;
       case LASitem::BYTE:
-        readers_compressed[i] = new LASreadItemCompressed_BYTE_v1(dec, items[i].size);
+        if (items[i].version == 1)
+          readers_compressed[i] = new LASreadItemCompressed_BYTE_v1(dec, items[i].size);
+        else
+          return FALSE;
         break;
       }
     }

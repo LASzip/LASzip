@@ -54,9 +54,18 @@ class LASwriteItemRaw_POINT10 : public LASwriteItemRaw
 {
 public:
   LASwriteItemRaw_POINT10(){};
-  BOOL write(U8* item)
+  inline BOOL write(U8* item)
   {
-    return outstream->putBytes(item, 20);
+    if (!outstream->put32bits(&(item[ 0]))) return FALSE;       // x
+    if (!outstream->put32bits(&(item[ 4]))) return FALSE;       // y
+    if (!outstream->put32bits(&(item[ 8]))) return FALSE;       // z
+    if (!outstream->put16bits(&(item[12]))) return FALSE;       // intensity
+    if (!outstream->putBytes(&(item[14]), 4)) return FALSE;     // bitfield
+                                                                // classification
+                                                                // scan_angle_rank
+                                                                // user_data
+    if (!outstream->put16bits(&(item[18]))) return FALSE;       // point_source_ID
+    return TRUE;
   };
 };
 
@@ -64,9 +73,9 @@ class LASwriteItemRaw_GPSTIME : public LASwriteItemRaw
 {
 public:
   LASwriteItemRaw_GPSTIME() {};
-  BOOL write(U8* item)
+  inline BOOL write(U8* item)
   {
-    return outstream->putBytes(item, 8);
+    return outstream->put64bits(item);
   };
 };
 
@@ -74,9 +83,12 @@ class LASwriteItemRaw_RGB : public LASwriteItemRaw
 {
 public:
   LASwriteItemRaw_RGB(){}
-  BOOL write(U8* item)
+  inline BOOL write(U8* item)
   {
-    return outstream->putBytes(item, 6);
+    if (!outstream->put16bits(&(item[0]))) return FALSE;        // R
+    if (!outstream->put16bits(&(item[2]))) return FALSE;        // G
+    if (!outstream->put16bits(&(item[4]))) return FALSE;        // B
+    return TRUE;
   };
 };
 
@@ -87,7 +99,7 @@ public:
   {
     this->number = number;
   }
-  BOOL write(U8* item)
+  inline BOOL write(U8* item)
   {
     return outstream->putBytes(item, number);
   };

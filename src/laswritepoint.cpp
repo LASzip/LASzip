@@ -49,7 +49,6 @@
 #include "arithmeticencoder.hpp"
 #include "rangeencoder.hpp"
 #include "laswriteitemraw.hpp"
-#include "laswriteitemrawendianswapped.hpp"
 #include "laswriteitemcompressed_v1.hpp"
 
 #include <string.h>
@@ -71,23 +70,7 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, U32 compression)
   // check if we support the items
   for (i = 0; i < num_items; i++)
   {
-    switch (items[i].type)
-    {
-    case LASitem::POINT10:
-      if (items[i].size != 20) return FALSE;
-      break;
-    case LASitem::GPSTIME:
-      if (items[i].size != 8) return FALSE;
-      break;
-    case LASitem::RGB:
-      if (items[i].size != 6) return FALSE;
-      break;
-    case LASitem::BYTE:
-      if (items[i].size < 1) return FALSE;
-      break;
-    default:
-      return FALSE;
-    }
+    if (!items[i].supported()) return FALSE;
   }
 
   // create entropy encoder (if requested)
@@ -117,22 +100,16 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, U32 compression)
     switch (items[i].type)
     {
     case LASitem::POINT10:
-      if (IS_LITTLE_ENDIAN())
-        writers_raw[i] = new LASwriteItemRaw_POINT10();
-      else
-        writers_raw[i] = new LASwriteItemRawEndianSwapped_POINT10();
+      writers_raw[i] = new LASwriteItemRaw_POINT10();
       break;
     case LASitem::GPSTIME:
-      if (IS_LITTLE_ENDIAN())
-        writers_raw[i] = new LASwriteItemRaw_GPSTIME();
-      else
-        writers_raw[i] = new LASwriteItemRawEndianSwapped_GPSTIME();
+      writers_raw[i] = new LASwriteItemRaw_GPSTIME();
       break;
     case LASitem::RGB:
-      if (IS_LITTLE_ENDIAN())
-        writers_raw[i] = new LASwriteItemRaw_RGB();
-      else
-        writers_raw[i] = new LASwriteItemRawEndianSwapped_RGB();
+      writers_raw[i] = new LASwriteItemRaw_RGB();
+      break;
+    case LASitem::WAVEPACKET:
+      writers_raw[i] = new LASwriteItemRaw_BYTE(items[i].size);
       break;
     case LASitem::BYTE:
       writers_raw[i] = new LASwriteItemRaw_BYTE(items[i].size);
@@ -158,6 +135,10 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, U32 compression)
         break;
       case LASitem::RGB:
         writers_compressed[i] = new LASwriteItemCompressed_RGB_v1(enc);
+        items[i].version = 1;
+        break;
+      case LASitem::WAVEPACKET:
+        writers_compressed[i] = new LASwriteItemCompressed_BYTE_v1(enc, items[i].size);
         items[i].version = 1;
         break;
       case LASitem::BYTE:

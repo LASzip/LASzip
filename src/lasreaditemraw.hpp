@@ -54,9 +54,18 @@ class LASreadItemRaw_POINT10 : public LASreadItemRaw
 {
 public:
   LASreadItemRaw_POINT10(){};
-  BOOL read(U8* item)
+  inline BOOL read(U8* item)
   {
-    return instream->getBytes(item, 20);
+    if (!instream->get32bits(&(item[ 0]))) return FALSE;       // x
+    if (!instream->get32bits(&(item[ 4]))) return FALSE;       // y
+    if (!instream->get32bits(&(item[ 8]))) return FALSE;       // z
+    if (!instream->get16bits(&(item[12]))) return FALSE;       // intensity
+    if (!instream->getBytes(&(item[14]), 4)) return FALSE;     // bitfield
+                                                               // classification
+                                                               // scan_angle_rank
+                                                               // user_data
+    if (!instream->get16bits(&(item[18]))) return FALSE;       // point_source_ID
+    return TRUE;
   };
 };
 
@@ -64,9 +73,9 @@ class LASreadItemRaw_GPSTIME : public LASreadItemRaw
 {
 public:
   LASreadItemRaw_GPSTIME(){};
-  BOOL read(U8* item)
+  inline BOOL read(U8* item)
   {
-    return instream->getBytes(item, 8);
+    return instream->get64bits(item);                         // GPSTIME
   };
 };
 
@@ -74,9 +83,12 @@ class LASreadItemRaw_RGB : public LASreadItemRaw
 {
 public:
   LASreadItemRaw_RGB(){};
-  BOOL read(U8* item)
+  inline BOOL read(U8* item)
   {
-    return instream->getBytes(item, 6);
+    if (!instream->get16bits(&(item[0]))) return FALSE;        // R
+    if (!instream->get16bits(&(item[2]))) return FALSE;        // G
+    if (!instream->get16bits(&(item[4]))) return FALSE;        // B
+    return TRUE;
   };
 };
 
@@ -87,7 +99,7 @@ public:
   {
     this->number = number;
   }
-  BOOL read(U8* item)
+  inline BOOL read(U8* item)
   {
     return instream->getBytes(item, number);
   };
