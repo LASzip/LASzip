@@ -55,8 +55,8 @@
 #define LASZIP_VERSION_MINOR    0
 #define LASZIP_VERSION_REVISION 0
 
-#define LASZIP_COMPRESSION_NONE 0
-#define LASZIP_COMPRESSION_RANGE 1
+#define LASZIP_COMPRESSION_NONE       0
+#define LASZIP_COMPRESSION_RANGE      1
 #define LASZIP_COMPRESSION_ARITHMETIC 2
 
 class LASitem
@@ -67,36 +67,65 @@ public:
   unsigned short size;
   unsigned short version;
 
-  // convenience function (not done as a ctor, since these items are usually allocated as an array)
-  void set(LASitem::Type type)
+  void set(LASitem::Type t, unsigned int number=1)
   {
-      LASitem& x = *this;
-      switch (type)
-      {
-      case LASitem::POINT10:
-          x.type = LASitem::POINT10;
-          x.size = 20;
-          x.version = 0;
-          break;
-      case LASitem::GPSTIME:
-          x.type = LASitem::GPSTIME;
-          x.size = 8;
-          x.version = 0;
-          break;
-      case LASitem::RGB:
-          x.type = LASitem::RGB;
-          x.size = 6;
-          x.version = 0;
-          break;
-      case LASitem::WAVEPACKET:
-          x.type = LASitem::WAVEPACKET;
-          x.size = 29;
-          x.version = 0;
-          break;
-      default:
-          throw 0; // BUG
-      }
-      return;
+    switch (t)
+    {
+    case LASitem::POINT10:
+        type = LASitem::POINT10;
+        size = 20;
+        version = 0;
+        break;
+    case LASitem::GPSTIME:
+        type = LASitem::GPSTIME;
+        size = 8;
+        version = 0;
+        break;
+    case LASitem::RGB:
+        type = LASitem::RGB;
+        size = 6;
+        version = 0;
+        break;
+    case LASitem::WAVEPACKET:
+        type = LASitem::WAVEPACKET;
+        size = 29;
+        version = 0;
+        break;
+    case LASitem::BYTE:
+        type = LASitem::BYTE;
+        size = number;
+        version = 0;
+        break;
+    default:
+        throw 0; // BUG
+    }
+    return;
+  }
+
+  bool is_type(LASitem::Type t) const
+  {
+    if (t != type) return false;
+    switch (t)
+    {
+    case POINT10:
+      if (size != 20) return false;
+      break;
+    case GPSTIME:
+      if (size != 8) return false;
+      break;
+    case RGB:
+      if (size != 6) return false;
+      break;
+    case WAVEPACKET:
+      if (size != 29) return false;
+      break;
+    case BYTE:
+      if (size < 1) return false;
+      break;
+    default:
+      return false;
+    }
+    return true;
   }
 
   bool supported_type() const
@@ -110,6 +139,8 @@ public:
     case BYTE:
       return true;
       break;
+    default:
+      return false;
     }
     return false;
   }
@@ -195,10 +226,12 @@ public:
   }
 };
 
+/*
 struct LASchunk
 {
   unsigned int count;
   unsigned int bytes;
-};
+}; 
+*/
 
 #endif

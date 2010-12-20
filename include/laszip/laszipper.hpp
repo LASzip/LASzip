@@ -68,8 +68,7 @@ public:
   bool open(FILE* outfile, unsigned int num_items, LASitem* items, unsigned int compression=0);
   bool open(ostream* outstream, unsigned int num_items, LASitem* items, unsigned int compression=0);
   bool write(unsigned char** point);
-  bool chunk(LASchunk* chunk);
-  unsigned int close(LASchunk* chunk=0);
+  unsigned int close();
 
   LASzipper();
   ~LASzipper();
