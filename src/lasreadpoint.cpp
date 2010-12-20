@@ -115,6 +115,8 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, U32 compression)
     case LASitem::BYTE:
       readers_raw[i] = new LASreadItemRaw_BYTE(items[i].size);
       break;
+    default:
+      return FALSE;
     }
   }
 
@@ -155,6 +157,8 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, U32 compression)
         else
           return FALSE;
         break;
+      default:
+        return FALSE;
       }
     }
   }

@@ -419,7 +419,8 @@ LASwriteItemCompressed_RGB_v1::LASwriteItemCompressed_RGB_v1(EntropyEncoder* enc
   this->enc = enc;
 
   /* create models and integer compressors */
-  ic_rgb = new IntegerCompressor(enc, 16, 3); // 16 bits, 3 contexts
+  m_byte_used = enc->createSymbolModel(64);
+  ic_rgb = new IntegerCompressor(enc, 8, 6);
 
   /* create last item */
   last_item = new U8[6];
@@ -427,6 +428,7 @@ LASwriteItemCompressed_RGB_v1::LASwriteItemCompressed_RGB_v1(EntropyEncoder* enc
 
 LASwriteItemCompressed_RGB_v1::~LASwriteItemCompressed_RGB_v1()
 {
+  enc->destroySymbolModel(m_byte_used);
   delete ic_rgb;
   delete [] last_item;
 }
@@ -436,6 +438,7 @@ BOOL LASwriteItemCompressed_RGB_v1::init(U8* item)
   /* init state */
 
   /* init models and integer compressors */
+  enc->initSymbolModel(m_byte_used);
   ic_rgb->initCompressor();
 
   /* init last item */
@@ -445,10 +448,20 @@ BOOL LASwriteItemCompressed_RGB_v1::init(U8* item)
 
 BOOL LASwriteItemCompressed_RGB_v1::write(U8* item)
 {
-	ic_rgb->compress(((U16*)last_item)[0], ((U16*)item)[0], 0);
-	ic_rgb->compress(((U16*)last_item)[1], ((U16*)item)[1], 1);
-	ic_rgb->compress(((U16*)last_item)[2], ((U16*)item)[2], 2);
-  memcpy(last_item, item, 6);
+  U32 i, sym = 0;
+  for (i = 0; i < 6; i++)
+  {
+    sym |= ((last_item[i] != item[i]) << i);
+  }
+  enc->encodeSymbol(m_byte_used, sym);
+  for (i = 0; i < 6; i++)
+  {
+    if (last_item[i] != item[i])
+    {
+      ic_rgb->compress(last_item[i], item[i], i);
+      last_item[i] = item[i];
+    }
+  }
   return TRUE;
 }
 

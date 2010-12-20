@@ -118,6 +118,7 @@ private:
   EntropyDecoder* dec;
   U8* last_item;
 
+  EntropyModel* m_byte_used;
   IntegerCompressor* ic_rgb;
 };
 
