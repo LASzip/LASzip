@@ -56,7 +56,7 @@ public:
 
   LASreadItemCompressed_POINT10_v1(EntropyDecoder* dec);
 
-  BOOL init(U8* item);
+  BOOL init(const U8* item);
   BOOL read(U8* item);
 
   ~LASreadItemCompressed_POINT10_v1();
@@ -87,7 +87,7 @@ public:
 
   LASreadItemCompressed_GPSTIME_v1(EntropyDecoder* dec);
 
-  BOOL init(U8* item);
+  BOOL init(const U8* item);
   BOOL read(U8* item);
 
   ~LASreadItemCompressed_GPSTIME_v1();
@@ -109,7 +109,7 @@ public:
 
   LASreadItemCompressed_RGB_v1(EntropyDecoder* dec);
 
-  BOOL init(U8* item);
+  BOOL init(const U8* item);
   BOOL read(U8* item);
 
   ~LASreadItemCompressed_RGB_v1();
@@ -128,7 +128,7 @@ public:
 
   LASreadItemCompressed_BYTE_v1(EntropyDecoder* dec, U32 number);
 
-  BOOL init(U8* item);
+  BOOL init(const U8* item);
   BOOL read(U8* item);
 
   ~LASreadItemCompressed_BYTE_v1();

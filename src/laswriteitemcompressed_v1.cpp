@@ -108,7 +108,7 @@ LASwriteItemCompressed_POINT10_v1::~LASwriteItemCompressed_POINT10_v1()
   delete [] last_item;
 }
 
-BOOL LASwriteItemCompressed_POINT10_v1::init(U8* item)
+BOOL LASwriteItemCompressed_POINT10_v1::init(const U8* item)
 {
   /* init state */
   last_dir = 0;
@@ -134,7 +134,7 @@ BOOL LASwriteItemCompressed_POINT10_v1::init(U8* item)
   return TRUE;
 }
 
-BOOL LASwriteItemCompressed_POINT10_v1::write(U8* item)
+inline BOOL LASwriteItemCompressed_POINT10_v1::write(const U8* item)
 {
   // find median difference for x and y from 3 preceding differences
   I32 median_x;
@@ -277,7 +277,7 @@ LASwriteItemCompressed_GPSTIME_v1::~LASwriteItemCompressed_GPSTIME_v1()
   delete ic_gpstime;
 }
 
-BOOL LASwriteItemCompressed_GPSTIME_v1::init(U8* item)
+BOOL LASwriteItemCompressed_GPSTIME_v1::init(const U8* item)
 {
   /* init state */
   last_gpstime_diff = 0;
@@ -293,7 +293,7 @@ BOOL LASwriteItemCompressed_GPSTIME_v1::init(U8* item)
   return TRUE;
 }
 
-BOOL LASwriteItemCompressed_GPSTIME_v1::write(U8* item)
+inline BOOL LASwriteItemCompressed_GPSTIME_v1::write(const U8* item)
 {
   I64F64 this_gpstime;
   this_gpstime.f64 = *((F64*)item);
@@ -433,7 +433,7 @@ LASwriteItemCompressed_RGB_v1::~LASwriteItemCompressed_RGB_v1()
   delete [] last_item;
 }
 
-BOOL LASwriteItemCompressed_RGB_v1::init(U8* item)
+BOOL LASwriteItemCompressed_RGB_v1::init(const U8* item)
 {
   /* init state */
 
@@ -446,7 +446,7 @@ BOOL LASwriteItemCompressed_RGB_v1::init(U8* item)
   return TRUE;
 }
 
-BOOL LASwriteItemCompressed_RGB_v1::write(U8* item)
+inline BOOL LASwriteItemCompressed_RGB_v1::write(const U8* item)
 {
   U32 i, sym = 0;
   for (i = 0; i < 6; i++)
@@ -492,7 +492,7 @@ LASwriteItemCompressed_BYTE_v1::~LASwriteItemCompressed_BYTE_v1()
   delete [] last_item;
 }
 
-BOOL LASwriteItemCompressed_BYTE_v1::init(U8* item)
+BOOL LASwriteItemCompressed_BYTE_v1::init(const U8* item)
 {
   /* init state */
 
@@ -504,7 +504,7 @@ BOOL LASwriteItemCompressed_BYTE_v1::init(U8* item)
   return TRUE;
 }
 
-BOOL LASwriteItemCompressed_BYTE_v1::write(U8* item)
+inline BOOL LASwriteItemCompressed_BYTE_v1::write(const U8* item)
 {
   U32 i;
   for (i = 0; i < number; i++)

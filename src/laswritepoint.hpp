@@ -66,7 +66,7 @@ public:
   BOOL setup(U32 num_items, LASitem* items, U32 compression=0);
 
   BOOL init(ByteStreamOut* outstream);
-  BOOL write(U8** point);
+  BOOL write(const U8 * const * point);
   BOOL done();
 
 private:

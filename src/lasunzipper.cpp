@@ -73,7 +73,7 @@ bool LASunzipper::open(istream* instream, unsigned int num_items, const LASitem*
   return true;
 }
 
-bool LASunzipper::read(unsigned char** point)
+bool LASunzipper::read(unsigned char * const * point)
 {
   count++;
   return reader->read(point);

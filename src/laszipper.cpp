@@ -73,7 +73,7 @@ bool LASzipper::open(ostream* outstream, unsigned int num_items, LASitem* items,
   return true;
 }
 
-bool LASzipper::write(unsigned char** point)
+bool LASzipper::write(const unsigned char * const * point)
 {
   count++;
   return writer->write(point);

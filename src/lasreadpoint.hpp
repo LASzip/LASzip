@@ -66,7 +66,7 @@ public:
   BOOL setup(U32 num_items, const LASitem* items, U32 compression=0);
 
   BOOL init(ByteStreamIn* instream);
-  BOOL read(U8** point);
+  BOOL read(U8* const * point);
   BOOL done() {return TRUE;};
 
 private:

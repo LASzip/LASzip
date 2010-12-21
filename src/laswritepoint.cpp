@@ -182,7 +182,7 @@ BOOL LASwritePoint::init(ByteStreamOut* outstream)
   return TRUE;
 }
 
-BOOL LASwritePoint::write(U8** point)
+BOOL LASwritePoint::write(const U8 * const * point)
 {
   U32 i;
 

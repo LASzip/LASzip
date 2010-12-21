@@ -109,7 +109,7 @@ LASreadItemCompressed_POINT10_v1::~LASreadItemCompressed_POINT10_v1()
 }
 
 
-BOOL LASreadItemCompressed_POINT10_v1::init(U8* item)
+BOOL LASreadItemCompressed_POINT10_v1::init(const U8* item)
 {
   /* init state */
   last_dir = 0;
@@ -135,7 +135,7 @@ BOOL LASreadItemCompressed_POINT10_v1::init(U8* item)
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_POINT10_v1::read(U8* item)
+inline BOOL LASreadItemCompressed_POINT10_v1::read(U8* item)
 {
   // find median difference for x and y from 3 preceding differences
   I32 median_x;
@@ -276,7 +276,7 @@ LASreadItemCompressed_GPSTIME_v1::~LASreadItemCompressed_GPSTIME_v1()
   delete ic_gpstime;
 }
 
-BOOL LASreadItemCompressed_GPSTIME_v1::init(U8* item)
+BOOL LASreadItemCompressed_GPSTIME_v1::init(const U8* item)
 {
   /* init state */
   last_gpstime_diff = 0;
@@ -292,7 +292,7 @@ BOOL LASreadItemCompressed_GPSTIME_v1::init(U8* item)
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_GPSTIME_v1::read(U8* item)
+inline BOOL LASreadItemCompressed_GPSTIME_v1::read(U8* item)
 {
   I32 multi;
   if (last_gpstime_diff == 0) // if the last integer difference was zero
@@ -390,7 +390,7 @@ LASreadItemCompressed_RGB_v1::~LASreadItemCompressed_RGB_v1()
   delete [] last_item;
 }
 
-BOOL LASreadItemCompressed_RGB_v1::init(U8* item)
+BOOL LASreadItemCompressed_RGB_v1::init(const U8* item)
 {
   /* init state */
 
@@ -403,7 +403,7 @@ BOOL LASreadItemCompressed_RGB_v1::init(U8* item)
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_RGB_v1::read(U8* item)
+inline BOOL LASreadItemCompressed_RGB_v1::read(U8* item)
 {
   U32 i, sym = dec->decodeSymbol(m_byte_used);
   for (i = 0; i < 6; i++)
@@ -444,7 +444,7 @@ LASreadItemCompressed_BYTE_v1::~LASreadItemCompressed_BYTE_v1()
   delete [] last_item;
 }
 
-BOOL LASreadItemCompressed_BYTE_v1::init(U8* item)
+BOOL LASreadItemCompressed_BYTE_v1::init(const U8* item)
 {
   /* init state */
 
@@ -456,7 +456,7 @@ BOOL LASreadItemCompressed_BYTE_v1::init(U8* item)
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_BYTE_v1::read(U8* item)
+inline BOOL LASreadItemCompressed_BYTE_v1::read(U8* item)
 {
   U32 i;
   for (i = 0; i < number; i++)

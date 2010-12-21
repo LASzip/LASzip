@@ -56,8 +56,8 @@ public:
 
   LASwriteItemCompressed_POINT10_v1(EntropyEncoder* enc);
 
-  BOOL init(U8* item);
-  BOOL write(U8* item);
+  BOOL init(const U8* item);
+  BOOL write(const U8* item);
 
   ~LASwriteItemCompressed_POINT10_v1();
 
@@ -87,8 +87,8 @@ public:
 
   LASwriteItemCompressed_GPSTIME_v1(EntropyEncoder* enc);
 
-  BOOL init(U8* item);
-  BOOL write(U8* item);
+  BOOL init(const U8* item);
+  BOOL write(const U8* item);
 
   ~LASwriteItemCompressed_GPSTIME_v1();
 
@@ -109,8 +109,8 @@ public:
 
   LASwriteItemCompressed_RGB_v1(EntropyEncoder* enc);
 
-  BOOL init(U8* item);
-  BOOL write(U8* item);
+  BOOL init(const U8* item);
+  BOOL write(const U8* item);
 
   ~LASwriteItemCompressed_RGB_v1();
 
@@ -128,8 +128,8 @@ public:
 
   LASwriteItemCompressed_BYTE_v1(EntropyEncoder* enc, U32 number);
 
-  BOOL init(U8* item);
-  BOOL write(U8* item);
+  BOOL init(const U8* item);
+  BOOL write(const U8* item);
 
   ~LASwriteItemCompressed_BYTE_v1();
 

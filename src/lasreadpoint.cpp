@@ -185,7 +185,7 @@ BOOL LASreadPoint::init(ByteStreamIn* instream)
   return TRUE;
 }
 
-BOOL LASreadPoint::read(U8** point)
+BOOL LASreadPoint::read(U8* const * point)
 {
   U32 i;
   if (readers)

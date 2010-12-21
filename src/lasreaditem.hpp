@@ -79,7 +79,7 @@ protected:
 class LASreadItemCompressed : public LASreadItem
 {
 public:
-  virtual BOOL init(U8* item)=0;
+  virtual BOOL init(const U8* item)=0;
 
   virtual ~LASreadItemCompressed(){};
 };

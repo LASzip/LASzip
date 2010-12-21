@@ -54,7 +54,7 @@ class LASwriteItemRaw_POINT10 : public LASwriteItemRaw
 {
 public:
   LASwriteItemRaw_POINT10(){};
-  inline BOOL write(U8* item)
+  inline BOOL write(const U8* item)
   {
     if (!outstream->put32bits(&(item[ 0]))) return FALSE;       // x
     if (!outstream->put32bits(&(item[ 4]))) return FALSE;       // y
@@ -73,7 +73,7 @@ class LASwriteItemRaw_GPSTIME : public LASwriteItemRaw
 {
 public:
   LASwriteItemRaw_GPSTIME() {};
-  inline BOOL write(U8* item)
+  inline BOOL write(const U8* item)
   {
     return outstream->put64bits(item);
   };
@@ -83,7 +83,7 @@ class LASwriteItemRaw_RGB : public LASwriteItemRaw
 {
 public:
   LASwriteItemRaw_RGB(){}
-  inline BOOL write(U8* item)
+  inline BOOL write(const U8* item)
   {
     if (!outstream->put16bits(&(item[0]))) return FALSE;        // R
     if (!outstream->put16bits(&(item[2]))) return FALSE;        // G
@@ -99,7 +99,7 @@ public:
   {
     this->number = number;
   }
-  inline BOOL write(U8* item)
+  inline BOOL write(const U8* item)
   {
     return outstream->putBytes(item, number);
   };
