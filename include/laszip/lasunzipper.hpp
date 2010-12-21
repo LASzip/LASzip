@@ -67,7 +67,7 @@ public:
 
   bool open(FILE* file, unsigned int num_items, const LASitem* items, unsigned int compression=0);
   bool open(istream* stream, unsigned int num_items, const LASitem* items, unsigned int compression=0);
-  bool read(unsigned char** point);
+  bool read(unsigned char * const * point);
   unsigned int close();
 
   LASunzipper();
