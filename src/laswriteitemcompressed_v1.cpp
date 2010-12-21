@@ -254,13 +254,13 @@ inline BOOL LASwriteItemCompressed_POINT10_v1::write(const U8* item)
 
 /*
 ===============================================================================
-                       LASwriteItemCompressed_GPSTIME_v1
+                       LASwriteItemCompressed_GPSTIME11_v1
 ===============================================================================
 */
 
 #define LASZIP_GPSTIME_MULTIMAX 512
 
-LASwriteItemCompressed_GPSTIME_v1::LASwriteItemCompressed_GPSTIME_v1(EntropyEncoder* enc)
+LASwriteItemCompressed_GPSTIME11_v1::LASwriteItemCompressed_GPSTIME11_v1(EntropyEncoder* enc)
 {
   /* set encoder */
   assert(enc);
@@ -271,13 +271,13 @@ LASwriteItemCompressed_GPSTIME_v1::LASwriteItemCompressed_GPSTIME_v1(EntropyEnco
   ic_gpstime = new IntegerCompressor(enc, 32, 6); // 32 bits, 6 contexts
 }
 
-LASwriteItemCompressed_GPSTIME_v1::~LASwriteItemCompressed_GPSTIME_v1()
+LASwriteItemCompressed_GPSTIME11_v1::~LASwriteItemCompressed_GPSTIME11_v1()
 {
   enc->destroySymbolModel(m_gpstime_multi);
   delete ic_gpstime;
 }
 
-BOOL LASwriteItemCompressed_GPSTIME_v1::init(const U8* item)
+BOOL LASwriteItemCompressed_GPSTIME11_v1::init(const U8* item)
 {
   /* init state */
   last_gpstime_diff = 0;
@@ -293,7 +293,7 @@ BOOL LASwriteItemCompressed_GPSTIME_v1::init(const U8* item)
   return TRUE;
 }
 
-inline BOOL LASwriteItemCompressed_GPSTIME_v1::write(const U8* item)
+inline BOOL LASwriteItemCompressed_GPSTIME11_v1::write(const U8* item)
 {
   I64F64 this_gpstime;
   this_gpstime.f64 = *((F64*)item);
@@ -408,11 +408,11 @@ inline BOOL LASwriteItemCompressed_GPSTIME_v1::write(const U8* item)
 
 /*
 ===============================================================================
-                       LASwriteItemCompressed_RGB_v1
+                       LASwriteItemCompressed_RGB12_v1
 ===============================================================================
 */
 
-LASwriteItemCompressed_RGB_v1::LASwriteItemCompressed_RGB_v1(EntropyEncoder* enc)
+LASwriteItemCompressed_RGB12_v1::LASwriteItemCompressed_RGB12_v1(EntropyEncoder* enc)
 {
   /* set encoder */
   assert(enc);
@@ -426,14 +426,14 @@ LASwriteItemCompressed_RGB_v1::LASwriteItemCompressed_RGB_v1(EntropyEncoder* enc
   last_item = new U8[6];
 }
 
-LASwriteItemCompressed_RGB_v1::~LASwriteItemCompressed_RGB_v1()
+LASwriteItemCompressed_RGB12_v1::~LASwriteItemCompressed_RGB12_v1()
 {
   enc->destroySymbolModel(m_byte_used);
   delete ic_rgb;
   delete [] last_item;
 }
 
-BOOL LASwriteItemCompressed_RGB_v1::init(const U8* item)
+BOOL LASwriteItemCompressed_RGB12_v1::init(const U8* item)
 {
   /* init state */
 
@@ -446,7 +446,7 @@ BOOL LASwriteItemCompressed_RGB_v1::init(const U8* item)
   return TRUE;
 }
 
-inline BOOL LASwriteItemCompressed_RGB_v1::write(const U8* item)
+inline BOOL LASwriteItemCompressed_RGB12_v1::write(const U8* item)
 {
   U32 i, sym = 0;
   for (i = 0; i < 6; i++)
@@ -462,6 +462,64 @@ inline BOOL LASwriteItemCompressed_RGB_v1::write(const U8* item)
       last_item[i] = item[i];
     }
   }
+  return TRUE;
+}
+
+/*
+===============================================================================
+                       LASwriteItemCompressed_WAVEPACKET13_v1
+===============================================================================
+*/
+
+/* NOT DONE */
+
+LASwriteItemCompressed_WAVEPACKET13_v1::LASwriteItemCompressed_WAVEPACKET13_v1(EntropyEncoder* enc)
+{
+  /* set encoder */
+  assert(enc);
+  this->enc = enc;
+
+  /* create models and integer compressors */
+  m_packet_index = enc->createSymbolModel(256);
+  m_small_offset_diff = enc->createBitModel();
+  ic_offset_diff = new IntegerCompressor(enc, 32);
+  ic_return_point = new IntegerCompressor(enc, 32);
+  ic_xyz = new IntegerCompressor(enc, 32, 3);
+
+  /* create last item */
+  last_item = new U8[29];
+}
+
+LASwriteItemCompressed_WAVEPACKET13_v1::~LASwriteItemCompressed_WAVEPACKET13_v1()
+{
+  enc->destroySymbolModel(m_packet_index);
+  enc->destroyBitModel(m_small_offset_diff);
+  delete ic_offset_diff;
+  delete ic_return_point;
+  delete ic_xyz;
+  delete [] last_item;
+}
+
+BOOL LASwriteItemCompressed_WAVEPACKET13_v1::init(const U8* item)
+{
+  /* init state */
+
+  /* init models and integer compressors */
+  enc->initSymbolModel(m_packet_index);
+  enc->initBitModel(m_small_offset_diff);
+  ic_offset_diff->initCompressor();
+  ic_return_point->initCompressor();
+  ic_xyz->initCompressor();
+
+  /* init last item */
+  memcpy(last_item, item, 29);
+  return TRUE;
+}
+
+inline BOOL LASwriteItemCompressed_WAVEPACKET13_v1::write(const U8* item)
+{
+//  enc->encodeSymbol(m_packet_index, sym);
+//  ic_xyz->compress(last_item[i], item[i], i);
   return TRUE;
 }
 

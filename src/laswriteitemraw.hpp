@@ -69,25 +69,42 @@ public:
   };
 };
 
-class LASwriteItemRaw_GPSTIME : public LASwriteItemRaw
+class LASwriteItemRaw_GPSTIME11 : public LASwriteItemRaw
 {
 public:
-  LASwriteItemRaw_GPSTIME() {};
+  LASwriteItemRaw_GPSTIME11() {};
   inline BOOL write(const U8* item)
   {
     return outstream->put64bits(item);
   };
 };
 
-class LASwriteItemRaw_RGB : public LASwriteItemRaw
+class LASwriteItemRaw_RGB12 : public LASwriteItemRaw
 {
 public:
-  LASwriteItemRaw_RGB(){}
+  LASwriteItemRaw_RGB12(){}
   inline BOOL write(const U8* item)
   {
     if (!outstream->put16bits(&(item[0]))) return FALSE;        // R
     if (!outstream->put16bits(&(item[2]))) return FALSE;        // G
     if (!outstream->put16bits(&(item[4]))) return FALSE;        // B
+    return TRUE;
+  };
+};
+
+class LASwriteItemRaw_WAVEPACKET13 : public LASwriteItemRaw
+{
+public:
+  LASwriteItemRaw_WAVEPACKET13(){}
+  inline BOOL write(const U8* item)
+  {
+    if (!outstream->putBytes(&(item[0]),1)) return FALSE;       // wavepacket descriptor index
+    if (!outstream->put64bits(&(item[ 1]))) return FALSE;       // byte offset to waveform data
+    if (!outstream->put32bits(&(item[ 9]))) return FALSE;       // waveform packet size in bytes
+    if (!outstream->put32bits(&(item[13]))) return FALSE;       // return point waveform location
+    if (!outstream->put32bits(&(item[17]))) return FALSE;       // X(t)
+    if (!outstream->put32bits(&(item[21]))) return FALSE;       // Y(t)
+    if (!outstream->put32bits(&(item[25]))) return FALSE;       // Z(t)
     return TRUE;
   };
 };
