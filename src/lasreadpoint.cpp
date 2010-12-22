@@ -103,18 +103,20 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, U32 compression)
     case LASitem::POINT10:
       readers_raw[i] = new LASreadItemRaw_POINT10();
       break;
-    case LASitem::GPSTIME:
-      readers_raw[i] = new LASreadItemRaw_GPSTIME();
+    case LASitem::GPSTIME11:
+      readers_raw[i] = new LASreadItemRaw_GPSTIME11();
       break;
-    case LASitem::RGB:
-      readers_raw[i] = new LASreadItemRaw_RGB();
+    case LASitem::RGB12:
+      readers_raw[i] = new LASreadItemRaw_RGB12();
       break;
-    case LASitem::WAVEPACKET:
-      readers_raw[i] = new LASreadItemRaw_BYTE(items[i].size);
+    case LASitem::WAVEPACKET13:
+      readers_raw[i] = new LASreadItemRaw_WAVEPACKET13();
       break;
     case LASitem::BYTE:
       readers_raw[i] = new LASreadItemRaw_BYTE(items[i].size);
       break;
+    default:
+      return FALSE;
     }
   }
 
@@ -131,20 +133,20 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, U32 compression)
         else
           return FALSE;
         break;
-      case LASitem::GPSTIME:
+      case LASitem::GPSTIME11:
         if (items[i].version == 1)
-          readers_compressed[i] = new LASreadItemCompressed_GPSTIME_v1(dec);
+          readers_compressed[i] = new LASreadItemCompressed_GPSTIME11_v1(dec);
         else
           return FALSE;
         break;
-      case LASitem::RGB:
+      case LASitem::RGB12:
         if (items[i].version == 1)
-          readers_compressed[i] = new LASreadItemCompressed_RGB_v1(dec);
+          readers_compressed[i] = new LASreadItemCompressed_RGB12_v1(dec);
         else
           return FALSE;
         break;
-      case LASitem::WAVEPACKET:
-        if (items[i].version == 1)
+      case LASitem::WAVEPACKET13:
+        if (items[i].version == 0)
           readers_compressed[i] = new LASreadItemCompressed_BYTE_v1(dec, items[i].size);
         else
           return FALSE;
@@ -155,6 +157,8 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, U32 compression)
         else
           return FALSE;
         break;
+      default:
+        return FALSE;
       }
     }
   }
@@ -181,7 +185,7 @@ BOOL LASreadPoint::init(ByteStreamIn* instream)
   return TRUE;
 }
 
-BOOL LASreadPoint::read(U8** point)
+BOOL LASreadPoint::read(U8* const * point)
 {
   U32 i;
   if (readers)

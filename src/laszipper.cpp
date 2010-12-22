@@ -73,12 +73,13 @@ unsigned int LASzipper::open(ostream& outstream, unsigned int num_items, LASitem
   return 0;
 }
 
-bool LASzipper::write(unsigned char** point)
+bool LASzipper::write(const unsigned char * const * point)
 {
   count++;
   return writer->write(point);
 }
 
+/*
 bool LASzipper::chunk(LASchunk* chunk)
 {
   if (!writer->done()) return false;
@@ -89,15 +90,21 @@ bool LASzipper::chunk(LASchunk* chunk)
   if (!writer->init(stream)) return false;
   return true;
 }
+*/
 
+/*
 unsigned int LASzipper::close(LASchunk* chunk)
+*/
+unsigned int LASzipper::close()
 {
   if (!writer->done()) return false;
+/*
   if (chunk)
   {
     chunk->count = count;
     chunk->bytes = stream->byteCount();
   }
+*/
   count = 0;
   if (writer) delete writer;
   writer = 0;

@@ -56,8 +56,8 @@ public:
 
   LASwriteItemCompressed_POINT10_v1(EntropyEncoder* enc);
 
-  BOOL init(U8* item);
-  BOOL write(U8* item);
+  BOOL init(const U8* item);
+  BOOL write(const U8* item);
 
   ~LASwriteItemCompressed_POINT10_v1();
 
@@ -81,16 +81,16 @@ private:
   IntegerCompressor* ic_point_source_ID;
 };
 
-class LASwriteItemCompressed_GPSTIME_v1 : public LASwriteItemCompressed
+class LASwriteItemCompressed_GPSTIME11_v1 : public LASwriteItemCompressed
 {
 public:
 
-  LASwriteItemCompressed_GPSTIME_v1(EntropyEncoder* enc);
+  LASwriteItemCompressed_GPSTIME11_v1(EntropyEncoder* enc);
 
-  BOOL init(U8* item);
-  BOOL write(U8* item);
+  BOOL init(const U8* item);
+  BOOL write(const U8* item);
 
-  ~LASwriteItemCompressed_GPSTIME_v1();
+  ~LASwriteItemCompressed_GPSTIME11_v1();
 
 private:
   EntropyEncoder* enc;
@@ -103,22 +103,45 @@ private:
   I32 last_gpstime_diff;
 };
 
-class LASwriteItemCompressed_RGB_v1 : public LASwriteItemCompressed
+class LASwriteItemCompressed_RGB12_v1 : public LASwriteItemCompressed
 {
 public:
 
-  LASwriteItemCompressed_RGB_v1(EntropyEncoder* enc);
+  LASwriteItemCompressed_RGB12_v1(EntropyEncoder* enc);
 
-  BOOL init(U8* item);
-  BOOL write(U8* item);
+  BOOL init(const U8* item);
+  BOOL write(const U8* item);
 
-  ~LASwriteItemCompressed_RGB_v1();
+  ~LASwriteItemCompressed_RGB12_v1();
 
 private:
   EntropyEncoder* enc;
   U8* last_item;
 
+  EntropyModel* m_byte_used;
   IntegerCompressor* ic_rgb;
+};
+
+class LASwriteItemCompressed_WAVEPACKET13_v1 : public LASwriteItemCompressed
+{
+public:
+
+  LASwriteItemCompressed_WAVEPACKET13_v1(EntropyEncoder* enc);
+
+  BOOL init(const U8* item);
+  BOOL write(const U8* item);
+
+  ~LASwriteItemCompressed_WAVEPACKET13_v1();
+
+private:
+  EntropyEncoder* enc;
+  U8* last_item;
+
+  EntropyModel* m_packet_index;
+  EntropyModel* m_small_offset_diff;
+  IntegerCompressor* ic_offset_diff;
+  IntegerCompressor* ic_return_point;
+  IntegerCompressor* ic_xyz;
 };
 
 class LASwriteItemCompressed_BYTE_v1 : public LASwriteItemCompressed
@@ -127,8 +150,8 @@ public:
 
   LASwriteItemCompressed_BYTE_v1(EntropyEncoder* enc, U32 number);
 
-  BOOL init(U8* item);
-  BOOL write(U8* item);
+  BOOL init(const U8* item);
+  BOOL write(const U8* item);
 
   ~LASwriteItemCompressed_BYTE_v1();
 

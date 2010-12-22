@@ -56,7 +56,7 @@ public:
 
   LASreadItemCompressed_POINT10_v1(EntropyDecoder* dec);
 
-  BOOL init(U8* item);
+  BOOL init(const U8* item);
   BOOL read(U8* item);
 
   ~LASreadItemCompressed_POINT10_v1();
@@ -81,16 +81,16 @@ private:
   IntegerCompressor* ic_point_source_ID;
 };
 
-class LASreadItemCompressed_GPSTIME_v1 : public LASreadItemCompressed
+class LASreadItemCompressed_GPSTIME11_v1 : public LASreadItemCompressed
 {
 public:
 
-  LASreadItemCompressed_GPSTIME_v1(EntropyDecoder* dec);
+  LASreadItemCompressed_GPSTIME11_v1(EntropyDecoder* dec);
 
-  BOOL init(U8* item);
+  BOOL init(const U8* item);
   BOOL read(U8* item);
 
-  ~LASreadItemCompressed_GPSTIME_v1();
+  ~LASreadItemCompressed_GPSTIME11_v1();
 
 private:
   EntropyDecoder* dec;
@@ -103,22 +103,45 @@ private:
   I32 last_gpstime_diff;
 };
 
-class LASreadItemCompressed_RGB_v1 : public LASreadItemCompressed
+class LASreadItemCompressed_RGB12_v1 : public LASreadItemCompressed
 {
 public:
 
-  LASreadItemCompressed_RGB_v1(EntropyDecoder* dec);
+  LASreadItemCompressed_RGB12_v1(EntropyDecoder* dec);
 
-  BOOL init(U8* item);
+  BOOL init(const U8* item);
   BOOL read(U8* item);
 
-  ~LASreadItemCompressed_RGB_v1();
+  ~LASreadItemCompressed_RGB12_v1();
 
 private:
   EntropyDecoder* dec;
   U8* last_item;
 
+  EntropyModel* m_byte_used;
   IntegerCompressor* ic_rgb;
+};
+
+class LASreadItemCompressed_WAVEPACKET13_v1 : public LASreadItemCompressed
+{
+public:
+
+  LASreadItemCompressed_WAVEPACKET13_v1(EntropyDecoder* dec);
+
+  BOOL init(const U8* item);
+  BOOL read(U8* item);
+
+  ~LASreadItemCompressed_WAVEPACKET13_v1();
+
+private:
+  EntropyDecoder* dec;
+  U8* last_item;
+
+  EntropyModel* m_packet_index;
+  EntropyModel* m_small_offset_diff;
+  IntegerCompressor* ic_offset_diff;
+  IntegerCompressor* ic_return_point;
+  IntegerCompressor* ic_xyz;
 };
 
 class LASreadItemCompressed_BYTE_v1 : public LASreadItemCompressed
@@ -127,7 +150,7 @@ public:
 
   LASreadItemCompressed_BYTE_v1(EntropyDecoder* dec, U32 number);
 
-  BOOL init(U8* item);
+  BOOL init(const U8* item);
   BOOL read(U8* item);
 
   ~LASreadItemCompressed_BYTE_v1();

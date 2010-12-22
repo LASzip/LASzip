@@ -66,9 +66,8 @@ class LASzipper
 public:
   unsigned int open(FILE* outfile, unsigned int num_items, LASitem items[], unsigned int compression=0);
   unsigned int open(ostream& outstream, unsigned int num_items, LASitem items[], unsigned int compression=0);
-  bool write(unsigned char** point);
-  bool chunk(LASchunk* chunk);
-  unsigned int close(LASchunk* chunk=0);
+  bool write(const unsigned char* const * point);
+  unsigned int close();
 
   LASzipper();
   ~LASzipper();

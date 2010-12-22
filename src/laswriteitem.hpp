@@ -53,7 +53,7 @@ class ByteStreamOut;
 class LASwriteItem
 {
 public:
-  virtual BOOL write(U8* item)=0;
+  virtual BOOL write(const U8* item)=0;
 
   virtual ~LASwriteItem(){};
 };
@@ -79,7 +79,7 @@ protected:
 class LASwriteItemCompressed : public LASwriteItem
 {
 public:
-  virtual BOOL init(U8* item)=0;
+  virtual BOOL init(const U8* item)=0;
 
   virtual ~LASwriteItemCompressed(){};
 };

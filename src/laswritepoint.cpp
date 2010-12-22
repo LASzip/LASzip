@@ -101,19 +101,26 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, U32 compression)
     {
     case LASitem::POINT10:
       writers_raw[i] = new LASwriteItemRaw_POINT10();
+      items[i].version = 0;
       break;
-    case LASitem::GPSTIME:
-      writers_raw[i] = new LASwriteItemRaw_GPSTIME();
+    case LASitem::GPSTIME11:
+      writers_raw[i] = new LASwriteItemRaw_GPSTIME11();
+      items[i].version = 0;
       break;
-    case LASitem::RGB:
-      writers_raw[i] = new LASwriteItemRaw_RGB();
+    case LASitem::RGB12:
+      writers_raw[i] = new LASwriteItemRaw_RGB12();
+      items[i].version = 0;
       break;
-    case LASitem::WAVEPACKET:
-      writers_raw[i] = new LASwriteItemRaw_BYTE(items[i].size);
+    case LASitem::WAVEPACKET13:
+      writers_raw[i] = new LASwriteItemRaw_WAVEPACKET13();
+      items[i].version = 0;
       break;
     case LASitem::BYTE:
       writers_raw[i] = new LASwriteItemRaw_BYTE(items[i].size);
+      items[i].version = 0;
       break;
+    default:
+      return FALSE;
     }
   }
 
@@ -129,22 +136,24 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, U32 compression)
         writers_compressed[i] = new LASwriteItemCompressed_POINT10_v1(enc);
         items[i].version = 1;
         break;
-      case LASitem::GPSTIME:
-        writers_compressed[i] = new LASwriteItemCompressed_GPSTIME_v1(enc);
+      case LASitem::GPSTIME11:
+        writers_compressed[i] = new LASwriteItemCompressed_GPSTIME11_v1(enc);
         items[i].version = 1;
         break;
-      case LASitem::RGB:
-        writers_compressed[i] = new LASwriteItemCompressed_RGB_v1(enc);
+      case LASitem::RGB12:
+        writers_compressed[i] = new LASwriteItemCompressed_RGB12_v1(enc);
         items[i].version = 1;
         break;
-      case LASitem::WAVEPACKET:
+      case LASitem::WAVEPACKET13:
         writers_compressed[i] = new LASwriteItemCompressed_BYTE_v1(enc, items[i].size);
-        items[i].version = 1;
+        items[i].version = 0;
         break;
       case LASitem::BYTE:
         writers_compressed[i] = new LASwriteItemCompressed_BYTE_v1(enc, items[i].size);
         items[i].version = 1;
         break;
+      default:
+        return FALSE;
       }
     }
   }
@@ -173,7 +182,7 @@ BOOL LASwritePoint::init(ByteStreamOut* outstream)
   return TRUE;
 }
 
-BOOL LASwritePoint::write(U8** point)
+BOOL LASwritePoint::write(const U8 * const * point)
 {
   U32 i;
 

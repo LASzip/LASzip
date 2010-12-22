@@ -109,7 +109,7 @@ LASreadItemCompressed_POINT10_v1::~LASreadItemCompressed_POINT10_v1()
 }
 
 
-BOOL LASreadItemCompressed_POINT10_v1::init(U8* item)
+BOOL LASreadItemCompressed_POINT10_v1::init(const U8* item)
 {
   /* init state */
   last_dir = 0;
@@ -135,7 +135,7 @@ BOOL LASreadItemCompressed_POINT10_v1::init(U8* item)
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_POINT10_v1::read(U8* item)
+inline BOOL LASreadItemCompressed_POINT10_v1::read(U8* item)
 {
   // find median difference for x and y from 3 preceding differences
   I32 median_x;
@@ -253,13 +253,13 @@ BOOL LASreadItemCompressed_POINT10_v1::read(U8* item)
 
 /*
 ===============================================================================
-                       LASreadItemCompressed_GPSTIME_v1
+                       LASreadItemCompressed_GPSTIME11_v1
 ===============================================================================
 */
 
 #define LASZIP_GPSTIME_MULTIMAX 512
 
-LASreadItemCompressed_GPSTIME_v1::LASreadItemCompressed_GPSTIME_v1(EntropyDecoder* dec)
+LASreadItemCompressed_GPSTIME11_v1::LASreadItemCompressed_GPSTIME11_v1(EntropyDecoder* dec)
 {
   /* set decoder */
   assert(dec);
@@ -270,13 +270,13 @@ LASreadItemCompressed_GPSTIME_v1::LASreadItemCompressed_GPSTIME_v1(EntropyDecode
   ic_gpstime = new IntegerCompressor(dec, 32, 6); // 32 bits, 6 contexts
 }
 
-LASreadItemCompressed_GPSTIME_v1::~LASreadItemCompressed_GPSTIME_v1()
+LASreadItemCompressed_GPSTIME11_v1::~LASreadItemCompressed_GPSTIME11_v1()
 {
   dec->destroySymbolModel(m_gpstime_multi);
   delete ic_gpstime;
 }
 
-BOOL LASreadItemCompressed_GPSTIME_v1::init(U8* item)
+BOOL LASreadItemCompressed_GPSTIME11_v1::init(const U8* item)
 {
   /* init state */
   last_gpstime_diff = 0;
@@ -292,7 +292,7 @@ BOOL LASreadItemCompressed_GPSTIME_v1::init(U8* item)
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_GPSTIME_v1::read(U8* item)
+inline BOOL LASreadItemCompressed_GPSTIME11_v1::read(U8* item)
 {
   I32 multi;
   if (last_gpstime_diff == 0) // if the last integer difference was zero
@@ -365,34 +365,37 @@ BOOL LASreadItemCompressed_GPSTIME_v1::read(U8* item)
 
 /*
 ===============================================================================
-                       LASreadItemCompressed_RGB_v1
+                       LASreadItemCompressed_RGB12_v1
 ===============================================================================
 */
 
-LASreadItemCompressed_RGB_v1::LASreadItemCompressed_RGB_v1(EntropyDecoder* dec)
+LASreadItemCompressed_RGB12_v1::LASreadItemCompressed_RGB12_v1(EntropyDecoder* dec)
 {
   /* set decoder */
   assert(dec);
   this->dec = dec;
 
   /* create models and integer compressors */
-  ic_rgb = new IntegerCompressor(dec, 16, 3); // 16 bits, 3 contexts
+  m_byte_used = dec->createSymbolModel(64);
+  ic_rgb = new IntegerCompressor(dec, 8, 6);
 
   /* create last item */
   last_item = new U8[6];
 }
 
-LASreadItemCompressed_RGB_v1::~LASreadItemCompressed_RGB_v1()
+LASreadItemCompressed_RGB12_v1::~LASreadItemCompressed_RGB12_v1()
 {
+  dec->destroySymbolModel(m_byte_used);
   delete ic_rgb;
   delete [] last_item;
 }
 
-BOOL LASreadItemCompressed_RGB_v1::init(U8* item)
+BOOL LASreadItemCompressed_RGB12_v1::init(const U8* item)
 {
   /* init state */
 
   /* init models and integer compressors */
+  dec->initSymbolModel(m_byte_used);
   ic_rgb->initDecompressor();
 
   /* init last item */
@@ -400,12 +403,73 @@ BOOL LASreadItemCompressed_RGB_v1::init(U8* item)
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_RGB_v1::read(U8* item)
+inline BOOL LASreadItemCompressed_RGB12_v1::read(U8* item)
 {
-	((U16*)item)[0] = (U16)(ic_rgb->decompress(((U16*)last_item)[0], 0));
-	((U16*)item)[1] = (U16)(ic_rgb->decompress(((U16*)last_item)[1], 1));
-	((U16*)item)[2] = (U16)(ic_rgb->decompress(((U16*)last_item)[2], 2));
-  memcpy(last_item, item, 6);
+  U32 i, sym = dec->decodeSymbol(m_byte_used);
+  for (i = 0; i < 6; i++)
+  {
+    if (sym & (1 << i))
+    {
+      item[i] = ic_rgb->decompress(last_item[i], i);
+      last_item[i] = item[i];
+    }
+  }
+  return TRUE;
+}
+
+/*
+===============================================================================
+                       LASreadItemCompressed_WAVEPACKET13_v1
+===============================================================================
+*/
+
+LASreadItemCompressed_WAVEPACKET13_v1::LASreadItemCompressed_WAVEPACKET13_v1(EntropyDecoder* dec)
+{
+  /* set decoder */
+  assert(dec);
+  this->dec = dec;
+
+  /* create models and integer compressors */
+  m_packet_index = dec->createSymbolModel(256);
+  m_small_offset_diff = dec->createBitModel();
+  ic_offset_diff = new IntegerCompressor(dec, 32);
+  ic_return_point = new IntegerCompressor(dec, 32);
+  ic_xyz = new IntegerCompressor(dec, 32, 3);
+
+  /* create last item */
+  last_item = new U8[29];
+}
+
+LASreadItemCompressed_WAVEPACKET13_v1::~LASreadItemCompressed_WAVEPACKET13_v1()
+{
+  dec->destroySymbolModel(m_packet_index);
+  dec->destroyBitModel(m_small_offset_diff);
+  delete ic_offset_diff;
+  delete ic_return_point;
+  delete ic_xyz;
+  delete [] last_item;
+}
+
+BOOL LASreadItemCompressed_WAVEPACKET13_v1::init(const U8* item)
+{
+  /* init state */
+
+  /* init models and integer compressors */
+  dec->initSymbolModel(m_packet_index);
+  dec->initBitModel(m_small_offset_diff);
+  ic_offset_diff->initDecompressor();
+  ic_return_point->initDecompressor();
+  ic_xyz->initDecompressor();
+
+  /* init last item */
+  memcpy(last_item, item, 29);
+  return TRUE;
+}
+
+inline BOOL LASreadItemCompressed_WAVEPACKET13_v1::read(U8* item)
+{
+//  dec->decodeSymbol(m_packet_index);
+//  ic_xyz->decompress(last_item[i], i);
   return TRUE;
 }
 
@@ -436,7 +500,7 @@ LASreadItemCompressed_BYTE_v1::~LASreadItemCompressed_BYTE_v1()
   delete [] last_item;
 }
 
-BOOL LASreadItemCompressed_BYTE_v1::init(U8* item)
+BOOL LASreadItemCompressed_BYTE_v1::init(const U8* item)
 {
   /* init state */
 
@@ -448,7 +512,7 @@ BOOL LASreadItemCompressed_BYTE_v1::init(U8* item)
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_BYTE_v1::read(U8* item)
+inline BOOL LASreadItemCompressed_BYTE_v1::read(U8* item)
 {
   U32 i;
   for (i = 0; i < number; i++)
