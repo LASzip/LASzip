@@ -67,172 +67,28 @@ typedef long long SIGNED_INT64;
 class LASitem
 {
 public:
-
   enum Type { BYTE = 0, SHORT, INT, LONG, FLOAT, DOUBLE, POINT10, GPSTIME11, RGB12, WAVEPACKET13 } type;
+
+  // number parameter only used when setting to BYTE
+  void set(LASitem::Type t, unsigned short number=1);
+
+  bool is_type(LASitem::Type t) const;
+  bool supported_type() const;
+  bool supported_size() const;
+  bool supported_version() const;
+  bool supported() const;
+
+public:
   unsigned short size;
   unsigned short version;
-
-  void set(LASitem::Type t, unsigned int number=1)
-  {
-    switch (t)
-    {
-    case LASitem::POINT10:
-        type = LASitem::POINT10;
-        size = 20;
-        version = 0;
-        break;
-    case LASitem::GPSTIME11:
-        type = LASitem::GPSTIME11;
-        size = 8;
-        version = 0;
-        break;
-    case LASitem::RGB12:
-        type = LASitem::RGB12;
-        size = 6;
-        version = 0;
-        break;
-    case LASitem::WAVEPACKET13:
-        type = LASitem::WAVEPACKET13;
-        size = 29;
-        version = 0;
-        break;
-    case LASitem::BYTE:
-        type = LASitem::BYTE;
-        size = number;
-        version = 0;
-        break;
-    default:
-        throw 0; // BUG
-    }
-    return;
-  }
-
-  bool is_type(LASitem::Type t) const
-  {
-    if (t != type) return false;
-    switch (t)
-    {
-    case POINT10:
-      if (size != 20) return false;
-      break;
-    case GPSTIME11:
-      if (size != 8) return false;
-      break;
-    case RGB12:
-      if (size != 6) return false;
-      break;
-    case WAVEPACKET13:
-      if (size != 29) return false;
-      break;
-    case BYTE:
-      if (size < 1) return false;
-      break;
-    default:
-      return false;
-    }
-    return true;
-  }
-
-  bool supported_type() const
-  {
-    switch (type)
-    {
-    case POINT10:
-    case GPSTIME11:
-    case RGB12:
-    case WAVEPACKET13:
-    case BYTE:
-      return true;
-      break;
-    default:
-      return false;
-    }
-    return false;
-  }
-
-  bool supported_size() const
-  {
-    switch (type)
-    {
-    case POINT10:
-      if (size != 20) return false;
-      break;
-    case GPSTIME11:
-      if (size != 8) return false;
-      break;
-    case RGB12:
-      if (size != 6) return false;
-      break;
-    case WAVEPACKET13:
-      if (size != 29) return false;
-      break;
-    case BYTE:
-      if (size < 1) return false;
-      break;
-    default:
-      return false;
-    }
-    return true;
-  }
-
-  bool supported_version() const
-  {
-    switch (type)
-    {
-    case POINT10:
-      if (version > 1) return false;
-      break;
-    case GPSTIME11:
-      if (version > 1) return false;
-      break;
-    case RGB12:
-      if (version > 1) return false;
-      break;
-    case WAVEPACKET13:
-      if (version > 1) return false;
-      break;
-    case BYTE:
-      if (version > 1) return false;
-      break;
-    default:
-      return false;
-    }
-    return true;
-  }
-
-  bool supported() const
-  {
-    switch (type)
-    {
-    case POINT10:
-      if (size != 20) return false;
-      if (version > 1) return false;
-      break;
-    case GPSTIME11:
-      if (size != 8) return false;
-      if (version > 1) return false;
-      break;
-    case RGB12:
-      if (size != 6) return false;
-      if (version > 1) return false;
-      break;
-    case WAVEPACKET13:
-      if (size != 29) return false;
-      if (version > 1) return false;
-      break;
-    case BYTE:
-      if (size < 1) return false;
-      if (version > 1) return false;
-      break;
-    default:
-      return false;
-    }
-    return true;
-  }
 };
 
 class LASzip
 {
+public:
+    LASzip();
+    ~LASzip();
+
 public:
   unsigned int compression;
   unsigned char version_major;
@@ -244,25 +100,6 @@ public:
   SIGNED_INT64 num_points;  /* not mandatory ... -1 if unknown */
   SIGNED_INT64 num_bytes;   /* not mandatory ... -1 if unknown */
   LASitem* items;
-
-  LASzip()
-  {
-    compression = 0;
-    version_major = 1;
-    version_minor = 0;
-    version_revision = 0;
-    options = 0;
-    num_items = 0;
-    num_chunks = 1;
-    num_points = -1;
-    num_bytes = -1;
-    items = 0;
-  }
-
-  ~LASzip()
-  {
-    if (items) delete [] items;
-  }
 };
 
 /*

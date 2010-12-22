@@ -86,7 +86,6 @@ unsigned int LASunzipper::close()
   if (reader) delete reader;
   reader = 0;
   unsigned int byteCount = stream->byteCount();
-  if (stream) delete stream;
   stream = 0;
   return byteCount;
 }

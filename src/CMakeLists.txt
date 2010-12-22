@@ -44,6 +44,7 @@ set(LASZIP_CPP
     lasunzipper.cpp
     laswriteitemcompressed_v1.cpp
     laswritepoint.cpp
+    laszip.cpp
     laszipper.cpp
     rangeencoder.cpp
     rangedecoder.cpp
