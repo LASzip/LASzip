@@ -73,17 +73,17 @@ void LASitem::set(LASitem::Type t, unsigned short number)
     case LASitem::POINT10:
         type = LASitem::POINT10;
         size = 20;
-        version = 0;
+        version = 1;
         break;
     case LASitem::GPSTIME11:
         type = LASitem::GPSTIME11;
         size = 8;
-        version = 0;
+        version = 1;
         break;
     case LASitem::RGB12:
         type = LASitem::RGB12;
         size = 6;
-        version = 0;
+        version = 1;
         break;
     case LASitem::WAVEPACKET13:
         type = LASitem::WAVEPACKET13;
@@ -93,7 +93,7 @@ void LASitem::set(LASitem::Type t, unsigned short number)
     case LASitem::BYTE:
         type = LASitem::BYTE;
         size = number;
-        version = 0;
+        version = 1;
         break;
     default:
         throw 0; // BUG
