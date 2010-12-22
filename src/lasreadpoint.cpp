@@ -218,14 +218,20 @@ LASreadPoint::~LASreadPoint()
     {
       delete readers_raw[i];
     }
+    delete[] readers_raw;
+    readers_raw = NULL;
   }
+
   if (readers_compressed)
   {
     for (i = 0; i < num_readers; i++)
     {
       delete readers_compressed[i];
     }
+    delete[] readers_compressed;
+    readers_compressed = NULL;
   }
+
   if (dec)
   {
     delete dec;
