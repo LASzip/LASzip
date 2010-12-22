@@ -116,11 +116,11 @@ int main(int argc, char *argv[])
   items[0].size = 20;
   items[0].version = 0;
 
-  items[1].type = LASitem::GPSTIME;
+  items[1].type = LASitem::GPSTIME11;
   items[1].size = 8;
   items[1].version = 0;
 
-  items[2].type = LASitem::RGB;
+  items[2].type = LASitem::RGB12;
   items[2].size = 6;
   items[2].version = 0;
 
