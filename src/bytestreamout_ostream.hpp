@@ -57,7 +57,7 @@ using namespace std;
 class ByteStreamOutOstream : public ByteStreamOut
 {
 public:
-  ByteStreamOutOstream(ostream* stream);
+  ByteStreamOutOstream(ostream& stream);
 /* write a single byte                                       */
   bool putByte(unsigned char byte);
 /* write an array of bytes                                   */
@@ -83,7 +83,7 @@ public:
 /* destructor                                                */
   ~ByteStreamOutOstream(){};
 protected:
-  ostream* stream;
+  ostream& stream;
 private:
 #ifdef LZ_WIN32_VC6
   long start;
@@ -97,7 +97,7 @@ private:
 class ByteStreamOutOstreamEndianSwapped : public ByteStreamOutOstream
 {
 public:
-  ByteStreamOutOstreamEndianSwapped(ostream* stream);
+  ByteStreamOutOstreamEndianSwapped(ostream& stream);
 /* write 16 bit field (for implementing endian swap)         */
   bool put16bits(const unsigned char* bytes);
 /* write 32 bit field (for implementing endian swap)         */
@@ -108,23 +108,23 @@ private:
   unsigned char swapped[8];
 };
 
-inline ByteStreamOutOstream::ByteStreamOutOstream(ostream* stream)
+inline ByteStreamOutOstream::ByteStreamOutOstream(ostream& stream_param) :
+    stream(stream_param)
 {
-  this->stream = stream;
-  start = stream->tellp();
-  seek_position = stream->tellp();
+  start = stream.tellp();
+  seek_position = stream.tellp();
 }
 
 inline bool ByteStreamOutOstream::putByte(unsigned char byte)
 {
-  stream->put(byte);
-  return !!(stream->good());
+  stream.put(byte);
+  return !!(stream.good());
 }
 
 inline bool ByteStreamOutOstream::putBytes(const unsigned char* bytes, unsigned int num_bytes)
 {
-  stream->write((const char*)bytes, num_bytes);
-  return !!(stream->good());
+  stream.write((const char*)bytes, num_bytes);
+  return !!(stream.good());
 }
 
 inline bool ByteStreamOutOstream::put16bits(const unsigned char* bytes)
@@ -144,33 +144,33 @@ inline bool ByteStreamOutOstream::put64bits(const unsigned char* bytes)
 
 inline bool ByteStreamOutOstream::isSeekable() const
 {
-  return (!!(static_cast<ofstream&>(*stream)));
+  return (!!(static_cast<ofstream&>(stream)));
 }
 
 inline bool ByteStreamOutOstream::saveSeekPosition()
 {
-  seek_position = stream->tellp();
-  return !!(stream->good());
+  seek_position = stream.tellp();
+  return !!(stream.good());
 }
 
 inline bool ByteStreamOutOstream::seek(long offset)
 {
-  stream->seekp(seek_position+offset);
-  return !!(stream->good());
+  stream.seekp(seek_position+offset);
+  return !!(stream.good());
 }
 
 inline bool ByteStreamOutOstream::seekEnd()
 {
-  stream->seekp(0, ios::end);
-  return !!(stream->good());
+  stream.seekp(0, ios::end);
+  return !!(stream.good());
 }
 
 inline unsigned int ByteStreamOutOstream::byteCount() const
 {
 #ifdef LZ_WIN32_VC6
-  return (stream->tellp() - start);
+  return (stream.tellp() - start);
 #else
-  ios::pos_type end = stream->tellp();
+  ios::pos_type end = stream.tellp();
   ios::off_type size = end - start;
   return static_cast<unsigned int>(size);
 #endif
@@ -178,10 +178,10 @@ inline unsigned int ByteStreamOutOstream::byteCount() const
 
 inline void ByteStreamOutOstream::resetCount()
 {
-  start = stream->tellp();
+  start = stream.tellp();
 }
 
-inline ByteStreamOutOstreamEndianSwapped::ByteStreamOutOstreamEndianSwapped(ostream* stream) : ByteStreamOutOstream(stream)
+inline ByteStreamOutOstreamEndianSwapped::ByteStreamOutOstreamEndianSwapped(ostream& stream) : ByteStreamOutOstream(stream)
 {
 }
 

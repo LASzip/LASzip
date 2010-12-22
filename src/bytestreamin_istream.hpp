@@ -57,7 +57,7 @@ using namespace std;
 class ByteStreamInIstream : public ByteStreamIn
 {
 public:
-  ByteStreamInIstream(istream* stream);
+  ByteStreamInIstream(istream& stream);
 /* read a single byte                                        */
   unsigned int getByte();
 /* read an array of bytes                                    */
@@ -77,7 +77,7 @@ public:
 /* destructor                                                */
   ~ByteStreamInIstream(){};
 protected:
-  istream* stream;
+  istream& stream;
 private:
 #ifdef LZ_WIN32_VC6
   long start;
@@ -89,7 +89,7 @@ private:
 class ByteStreamInIstreamEndianSwapped : public ByteStreamInIstream
 {
 public:
-  ByteStreamInIstreamEndianSwapped(istream* stream);
+  ByteStreamInIstreamEndianSwapped(istream& stream);
 /* read 16 bit field (for implementing endian swap)         */
   bool get16bits(unsigned char* bytes);
 /* read 32 bit field (for implementing endian swap)         */
@@ -100,16 +100,16 @@ private:
   unsigned char swapped[8];
 };
 
-inline ByteStreamInIstream::ByteStreamInIstream(istream* stream)
+inline ByteStreamInIstream::ByteStreamInIstream(istream& stream_param) :
+  stream(stream_param)
 {
-  this->stream = stream;
   resetCount();
 }
 
 inline unsigned int ByteStreamInIstream::getByte()
 {
-  int byte = stream->get();
-  if (stream->eof())
+  int byte = stream.get();
+  if (stream.eof())
   {
     fprintf(stderr, "reading EOF\n");
     byte = 0;
@@ -119,8 +119,8 @@ inline unsigned int ByteStreamInIstream::getByte()
 
 inline bool ByteStreamInIstream::getBytes(unsigned char* bytes, unsigned int num_bytes)
 {
-  stream->read((char*)bytes, num_bytes);
-  return !!(stream->good());
+  stream.read((char*)bytes, num_bytes);
+  return !!(stream.good());
 }
 
 inline bool ByteStreamInIstream::get16bits(unsigned char* bytes)
@@ -140,15 +140,15 @@ inline bool ByteStreamInIstream::get64bits(unsigned char* bytes)
 
 inline bool ByteStreamInIstream::isSeekable() const
 {
-  return (!!(static_cast<ifstream&>(*stream)));
+  return (!!(static_cast<ifstream&>(stream)));
 }
 
 inline unsigned int ByteStreamInIstream::byteCount() const
 {
 #ifdef LZ_WIN32_VC6
-  return (stream->tellg() - start);
+  return (stream.tellg() - start);
 #else
-  ios::pos_type end = stream->tellg();
+  ios::pos_type end = stream.tellg();
   ios::off_type size = end - start;
   return static_cast<unsigned int>(size);
 #endif
@@ -156,10 +156,10 @@ inline unsigned int ByteStreamInIstream::byteCount() const
 
 inline void ByteStreamInIstream::resetCount()
 {
-  start = stream->tellg();
+  start = stream.tellg();
 }
 
-inline ByteStreamInIstreamEndianSwapped::ByteStreamInIstreamEndianSwapped(istream* stream) : ByteStreamInIstream(stream)
+inline ByteStreamInIstreamEndianSwapped::ByteStreamInIstreamEndianSwapped(istream& stream) : ByteStreamInIstream(stream)
 {
 }
 
