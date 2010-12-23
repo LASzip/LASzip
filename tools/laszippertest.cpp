@@ -49,11 +49,11 @@
 #include "lasunzipper.hpp"
 
 #ifdef LZ_WIN32_VC6
-    #include <fstream.h>
+#include <fstream.h>
 #else
-    #include <istream>
-    #include <fstream>
-    using namespace std;
+#include <istream>
+#include <fstream>
+using namespace std;
 #endif
 
 #include <time.h>
@@ -68,49 +68,43 @@ int main(int argc, char *argv[])
 {
   unsigned char c;
   unsigned int i, j;
-  unsigned int num_points = 1000000;
+  unsigned int num_points = 100000;
   unsigned int num_errors, num_bytes;
+  double start_time, end_time;
+  FILE* ofile1 = 0;
+  FILE* ofile2 = 0;
+  FILE* ofile3 = 0;
+  FILE* ifile1 = 0;
+  FILE* ifile2 = 0;
+  FILE* ifile3 = 0;
   filebuf ofb1;
   filebuf ofb2;
   filebuf ofb3;
-
-
+  filebuf ifb1;
+  filebuf ifb2;
+  filebuf ifb3;
 #ifdef LZ_WIN32_VC6
   ostream* ostream1 = 0;
   ostream* ostream2 = 0;
   ostream* ostream3 = 0;
   istream* istream1 = 0;
   istream* istream2 = 0;
-  istream* istream3 = 0;  
+  istream* istream3 = 0;
 #else
   ofstream* ostream1 = 0;
   ofstream* ostream2 = 0;
   ofstream* ostream3 = 0;
   ifstream* istream1 = 0;
   ifstream* istream2 = 0;
-  ifstream* istream3 = 0;  
-#endif
+  ifstream* istream3 = 0;
+#endif   
 
-
-
-  FILE* ofile1 = 0;
-  FILE* ofile2 = 0;
-  FILE* ofile3 = 0;
-  filebuf ifb1;
-  filebuf ifb2;
-  filebuf ifb3;
-
-  FILE* ifile1 = 0;
-  FILE* ifile2 = 0;
-  FILE* ifile3 = 0;
-  double start_time, end_time;
-  
-  bool use_iostream = true;
+  bool use_iostream = false;
 
   // describe the point structure
 
-  unsigned int num_items = 4;
-  LASitem items[4];
+  unsigned int num_items = 5;
+  LASitem items[5];
 
   items[0].type = LASitem::POINT10;
   items[0].size = 20;
@@ -124,9 +118,13 @@ int main(int argc, char *argv[])
   items[2].size = 6;
   items[2].version = 0;
 
-  items[3].type = LASitem::BYTE;
-  items[3].size = 7;
+  items[3].type = LASitem::WAVEPACKET13;
+  items[3].size = 29;
   items[3].version = 0;
+
+  items[4].type = LASitem::BYTE;
+  items[4].size = 7;
+  items[4].version = 0;
 
   // compute the point size
   unsigned int point_size = 0;
@@ -148,49 +146,42 @@ int main(int argc, char *argv[])
 
   if (use_iostream)
   {
-
-#ifdef LZ_WIN32_VC6
+#ifdef LZ_WIN32_VC6 
     ofb1.open("test1.lax", ios::out);
     ofb1.setmode(filebuf::binary);
     ostream1 = new ostream(&ofb1);
 #else
     ostream1 = new ofstream();
     ostream1->open("test1.lax", std::ios::out | std::ios::binary );
-#endif
-
-
-
+#endif 
     if (laszipper1->open(*ostream1, num_items, items, LASZIP_COMPRESSION_NONE) != 0)
     {
       fprintf(stderr, "ERROR: could not open laszipper1\n");
       return 0;
     }
 
-#ifdef LZ_WIN32_VC6
+#ifdef LZ_WIN32_VC6 
     ofb2.open("test2.lax", ios::out);
     ofb2.setmode(filebuf::binary);
     ostream2 = new ostream(&ofb2);
 #else
     ostream2 = new ofstream();
     ostream2->open("test2.lax", std::ios::out | std::ios::binary );
-#endif
-
+#endif 
     if (laszipper2->open(*ostream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC) != 0)
     {
       fprintf(stderr, "ERROR: could not open laszipper2\n");
       return 0;
     }
 
-#ifdef LZ_WIN32_VC6
+#ifdef LZ_WIN32_VC6 
     ofb3.open("test3.lax", ios::out);
     ofb3.setmode(filebuf::binary);
     ostream3 = new ostream(&ofb3);
 #else
     ostream3 = new ofstream();
     ostream3->open("test3.lax", std::ios::out | std::ios::binary );
-#endif
-
-
+#endif 
     if (laszipper3->open(*ostream3, num_items, items, LASZIP_COMPRESSION_RANGE) != 0)
     {
       fprintf(stderr, "ERROR: could not open laszipper3\n");
@@ -200,21 +191,21 @@ int main(int argc, char *argv[])
   else
   {
     ofile1 = fopen("test1.lax", "wb");
-    if (laszipper1->open(ofile1, num_items, items, LASZIP_COMPRESSION_NONE) != 0)
+    if (!laszipper1->open(ofile1, num_items, items, LASZIP_COMPRESSION_NONE))
     {
       fprintf(stderr, "ERROR: could not open laszipper1\n");
       return 0;
     }
 
     ofile2 = fopen("test2.lax", "wb");
-    if (laszipper2->open(ofile2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC) != 0)
+    if (!laszipper2->open(ofile2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
     {
       fprintf(stderr, "ERROR: could not open laszipper2\n");
       return 0;
     }
 
     ofile3 = fopen("test3.lax", "wb");
-    if (laszipper3->open(ofile3, num_items, items, LASZIP_COMPRESSION_RANGE) != 0)
+    if (!laszipper3->open(ofile3, num_items, items, LASZIP_COMPRESSION_RANGE))
     {
       fprintf(stderr, "ERROR: could not open laszipper3\n");
       return 0;
@@ -277,9 +268,11 @@ int main(int argc, char *argv[])
     delete ostream1;
     delete ostream2;
     delete ostream3;
+#ifdef LZ_WIN32_VC6 
     ofb1.close();
     ofb2.close();
     ofb3.close();
+#endif
   }
   else
   {
@@ -294,48 +287,41 @@ int main(int argc, char *argv[])
 
   if (use_iostream)
   {
-
-#ifdef LZ_WIN32_VC6
+#ifdef LZ_WIN32_VC6 
     ifb1.open("test1.lax", ios::in);
     ifb1.setmode(filebuf::binary);
     istream1 = new istream(&ifb1);
 #else
     istream1 = new ifstream();
-    istream1->open("test1.lax", std::ios::in | std::ios::binary );
+    istream1->open("test1.lax", std::ios::in | std::ios::binary ); 
 #endif
-
-
     if (lasunzipper1->open(*istream1, num_items, items, LASZIP_COMPRESSION_NONE) != 0)
     {
       fprintf(stderr, "ERROR: could not open lasunzipper1\n");
       return 0;
     }
-
-#ifdef LZ_WIN32_VC6
+#ifdef LZ_WIN32_VC6 
     ifb2.open("test2.lax", ios::in);
     ifb2.setmode(filebuf::binary);
     istream2 = new istream(&ifb2);
 #else
     istream2 = new ifstream();
-    istream2->open("test2.lax", std::ios::in | std::ios::binary );
+    istream2->open("test2.lax", std::ios::in | std::ios::binary ); 
 #endif
-
-    if (lasunzipper2->open(*istream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC) != 0)
+    if (lasunzipper2->open(istream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC) != 0)
     {
       fprintf(stderr, "ERROR: could not open lasunzipper2\n");
       return 0;
     }
-
-#ifdef LZ_WIN32_VC6
+#ifdef LZ_WIN32_VC6 
     ifb3.open("test3.lax", ios::in);
     ifb3.setmode(filebuf::binary);
     istream3 = new istream(&ifb3);
 #else
     istream3 = new ifstream();
-    istream3->open("test3.lax", std::ios::in | std::ios::binary );
+    istream3->open("test3.lax", std::ios::in | std::ios::binary ); 
 #endif
-
-    if (lasunzipper3->open(*istream3, num_items, items, LASZIP_COMPRESSION_RANGE) != 0)
+    if (lasunzipper3->open(istream3, num_items, items, LASZIP_COMPRESSION_RANGE) != 0)
     {
       fprintf(stderr, "ERROR: could not open lasunzipper3\n");
       return 0;
@@ -344,19 +330,19 @@ int main(int argc, char *argv[])
   else
   {
     ifile1 = fopen("test1.lax", "rb");
-    if (lasunzipper1->open(ifile1, num_items, items, LASZIP_COMPRESSION_NONE) != 0)
+    if (!lasunzipper1->open(ifile1, num_items, items, LASZIP_COMPRESSION_NONE))
     {
       fprintf(stderr, "ERROR: could not open lasunzipper1\n");
       return 0;
     }
     ifile2 = fopen("test2.lax", "rb");
-    if (lasunzipper2->open(ifile2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC) != 0)
+    if (!lasunzipper2->open(ifile2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
     {
       fprintf(stderr, "ERROR: could not open lasunzipper2\n");
       return 0;
     }
     ifile3 = fopen("test3.lax", "rb");
-    if (lasunzipper3->open(ifile3, num_items, items, LASZIP_COMPRESSION_RANGE) != 0)
+    if (!lasunzipper3->open(ifile3, num_items, items, LASZIP_COMPRESSION_RANGE))
     {
       fprintf(stderr, "ERROR: could not open lasunzipper3\n");
       return 0;
@@ -459,12 +445,14 @@ int main(int argc, char *argv[])
 
   if (use_iostream)
   {
-    ifb1.close();
-    ifb2.close();
-    ifb3.close();
     delete istream1;
     delete istream2;
     delete istream3;
+#ifdef LZ_WIN32_VC6 
+    ifb1.close();
+    ifb2.close();
+    ifb3.close();
+#endif
   }
   else
   {
