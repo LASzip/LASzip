@@ -235,28 +235,28 @@ unsigned short ArithmeticDecoder::readShort()
   return (U16)sym;
 }
 
-U32 ArithmeticDecoder::readInt()
+inline U32 ArithmeticDecoder::readInt()
 {
   U32 lowerInt = readShort();
   U32 upperInt = readShort();
   return upperInt*U16_MAX_PLUS_ONE+lowerInt;
 }
 
-F32 ArithmeticDecoder::readFloat()
+inline F32 ArithmeticDecoder::readFloat()
 {
   U32F32 u32f32;
   u32f32.u32 = readInt();
   return u32f32.f32;
 }
 
-U64 ArithmeticDecoder::readInt64()
+inline U64 ArithmeticDecoder::readInt64()
 {
   U64 lowerInt = readInt();
   U64 upperInt = readInt();
   return upperInt*U32_MAX_PLUS_ONE+lowerInt;
 }
 
-F64 ArithmeticDecoder::readDouble()
+inline F64 ArithmeticDecoder::readDouble()
 {
   U64F64 u64f64;
   u64f64.u64 = readInt64();

@@ -137,9 +137,11 @@ private:
   EntropyDecoder* dec;
   U8* last_item;
 
+  I32 last_diff_32;
   EntropyModel* m_packet_index;
   EntropyModel* m_small_offset_diff;
   IntegerCompressor* ic_offset_diff;
+  IntegerCompressor* ic_packet_size;
   IntegerCompressor* ic_return_point;
   IntegerCompressor* ic_xyz;
 };

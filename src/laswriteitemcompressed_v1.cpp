@@ -57,18 +57,18 @@
 
 struct LASpoint10
 {
-  int x;
-  int y;
-  int z;
-  unsigned short intensity;
-  unsigned char return_number : 3;
-  unsigned char number_of_returns_of_given_pulse : 3;
-  unsigned char scan_direction_flag : 1;
-  unsigned char edge_of_flight_line : 1;
-  unsigned char classification;
-  char scan_angle_rank;
-  unsigned char user_data;
-  unsigned short point_source_ID;
+  I32 x;
+  I32 y;
+  I32 z;
+  U16 intensity;
+  U8 return_number : 3;
+  U8 number_of_returns_of_given_pulse : 3;
+  U8 scan_direction_flag : 1;
+  U8 edge_of_flight_line : 1;
+  U8 classification;
+  I8 scan_angle_rank;
+  U8 user_data;
+  U16 point_source_ID;
 };
 
 LASwriteItemCompressed_POINT10_v1::LASwriteItemCompressed_POINT10_v1(EntropyEncoder* enc)
@@ -318,7 +318,7 @@ inline BOOL LASwriteItemCompressed_GPSTIME11_v1::write(const U8* item)
       else
       {
         enc->encodeSymbol(m_gpstime_0diff, 2); // the difference is huge
-        enc->writeDouble(this_gpstime.f64);
+        enc->writeInt64(this_gpstime.i64);
       }
       last_gpstime.f64 = this_gpstime.f64;
     }
@@ -396,9 +396,9 @@ inline BOOL LASwriteItemCompressed_GPSTIME11_v1::write(const U8* item)
       }
       else
       {
-        // if difference is so huge ... we simply write the double (for now) 
+        // if difference is so huge ... we simply write the double
         enc->encodeSymbol(m_gpstime_multi, LASZIP_GPSTIME_MULTIMAX-2);
-        enc->writeDouble(this_gpstime.f64);
+        enc->writeInt64(this_gpstime.i64);
       }
       last_gpstime.f64 = this_gpstime.f64;
     }
@@ -448,20 +448,20 @@ BOOL LASwriteItemCompressed_RGB12_v1::init(const U8* item)
 
 inline BOOL LASwriteItemCompressed_RGB12_v1::write(const U8* item)
 {
-  U32 i, sym = 0;
-  for (i = 0; i < 6; i++)
-  {
-    sym |= ((last_item[i] != item[i]) << i);
-  }
+  U32 sym = ((((U16*)last_item)[0]&0x00FF) != (((U16*)item)[0]&0x00FF)) << 0;
+  sym |= ((((U16*)last_item)[0]&0xFF00) != (((U16*)item)[0]&0xFF00)) << 1;
+  sym |= ((((U16*)last_item)[1]&0x00FF) != (((U16*)item)[1]&0x00FF)) << 2;
+  sym |= ((((U16*)last_item)[1]&0xFF00) != (((U16*)item)[1]&0xFF00)) << 3;
+  sym |= ((((U16*)last_item)[2]&0x00FF) != (((U16*)item)[2]&0x00FF)) << 4;
+  sym |= ((((U16*)last_item)[2]&0xFF00) != (((U16*)item)[2]&0xFF00)) << 5;
   enc->encodeSymbol(m_byte_used, sym);
-  for (i = 0; i < 6; i++)
-  {
-    if (last_item[i] != item[i])
-    {
-      ic_rgb->compress(last_item[i], item[i], i);
-      last_item[i] = item[i];
-    }
-  }
+  if (sym & (1 << 0)) ic_rgb->compress(((U16*)last_item)[0]&255,((U16*)item)[0]&255, 0);
+  if (sym & (1 << 1)) ic_rgb->compress(((U16*)last_item)[0]>>8,((U16*)item)[0]>>8, 1);
+  if (sym & (1 << 2)) ic_rgb->compress(((U16*)last_item)[1]&255,((U16*)item)[1]&255, 2);
+  if (sym & (1 << 3)) ic_rgb->compress(((U16*)last_item)[1]>>8,((U16*)item)[1]>>8, 3);
+  if (sym & (1 << 4)) ic_rgb->compress(((U16*)last_item)[2]&255,((U16*)item)[2]&255, 4);
+  if (sym & (1 << 5)) ic_rgb->compress(((U16*)last_item)[2]>>8,((U16*)item)[2]>>8, 5);
+  memcpy(last_item, item, 6);
   return TRUE;
 }
 
@@ -471,7 +471,15 @@ inline BOOL LASwriteItemCompressed_RGB12_v1::write(const U8* item)
 ===============================================================================
 */
 
-/* NOT DONE */
+struct LASwavepacket13
+{
+  U64 offset;
+  U32 packet_size;
+  I32F32 return_point;
+  I32F32 x;
+  I32F32 y;
+  I32F32 z;
+};
 
 LASwriteItemCompressed_WAVEPACKET13_v1::LASwriteItemCompressed_WAVEPACKET13_v1(EntropyEncoder* enc)
 {
@@ -483,11 +491,12 @@ LASwriteItemCompressed_WAVEPACKET13_v1::LASwriteItemCompressed_WAVEPACKET13_v1(E
   m_packet_index = enc->createSymbolModel(256);
   m_small_offset_diff = enc->createBitModel();
   ic_offset_diff = new IntegerCompressor(enc, 32);
+  ic_packet_size = new IntegerCompressor(enc, 32);
   ic_return_point = new IntegerCompressor(enc, 32);
   ic_xyz = new IntegerCompressor(enc, 32, 3);
 
   /* create last item */
-  last_item = new U8[29];
+  last_item = new U8[28];
 }
 
 LASwriteItemCompressed_WAVEPACKET13_v1::~LASwriteItemCompressed_WAVEPACKET13_v1()
@@ -495,6 +504,7 @@ LASwriteItemCompressed_WAVEPACKET13_v1::~LASwriteItemCompressed_WAVEPACKET13_v1(
   enc->destroySymbolModel(m_packet_index);
   enc->destroyBitModel(m_small_offset_diff);
   delete ic_offset_diff;
+  delete ic_packet_size;
   delete ic_return_point;
   delete ic_xyz;
   delete [] last_item;
@@ -503,23 +513,48 @@ LASwriteItemCompressed_WAVEPACKET13_v1::~LASwriteItemCompressed_WAVEPACKET13_v1(
 BOOL LASwriteItemCompressed_WAVEPACKET13_v1::init(const U8* item)
 {
   /* init state */
+  last_diff_32 = 0;
 
   /* init models and integer compressors */
   enc->initSymbolModel(m_packet_index);
   enc->initBitModel(m_small_offset_diff);
   ic_offset_diff->initCompressor();
+  ic_packet_size->initCompressor();
   ic_return_point->initCompressor();
   ic_xyz->initCompressor();
 
   /* init last item */
-  memcpy(last_item, item, 29);
+  item++;
+  memcpy(last_item, item, 28);
   return TRUE;
 }
 
 inline BOOL LASwriteItemCompressed_WAVEPACKET13_v1::write(const U8* item)
 {
-//  enc->encodeSymbol(m_packet_index, sym);
-//  ic_xyz->compress(last_item[i], item[i], i);
+  enc->encodeSymbol(m_packet_index, (U32)(item[0]));
+  item++;
+
+  // calculate the difference between the two offsets
+  I64 curr_diff_64 = ((LASwavepacket13*)item)->offset - ((LASwavepacket13*)last_item)->offset;
+  I32 curr_diff_32 = (I32)curr_diff_64;
+  // if the current difference can be represented with 32 bits
+  if (curr_diff_64 == (I64)(curr_diff_32))
+  {
+    enc->encodeBit(m_small_offset_diff, 1);
+    ic_offset_diff->compress(last_diff_32, curr_diff_32);
+    last_diff_32 = curr_diff_32;
+  }
+  else
+  {
+    enc->encodeBit(m_small_offset_diff, 0);
+    enc->writeInt64(((LASwavepacket13*)item)->offset);
+  }
+  ic_packet_size->compress(((LASwavepacket13*)last_item)->packet_size, ((LASwavepacket13*)item)->packet_size);
+  ic_return_point->compress(((LASwavepacket13*)last_item)->return_point.i32, ((LASwavepacket13*)item)->return_point.i32);
+  ic_xyz->compress(((LASwavepacket13*)last_item)->x.i32, ((LASwavepacket13*)item)->x.i32, 0);
+  ic_xyz->compress(((LASwavepacket13*)last_item)->y.i32, ((LASwavepacket13*)item)->y.i32, 1);
+  ic_xyz->compress(((LASwavepacket13*)last_item)->z.i32, ((LASwavepacket13*)item)->z.i32, 2);
+  memcpy(last_item, item, 28);
   return TRUE;
 }
 
