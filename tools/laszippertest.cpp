@@ -308,7 +308,7 @@ int main(int argc, char *argv[])
     istream2 = new ifstream();
     istream2->open("test2.lax", std::ios::in | std::ios::binary ); 
 #endif
-    if (lasunzipper2->open(istream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC) != 0)
+    if (lasunzipper2->open(*istream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC) != 0)
     {
       fprintf(stderr, "ERROR: could not open lasunzipper2\n");
       return 0;
@@ -321,7 +321,7 @@ int main(int argc, char *argv[])
     istream3 = new ifstream();
     istream3->open("test3.lax", std::ios::in | std::ios::binary ); 
 #endif
-    if (lasunzipper3->open(istream3, num_items, items, LASZIP_COMPRESSION_RANGE) != 0)
+    if (lasunzipper3->open(*istream3, num_items, items, LASZIP_COMPRESSION_RANGE) != 0)
     {
       fprintf(stderr, "ERROR: could not open lasunzipper3\n");
       return 0;
