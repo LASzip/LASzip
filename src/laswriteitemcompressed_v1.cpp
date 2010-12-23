@@ -78,7 +78,7 @@ LASwriteItemCompressed_POINT10_v1::LASwriteItemCompressed_POINT10_v1(EntropyEnco
   this->enc = enc;
 
   /* create models and integer compressors */
-  ic_dx = new IntegerCompressor(enc, 32, 2);  // 32 bits, 2 contexts
+  ic_dx = new IntegerCompressor(enc, 32);  // 32 bits, 1 context
 	ic_dy = new IntegerCompressor(enc, 32, 33); // 32 bits, 33 contexts
 	ic_z = new IntegerCompressor(enc, 32, 33);  // 32 bits, 33 contexts
 	m_changed_values = enc->createSymbolModel(64);
@@ -111,10 +111,9 @@ LASwriteItemCompressed_POINT10_v1::~LASwriteItemCompressed_POINT10_v1()
 BOOL LASwriteItemCompressed_POINT10_v1::init(const U8* item)
 {
   /* init state */
-  last_dir = 0;
-	last_x_diff[0][0] = last_x_diff[0][1] = last_x_diff[0][2] = last_x_diff[1][0] = last_x_diff[1][1] = last_x_diff[1][2] = 0;
-	last_y_diff[0][0] = last_y_diff[0][1] = last_y_diff[0][2] = last_y_diff[1][0] = last_y_diff[1][1] = last_y_diff[1][2] = 0;
-  last_incr[0] = last_incr[1] = 0;
+	last_x_diff[0] = last_x_diff[1] = last_x_diff[2] = 0;
+	last_y_diff[0] = last_y_diff[1] = last_y_diff[2] = 0;
+  last_incr = 0;
 
   /* init models and integer compressors */
   ic_dx->initCompressor();
@@ -138,50 +137,50 @@ inline BOOL LASwriteItemCompressed_POINT10_v1::write(const U8* item)
 {
   // find median difference for x and y from 3 preceding differences
   I32 median_x;
-  if (last_x_diff[last_dir][0] < last_x_diff[last_dir][1])
+  if (last_x_diff[0] < last_x_diff[1])
   {
-    if (last_x_diff[last_dir][1] < last_x_diff[last_dir][2])
-      median_x = last_x_diff[last_dir][1];
-    else if (last_x_diff[last_dir][0] < last_x_diff[last_dir][2])
-     median_x = last_x_diff[last_dir][2];
+    if (last_x_diff[1] < last_x_diff[2])
+      median_x = last_x_diff[1];
+    else if (last_x_diff[0] < last_x_diff[2])
+     median_x = last_x_diff[2];
     else
-      median_x = last_x_diff[last_dir][0];
+      median_x = last_x_diff[0];
   }
   else
   {
-    if (last_x_diff[last_dir][0] < last_x_diff[last_dir][2])
-      median_x = last_x_diff[last_dir][0];
-    else if (last_x_diff[last_dir][1] < last_x_diff[last_dir][2])
-      median_x = last_x_diff[last_dir][2];
+    if (last_x_diff[0] < last_x_diff[2])
+      median_x = last_x_diff[0];
+    else if (last_x_diff[1] < last_x_diff[2])
+      median_x = last_x_diff[2];
     else
-      median_x = last_x_diff[last_dir][1];
+      median_x = last_x_diff[1];
   }
 
   I32 median_y;
-  if (last_y_diff[last_dir][0] < last_y_diff[last_dir][1])
+  if (last_y_diff[0] < last_y_diff[1])
   {
-    if (last_y_diff[last_dir][1] < last_y_diff[last_dir][2])
-      median_y = last_y_diff[last_dir][1];
-    else if (last_y_diff[last_dir][0] < last_y_diff[last_dir][2])
-      median_y = last_y_diff[last_dir][2];
+    if (last_y_diff[1] < last_y_diff[2])
+      median_y = last_y_diff[1];
+    else if (last_y_diff[0] < last_y_diff[2])
+      median_y = last_y_diff[2];
     else
-      median_y = last_y_diff[last_dir][0];
+      median_y = last_y_diff[0];
   }
   else
   {
-    if (last_y_diff[last_dir][0] < last_y_diff[last_dir][2])
-      median_y = last_y_diff[last_dir][0];
-    else if (last_y_diff[last_dir][1] < last_y_diff[last_dir][2])
-      median_y = last_y_diff[last_dir][2];
+    if (last_y_diff[0] < last_y_diff[2])
+      median_y = last_y_diff[0];
+    else if (last_y_diff[1] < last_y_diff[2])
+      median_y = last_y_diff[2];
     else
-      median_y = last_y_diff[last_dir][1];
+      median_y = last_y_diff[1];
   }
 
   // compress x y z coordinates
   I32 x_diff = ((LASpoint10*)item)->x - ((LASpoint10*)last_item)->x;
   I32 y_diff = ((LASpoint10*)item)->y - ((LASpoint10*)last_item)->y;
 
-  ic_dx->compress(median_x, x_diff, last_dir);
+  ic_dx->compress(median_x, x_diff);
   // we use the number k of bits corrector bits to switch contexts
   U32 k_bits = ic_dx->getK();
   ic_dy->compress(median_y, y_diff, k_bits);
@@ -234,18 +233,11 @@ inline BOOL LASwriteItemCompressed_POINT10_v1::write(const U8* item)
     ic_point_source_ID->compress(((LASpoint10*)last_item)->point_source_ID, ((LASpoint10*)item)->point_source_ID);
   }
 
-  // only record the difference if the scan direction has not changed
-  if (last_dir == ((LASpoint10*)item)->scan_direction_flag)
-  {
-    last_x_diff[last_dir][last_incr[last_dir]] = x_diff;
-    last_y_diff[last_dir][last_incr[last_dir]] = y_diff;
-    last_incr[last_dir]++;
-    if (last_incr[last_dir] > 2) last_incr[last_dir] = 0;
-  }
-  else
-  {
-    last_dir = ((LASpoint10*)item)->scan_direction_flag;
-  }
+  // record the difference
+  last_x_diff[last_incr] = x_diff;
+  last_y_diff[last_incr] = y_diff;
+  last_incr++;
+  if (last_incr > 2) last_incr = 0;
 
   // copy the last item
   memcpy(last_item, item, 20);

@@ -65,10 +65,9 @@ private:
   EntropyEncoder* enc;
   U8* last_item;
 
-  I32 last_dir;
-  I32 last_x_diff[2][3];
-  I32 last_y_diff[2][3];
-  I32 last_incr[2];
+  I32 last_x_diff[3];
+  I32 last_y_diff[3];
+  I32 last_incr;
   IntegerCompressor* ic_dx;
   IntegerCompressor* ic_dy;
   IntegerCompressor* ic_z;

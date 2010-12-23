@@ -146,8 +146,8 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, U32 compression)
           return FALSE;
         break;
       case LASitem::WAVEPACKET13:
-        if (items[i].version == 0)
-          readers_compressed[i] = new LASreadItemCompressed_BYTE_v1(dec, items[i].size);
+        if (items[i].version == 1)
+          readers_compressed[i] = new LASreadItemCompressed_WAVEPACKET13_v1(dec);
         else
           return FALSE;
         break;
