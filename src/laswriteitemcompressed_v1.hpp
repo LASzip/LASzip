@@ -63,7 +63,7 @@ public:
 
 private:
   EntropyEncoder* enc;
-  U8* last_item;
+  U8 last_item[20];
 
   I32 last_x_diff[3];
   I32 last_y_diff[3];
@@ -71,13 +71,13 @@ private:
   IntegerCompressor* ic_dx;
   IntegerCompressor* ic_dy;
   IntegerCompressor* ic_z;
-  EntropyModel* m_changed_values;
   IntegerCompressor* ic_intensity;
-  EntropyModel* m_bit_byte;
-  EntropyModel* m_classification;
   IntegerCompressor* ic_scan_angle_rank;
-  EntropyModel* m_user_data;
   IntegerCompressor* ic_point_source_ID;
+  EntropyModel* m_changed_values;
+  EntropyModel* m_bit_byte[256];
+  EntropyModel* m_classification[256];
+  EntropyModel* m_user_data[256];
 };
 
 class LASwriteItemCompressed_GPSTIME11_v1 : public LASwriteItemCompressed

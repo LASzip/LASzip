@@ -57,60 +57,67 @@
 
 struct LASpoint10
 {
-  int x;
-  int y;
-  int z;
-  unsigned short intensity;
-  unsigned char return_number : 3;
-  unsigned char number_of_returns_of_given_pulse : 3;
-  unsigned char scan_direction_flag : 1;
-  unsigned char edge_of_flight_line : 1;
-  unsigned char classification;
-  char scan_angle_rank;
-  unsigned char user_data;
-  unsigned short point_source_ID;
+  I32 x;
+  I32 y;
+  I32 z;
+  U16 intensity;
+  U8 return_number : 3;
+  U8 number_of_returns_of_given_pulse : 3;
+  U8 scan_direction_flag : 1;
+  U8 edge_of_flight_line : 1;
+  U8 classification;
+  I8 scan_angle_rank;
+  U8 user_data;
+  U16 point_source_ID;
 };
 
 LASreadItemCompressed_POINT10_v1::LASreadItemCompressed_POINT10_v1(EntropyDecoder* dec)
 {
+  U32 i;
+
   /* set decoder */
   assert(dec);
   this->dec = dec;
 
   /* create models and integer compressors */
   ic_dx = new IntegerCompressor(dec, 32);  // 32 bits, 1 context
-	ic_dy = new IntegerCompressor(dec, 32, 33); // 32 bits, 33 contexts
-	ic_z = new IntegerCompressor(dec, 32, 33);  // 32 bits, 33 contexts
-	m_changed_values = dec->createSymbolModel(64);
+	ic_dy = new IntegerCompressor(dec, 32, 20); // 32 bits, 20 contexts
+	ic_z = new IntegerCompressor(dec, 32, 20);  // 32 bits, 20 contexts
 	ic_intensity = new IntegerCompressor(dec, 16);
-	m_bit_byte = dec->createSymbolModel(256);
-  m_classification = dec->createSymbolModel(256);
 	ic_scan_angle_rank = new IntegerCompressor(dec, 8, 2);
-	m_user_data = dec->createSymbolModel(256);
 	ic_point_source_ID = new IntegerCompressor(dec, 16);
-
-  /* create last item */
-  last_item = new U8[20];
+	m_changed_values = dec->createSymbolModel(64);
+  for (i = 0; i < 256; i++)
+  {
+    m_bit_byte[i] = 0;
+    m_classification[i] = 0;
+    m_user_data[i] = 0;
+  }
 }
 
 LASreadItemCompressed_POINT10_v1::~LASreadItemCompressed_POINT10_v1()
 {
+  U32 i;
+
   delete ic_dx;
   delete ic_dy;
   delete ic_z;
-  dec->destroySymbolModel(m_changed_values);
   delete ic_intensity;
-  dec->destroySymbolModel(m_bit_byte);
-  dec->destroySymbolModel(m_classification);
   delete ic_scan_angle_rank;
-  dec->destroySymbolModel(m_user_data);
   delete ic_point_source_ID;
-  delete [] last_item;
+  dec->destroySymbolModel(m_changed_values);
+  for (i = 0; i < 256; i++)
+  {
+    if (m_bit_byte[i]) dec->destroySymbolModel(m_bit_byte[i]);
+    if (m_classification[i]) dec->destroySymbolModel(m_classification[i]);
+    if (m_user_data[i]) dec->destroySymbolModel(m_user_data[i]);
+  }
 }
-
 
 BOOL LASreadItemCompressed_POINT10_v1::init(const U8* item)
 {
+  U32 i;
+
   /* init state */
 	last_x_diff[0] = last_x_diff[1] = last_x_diff[2] = 0;
 	last_y_diff[0] = last_y_diff[1] = last_y_diff[2] = 0;
@@ -120,13 +127,16 @@ BOOL LASreadItemCompressed_POINT10_v1::init(const U8* item)
   ic_dx->initDecompressor();
   ic_dy->initDecompressor();
   ic_z->initDecompressor();
-  dec->initSymbolModel(m_changed_values);
   ic_intensity->initDecompressor();
-  dec->initSymbolModel(m_bit_byte);
-  dec->initSymbolModel(m_classification);
   ic_scan_angle_rank->initDecompressor();
-  dec->initSymbolModel(m_user_data);
   ic_point_source_ID->initDecompressor();
+  dec->initSymbolModel(m_changed_values);
+  for (i = 0; i < 256; i++)
+  {
+    if (m_bit_byte[i]) dec->initSymbolModel(m_bit_byte[i]);
+    if (m_classification[i]) dec->initSymbolModel(m_classification[i]);
+    if (m_user_data[i]) dec->initSymbolModel(m_user_data[i]);
+  }
 
   /* init last item */
   memcpy(last_item, item, 20);
@@ -185,10 +195,10 @@ inline BOOL LASreadItemCompressed_POINT10_v1::read(U8* item)
   ((LASpoint10*)item)->x += x_diff;
   // we use the number k of bits corrector bits to switch contexts
   U32 k_bits = ic_dx->getK();
-  I32 y_diff = ic_dy->decompress(median_y, k_bits);
+  I32 y_diff = ic_dy->decompress(median_y, (k_bits < 19 ? k_bits : 19));
   ((LASpoint10*)item)->y += y_diff;
   k_bits = (k_bits + ic_dy->getK())/2;
-  ((LASpoint10*)item)->z = ic_z->decompress(((LASpoint10*)last_item)->z, k_bits);
+  ((LASpoint10*)item)->z = ic_z->decompress(((LASpoint10*)last_item)->z, (k_bits < 19 ? k_bits : 19));
 
 	// decompress which other values have changed
 	I32 changed_values = dec->decodeSymbol(m_changed_values);
@@ -204,25 +214,40 @@ inline BOOL LASreadItemCompressed_POINT10_v1::read(U8* item)
 		// decompress the edge_of_flight_line, scan_direction_flag, ... if it has changed
 		if (changed_values & 16)
 		{
-			item[14] = dec->decodeSymbol(m_bit_byte);
+      if (m_bit_byte[last_item[14]] == 0)
+      {
+        m_bit_byte[last_item[14]] = dec->createSymbolModel(256);
+        dec->initSymbolModel(m_bit_byte[last_item[14]]);
+      }
+			item[14] = dec->decodeSymbol(m_bit_byte[last_item[14]]);
 		}
 
 		// decompress the classification ... if it has changed
 		if (changed_values & 8)
 		{
-			((LASpoint10*)item)->classification = dec->decodeSymbol(m_classification);
+      if (m_classification[last_item[15]] == 0)
+      {
+        m_classification[last_item[15]] = dec->createSymbolModel(256);
+        dec->initSymbolModel(m_classification[last_item[15]]);
+      }
+			item[15] = dec->decodeSymbol(m_classification[last_item[15]]);
 		}
 		
 		// decompress the scan_angle_rank ... if it has changed
 		if (changed_values & 4)
 		{
-			((LASpoint10*)item)->scan_angle_rank = ic_scan_angle_rank->decompress(((LASpoint10*)last_item)->scan_angle_rank, k_bits < 3);
+			((I8*)item)[16] = ic_scan_angle_rank->decompress(((I8*)last_item)[16], k_bits < 3);
 		}
 
 		// decompress the user_data ... if it has changed
 		if (changed_values & 2)
 		{
-			((LASpoint10*)item)->user_data = dec->decodeSymbol(m_user_data);
+      if (m_user_data[last_item[17]] == 0)
+      {
+        m_user_data[last_item[17]] = dec->createSymbolModel(256);
+        dec->initSymbolModel(m_user_data[last_item[17]]);
+      }
+			item[17] = dec->decodeSymbol(m_user_data[last_item[17]]);
 		}
 
 		// decompress the point_source_ID ... if it has changed

@@ -73,43 +73,51 @@ struct LASpoint10
 
 LASwriteItemCompressed_POINT10_v1::LASwriteItemCompressed_POINT10_v1(EntropyEncoder* enc)
 {
+  U32 i;
+
   /* set encoder */
   assert(enc);
   this->enc = enc;
 
   /* create models and integer compressors */
   ic_dx = new IntegerCompressor(enc, 32);  // 32 bits, 1 context
-	ic_dy = new IntegerCompressor(enc, 32, 33); // 32 bits, 33 contexts
-	ic_z = new IntegerCompressor(enc, 32, 33);  // 32 bits, 33 contexts
-	m_changed_values = enc->createSymbolModel(64);
+	ic_dy = new IntegerCompressor(enc, 32, 20); // 32 bits, 20 contexts
+	ic_z = new IntegerCompressor(enc, 32, 20);  // 32 bits, 20 contexts
 	ic_intensity = new IntegerCompressor(enc, 16);
-	m_bit_byte = enc->createSymbolModel(256);
-  m_classification = enc->createSymbolModel(256);
 	ic_scan_angle_rank = new IntegerCompressor(enc, 8, 2);
-	m_user_data = enc->createSymbolModel(256);
 	ic_point_source_ID = new IntegerCompressor(enc, 16);
-
-  /* create last item */
-  last_item = new U8[20];
+	m_changed_values = enc->createSymbolModel(64);
+  for (i = 0; i < 256; i++)
+  {
+    m_bit_byte[i] = 0;
+    m_classification[i] = 0;
+    m_user_data[i] = 0;
+  }
 }
 
 LASwriteItemCompressed_POINT10_v1::~LASwriteItemCompressed_POINT10_v1()
 {
+  U32 i;
+
   delete ic_dx;
   delete ic_dy;
   delete ic_z;
-  enc->destroySymbolModel(m_changed_values);
   delete ic_intensity;
-  enc->destroySymbolModel(m_bit_byte);
-  enc->destroySymbolModel(m_classification);
   delete ic_scan_angle_rank;
-  enc->destroySymbolModel(m_user_data);
   delete ic_point_source_ID;
-  delete [] last_item;
+  enc->destroySymbolModel(m_changed_values);
+  for (i = 0; i < 256; i++)
+  {
+    if (m_bit_byte[i]) enc->destroySymbolModel(m_bit_byte[i]);
+    if (m_classification[i]) enc->destroySymbolModel(m_classification[i]);
+    if (m_user_data[i]) enc->destroySymbolModel(m_user_data[i]);
+  }
 }
 
 BOOL LASwriteItemCompressed_POINT10_v1::init(const U8* item)
 {
+  U32 i;
+
   /* init state */
 	last_x_diff[0] = last_x_diff[1] = last_x_diff[2] = 0;
 	last_y_diff[0] = last_y_diff[1] = last_y_diff[2] = 0;
@@ -119,13 +127,16 @@ BOOL LASwriteItemCompressed_POINT10_v1::init(const U8* item)
   ic_dx->initCompressor();
   ic_dy->initCompressor();
   ic_z->initCompressor();
-  enc->initSymbolModel(m_changed_values);
   ic_intensity->initCompressor();
-  enc->initSymbolModel(m_bit_byte);
-  enc->initSymbolModel(m_classification);
   ic_scan_angle_rank->initCompressor();
-  enc->initSymbolModel(m_user_data);
   ic_point_source_ID->initCompressor();
+  enc->initSymbolModel(m_changed_values);
+  for (i = 0; i < 256; i++)
+  {
+    if (m_bit_byte[i]) enc->initSymbolModel(m_bit_byte[i]);
+    if (m_classification[i]) enc->initSymbolModel(m_classification[i]);
+    if (m_user_data[i]) enc->initSymbolModel(m_user_data[i]);
+  }
 
   /* init last item */
   memcpy(last_item, item, 20);
@@ -142,7 +153,7 @@ inline BOOL LASwriteItemCompressed_POINT10_v1::write(const U8* item)
     if (last_x_diff[1] < last_x_diff[2])
       median_x = last_x_diff[1];
     else if (last_x_diff[0] < last_x_diff[2])
-     median_x = last_x_diff[2];
+      median_x = last_x_diff[2];
     else
       median_x = last_x_diff[0];
   }
@@ -183,16 +194,16 @@ inline BOOL LASwriteItemCompressed_POINT10_v1::write(const U8* item)
   ic_dx->compress(median_x, x_diff);
   // we use the number k of bits corrector bits to switch contexts
   U32 k_bits = ic_dx->getK();
-  ic_dy->compress(median_y, y_diff, k_bits);
+  ic_dy->compress(median_y, y_diff, (k_bits < 19 ? k_bits : 19));
   k_bits = (k_bits + ic_dy->getK()) / 2;
-  ic_z->compress(((LASpoint10*)last_item)->z, ((LASpoint10*)item)->z, k_bits);
+  ic_z->compress(((LASpoint10*)last_item)->z, ((LASpoint10*)item)->z, (k_bits < 19 ? k_bits : 19));
 
   // compress which other values have changed
   I32 changed_values = ((((LASpoint10*)last_item)->intensity != ((LASpoint10*)item)->intensity) << 5) |
-                       ((last_item[14] != item[14]) << 4) |
-                       ((((LASpoint10*)last_item)->classification != ((LASpoint10*)item)->classification) << 3) |
-                       ((((LASpoint10*)last_item)->scan_angle_rank != ((LASpoint10*)item)->scan_angle_rank) << 2) |
-                       ((((LASpoint10*)last_item)->user_data != ((LASpoint10*)item)->user_data) << 1) |
+                       ((last_item[14] != item[14]) << 4) | // bit_byte
+                       ((last_item[15] != item[15]) << 3) | // classification
+                       ((last_item[16] != item[16]) << 2) | // scan_angle_rank
+                       ((last_item[17] != item[17]) << 1) | // user_data
                        ((((LASpoint10*)last_item)->point_source_ID != ((LASpoint10*)item)->point_source_ID));
 
   enc->encodeSymbol(m_changed_values, changed_values);
@@ -206,25 +217,40 @@ inline BOOL LASwriteItemCompressed_POINT10_v1::write(const U8* item)
   // compress the edge_of_flight_line, scan_direction_flag, ... if it has changed
   if (changed_values & 16)
   {
-    enc->encodeSymbol(m_bit_byte, item[14]);
+    if (m_bit_byte[last_item[14]] == 0)
+    {
+      m_bit_byte[last_item[14]] = enc->createSymbolModel(256);
+      enc->initSymbolModel(m_bit_byte[last_item[14]]);
+    }
+    enc->encodeSymbol(m_bit_byte[last_item[14]], item[14]);
   }
 
   // compress the classification ... if it has changed
   if (changed_values & 8)
   {
-    enc->encodeSymbol(m_classification, ((LASpoint10*)item)->classification);
+    if (m_classification[last_item[15]] == 0)
+    {
+      m_classification[last_item[15]] = enc->createSymbolModel(256);
+      enc->initSymbolModel(m_classification[last_item[15]]);
+    }
+    enc->encodeSymbol(m_classification[last_item[15]], item[15]);
   }
   
   // compress the scan_angle_rank ... if it has changed
   if (changed_values & 4)
   {
-    ic_scan_angle_rank->compress(((LASpoint10*)last_item)->scan_angle_rank, ((LASpoint10*)item)->scan_angle_rank, k_bits < 3);
+    ic_scan_angle_rank->compress(((I8*)last_item)[16], ((I8*)item)[16], k_bits < 3);
   }
 
   // compress the user_data ... if it has changed
   if (changed_values & 2)
   {
-    enc->encodeSymbol(m_user_data, ((LASpoint10*)item)->user_data);
+    if (m_user_data[last_item[17]] == 0)
+    {
+      m_user_data[last_item[17]] = enc->createSymbolModel(256);
+      enc->initSymbolModel(m_user_data[last_item[17]]);
+    }
+    enc->encodeSymbol(m_user_data[last_item[17]], item[17]);
   }
 
   // compress the point_source_ID ... if it has changed
@@ -599,3 +625,41 @@ inline BOOL LASwriteItemCompressed_BYTE_v1::write(const U8* item)
   memcpy(last_item, item, number);
   return TRUE;
 }
+
+/* for later
+
+#define swap(a,b) { int temp=(a);(a)=(b);(b)=temp; }
+
+int median5(int* a)
+{
+  int a0 = a[0];
+  int a1 = a[1];
+  int a2 = a[2];
+  int a3 = a[3];
+  int a4 = a[4];
+
+  if (a1 < a0) 
+      swap(a0, a1);
+  if (a2 < a0)
+      swap(a0, a2); 
+  if (a3 < a0)
+      swap(a0, a3);
+  if (a4 < a0)
+      swap(a0, a4);
+
+  if (a2 < a1)
+      swap(a1, a2);
+  if (a3 < a1)
+      swap(a1, a3);
+  if (a4 < a1)
+      swap(a1, a4);
+
+  if (a3 < a2)
+      swap(a2, a3);
+  if (a4 < a2)
+    return a4;
+  else
+    return a2;
+};
+
+*/
