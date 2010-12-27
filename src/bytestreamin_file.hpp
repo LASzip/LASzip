@@ -109,7 +109,7 @@ inline unsigned int ByteStreamInFile::getByte()
   int byte = getc(file);
   if (byte == EOF)
   {
-    fprintf(stderr, "reading EOF\n");
+    //fprintf(stderr, "reading EOF\n");
     byte = 0;
   }
   return (unsigned int)byte;

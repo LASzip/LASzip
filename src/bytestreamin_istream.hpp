@@ -111,7 +111,7 @@ inline unsigned int ByteStreamInIstream::getByte()
   int byte = stream.get();
   if (stream.eof())
   {
-    fprintf(stderr, "reading EOF\n");
+    //fprintf(stderr, "reading EOF\n");
     byte = 0;
   }
   return (unsigned int)byte;
