@@ -191,21 +191,21 @@ int main(int argc, char *argv[])
   else
   {
     ofile1 = fopen("test1.lax", "wb");
-    if (!laszipper1->open(ofile1, num_items, items, LASZIP_COMPRESSION_NONE))
+    if (laszipper1->open(ofile1, num_items, items, LASZIP_COMPRESSION_NONE) != 0)
     {
       fprintf(stderr, "ERROR: could not open laszipper1\n");
       return 0;
     }
 
     ofile2 = fopen("test2.lax", "wb");
-    if (!laszipper2->open(ofile2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
+    if (laszipper2->open(ofile2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC) != 0)
     {
       fprintf(stderr, "ERROR: could not open laszipper2\n");
       return 0;
     }
 
     ofile3 = fopen("test3.lax", "wb");
-    if (!laszipper3->open(ofile3, num_items, items, LASZIP_COMPRESSION_RANGE))
+    if (laszipper3->open(ofile3, num_items, items, LASZIP_COMPRESSION_RANGE) != 0)
     {
       fprintf(stderr, "ERROR: could not open laszipper3\n");
       return 0;
@@ -330,19 +330,19 @@ int main(int argc, char *argv[])
   else
   {
     ifile1 = fopen("test1.lax", "rb");
-    if (!lasunzipper1->open(ifile1, num_items, items, LASZIP_COMPRESSION_NONE))
+    if (lasunzipper1->open(ifile1, num_items, items, LASZIP_COMPRESSION_NONE) != 0)
     {
       fprintf(stderr, "ERROR: could not open lasunzipper1\n");
       return 0;
     }
     ifile2 = fopen("test2.lax", "rb");
-    if (!lasunzipper2->open(ifile2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC))
+    if (lasunzipper2->open(ifile2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC) != 0)
     {
       fprintf(stderr, "ERROR: could not open lasunzipper2\n");
       return 0;
     }
     ifile3 = fopen("test3.lax", "rb");
-    if (!lasunzipper3->open(ifile3, num_items, items, LASZIP_COMPRESSION_RANGE))
+    if (lasunzipper3->open(ifile3, num_items, items, LASZIP_COMPRESSION_RANGE) != 0)
     {
       fprintf(stderr, "ERROR: could not open lasunzipper3\n");
       return 0;
