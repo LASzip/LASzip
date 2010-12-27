@@ -64,8 +64,8 @@ class LASwritePoint;
 class LASzipper
 {
 public:
-  unsigned int open(FILE* outfile, unsigned int num_items, LASitem items[], LASzip::CompressionType = LASzip::COMPRESSION_DEFAULT);
-  unsigned int open(ostream& outstream, unsigned int num_items, LASitem items[], LASzip::CompressionType=LASzip::COMPRESSION_DEFAULT);
+  unsigned int open(FILE* outfile, unsigned int num_items, LASitem items[], LASzip::CompressionType compression_type);
+  unsigned int open(ostream& outstream, unsigned int num_items, LASitem items[], LASzip::CompressionType compression_type);
   bool write(const unsigned char* const * point);
   unsigned int close();
 

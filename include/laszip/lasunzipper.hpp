@@ -64,8 +64,8 @@ class LASreadPoint;
 class LASunzipper
 {
 public:
-  unsigned int open(FILE* file, unsigned int num_items, const LASitem items[], LASzip::CompressionType compression_type=LASzip::COMPRESSION_DEFAULT);
-  unsigned int open(istream& stream, unsigned int num_items, const LASitem items[], LASzip::CompressionType compression_type=LASzip::COMPRESSION_DEFAULT);
+  unsigned int open(FILE* file, unsigned int num_items, const LASitem items[], LASzip::CompressionType compression_type);
+  unsigned int open(istream& stream, unsigned int num_items, const LASitem items[], LASzip::CompressionType compression_type);
   bool read(unsigned char * const * point);
   unsigned int close();
 
