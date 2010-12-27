@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
     ostream1 = new ofstream();
     ostream1->open("test1.lax", std::ios::out | std::ios::binary );
 #endif 
-    if (laszipper1->open(*ostream1, num_items, items, LASZIP_COMPRESSION_NONE) != 0)
+    if (laszipper1->open(*ostream1, num_items, items, LASzip::COMPRESSION_NONE) != 0)
     {
       fprintf(stderr, "ERROR: could not open laszipper1\n");
       return 0;
@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
     ostream2 = new ofstream();
     ostream2->open("test2.lax", std::ios::out | std::ios::binary );
 #endif 
-    if (laszipper2->open(*ostream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC) != 0)
+    if (laszipper2->open(*ostream2, num_items, items, LASzip::COMPRESSION_ARITHMETIC) != 0)
     {
       fprintf(stderr, "ERROR: could not open laszipper2\n");
       return 0;
@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
     ostream3 = new ofstream();
     ostream3->open("test3.lax", std::ios::out | std::ios::binary );
 #endif 
-    if (laszipper3->open(*ostream3, num_items, items, LASZIP_COMPRESSION_RANGE) != 0)
+    if (laszipper3->open(*ostream3, num_items, items, LASzip::COMPRESSION_RANGE) != 0)
     {
       fprintf(stderr, "ERROR: could not open laszipper3\n");
       return 0;
@@ -191,21 +191,21 @@ int main(int argc, char *argv[])
   else
   {
     ofile1 = fopen("test1.lax", "wb");
-    if (laszipper1->open(ofile1, num_items, items, LASZIP_COMPRESSION_NONE) != 0)
+    if (laszipper1->open(ofile1, num_items, items, LASzip::COMPRESSION_NONE) != 0)
     {
       fprintf(stderr, "ERROR: could not open laszipper1\n");
       return 0;
     }
 
     ofile2 = fopen("test2.lax", "wb");
-    if (laszipper2->open(ofile2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC) != 0)
+    if (laszipper2->open(ofile2, num_items, items, LASzip::COMPRESSION_ARITHMETIC) != 0)
     {
       fprintf(stderr, "ERROR: could not open laszipper2\n");
       return 0;
     }
 
     ofile3 = fopen("test3.lax", "wb");
-    if (laszipper3->open(ofile3, num_items, items, LASZIP_COMPRESSION_RANGE) != 0)
+    if (laszipper3->open(ofile3, num_items, items, LASzip::COMPRESSION_RANGE) != 0)
     {
       fprintf(stderr, "ERROR: could not open laszipper3\n");
       return 0;
@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
     istream1 = new ifstream();
     istream1->open("test1.lax", std::ios::in | std::ios::binary ); 
 #endif
-    if (lasunzipper1->open(*istream1, num_items, items, LASZIP_COMPRESSION_NONE) != 0)
+    if (lasunzipper1->open(*istream1, num_items, items, LASzip::COMPRESSION_NONE) != 0)
     {
       fprintf(stderr, "ERROR: could not open lasunzipper1\n");
       return 0;
@@ -308,7 +308,7 @@ int main(int argc, char *argv[])
     istream2 = new ifstream();
     istream2->open("test2.lax", std::ios::in | std::ios::binary ); 
 #endif
-    if (lasunzipper2->open(*istream2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC) != 0)
+    if (lasunzipper2->open(*istream2, num_items, items, LASzip::COMPRESSION_ARITHMETIC) != 0)
     {
       fprintf(stderr, "ERROR: could not open lasunzipper2\n");
       return 0;
@@ -321,7 +321,7 @@ int main(int argc, char *argv[])
     istream3 = new ifstream();
     istream3->open("test3.lax", std::ios::in | std::ios::binary ); 
 #endif
-    if (lasunzipper3->open(*istream3, num_items, items, LASZIP_COMPRESSION_RANGE) != 0)
+    if (lasunzipper3->open(*istream3, num_items, items, LASzip::COMPRESSION_RANGE) != 0)
     {
       fprintf(stderr, "ERROR: could not open lasunzipper3\n");
       return 0;
@@ -330,19 +330,19 @@ int main(int argc, char *argv[])
   else
   {
     ifile1 = fopen("test1.lax", "rb");
-    if (lasunzipper1->open(ifile1, num_items, items, LASZIP_COMPRESSION_NONE) != 0)
+    if (lasunzipper1->open(ifile1, num_items, items, LASzip::COMPRESSION_NONE) != 0)
     {
       fprintf(stderr, "ERROR: could not open lasunzipper1\n");
       return 0;
     }
     ifile2 = fopen("test2.lax", "rb");
-    if (lasunzipper2->open(ifile2, num_items, items, LASZIP_COMPRESSION_ARITHMETIC) != 0)
+    if (lasunzipper2->open(ifile2, num_items, items, LASzip::COMPRESSION_ARITHMETIC) != 0)
     {
       fprintf(stderr, "ERROR: could not open lasunzipper2\n");
       return 0;
     }
     ifile3 = fopen("test3.lax", "rb");
-    if (lasunzipper3->open(ifile3, num_items, items, LASZIP_COMPRESSION_RANGE) != 0)
+    if (lasunzipper3->open(ifile3, num_items, items, LASzip::COMPRESSION_RANGE) != 0)
     {
       fprintf(stderr, "ERROR: could not open lasunzipper3\n");
       return 0;

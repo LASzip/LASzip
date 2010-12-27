@@ -49,26 +49,26 @@
 #include "bytestreamin_istream.hpp"
 #include "lasreadpoint.hpp"
 
-unsigned int LASunzipper::open(FILE* infile, unsigned int num_items, const LASitem items[], unsigned int compression)
+unsigned int LASunzipper::open(FILE* infile, unsigned int num_items, const LASitem items[], LASzip::CompressionType compression_type)
 {
   count = 0;
   stream = new ByteStreamInFile(infile);
   if (!stream) return 1;
   reader = new LASreadPoint();
   if (!reader) return 1;
-  if (!reader->setup(num_items, items, compression)) return 1;
+  if (!reader->setup(num_items, items, compression_type)) return 1;
   if (!reader->init(stream)) return 1;
   return 0;
 }
 
-unsigned int LASunzipper::open(istream& instream, unsigned int num_items, const LASitem items[], unsigned int compression)
+unsigned int LASunzipper::open(istream& instream, unsigned int num_items, const LASitem items[], LASzip::CompressionType compression_type)
 {
   count = 0;
   stream = new ByteStreamInIstream(instream);
   if (!stream) return 1;
   reader = new LASreadPoint();
   if (!reader) return 1;
-  if (!reader->setup(num_items, items, compression)) return 1;
+  if (!reader->setup(num_items, items, compression_type)) return 1;
   if (!reader->init(stream)) return 1;
   return 0;
 }

@@ -63,7 +63,7 @@ LASwritePoint::LASwritePoint()
   enc = 0;
 }
 
-BOOL LASwritePoint::setup(U32 num_items, LASitem* items, U32 compression)
+BOOL LASwritePoint::setup(U32 num_items, LASitem* items, LASzip::CompressionType compression_type)
 {
   U32 i;
 
@@ -74,15 +74,15 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, U32 compression)
   }
 
   // create entropy encoder (if requested)
-  switch (compression)
+  switch (compression_type)
   {
-  case LASZIP_COMPRESSION_NONE:
+  case LASzip::COMPRESSION_NONE:
     enc = 0;
     break;
-  case LASZIP_COMPRESSION_RANGE:
+  case LASzip::COMPRESSION_RANGE:
     enc = new RangeEncoder();
     break;
-  case LASZIP_COMPRESSION_ARITHMETIC:
+  case LASzip::COMPRESSION_ARITHMETIC:
     enc = new ArithmeticEncoder();
     break;
   default:

@@ -58,11 +58,7 @@ typedef long long SIGNED_INT64;
 #define LASZIP_VERSION_MINOR    0
 #define LASZIP_VERSION_REVISION 0
 
-#define LASZIP_COMPRESSION_NONE       0
-#define LASZIP_COMPRESSION_ARITHMETIC 1
-#define LASZIP_COMPRESSION_RANGE      2
 
-#define LASZIP_COMPRESSION_DEFAULT    1
 
 class LASitem
 {
@@ -85,6 +81,15 @@ public:
 
 class LASzip
 {
+public:
+    enum CompressionType
+    {
+        COMPRESSION_NONE       = 0,
+        COMPRESSION_ARITHMETIC = 1,
+        COMPRESSION_RANGE      = 2,
+        COMPRESSION_DEFAULT    = COMPRESSION_ARITHMETIC
+    };
+
 public:
     LASzip();
     ~LASzip();

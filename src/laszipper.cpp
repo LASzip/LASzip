@@ -49,26 +49,26 @@
 #include "bytestreamout_ostream.hpp"
 #include "laswritepoint.hpp"
 
-unsigned int LASzipper::open(FILE* outfile, unsigned int num_items, LASitem items[], unsigned int compression)
+unsigned int LASzipper::open(FILE* outfile, unsigned int num_items, LASitem items[], LASzip::CompressionType compression_type)
 {
   count = 0;
   stream = new ByteStreamOutFile(outfile);
   if (!stream) return 1;
   writer = new LASwritePoint();
   if (!writer) return 1;
-  if (!writer->setup(num_items, items, compression)) return 1;
+  if (!writer->setup(num_items, items, compression_type)) return 1;
   if (!writer->init(stream)) return 1;
   return 0;
 }
 
-unsigned int LASzipper::open(ostream& outstream, unsigned int num_items, LASitem items[], unsigned int compression)
+unsigned int LASzipper::open(ostream& outstream, unsigned int num_items, LASitem items[], LASzip::CompressionType compression_type)
 {
   count = 0;
   stream = new ByteStreamOutOstream(outstream);
   if (!stream) return 1;
   writer = new LASwritePoint();
   if (!writer) return 1;
-  if (!writer->setup(num_items, items, compression)) return 1;
+  if (!writer->setup(num_items, items, compression_type)) return 1;
   if (!writer->init(stream)) return 1;
   return 0;
 }

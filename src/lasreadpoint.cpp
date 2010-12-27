@@ -63,7 +63,7 @@ LASreadPoint::LASreadPoint()
   dec = 0;
 }
 
-BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, U32 compression)
+BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, LASzip::CompressionType compression_type)
 {
   U32 i;
 
@@ -74,15 +74,15 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, U32 compression)
   }
 
   // create entropy decoder (if requested)
-  switch (compression)
+  switch (compression_type)
   {
-  case LASZIP_COMPRESSION_NONE:
+  case LASzip::COMPRESSION_NONE:
     dec = 0;
     break;
-  case LASZIP_COMPRESSION_RANGE:
+  case LASzip::COMPRESSION_RANGE:
     dec = new RangeDecoder();
     break;
-  case LASZIP_COMPRESSION_ARITHMETIC:
+  case LASzip::COMPRESSION_ARITHMETIC:
     dec = new ArithmeticDecoder();
     break;
   default:
