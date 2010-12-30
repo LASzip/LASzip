@@ -26,12 +26,15 @@ set(LASZIP_HPP
   integercompressor.hpp
   lasreaditem.hpp
   lasreaditemcompressed_v1.hpp
+  lasreaditemrawendianswapped.hpp
   lasreaditemraw.hpp
   lasreadpoint.hpp
   laswriteitem.hpp
   laswriteitemcompressed_v1.hpp
+  laswriteitemrawendianswapped.hpp
   laswriteitemraw.hpp
   laswritepoint.hpp
+  mydefs.hpp
  )
 
 set(LASZIP_CPP
@@ -55,6 +58,7 @@ set(LASZIP_SOURCES
   ${LASZIP_HPP}
   ${LASZIP_CPP}
   )
+
 # Group source files for IDE source explorers (e.g. Visual Studio)
 source_group("CMake Files" FILES CMakeLists.txt)
 source_group("Header Files" FILES ${LASZIP_HPP})
