@@ -8,9 +8,15 @@
 # laszip general settings
 project(laszip)
 
-# Name of C++ library
-set(LASZIP_LIB_NAME liblaszip)
+if(WIN32)
+  # Name of C++ library
+  set(LASZIP_LIB_NAME liblaszip)
+else()
+  # Name of C++ library
+  set(LASZIP_LIB_NAME laszip)
+endif()
 
+message(STATUS "Configuring LASzip library - ${LIBLAS_LIB_NAME}")
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
@@ -31,8 +37,12 @@ set(CMAKE_MODULE_PATH ${laszip_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 
 # Default to release mode 
 if(NOT MSVC_IDE)
+  if(NOT CMAKE_BUILD_TYPE)
+
   set(CMAKE_BUILD_TYPE Release CACHE STRING 
-    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel")
+    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel" FORCE)
+  endif()
+    message(STATUS "Setting LASzip build type - ${CMAKE_BUILD_TYPE}")
 endif()
 
 # TODO: Still testing the output paths --mloskot
