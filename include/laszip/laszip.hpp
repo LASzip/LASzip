@@ -58,9 +58,10 @@ typedef long long SIGNED_INT64;
 #define LASZIP_VERSION_MINOR    0
 #define LASZIP_VERSION_REVISION 0
 
+#include "export.hpp"
 
 
-class LASitem
+class LASZIP_DLL LASitem
 {
 public:
   enum Type { BYTE = 0, SHORT, INT, LONG, FLOAT, DOUBLE, POINT10, GPSTIME11, RGB12, WAVEPACKET13 } type;
@@ -79,7 +80,7 @@ public:
   unsigned short version;
 };
 
-class LASzip
+class LASZIP_DLL LASzip
 {
 public:
     enum CompressionType
