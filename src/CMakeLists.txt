@@ -68,15 +68,15 @@ source_group("Source Files" FILES ${LASZIP_CPP})
 # Standard include directory of laszip library
 include_directories(../include ../include/laszip .)
 
-add_library(${LASZIP_LIB_NAME} STATIC ${LASZIP_SOURCES})
+add_library(${LASZIP_LIB_NAME} SHARED ${LASZIP_SOURCES})
 
 ###############################################################################
 # Targets installation
 
 install(TARGETS ${LASZIP_LIB_NAME} 
   RUNTIME DESTINATION ${LASZIP_BIN_DIR}
-  LIBRARY DESTINATION ${LASZIP_BIN_DIR}
-  ARCHIVE DESTINATION ${LASZIP_BIN_DIR})
+  LIBRARY DESTINATION ${LASZIP_LIB_DIR}
+  ARCHIVE DESTINATION ${LASZIP_LIB_DIR})
 
 install(DIRECTORY ${LASZIP_HEADERS_DIR}
   DESTINATION ${LASZIP_INCLUDE_DIR}

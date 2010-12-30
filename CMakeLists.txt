@@ -110,7 +110,6 @@ mark_as_advanced(LASZIP_BIN_SUBDIR
 set(LASZIP_BIN_DIR ${LASZIP_BIN_SUBDIR})
 set(LASZIP_LIB_DIR ${LASZIP_LIB_SUBDIR})
 set(LASZIP_INCLUDE_DIR ${LASZIP_INCLUDE_SUBDIR})
-set(LASZIP_DATA_DIR ${LASZIP_DATA_SUBDIR})
 
 ###############################################################################
 # Processing of project directories
