@@ -25,6 +25,10 @@ set(LASZIP_UTILITIES
     ${LASZIP} ${LASDIFF} ${LASZIPPERTEST}
     )
     
+if(WIN32)
+    add_definitions("-DLASZIP_DLL_EXPORT=1")
+endif()
+
 
 # TODO: Experimental and requires testing --mloskot
 # Generate user-specific settings for Visual Studio project

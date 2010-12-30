@@ -60,6 +60,10 @@ set(LASZIP_SOURCES
   ${LASZIP_CPP}
   )
 
+if(WIN32)
+    add_definitions("-DLASZIP_DLL_EXPORT=1")
+endif()
+
 # Group source files for IDE source explorers (e.g. Visual Studio)
 source_group("CMake Files" FILES CMakeLists.txt)
 source_group("Header Files" FILES ${LASZIP_HPP})
