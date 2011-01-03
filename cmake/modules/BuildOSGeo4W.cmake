@@ -38,10 +38,7 @@ set(OSGEO4W_DIRECTORIES
 add_custom_target(make_osgeo4w_directories
   COMMAND ${CMAKE_COMMAND} -E echo "Building OSGeo4W install directories")
 
-foreach(utility ${LASZIP_UTILITIES})
-    add_dependencies(  make_osgeo4w_directories  ${utility} )
-
-endforeach()
+add_dependencies(  make_osgeo4w_directories  ${LASZIP_LIB_NAME} )
 
 
 macro (make_directories)
@@ -109,8 +106,8 @@ copy_files(${LASZIP_BUILD_OUTPUT_DIRECTORY}/laszip.dll ${OSGEO4W_BIN_DIR}/  )
 copy_files(${LASZIP_BUILD_OUTPUT_DIRECTORY}/laszip.lib ${OSGEO4W_DEVEL_LIB_DIR}/  )
 copy_files(./include/laszip/*.hpp ${OSGEO4W_DEVEL_INCLUDE_LASZIP_DIR}/  )
 
-tar_directories(${OSGEO4W_DIR} ${laszip_SOURCE_DIR}/${OSGEO4W_PACKAGES}/laszip-${VERSION}.tar.bz2 "bin/")
-tar_directories(${OSGEO4W_DIR}/devel ${laszip_SOURCE_DIR}/${OSGEO4W_PACKAGES}/laszip-devel-${VERSION}.tar.bz2 "lib/;include")
+tar_directories(${OSGEO4W_DIR} ${laszip_SOURCE_DIR}/${OSGEO4W_PACKAGES}/laszip-${VERSION}-${OSGEO4W_UPSTREAM_RELEASE}.tar.bz2 "bin/")
+tar_directories(${OSGEO4W_DIR}/devel ${laszip_SOURCE_DIR}/${OSGEO4W_PACKAGES}/laszip-devel-${VERSION}-${OSGEO4W_UPSTREAM_RELEASE}.tar.bz2 "lib/;include")
 
 
 add_custom_target(osgeo4w
