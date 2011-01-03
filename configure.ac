@@ -2,9 +2,9 @@ dnl $Id$
 dnl
 dnl This is main autoconf bootstrap script of libLAS project.
 dnl
-m4_define([laszip_version_major], [0])
-m4_define([laszip_version_minor], [1])
-m4_define([laszip_version_micro], [0])
+m4_define([laszip_version_major], [1])
+m4_define([laszip_version_minor], [0])
+m4_define([laszip_version_micro], [b1])
 m4_define([laszip_version],
           [laszip_version_major.laszip_version_minor.laszip_version_micro])
 
@@ -119,7 +119,7 @@ AC_CONFIG_FILES([
 	include/laszip/Makefile
 	src/Makefile
 	tools/Makefile
-	laszip-config
+	tools/laszip-config
 
 ])
 
