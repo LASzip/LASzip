@@ -27,12 +27,10 @@ set(LASZIP_HPP
   integercompressor.hpp
   lasreaditem.hpp
   lasreaditemcompressed_v1.hpp
-  lasreaditemrawendianswapped.hpp
   lasreaditemraw.hpp
   lasreadpoint.hpp
   laswriteitem.hpp
   laswriteitemcompressed_v1.hpp
-  laswriteitemrawendianswapped.hpp
   laswriteitemraw.hpp
   laswritepoint.hpp
   mydefs.hpp
