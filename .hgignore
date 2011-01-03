@@ -63,6 +63,10 @@ src/CMakeFiles
 CMakeFiles
 CMakeCache.txt
 cmake_install.cmake
+.DS_Store
+CPackConfig.cmake
+_CPack_Packages/
+CPackSourceConfig.cmake
 src/liblas.a
 Debug
 Release
