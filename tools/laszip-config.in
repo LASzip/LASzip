@@ -41,7 +41,7 @@ case $1 in
     ;;
 
   --defines)
-    echo @LASZIP_CONFIG_DEFINITIONS@
+    echo @LASZIP_CONFIG_DEFINITIONS@ @DEFS@
     ;;
 
   --includes)
@@ -49,11 +49,11 @@ case $1 in
     ;;
 
   --cflags)
-    echo @CMAKE_C_FLAGS@
+    echo @CMAKE_C_FLAGS@ @CFLAGS@
     ;;
 
   --cxxflags)
-    echo @CMAKE_CXX_FLAGS@
+    echo @CMAKE_CXX_FLAGS@ @CXXFLAGS@
     ;;
     
   --version)

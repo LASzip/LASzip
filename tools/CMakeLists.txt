@@ -61,26 +61,38 @@ endif()
 
 
 if(UNIX)
-# Autoconf compatibility variables to use the same script source.
-set(prefix ${CMAKE_INSTALL_PREFIX})
-set(exec_prefix ${CMAKE_INSTALL_PREFIX}/bin)
-set(libdir ${CMAKE_INSTALL_PREFIX}/lib)
+    # Autoconf compatibility variables to use the same script source.
+    set(prefix ${CMAKE_INSTALL_PREFIX})
+    set(exec_prefix ${CMAKE_INSTALL_PREFIX}/bin)
+    set(libdir ${CMAKE_INSTALL_PREFIX}/lib)
 
-GET_DIRECTORY_PROPERTY(LASZIP_DEFINITIONS DIRECTORY ${laszip_SOURCE_DIR}/ COMPILE_DEFINITIONS)   
+    GET_DIRECTORY_PROPERTY(LASZIP_DEFINITIONS DIRECTORY ${laszip_SOURCE_DIR}/ COMPILE_DEFINITIONS)   
 
-set(LASZIP_CONFIG_DEFINITIONS "")
-foreach(definition ${LASZIP_DEFINITIONS})
-    set(LASZIP_CONFIG_DEFINITIONS "${LASZIP_CONFIG_DEFINITIONS} -D${definition}")
-endforeach()
+    set(LASZIP_CONFIG_DEFINITIONS "")
+    foreach(definition ${LASZIP_DEFINITIONS})
+        set(LASZIP_CONFIG_DEFINITIONS "${LASZIP_CONFIG_DEFINITIONS} -D${definition}")
+    endforeach()
 
  
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/laszip-config.in
-  ${CMAKE_CURRENT_BINARY_DIR}/laszip-config @ONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/laszip-config.in
+      ${CMAKE_CURRENT_BINARY_DIR}/laszip-config @ONLY)
   
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/laszip-config
-  DESTINATION bin/
-  PERMISSIONS
-  OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/laszip-config
+      DESTINATION bin/
+      PERMISSIONS
+      OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
+    #pkgconfig
+    set(PKGCFG_PREFIX "${CMAKE_INSTALL_PREFIX}")
+    set(PKGCFG_INC_DIR "${CMAKE_INSTALL_PREFIX}/${LIBLAS_INCLUDE_SUBDIR}")
+    set(PKGCFG_LIB_DIR "${CMAKE_INSTALL_PREFIX}/${LIBLAS_LIB_SUBDIR}")
+    set(PKGCFG_REQUIRES  "")
+    set(PKGCFG_VERSION ${VERSION})
+    set(PKGCFG_LINK_FLAGS "-llaszip")
+    set(PKGCFG_COMPILE_FLAGS "$CMAKE_CXX_FLAGS")
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/laszip.pc.in
+      ${CMAKE_CURRENT_BINARY_DIR}/laszip.pc @ONLY)
+
   
 endif(UNIX)
 ###############################################################################
