@@ -3,4 +3,4 @@ laszipdir = $(includedir)/
 laszip_HEADERS =		lasunzipper.hpp \
 						laszip.hpp \
 						laszipper.hpp \
-						liblaszip.hpp 
+						export.hpp 
