@@ -70,7 +70,10 @@ source_group("Source Files" FILES ${LASZIP_CPP})
 # Standard include directory of laszip library
 include_directories(../include ../include/laszip .)
 
+
 add_library(${LASZIP_LIB_NAME} SHARED ${LASZIP_SOURCES})
+set_target_properties(${LASZIP_LIB_NAME}
+  PROPERTIES SOVERSION "${LASZIP_LIB_SOVERSION}" )
 
 ###############################################################################
 # Targets installation
