@@ -15,13 +15,8 @@ SET(LASZIP_VERSION_PATCH "b1")
 set(VERSION "${LASZIP_VERSION_MAJOR}.${LASZIP_VERSION_MINOR}.${LASZIP_VERSION_PATCH}")
 SET(LASZIP_LIB_SOVERSION "1.0.0")
 
-if(WIN32)
-  # Name of C++ library
-  set(LASZIP_LIB_NAME liblaszip)
-else()
-  # Name of C++ library
-  set(LASZIP_LIB_NAME laszip)
-endif()
+# Name of C++ library
+set(LASZIP_LIB_NAME laszip)
 
 message(STATUS "Configuring LASzip library - ${LIBLAS_LIB_NAME}")
 
@@ -152,3 +147,7 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "CPackConfig.cmake")
 include(CPack)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+
+if (WIN32)
+    include(BuildOSGeo4W)
+endif(WIN32)

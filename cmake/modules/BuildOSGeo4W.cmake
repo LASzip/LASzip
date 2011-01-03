@@ -23,9 +23,6 @@ set(OSGEO4W_PACKAGES ${OSGEO4W_DIR}/packages)
 
 set(OSGEO4W_DIRECTORIES
     ${OSGEO4W_DIR}
-    ${OSGEO4W_ETC_DIR}
-    ${OSGEO4W_ETC_INI_DIR}
-    ${OSGEO4W_ETC_POSTINSTALL_DIR}
     ${OSGEO4W_LIB_DIR}
     ${OSGEO4W_LIB_BIN_DIR}
     ${OSGEO4W_DEVEL_DIR}
@@ -79,6 +76,7 @@ macro(copy_files GLOBPAT DESTINATION  )
     foreach(FILENAME ${COPY_FILES})
         set(SRC "${FILENAME}")
         set(DST "${DESTINATION}")
+
         add_custom_command(
             TARGET copy
             COMMAND ${CMAKE_COMMAND} -E copy ${SRC} ${DST}
@@ -109,10 +107,10 @@ endmacro(tar_directories)
 make_directories()
 copy_files(${LASZIP_BUILD_OUTPUT_DIRECTORY}/laszip.dll ${OSGEO4W_BIN_DIR}/  )
 copy_files(${LASZIP_BUILD_OUTPUT_DIRECTORY}/laszip.lib ${OSGEO4W_DEVEL_LIB_DIR}/  )
-copy_directory(./include/laszip/ ${OSGEO4W_DEVEL_INCLUDE_LASZIP_DIR}/  )
+copy_files(./include/laszip/*.hpp ${OSGEO4W_DEVEL_INCLUDE_LASZIP_DIR}/  )
 
-tar_directories(${OSGEO4W_DIR} ${libLAS_SOURCE_DIR}/${OSGEO4W_PACKAGES}/laszip-${VERSION}.tar.bz2 "bin/")
-tar_directories(${OSGEO4W_DIR}/devel ${libLAS_SOURCE_DIR}/${OSGEO4W_PACKAGES}/laszip-devel-${VERSION}.tar.bz2 "lib/;include")
+tar_directories(${OSGEO4W_DIR} ${laszip_SOURCE_DIR}/${OSGEO4W_PACKAGES}/laszip-${VERSION}.tar.bz2 "bin/")
+tar_directories(${OSGEO4W_DIR}/devel ${laszip_SOURCE_DIR}/${OSGEO4W_PACKAGES}/laszip-devel-${VERSION}.tar.bz2 "lib/;include")
 
 
 add_custom_target(osgeo4w
