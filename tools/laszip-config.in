@@ -1,4 +1,10 @@
 #!/bin/sh
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+
+INCLUDES="-I${prefix}/include "
+LIBS="-L$libdir -llaszip"
 
 
 
@@ -22,28 +28,36 @@ if test $# -eq 0; then
 fi
 
 case $1 in 
-  --libs)
-    echo @LIBS@
+  --libs) 
+    echo $LIBS
+    ;;
+
+  --prefix)
+    echo ${prefix}
+     ;;
+
+  --ldflags)
+    echo -L${libdir}
     ;;
 
   --defines)
-    echo @DEFS@
+    echo @LASZIP_CONFIG_DEFINITIONS@
     ;;
 
   --includes)
-    echo 
+    echo ${INCLUDES}
     ;;
 
   --cflags)
-    echo @CFLAGS@
+    echo @CMAKE_C_FLAGS@
     ;;
 
   --cxxflags)
-    echo @CXXFLAGS@
+    echo @CMAKE_CXX_FLAGS@
     ;;
     
   --version)
-    echo @RELEASE_VERSION@
+    echo @VERSION@
     ;;
 
   *)

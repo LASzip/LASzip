@@ -59,6 +59,30 @@ if(LASZIPPERTEST)
     target_link_libraries(${LASZIPPERTEST} ${APPS_CPP_DEPENDENCIES} )
 endif()
 
+
+if(UNIX)
+# Autoconf compatibility variables to use the same script source.
+set(prefix ${CMAKE_INSTALL_PREFIX})
+set(exec_prefix ${CMAKE_INSTALL_PREFIX}/bin)
+set(libdir ${CMAKE_INSTALL_PREFIX}/lib)
+
+GET_DIRECTORY_PROPERTY(LASZIP_DEFINITIONS DIRECTORY ${laszip_SOURCE_DIR}/ COMPILE_DEFINITIONS)   
+
+set(LASZIP_CONFIG_DEFINITIONS "")
+foreach(definition ${LASZIP_DEFINITIONS})
+    set(LASZIP_CONFIG_DEFINITIONS "${LASZIP_CONFIG_DEFINITIONS} -D${definition}")
+endforeach()
+
+ 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/laszip-config.in
+  ${CMAKE_CURRENT_BINARY_DIR}/laszip-config @ONLY)
+  
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/laszip-config
+  DESTINATION bin/
+  PERMISSIONS
+  OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+  
+endif(UNIX)
 ###############################################################################
 # Targets installation
 
