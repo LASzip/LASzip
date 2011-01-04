@@ -61,11 +61,11 @@ using namespace std;
 class ByteStreamOut;
 class LASwritePoint;
 
-class LASZIP_DLL LASzipper
+class LASzipper
 {
 public:
-  unsigned int open(FILE* outfile, unsigned int num_items, LASitem items[], LASzip::CompressionType compression_type);
-  unsigned int open(ostream& outstream, unsigned int num_items, LASitem items[], LASzip::CompressionType compression_type);
+  unsigned int open(FILE* outfile, unsigned int num_items, LASitem items[], LASzip::Algorithm algorithm);
+  unsigned int open(ostream& outstream, unsigned int num_items, LASitem items[], LASzip::Algorithm algorithm);
   bool write(const unsigned char* const * point);
   unsigned int close();
 

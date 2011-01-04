@@ -61,11 +61,11 @@ using namespace std;
 class ByteStreamIn;
 class LASreadPoint;
 
-class LASZIP_DLL LASunzipper
+class LASunzipper
 {
 public:
-  unsigned int open(FILE* file, unsigned int num_items, const LASitem items[], LASzip::CompressionType compression_type);
-  unsigned int open(istream& stream, unsigned int num_items, const LASitem items[], LASzip::CompressionType compression_type);
+  unsigned int open(FILE* file, unsigned int num_items, const LASitem items[], LASzip::Algorithm algorithm);
+  unsigned int open(istream& stream, unsigned int num_items, const LASitem items[], LASzip::Algorithm algorithm);
   bool read(unsigned char * const * point);
   unsigned int close();
 
