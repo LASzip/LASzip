@@ -27,6 +27,8 @@ bin
 *.swp
 *.bz2
 *.gz
+*.bak
+osgeo4w/
 *.orig
 *.user
 aclocal.m4
