@@ -7,16 +7,8 @@
 
 set(OSGEO4W_DIR osgeo4w)
 set(OSGEO4W_LIB_DIR ${OSGEO4W_DIR}/lib)
-set(OSGEO4W_ETC_DIR ${OSGEO4W_DIR}/etc)
-set(OSGEO4W_ETC_INI_DIR ${OSGEO4W_DIR}/etc/ini)
-set(OSGEO4W_ETC_POSTINSTALL_DIR ${OSGEO4W_DIR}/etc/postinstall)
-set(OSGEO4W_LIB_BIN_DIR ${OSGEO4W_DIR}/lib/bin)
 set(OSGEO4W_BIN_DIR ${OSGEO4W_DIR}/bin)
-set(OSGEO4W_DEVEL_DIR ${OSGEO4W_DIR}/devel)
-set(OSGEO4W_DEVEL_INCLUDE_DIR ${OSGEO4W_DEVEL_DIR}/include)
-set(OSGEO4W_DEVEL_INCLUDE_LASZIP_DIR ${OSGEO4W_DEVEL_INCLUDE_DIR}/laszip)
-set(OSGEO4W_DEVEL_LIB_DIR ${OSGEO4W_DEVEL_DIR}/lib)
-set(OSGEO4W_DEVEL_BIN_DIR ${OSGEO4W_DEVEL_DIR}/bin)
+set(OSGEO4W_INCLUDE_DIR ${OSGEO4W_DIR}/include/laszip)
 
 set(OSGEO4W_PACKAGES ${OSGEO4W_DIR}/packages)
 
@@ -24,12 +16,7 @@ set(OSGEO4W_PACKAGES ${OSGEO4W_DIR}/packages)
 set(OSGEO4W_DIRECTORIES
     ${OSGEO4W_DIR}
     ${OSGEO4W_LIB_DIR}
-    ${OSGEO4W_LIB_BIN_DIR}
-    ${OSGEO4W_DEVEL_DIR}
-    ${OSGEO4W_DEVEL_INCLUDE_DIR}
-    ${OSGEO4W_DEVEL_INCLUDE_LASZIP_DIR}
-    ${OSGEO4W_DEVEL_LIB_DIR}
-    ${OSGEO4W_DEVEL_BIN_DIR}
+    ${OSGEO4W_INCLUDE_DIR}
     ${OSGEO4W_PACKAGES}
     ${OSGEO4W_BIN_DIR})
 
@@ -103,11 +90,10 @@ endmacro(tar_directories)
 
 make_directories()
 copy_files(${LASZIP_BUILD_OUTPUT_DIRECTORY}/laszip.dll ${OSGEO4W_BIN_DIR}/  )
-copy_files(${LASZIP_BUILD_OUTPUT_DIRECTORY}/laszip.lib ${OSGEO4W_DEVEL_LIB_DIR}/  )
-copy_files(./include/laszip/*.hpp ${OSGEO4W_DEVEL_INCLUDE_LASZIP_DIR}/  )
+copy_files(${LASZIP_BUILD_OUTPUT_DIRECTORY}/laszip.lib ${OSGEO4W_LIB_DIR}/  )
+copy_files(./include/laszip/*.hpp ${OSGEO4W_INCLUDE_DIR}/  )
 
-tar_directories(${OSGEO4W_DIR} ${laszip_SOURCE_DIR}/${OSGEO4W_PACKAGES}/laszip-${VERSION}-${OSGEO4W_UPSTREAM_RELEASE}.tar.bz2 "bin/")
-tar_directories(${OSGEO4W_DIR}/devel ${laszip_SOURCE_DIR}/${OSGEO4W_PACKAGES}/laszip-devel-${VERSION}-${OSGEO4W_UPSTREAM_RELEASE}.tar.bz2 "lib/;include")
+tar_directories(${OSGEO4W_DIR} ${laszip_SOURCE_DIR}/${OSGEO4W_PACKAGES}/laszip-${VERSION}-${OSGEO4W_UPSTREAM_RELEASE}.tar.bz2 "bin/;lib/;include/")
 
 
 add_custom_target(osgeo4w
