@@ -122,9 +122,9 @@ void RangeModel::dorescale()
   }
   if (c!=newf[0])
   {
-    //fprintf(stderr,"BUG: rescaling left %d total frequency\n",c);
-    //exit(1);
-    throw std::runtime_error("laszip internal error: RangeModel::dorescale()");
+//    fprintf(stderr,"BUG: rescaling left %d total frequency\n",c);
+//    exit(1);
+    throw std::runtime_error("internal error: RangeModel::dorescale()");
   }
   newf[0] = newf[0]>>1 | 1;
   missing -= newf[0];

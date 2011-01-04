@@ -56,15 +56,15 @@ public:
   LASreadItemRaw_POINT10(){};
   inline BOOL read(U8* item)
   {
-    if (!instream->get32bits(&(item[ 0]))) return FALSE;       // x
-    if (!instream->get32bits(&(item[ 4]))) return FALSE;       // y
-    if (!instream->get32bits(&(item[ 8]))) return FALSE;       // z
-    if (!instream->get16bits(&(item[12]))) return FALSE;       // intensity
-    if (!instream->getBytes(&(item[14]), 4)) return FALSE;     // bitfield
-                                                               // classification
-                                                               // scan_angle_rank
-                                                               // user_data
-    if (!instream->get16bits(&(item[18]))) return FALSE;       // point_source_ID
+    if (!instream->get32bitsLE(&(item[ 0]))) return FALSE;       // x
+    if (!instream->get32bitsLE(&(item[ 4]))) return FALSE;       // y
+    if (!instream->get32bitsLE(&(item[ 8]))) return FALSE;       // z
+    if (!instream->get16bitsLE(&(item[12]))) return FALSE;       // intensity
+    if (!instream->getBytes(&(item[14]), 4)) return FALSE;       // bitfield
+                                                                 // classification
+                                                                 // scan_angle_rank
+                                                                 // user_data
+    if (!instream->get16bitsLE(&(item[18]))) return FALSE;       // point_source_ID
     return TRUE;
   };
 };
@@ -75,7 +75,7 @@ public:
   LASreadItemRaw_GPSTIME11(){};
   inline BOOL read(U8* item)
   {
-    return instream->get64bits(item);                         // GPSTIME
+    return instream->get64bitsLE(item);                          // GPSTIME
   };
 };
 
@@ -85,9 +85,9 @@ public:
   LASreadItemRaw_RGB12(){};
   inline BOOL read(U8* item)
   {
-    if (!instream->get16bits(&(item[0]))) return FALSE;        // R
-    if (!instream->get16bits(&(item[2]))) return FALSE;        // G
-    if (!instream->get16bits(&(item[4]))) return FALSE;        // B
+    if (!instream->get16bitsLE(&(item[0]))) return FALSE;        // R
+    if (!instream->get16bitsLE(&(item[2]))) return FALSE;        // G
+    if (!instream->get16bitsLE(&(item[4]))) return FALSE;        // B
     return TRUE;
   };
 };
@@ -98,13 +98,13 @@ public:
   LASreadItemRaw_WAVEPACKET13(){}
   inline BOOL read(U8* item)
   {
-    if (!instream->getBytes(&(item[0]),1)) return FALSE;       // wavepacket descriptor index
-    if (!instream->get64bits(&(item[ 1]))) return FALSE;       // byte offset to waveform data
-    if (!instream->get32bits(&(item[ 9]))) return FALSE;       // waveform packet size in bytes
-    if (!instream->get32bits(&(item[13]))) return FALSE;       // return point waveform location
-    if (!instream->get32bits(&(item[17]))) return FALSE;       // X(t)
-    if (!instream->get32bits(&(item[21]))) return FALSE;       // Y(t)
-    if (!instream->get32bits(&(item[25]))) return FALSE;       // Z(t)
+    if (!instream->getBytes(&(item[0]),1)) return FALSE;         // wavepacket descriptor index
+    if (!instream->get64bitsLE(&(item[ 1]))) return FALSE;       // byte offset to waveform data
+    if (!instream->get32bitsLE(&(item[ 9]))) return FALSE;       // waveform packet size in bytes
+    if (!instream->get32bitsLE(&(item[13]))) return FALSE;       // return point waveform location
+    if (!instream->get32bitsLE(&(item[17]))) return FALSE;       // X(t)
+    if (!instream->get32bitsLE(&(item[21]))) return FALSE;       // Y(t)
+    if (!instream->get32bitsLE(&(item[25]))) return FALSE;       // Z(t)
     return TRUE;
   };
 };

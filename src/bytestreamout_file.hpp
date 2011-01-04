@@ -56,12 +56,6 @@ public:
   bool putByte(unsigned char byte);
 /* write an array of bytes                                   */
   bool putBytes(const unsigned char* bytes, unsigned int num_bytes);
-/* write 16 bit field (for implementing endian swap)         */
-  virtual bool put16bits(const unsigned char* bytes);
-/* write 32 bit field (for implementing endian swap)         */
-  virtual bool put32bits(const unsigned char* bytes);
-/* write 64 bit field (for implementing endian swap)         */
-  virtual bool put64bits(const unsigned char* bytes);
 /* is the stream seekable (e.g. standard out is not)         */
   bool isSeekable() const;
 /* save position in the stream for (forward) seeking later   */
@@ -83,16 +77,42 @@ private:
   long seek_position;
 };
 
-class ByteStreamOutFileEndianSwapped : public ByteStreamOutFile
+class ByteStreamOutFileLE : public ByteStreamOutFile
 {
 public:
-  ByteStreamOutFileEndianSwapped(FILE* file);
-/* write 16 bit field (for implementing endian swap)         */
-  bool put16bits(const unsigned char* bytes);
-/* write 32 bit field (for implementing endian swap)         */
-  bool put32bits(const unsigned char* bytes);
-/* write 64 bit field (for implementing endian swap)         */
-  bool put64bits(const unsigned char* bytes);
+  ByteStreamOutFileLE(FILE* file);
+/* write 16 bit low-endian field                             */
+  bool put16bitsLE(const unsigned char* bytes);
+/* write 32 bit low-endian field                             */
+  bool put32bitsLE(const unsigned char* bytes);
+/* write 64 bit low-endian field                             */
+  bool put64bitsLE(const unsigned char* bytes);
+/* write 16 bit big-endian field                             */
+  bool put16bitsBE(const unsigned char* bytes);
+/* write 32 bit big-endian field                             */
+  bool put32bitsBE(const unsigned char* bytes);
+/* write 64 bit big-endian field                             */
+  bool put64bitsBE(const unsigned char* bytes);
+private:
+  unsigned char swapped[8];
+};
+
+class ByteStreamOutFileBE : public ByteStreamOutFile
+{
+public:
+  ByteStreamOutFileBE(FILE* file);
+/* write 16 bit low-endian field                             */
+  bool put16bitsLE(const unsigned char* bytes);
+/* write 32 bit low-endian field                             */
+  bool put32bitsLE(const unsigned char* bytes);
+/* write 64 bit low-endian field                             */
+  bool put64bitsLE(const unsigned char* bytes);
+/* write 16 bit big-endian field                             */
+  bool put16bitsBE(const unsigned char* bytes);
+/* write 32 bit big-endian field                             */
+  bool put32bitsBE(const unsigned char* bytes);
+/* write 64 bit big-endian field                             */
+  bool put64bitsBE(const unsigned char* bytes);
 private:
   unsigned char swapped[8];
 };
@@ -112,21 +132,6 @@ inline bool ByteStreamOutFile::putByte(unsigned char byte)
 inline bool ByteStreamOutFile::putBytes(const unsigned char* bytes, unsigned int num_bytes)
 {
   return (fwrite(bytes, 1, num_bytes, file) == num_bytes);
-}
-
-inline bool ByteStreamOutFile::put16bits(const unsigned char* bytes)
-{
-  return putBytes(bytes, 2);
-}
-
-inline bool ByteStreamOutFile::put32bits(const unsigned char* bytes)
-{
-  return putBytes(bytes, 4);
-}
-
-inline bool ByteStreamOutFile::put64bits(const unsigned char* bytes)
-{
-  return putBytes(bytes, 8);
 }
 
 inline bool ByteStreamOutFile::isSeekable() const
@@ -160,18 +165,33 @@ inline void ByteStreamOutFile::resetCount()
   start = ftell(file);
 }
 
-inline ByteStreamOutFileEndianSwapped::ByteStreamOutFileEndianSwapped(FILE* file) : ByteStreamOutFile(file)
+inline ByteStreamOutFileLE::ByteStreamOutFileLE(FILE* file) : ByteStreamOutFile(file)
 {
 }
 
-inline bool ByteStreamOutFileEndianSwapped::put16bits(const unsigned char* bytes)
+inline bool ByteStreamOutFileLE::put16bitsLE(const unsigned char* bytes)
+{
+  return putBytes(bytes, 2);
+}
+
+inline bool ByteStreamOutFileLE::put32bitsLE(const unsigned char* bytes)
+{
+  return putBytes(bytes, 4);
+}
+
+inline bool ByteStreamOutFileLE::put64bitsLE(const unsigned char* bytes)
+{
+  return putBytes(bytes, 8);
+}
+
+inline bool ByteStreamOutFileLE::put16bitsBE(const unsigned char* bytes)
 {
   swapped[0] = bytes[1];
   swapped[1] = bytes[0];
   return putBytes(swapped, 2);
 }
 
-inline bool ByteStreamOutFileEndianSwapped::put32bits(const unsigned char* bytes)
+inline bool ByteStreamOutFileLE::put32bitsBE(const unsigned char* bytes)
 {
   swapped[0] = bytes[3];
   swapped[1] = bytes[2];
@@ -180,7 +200,7 @@ inline bool ByteStreamOutFileEndianSwapped::put32bits(const unsigned char* bytes
   return putBytes(swapped, 4);
 }
 
-inline bool ByteStreamOutFileEndianSwapped::put64bits(const unsigned char* bytes)
+inline bool ByteStreamOutFileLE::put64bitsBE(const unsigned char* bytes)
 {
   swapped[0] = bytes[7];
   swapped[1] = bytes[6];
@@ -191,6 +211,54 @@ inline bool ByteStreamOutFileEndianSwapped::put64bits(const unsigned char* bytes
   swapped[6] = bytes[1];
   swapped[7] = bytes[0];
   return putBytes(swapped, 8);
+}
+
+inline ByteStreamOutFileBE::ByteStreamOutFileBE(FILE* file) : ByteStreamOutFile(file)
+{
+}
+
+inline bool ByteStreamOutFileBE::put16bitsLE(const unsigned char* bytes)
+{
+  swapped[0] = bytes[1];
+  swapped[1] = bytes[0];
+  return putBytes(swapped, 2);
+}
+
+inline bool ByteStreamOutFileBE::put32bitsLE(const unsigned char* bytes)
+{
+  swapped[0] = bytes[3];
+  swapped[1] = bytes[2];
+  swapped[2] = bytes[1];
+  swapped[3] = bytes[0];
+  return putBytes(swapped, 4);
+}
+
+inline bool ByteStreamOutFileBE::put64bitsLE(const unsigned char* bytes)
+{
+  swapped[0] = bytes[7];
+  swapped[1] = bytes[6];
+  swapped[2] = bytes[5];
+  swapped[3] = bytes[4];
+  swapped[4] = bytes[3];
+  swapped[5] = bytes[2];
+  swapped[6] = bytes[1];
+  swapped[7] = bytes[0];
+  return putBytes(swapped, 8);
+}
+
+inline bool ByteStreamOutFileBE::put16bitsBE(const unsigned char* bytes)
+{
+  return putBytes(bytes, 2);
+}
+
+inline bool ByteStreamOutFileBE::put32bitsBE(const unsigned char* bytes)
+{
+  return putBytes(bytes, 4);
+}
+
+inline bool ByteStreamOutFileBE::put64bitsBE(const unsigned char* bytes)
+{
+  return putBytes(bytes, 8);
 }
 
 #endif

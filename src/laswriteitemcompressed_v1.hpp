@@ -137,8 +137,9 @@ private:
   U8* last_item;
 
   I32 last_diff_32;
+  U32 sym_last_offset_diff;
   EntropyModel* m_packet_index;
-  EntropyModel* m_small_offset_diff;
+  EntropyModel* m_offset_diff[4];
   IntegerCompressor* ic_offset_diff;
   IntegerCompressor* ic_packet_size;
   IntegerCompressor* ic_return_point;

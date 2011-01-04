@@ -63,7 +63,7 @@ LASreadPoint::LASreadPoint()
   dec = 0;
 }
 
-BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, LASzip::CompressionType compression_type)
+BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, LASzip::Algorithm algorithm)
 {
   U32 i;
 
@@ -74,19 +74,19 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, LASzip::Compressio
   }
 
   // create entropy decoder (if requested)
-  switch (compression_type)
+  switch (algorithm)
   {
-  case LASzip::COMPRESSION_NONE:
+  case LASzip::POINT_BY_POINT_RAW:
     dec = 0;
     break;
-  case LASzip::COMPRESSION_RANGE:
+  case LASzip::POINT_BY_POINT_RANGE:
     dec = new RangeDecoder();
     break;
-  case LASzip::COMPRESSION_ARITHMETIC:
+  case LASzip::POINT_BY_POINT_ARITHMETIC:
     dec = new ArithmeticDecoder();
     break;
   default:
-    // entropy coder not supported
+    // entropy decoder not supported
     return FALSE;
   }
  

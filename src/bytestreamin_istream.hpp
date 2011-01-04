@@ -62,12 +62,6 @@ public:
   unsigned int getByte();
 /* read an array of bytes                                    */
   bool getBytes(unsigned char* bytes, unsigned int num_bytes);
-/* read 16 bit field (for implementing endian swap)         */
-  virtual bool get16bits(unsigned char* bytes);
-/* read 32 bit field (for implementing endian swap)         */
-  virtual bool get32bits(unsigned char* bytes);
-/* read 64 bit field (for implementing endian swap)         */
-  virtual bool get64bits(unsigned char* bytes);
 /* is the stream seekable (e.g. standard in is not)          */
   bool isSeekable() const;
 /* returns how many bytes were read since last reset         */
@@ -86,16 +80,42 @@ private:
 #endif
 };
 
-class ByteStreamInIstreamEndianSwapped : public ByteStreamInIstream
+class ByteStreamInIstreamLE : public ByteStreamInIstream
 {
 public:
-  ByteStreamInIstreamEndianSwapped(istream& stream);
-/* read 16 bit field (for implementing endian swap)         */
-  bool get16bits(unsigned char* bytes);
-/* read 32 bit field (for implementing endian swap)         */
-  bool get32bits(unsigned char* bytes);
-/* read 64 bit field (for implementing endian swap)         */
-  bool get64bits(unsigned char* bytes);
+  ByteStreamInIstreamLE(istream& stream);
+/* read 16 bit low-endian field                              */
+  bool get16bitsLE(unsigned char* bytes);
+/* read 32 bit low-endian field                              */
+  bool get32bitsLE(unsigned char* bytes);
+/* read 64 bit low-endian field                              */
+  bool get64bitsLE(unsigned char* bytes);
+/* read 16 bit big-endian field                              */
+  bool get16bitsBE(unsigned char* bytes);
+/* read 32 bit big-endian field                              */
+  bool get32bitsBE(unsigned char* bytes);
+/* read 64 bit big-endian field                              */
+  bool get64bitsBE(unsigned char* bytes);
+private:
+  unsigned char swapped[8];
+};
+
+class ByteStreamInIstreamBE : public ByteStreamInIstream
+{
+public:
+  ByteStreamInIstreamBE(istream& stream);
+/* read 16 bit low-endian field                              */
+  bool get16bitsLE(unsigned char* bytes);
+/* read 32 bit low-endian field                              */
+  bool get32bitsLE(unsigned char* bytes);
+/* read 64 bit low-endian field                              */
+  bool get64bitsLE(unsigned char* bytes);
+/* read 16 bit big-endian field                              */
+  bool get16bitsBE(unsigned char* bytes);
+/* read 32 bit big-endian field                              */
+  bool get32bitsBE(unsigned char* bytes);
+/* read 64 bit big-endian field                              */
+  bool get64bitsBE(unsigned char* bytes);
 private:
   unsigned char swapped[8];
 };
@@ -111,7 +131,7 @@ inline unsigned int ByteStreamInIstream::getByte()
   int byte = stream.get();
   if (stream.eof())
   {
-    //fprintf(stderr, "reading EOF\n");
+//    fprintf(stderr, "reading EOF\n");
     byte = 0;
   }
   return (unsigned int)byte;
@@ -121,21 +141,6 @@ inline bool ByteStreamInIstream::getBytes(unsigned char* bytes, unsigned int num
 {
   stream.read((char*)bytes, num_bytes);
   return !!(stream.good());
-}
-
-inline bool ByteStreamInIstream::get16bits(unsigned char* bytes)
-{
-  return getBytes(bytes, 2);
-}
-
-inline bool ByteStreamInIstream::get32bits(unsigned char* bytes)
-{
-  return getBytes(bytes, 4);
-}
-
-inline bool ByteStreamInIstream::get64bits(unsigned char* bytes)
-{
-  return getBytes(bytes, 8);
 }
 
 inline bool ByteStreamInIstream::isSeekable() const
@@ -159,11 +164,26 @@ inline void ByteStreamInIstream::resetCount()
   start = stream.tellg();
 }
 
-inline ByteStreamInIstreamEndianSwapped::ByteStreamInIstreamEndianSwapped(istream& stream) : ByteStreamInIstream(stream)
+inline ByteStreamInIstreamLE::ByteStreamInIstreamLE(istream& stream) : ByteStreamInIstream(stream)
 {
 }
 
-inline bool ByteStreamInIstreamEndianSwapped::get16bits(unsigned char* bytes)
+inline bool ByteStreamInIstreamLE::get16bitsLE(unsigned char* bytes)
+{
+  return getBytes(bytes, 2);
+}
+
+inline bool ByteStreamInIstreamLE::get32bitsLE(unsigned char* bytes)
+{
+  return getBytes(bytes, 4);
+}
+
+inline bool ByteStreamInIstreamLE::get64bitsLE(unsigned char* bytes)
+{
+  return getBytes(bytes, 8);
+}
+
+inline bool ByteStreamInIstreamLE::get16bitsBE(unsigned char* bytes)
 {
   if (getBytes(swapped, 2))
   {
@@ -174,7 +194,7 @@ inline bool ByteStreamInIstreamEndianSwapped::get16bits(unsigned char* bytes)
   return false;
 }
 
-inline bool ByteStreamInIstreamEndianSwapped::get32bits(unsigned char* bytes)
+inline bool ByteStreamInIstreamLE::get32bitsBE(unsigned char* bytes)
 {
   if (getBytes(swapped, 4))
   {
@@ -187,7 +207,7 @@ inline bool ByteStreamInIstreamEndianSwapped::get32bits(unsigned char* bytes)
   return false;
 }
 
-inline bool ByteStreamInIstreamEndianSwapped::get64bits(unsigned char* bytes)
+inline bool ByteStreamInIstreamLE::get64bitsBE(unsigned char* bytes)
 {
   if (getBytes(swapped, 8))
   {
@@ -202,6 +222,66 @@ inline bool ByteStreamInIstreamEndianSwapped::get64bits(unsigned char* bytes)
     return true;
   }
   return false;
+}
+
+inline ByteStreamInIstreamBE::ByteStreamInIstreamBE(istream& stream) : ByteStreamInIstream(stream)
+{
+}
+
+inline bool ByteStreamInIstreamBE::get16bitsLE(unsigned char* bytes)
+{
+  if (getBytes(swapped, 2))
+  {
+    bytes[0] = swapped[1];
+    bytes[1] = swapped[0];
+    return true;
+  }
+  return false;
+}
+
+inline bool ByteStreamInIstreamBE::get32bitsLE(unsigned char* bytes)
+{
+  if (getBytes(swapped, 4))
+  {
+    bytes[0] = swapped[3];
+    bytes[1] = swapped[2];
+    bytes[2] = swapped[1];
+    bytes[3] = swapped[0];
+    return true;
+  }
+  return false;
+}
+
+inline bool ByteStreamInIstreamBE::get64bitsLE(unsigned char* bytes)
+{
+  if (getBytes(swapped, 8))
+  {
+    bytes[0] = swapped[7];
+    bytes[1] = swapped[6];
+    bytes[2] = swapped[5];
+    bytes[3] = swapped[4];
+    bytes[4] = swapped[3];
+    bytes[5] = swapped[2];
+    bytes[6] = swapped[1];
+    bytes[7] = swapped[0];
+    return true;
+  }
+  return false;
+}
+
+inline bool ByteStreamInIstreamBE::get16bitsBE(unsigned char* bytes)
+{
+  return getBytes(bytes, 2);
+}
+
+inline bool ByteStreamInIstreamBE::get32bitsBE(unsigned char* bytes)
+{
+  return getBytes(bytes, 4);
+}
+
+inline bool ByteStreamInIstreamBE::get64bitsBE(unsigned char* bytes)
+{
+  return getBytes(bytes, 8);
 }
 
 #endif

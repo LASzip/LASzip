@@ -63,7 +63,7 @@ public:
   ~LASreadPoint();
 
   // should only be called *once*
-  BOOL setup(U32 num_items, const LASitem* items, LASzip::CompressionType compression_type);
+  BOOL setup(U32 num_items, const LASitem* items, LASzip::Algorithm algorithm);
 
   BOOL init(ByteStreamIn* instream);
   BOOL read(U8* const * point);

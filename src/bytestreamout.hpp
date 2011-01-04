@@ -53,12 +53,18 @@ public:
   virtual bool putByte(unsigned char byte) = 0;
 /* write an array of bytes                                   */
   virtual bool putBytes(const unsigned char* bytes, unsigned int num_bytes) = 0;
-/* write 16 bit field (for implementing endian swap)         */
-  virtual bool put16bits(const unsigned char* bytes) = 0;
-/* write 32 bit field (for implementing endian swap)         */
-  virtual bool put32bits(const unsigned char* bytes) = 0;
-/* write 64 bit field (for implementing endian swap)         */
-  virtual bool put64bits(const unsigned char* bytes) = 0;
+/* write 16 bit low-endian field                             */
+  virtual bool put16bitsLE(const unsigned char* bytes) = 0;
+/* write 32 bit low-endian field                             */
+  virtual bool put32bitsLE(const unsigned char* bytes) = 0;
+/* write 64 bit low-endian field                             */
+  virtual bool put64bitsLE(const unsigned char* bytes) = 0;
+/* write 16 bit big-endian field                             */
+  virtual bool put16bitsBE(const unsigned char* bytes) = 0;
+/* write 32 bit big-endian field                             */
+  virtual bool put32bitsBE(const unsigned char* bytes) = 0;
+/* write 64 bit big-endian field                             */
+  virtual bool put64bitsBE(const unsigned char* bytes) = 0;
 /* is the stream seekable (e.g. standard out is not)         */
   virtual bool isSeekable() const = 0;
 /* save position in the stream for (forward) seeking later   */

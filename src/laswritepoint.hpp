@@ -63,7 +63,7 @@ public:
   ~LASwritePoint();
 
   // should only be called *once*
-  BOOL setup(U32 num_items, LASitem* items, LASzip::CompressionType compression_type);
+  BOOL setup(U32 num_items, LASitem* items, LASzip::Algorithm algorithm);
 
   BOOL init(ByteStreamOut* outstream);
   BOOL write(const U8 * const * point);

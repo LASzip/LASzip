@@ -507,7 +507,10 @@ LASwriteItemCompressed_WAVEPACKET13_v1::LASwriteItemCompressed_WAVEPACKET13_v1(E
 
   /* create models and integer compressors */
   m_packet_index = enc->createSymbolModel(256);
-  m_small_offset_diff = enc->createBitModel();
+  m_offset_diff[0] = enc->createSymbolModel(4);
+  m_offset_diff[1] = enc->createSymbolModel(4);
+  m_offset_diff[2] = enc->createSymbolModel(4);
+  m_offset_diff[3] = enc->createSymbolModel(4);
   ic_offset_diff = new IntegerCompressor(enc, 32);
   ic_packet_size = new IntegerCompressor(enc, 32);
   ic_return_point = new IntegerCompressor(enc, 32);
@@ -520,7 +523,10 @@ LASwriteItemCompressed_WAVEPACKET13_v1::LASwriteItemCompressed_WAVEPACKET13_v1(E
 LASwriteItemCompressed_WAVEPACKET13_v1::~LASwriteItemCompressed_WAVEPACKET13_v1()
 {
   enc->destroySymbolModel(m_packet_index);
-  enc->destroyBitModel(m_small_offset_diff);
+  enc->destroySymbolModel(m_offset_diff[0]);
+  enc->destroySymbolModel(m_offset_diff[1]);
+  enc->destroySymbolModel(m_offset_diff[2]);
+  enc->destroySymbolModel(m_offset_diff[3]);
   delete ic_offset_diff;
   delete ic_packet_size;
   delete ic_return_point;
@@ -532,10 +538,14 @@ BOOL LASwriteItemCompressed_WAVEPACKET13_v1::init(const U8* item)
 {
   /* init state */
   last_diff_32 = 0;
+  sym_last_offset_diff = 0;
 
   /* init models and integer compressors */
   enc->initSymbolModel(m_packet_index);
-  enc->initBitModel(m_small_offset_diff);
+  enc->initSymbolModel(m_offset_diff[0]);
+  enc->initSymbolModel(m_offset_diff[1]);
+  enc->initSymbolModel(m_offset_diff[2]);
+  enc->initSymbolModel(m_offset_diff[3]);
   ic_offset_diff->initCompressor();
   ic_packet_size->initCompressor();
   ic_return_point->initCompressor();
@@ -558,13 +568,28 @@ inline BOOL LASwriteItemCompressed_WAVEPACKET13_v1::write(const U8* item)
   // if the current difference can be represented with 32 bits
   if (curr_diff_64 == (I64)(curr_diff_32))
   {
-    enc->encodeBit(m_small_offset_diff, 1);
-    ic_offset_diff->compress(last_diff_32, curr_diff_32);
-    last_diff_32 = curr_diff_32;
+    if (curr_diff_32 == 0) // current difference is zero
+    {
+      enc->encodeSymbol(m_offset_diff[sym_last_offset_diff], 0);
+      sym_last_offset_diff = 0;
+    }
+    else if (curr_diff_32 == (I32)((LASwavepacket13*)last_item)->packet_size) // current difference is size of last packet
+    {
+      enc->encodeSymbol(m_offset_diff[sym_last_offset_diff], 1);
+      sym_last_offset_diff = 1;
+    }
+    else // 
+    {
+      enc->encodeSymbol(m_offset_diff[sym_last_offset_diff], 2);
+      sym_last_offset_diff = 2;
+      ic_offset_diff->compress(last_diff_32, curr_diff_32);
+      last_diff_32 = curr_diff_32;
+    }
   }
   else
   {
-    enc->encodeBit(m_small_offset_diff, 0);
+    enc->encodeSymbol(m_offset_diff[sym_last_offset_diff], 3);
+    sym_last_offset_diff = 3;
     enc->writeInt64(((LASwavepacket13*)item)->offset);
   }
   ic_packet_size->compress(((LASwavepacket13*)last_item)->packet_size, ((LASwavepacket13*)item)->packet_size);

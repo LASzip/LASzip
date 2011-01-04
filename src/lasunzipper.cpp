@@ -49,26 +49,32 @@
 #include "bytestreamin_istream.hpp"
 #include "lasreadpoint.hpp"
 
-unsigned int LASunzipper::open(FILE* infile, unsigned int num_items, const LASitem items[], LASzip::CompressionType compression_type)
+unsigned int LASunzipper::open(FILE* infile, unsigned int num_items, const LASitem items[], LASzip::Algorithm algorithm)
 {
   count = 0;
-  stream = new ByteStreamInFile(infile);
+  if (IS_LITTLE_ENDIAN())
+    stream = new ByteStreamInFileLE(infile);
+  else
+    stream = new ByteStreamInFileBE(infile);
   if (!stream) return 1;
   reader = new LASreadPoint();
   if (!reader) return 1;
-  if (!reader->setup(num_items, items, compression_type)) return 1;
+  if (!reader->setup(num_items, items, algorithm)) return 1;
   if (!reader->init(stream)) return 1;
   return 0;
 }
 
-unsigned int LASunzipper::open(istream& instream, unsigned int num_items, const LASitem items[], LASzip::CompressionType compression_type)
+unsigned int LASunzipper::open(istream& instream, unsigned int num_items, const LASitem items[], LASzip::Algorithm algorithm)
 {
   count = 0;
-  stream = new ByteStreamInIstream(instream);
+  if (IS_LITTLE_ENDIAN())
+    stream = new ByteStreamInIstreamLE(instream);
+  else
+    stream = new ByteStreamInIstreamBE(instream);
   if (!stream) return 1;
   reader = new LASreadPoint();
   if (!reader) return 1;
-  if (!reader->setup(num_items, items, compression_type)) return 1;
+  if (!reader->setup(num_items, items, algorithm)) return 1;
   if (!reader->init(stream)) return 1;
   return 0;
 }

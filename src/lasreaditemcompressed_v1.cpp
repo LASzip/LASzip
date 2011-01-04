@@ -463,7 +463,10 @@ LASreadItemCompressed_WAVEPACKET13_v1::LASreadItemCompressed_WAVEPACKET13_v1(Ent
 
   /* create models and integer compressors */
   m_packet_index = dec->createSymbolModel(256);
-  m_small_offset_diff = dec->createBitModel();
+  m_offset_diff[0] = dec->createSymbolModel(4);
+  m_offset_diff[1] = dec->createSymbolModel(4);
+  m_offset_diff[2] = dec->createSymbolModel(4);
+  m_offset_diff[3] = dec->createSymbolModel(4);
   ic_offset_diff = new IntegerCompressor(dec, 32);
   ic_packet_size = new IntegerCompressor(dec, 32);
   ic_return_point = new IntegerCompressor(dec, 32);
@@ -476,7 +479,10 @@ LASreadItemCompressed_WAVEPACKET13_v1::LASreadItemCompressed_WAVEPACKET13_v1(Ent
 LASreadItemCompressed_WAVEPACKET13_v1::~LASreadItemCompressed_WAVEPACKET13_v1()
 {
   dec->destroySymbolModel(m_packet_index);
-  dec->destroyBitModel(m_small_offset_diff);
+  dec->destroyBitModel(m_offset_diff[0]);
+  dec->destroyBitModel(m_offset_diff[1]);
+  dec->destroyBitModel(m_offset_diff[2]);
+  dec->destroyBitModel(m_offset_diff[3]);
   delete ic_offset_diff;
   delete ic_packet_size;
   delete ic_return_point;
@@ -488,10 +494,14 @@ BOOL LASreadItemCompressed_WAVEPACKET13_v1::init(const U8* item)
 {
   /* init state */
   last_diff_32 = 0;
+  sym_last_offset_diff = 0;
 
   /* init models and integer compressors */
   dec->initSymbolModel(m_packet_index);
-  dec->initBitModel(m_small_offset_diff);
+  dec->initSymbolModel(m_offset_diff[0]);
+  dec->initSymbolModel(m_offset_diff[1]);
+  dec->initSymbolModel(m_offset_diff[2]);
+  dec->initSymbolModel(m_offset_diff[3]);
   ic_offset_diff->initDecompressor();
   ic_packet_size->initDecompressor();
   ic_return_point->initDecompressor();
@@ -508,7 +518,17 @@ inline BOOL LASreadItemCompressed_WAVEPACKET13_v1::read(U8* item)
   item[0] = (U8)(dec->decodeSymbol(m_packet_index));
   item++;
 
-  if (dec->decodeBit(m_small_offset_diff))
+  sym_last_offset_diff = dec->decodeSymbol(m_offset_diff[sym_last_offset_diff]);
+
+  if (sym_last_offset_diff == 0)
+  {
+    ((LASwavepacket13*)item)->offset = ((LASwavepacket13*)last_item)->offset;
+  }
+  else if (sym_last_offset_diff == 1)
+  {
+    ((LASwavepacket13*)item)->offset = ((LASwavepacket13*)last_item)->offset + ((LASwavepacket13*)last_item)->packet_size;
+  }
+  else if (sym_last_offset_diff == 2)
   {
     last_diff_32 = ic_offset_diff->decompress(last_diff_32);
     ((LASwavepacket13*)item)->offset = ((LASwavepacket13*)last_item)->offset + last_diff_32;
