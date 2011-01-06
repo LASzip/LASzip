@@ -56,6 +56,18 @@ public:
   LASreadItemRaw_POINT10(){};
   inline BOOL read(U8* item)
   {
+    if (!instream->getBytes(item, 20)) return FALSE;       // POINT10
+    return TRUE;
+  }
+};
+
+/*
+class LASreadItemRaw_POINT10 : public LASreadItemRaw
+{
+public:
+  LASreadItemRaw_POINT10(){};
+  inline BOOL read(U8* item)
+  {
     if (!instream->get32bitsLE(&(item[ 0]))) return FALSE;       // x
     if (!instream->get32bitsLE(&(item[ 4]))) return FALSE;       // y
     if (!instream->get32bitsLE(&(item[ 8]))) return FALSE;       // z
@@ -68,6 +80,7 @@ public:
     return TRUE;
   };
 };
+*/
 
 class LASreadItemRaw_GPSTIME11 : public LASreadItemRaw
 {

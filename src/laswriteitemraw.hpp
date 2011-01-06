@@ -56,6 +56,18 @@ public:
   LASwriteItemRaw_POINT10(){};
   inline BOOL write(const U8* item)
   {
+    if (!outstream->putBytes(item, 20)) return FALSE;       // POINT10
+    return TRUE;
+  };
+};
+
+/*
+class LASwriteItemRaw_POINT10 : public LASwriteItemRaw
+{
+public:
+  LASwriteItemRaw_POINT10(){};
+  inline BOOL write(const U8* item)
+  {
     if (!outstream->put32bitsLE(&(item[ 0]))) return FALSE;       // x
     if (!outstream->put32bitsLE(&(item[ 4]))) return FALSE;       // y
     if (!outstream->put32bitsLE(&(item[ 8]))) return FALSE;       // z
@@ -68,6 +80,7 @@ public:
     return TRUE;
   };
 };
+*/
 
 class LASwriteItemRaw_GPSTIME11 : public LASwriteItemRaw
 {
