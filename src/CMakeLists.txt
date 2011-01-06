@@ -78,6 +78,13 @@ set_target_properties(${LASZIP_LIB_NAME}
 ###############################################################################
 # Targets installation
 
+if (APPLE)
+  set_target_properties(
+    ${LASZIP_LIB_NAME}
+    PROPERTIES
+    INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+endif()
+
 install(TARGETS ${LASZIP_LIB_NAME} 
   RUNTIME DESTINATION ${LASZIP_BIN_DIR}
   LIBRARY DESTINATION ${LASZIP_LIB_DIR}
