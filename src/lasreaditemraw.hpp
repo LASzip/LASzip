@@ -50,76 +50,113 @@
 
 #include <assert.h>
 
-class LASreadItemRaw_POINT10 : public LASreadItemRaw
+class LASreadItemRaw_POINT10_LE : public LASreadItemRaw
 {
 public:
-  LASreadItemRaw_POINT10(){};
+  LASreadItemRaw_POINT10_LE(){};
   inline BOOL read(U8* item)
   {
-    if (!instream->getBytes(item, 20)) return FALSE;       // POINT10
-    return TRUE;
+    return instream->getBytes(item, 20);
   }
 };
 
-/*
-class LASreadItemRaw_POINT10 : public LASreadItemRaw
+class LASreadItemRaw_POINT10_BE : public LASreadItemRaw
 {
 public:
-  LASreadItemRaw_POINT10(){};
+  LASreadItemRaw_POINT10_BE(){};
   inline BOOL read(U8* item)
   {
-    if (!instream->get32bitsLE(&(item[ 0]))) return FALSE;       // x
-    if (!instream->get32bitsLE(&(item[ 4]))) return FALSE;       // y
-    if (!instream->get32bitsLE(&(item[ 8]))) return FALSE;       // z
-    if (!instream->get16bitsLE(&(item[12]))) return FALSE;       // intensity
-    if (!instream->getBytes(&(item[14]), 4)) return FALSE;       // bitfield
-                                                                 // classification
-                                                                 // scan_angle_rank
-                                                                 // user_data
-    if (!instream->get16bitsLE(&(item[18]))) return FALSE;       // point_source_ID
+    if (!instream->getBytes(swapped, 20)) return FALSE;
+    ENDIAN_SWAP_32(&swapped[ 0], &item[ 0]);    // x
+    ENDIAN_SWAP_32(&swapped[ 4], &item[ 4]);    // y
+    ENDIAN_SWAP_32(&swapped[ 8], &item[ 8]);    // z
+    ENDIAN_SWAP_16(&swapped[12], &item[12]);    // intensity
+    *((U32*)&item[14]) = *((U32*)&swapped[14]); // bitfield, classification, scan_angle_rank, user_data
+    ENDIAN_SWAP_16(&swapped[18], &item[18]);    // point_source_ID
     return TRUE;
   };
+private:
+  U8 swapped[20];
 };
-*/
 
-class LASreadItemRaw_GPSTIME11 : public LASreadItemRaw
+class LASreadItemRaw_GPSTIME11_LE : public LASreadItemRaw
 {
 public:
-  LASreadItemRaw_GPSTIME11(){};
+  LASreadItemRaw_GPSTIME11_LE(){};
   inline BOOL read(U8* item)
   {
-    return instream->get64bitsLE(item);                          // GPSTIME
+    return instream->getBytes(item, 8);
   };
 };
 
-class LASreadItemRaw_RGB12 : public LASreadItemRaw
+class LASreadItemRaw_GPSTIME11_BE : public LASreadItemRaw
 {
 public:
-  LASreadItemRaw_RGB12(){};
+  LASreadItemRaw_GPSTIME11_BE(){};
   inline BOOL read(U8* item)
   {
-    if (!instream->get16bitsLE(&(item[0]))) return FALSE;        // R
-    if (!instream->get16bitsLE(&(item[2]))) return FALSE;        // G
-    if (!instream->get16bitsLE(&(item[4]))) return FALSE;        // B
+    if (!instream->getBytes(swapped, 8)) return FALSE;
+    ENDIAN_SWAP_64(swapped, item);
     return TRUE;
+  };
+private:
+  U8 swapped[8];
+};
+
+class LASreadItemRaw_RGB12_LE : public LASreadItemRaw
+{
+public:
+  LASreadItemRaw_RGB12_LE(){};
+  inline BOOL read(U8* item)
+  {
+    return instream->getBytes(item, 6);
   };
 };
 
-class LASreadItemRaw_WAVEPACKET13 : public LASreadItemRaw
+class LASreadItemRaw_RGB12_BE : public LASreadItemRaw
 {
 public:
-  LASreadItemRaw_WAVEPACKET13(){}
+  LASreadItemRaw_RGB12_BE(){};
   inline BOOL read(U8* item)
   {
-    if (!instream->getBytes(&(item[0]),1)) return FALSE;         // wavepacket descriptor index
-    if (!instream->get64bitsLE(&(item[ 1]))) return FALSE;       // byte offset to waveform data
-    if (!instream->get32bitsLE(&(item[ 9]))) return FALSE;       // waveform packet size in bytes
-    if (!instream->get32bitsLE(&(item[13]))) return FALSE;       // return point waveform location
-    if (!instream->get32bitsLE(&(item[17]))) return FALSE;       // X(t)
-    if (!instream->get32bitsLE(&(item[21]))) return FALSE;       // Y(t)
-    if (!instream->get32bitsLE(&(item[25]))) return FALSE;       // Z(t)
+    if (!instream->getBytes(swapped, 6)) return FALSE;
+    ENDIAN_SWAP_32(&swapped[ 0], &item[ 0]); // R
+    ENDIAN_SWAP_32(&swapped[ 2], &item[ 2]); // G
+    ENDIAN_SWAP_32(&swapped[ 4], &item[ 4]); // B
     return TRUE;
   };
+private:
+  U8 swapped[6];
+};
+
+class LASreadItemRaw_WAVEPACKET13_LE : public LASreadItemRaw
+{
+public:
+  LASreadItemRaw_WAVEPACKET13_LE(){}
+  inline BOOL read(U8* item)
+  {
+    return instream->getBytes(item, 29);
+  };
+};
+
+class LASreadItemRaw_WAVEPACKET13_BE : public LASreadItemRaw
+{
+public:
+  LASreadItemRaw_WAVEPACKET13_BE(){}
+  inline BOOL read(U8* item)
+  {
+    if (!instream->getBytes(swapped, 29)) return FALSE;
+    item[0] = swapped[0];                    // wavepacket descriptor index
+    ENDIAN_SWAP_64(&swapped[ 1], &item[ 1]); // byte offset to waveform data
+    ENDIAN_SWAP_32(&swapped[ 9], &item[ 9]); // waveform packet size in bytes
+    ENDIAN_SWAP_32(&swapped[13], &item[13]); // return point waveform location
+    ENDIAN_SWAP_32(&swapped[17], &item[17]); // X(t)
+    ENDIAN_SWAP_32(&swapped[21], &item[21]); // Y(t)
+    ENDIAN_SWAP_32(&swapped[25], &item[25]); // Z(t)
+    return TRUE;
+  };
+private:
+  U8 swapped[29];
 };
 
 class LASreadItemRaw_BYTE : public LASreadItemRaw

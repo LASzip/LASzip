@@ -27,7 +27,7 @@ typedef unsigned int       U32;
 typedef unsigned short     U16;
 typedef unsigned char      U8;
 
-#if defined(WIN32)            // 64 byte integer under Windows 
+#if defined(_WIN32)            // 64 byte integer under Windows 
 typedef unsigned __int64   U64;
 typedef __int64            I64;
 #else                          // 64 byte integer elsewhere ... 
@@ -38,7 +38,11 @@ typedef long long          I64;
 typedef float              F32;
 typedef double             F64;
 
+#if defined(_WIN32)
+typedef int                BOOL;
+#else
 typedef bool               BOOL;
+#endif
 
 typedef union U32F32 { U32 u32; F32 f32; } U32F32;
 typedef union U64F64 { U64 u64; F64 f64; } U64F64;
@@ -84,12 +88,19 @@ typedef union I64F64 { I64 i64; F64 f64; } I64F64;
 
 inline BOOL IS_LITTLE_ENDIAN()
 {
-  U32 i = 1;
-  if (*((U8*)&i) == 1)
-    return TRUE;
-  else
-    return FALSE;
+  const U32 i = 1;
+  return (*((U8*)&i) == 1);
 }
+
+#define ENDIANSWAP16(n) \
+	( ((((U16) n) << 8) & 0xFF00) | \
+	  ((((U16) n) >> 8) & 0x00FF) )
+
+#define ENDIANSWAP32(n) \
+	( ((((U32) n) << 24) & 0xFF000000) |	\
+	  ((((U32) n) <<  8) & 0x00FF0000) |	\
+	  ((((U32) n) >>  8) & 0x0000FF00) |	\
+	  ((((U32) n) >> 24) & 0x000000FF) )
 
 inline void ENDIAN_SWAP_16(U8* field)
 {
@@ -126,13 +137,13 @@ inline void ENDIAN_SWAP_64(U8* field)
   field[4] = help;
 }
 
-inline void ENDIAN_SWAP_16(U8* from, U8* to)
+inline void ENDIAN_SWAP_16(const U8* from, U8* to)
 {
   to[0] = from[1];
   to[1] = from[0];
 }
 
-inline void ENDIAN_SWAP_32(U8* from, U8* to)
+inline void ENDIAN_SWAP_32(const U8* from, U8* to)
 {
   to[0] = from[3];
   to[1] = from[2];
@@ -140,7 +151,7 @@ inline void ENDIAN_SWAP_32(U8* from, U8* to)
   to[3] = from[0];
 }
 
-inline void ENDIAN_SWAP_64(U8* from, U8* to)
+inline void ENDIAN_SWAP_64(const U8* from, U8* to)
 {
   to[0] = from[7];
   to[1] = from[6];

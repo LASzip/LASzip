@@ -101,16 +101,28 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, LASzip::Algorithm 
     switch (items[i].type)
     {
     case LASitem::POINT10:
-      readers_raw[i] = new LASreadItemRaw_POINT10();
+      if (IS_LITTLE_ENDIAN())
+        readers_raw[i] = new LASreadItemRaw_POINT10_LE();
+      else
+        readers_raw[i] = new LASreadItemRaw_POINT10_BE();
       break;
     case LASitem::GPSTIME11:
-      readers_raw[i] = new LASreadItemRaw_GPSTIME11();
-      break;
+      if (IS_LITTLE_ENDIAN())
+        readers_raw[i] = new LASreadItemRaw_GPSTIME11_LE();
+      else
+        readers_raw[i] = new LASreadItemRaw_GPSTIME11_BE();
+        break;
     case LASitem::RGB12:
-      readers_raw[i] = new LASreadItemRaw_RGB12();
+      if (IS_LITTLE_ENDIAN())
+        readers_raw[i] = new LASreadItemRaw_RGB12_LE();
+      else
+        readers_raw[i] = new LASreadItemRaw_RGB12_BE();
       break;
     case LASitem::WAVEPACKET13:
-      readers_raw[i] = new LASreadItemRaw_WAVEPACKET13();
+      if (IS_LITTLE_ENDIAN())
+        readers_raw[i] = new LASreadItemRaw_WAVEPACKET13_LE();
+      else
+        readers_raw[i] = new LASreadItemRaw_WAVEPACKET13_BE();
       break;
     case LASitem::BYTE:
       readers_raw[i] = new LASreadItemRaw_BYTE(items[i].size);

@@ -101,19 +101,31 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, LASzip::Algorithm algor
     switch (items[i].type)
     {
     case LASitem::POINT10:
-      writers_raw[i] = new LASwriteItemRaw_POINT10();
+      if (IS_LITTLE_ENDIAN())
+        writers_raw[i] = new LASwriteItemRaw_POINT10_LE();
+      else
+        writers_raw[i] = new LASwriteItemRaw_POINT10_BE();
       items[i].version = 0;
       break;
     case LASitem::GPSTIME11:
-      writers_raw[i] = new LASwriteItemRaw_GPSTIME11();
+      if (IS_LITTLE_ENDIAN())
+        writers_raw[i] = new LASwriteItemRaw_GPSTIME11_LE();
+      else
+        writers_raw[i] = new LASwriteItemRaw_GPSTIME11_BE();
       items[i].version = 0;
       break;
     case LASitem::RGB12:
-      writers_raw[i] = new LASwriteItemRaw_RGB12();
+      if (IS_LITTLE_ENDIAN())
+        writers_raw[i] = new LASwriteItemRaw_RGB12_LE();
+      else
+        writers_raw[i] = new LASwriteItemRaw_RGB12_BE();
       items[i].version = 0;
       break;
     case LASitem::WAVEPACKET13:
-      writers_raw[i] = new LASwriteItemRaw_WAVEPACKET13();
+      if (IS_LITTLE_ENDIAN())
+        writers_raw[i] = new LASwriteItemRaw_WAVEPACKET13_LE();
+      else
+        writers_raw[i] = new LASwriteItemRaw_WAVEPACKET13_BE();
       items[i].version = 0;
       break;
     case LASitem::BYTE:
