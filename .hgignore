@@ -84,6 +84,7 @@ laszip.opensdf
 laszip.sdf
 laszip.sln
 laszip/laszip.sdf
+*.tlog
 
 tools/laszip.pc
 tools/laszip-config
