@@ -38,7 +38,7 @@ typedef long long          I64;
 typedef float              F32;
 typedef double             F64;
 
-#if defined(_WIN32)
+#if defined(_MSC_VER) && (_MSC_VER < 1300)
 typedef int                BOOL;
 #else
 typedef bool               BOOL;
