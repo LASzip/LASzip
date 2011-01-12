@@ -242,7 +242,6 @@ LASwritePoint::~LASwritePoint()
     {
       delete writers_raw[i];
     }
-    delete writers_raw;
   }
   if (writers_compressed)
   {
@@ -250,7 +249,6 @@ LASwritePoint::~LASwritePoint()
     {
       delete writers_compressed[i];
     }
-    delete writers_compressed;
   }
   if (enc)
   {
