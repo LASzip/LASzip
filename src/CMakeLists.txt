@@ -9,7 +9,7 @@
 set(LASZIP_HEADERS_DIR ../include/laszip)
 
 set(LASZIP_HPP
-  ${LASZIP_HEADERS_DIR}/export.hpp
+  ${LASZIP_HEADERS_DIR}/laszipexport.hpp
   ${LASZIP_HEADERS_DIR}/laszip.hpp
   ${LASZIP_HEADERS_DIR}/laszipper.hpp
   ${LASZIP_HEADERS_DIR}/lasunzipper.hpp
