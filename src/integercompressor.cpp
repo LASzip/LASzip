@@ -342,7 +342,7 @@ I32 IntegerCompressor::decompress(I32 pred, U32 context)
 
 void IntegerCompressor::writeCorrector(I32 c, EntropyModel* mBits)
 {
-  I32 c1;
+  U32 c1;
 
   // find the tighest interval [ - (2^k - 1)  ...  + (2^k) ] that contains c
 
@@ -369,22 +369,25 @@ void IntegerCompressor::writeCorrector(I32 c, EntropyModel* mBits)
   if (k) // then c is either smaller than 0 or bigger than 1
   {
     assert((c != 0) && (c != 1));
-    // translate the corrector c into the k-bit interval [ 0 ... 2^k - 1 ]
-    if (c < 0) // then c is in the interval [ - (2^k - 1)  ...  - (2^(k-1)) ]
+    if (k < 32)
     {
-      // so we translate c into the interval [ 0 ...  + 2^(k-1) - 1 ] by adding (2^k - 1)
-      enc->writeBits(k, c + ((1<<k) - 1));
+      // translate the corrector c into the k-bit interval [ 0 ... 2^k - 1 ]
+      if (c < 0) // then c is in the interval [ - (2^k - 1)  ...  - (2^(k-1)) ]
+      {
+        // so we translate c into the interval [ 0 ...  + 2^(k-1) - 1 ] by adding (2^k - 1)
+        enc->writeBits(k, c + ((1<<k) - 1));
 #ifdef CREATE_HISTOGRAMS
-      corr_histogram[k][c + ((1<<k) - 1)]++;
+        corr_histogram[k][c + ((1<<k) - 1)]++;
 #endif
-    }
-    else // then c is in the interval [ 2^(k-1) + 1  ...  2^k ]
-    {
-      // so we translate c into the interval [ 2^(k-1) ...  + 2^k - 1 ] by subtracting 1
-      enc->writeBits(k, c - 1);
+      }
+      else // then c is in the interval [ 2^(k-1) + 1  ...  2^k ]
+      {
+        // so we translate c into the interval [ 2^(k-1) ...  + 2^k - 1 ] by subtracting 1
+        enc->writeBits(k, c - 1);
 #ifdef CREATE_HISTOGRAMS
-      corr_histogram[k][c - 1]++;
+        corr_histogram[k][c - 1]++;
 #endif
+      }
     }
   }
   else // then c is 0 or 1
@@ -399,35 +402,37 @@ void IntegerCompressor::writeCorrector(I32 c, EntropyModel* mBits)
   if (k) // then c is either smaller than 0 or bigger than 1
   {
     assert((c != 0) && (c != 1));
-    // translate the corrector c into the k-bit interval [ 0 ... 2^k - 1 ]
-    if (c < 0) // then c is in the interval [ - (2^k - 1)  ...  - (2^(k-1)) ]
+    if (k < 32)
     {
-      // so we translate c into the interval [ 0 ...  + 2^(k-1) - 1 ] by adding (2^k - 1)
-      c += ((1<<k) - 1);
-    }
-    else // then c is in the interval [ 2^(k-1) + 1  ...  2^k ]
-    {
-      // so we translate c into the interval [ 2^(k-1) ...  + 2^k - 1 ] by subtracting 1
-      c -= 1;
-    }
-
-    if (k <= bits_high) // for small k we code the interval in one step
-    {
-      // compress c with the range coder
-      enc->encodeSymbol(mCorrector[k], c);
-    }
-    else // for larger k we need to code the interval in two steps
-    {
-      // figure out how many lower bits there are 
-      int k1 = k-bits_high;
-      // c1 represents the lowest k-bits_high+1 bits
-      c1 = c & ((1<<k1) - 1);
-      // c represents the highest bits_high bits
-      c = c >> k1;
-      // compress the higher bits using a context table
-      enc->encodeSymbol(mCorrector[k], c);
-      // store the lower k1 bits raw
-      enc->writeBits(k1, c1);
+      // translate the corrector c into the k-bit interval [ 0 ... 2^k - 1 ]
+      if (c < 0) // then c is in the interval [ - (2^k - 1)  ...  - (2^(k-1)) ]
+      {
+        // so we translate c into the interval [ 0 ...  + 2^(k-1) - 1 ] by adding (2^k - 1)
+        c += ((1<<k) - 1);
+      }
+      else // then c is in the interval [ 2^(k-1) + 1  ...  2^k ]
+      {
+        // so we translate c into the interval [ 2^(k-1) ...  + 2^k - 1 ] by subtracting 1
+        c -= 1;
+      }
+      if (k <= bits_high) // for small k we code the interval in one step
+      {
+        // compress c with the range coder
+        enc->encodeSymbol(mCorrector[k], c);
+      }
+      else // for larger k we need to code the interval in two steps
+      {
+        // figure out how many lower bits there are 
+        int k1 = k-bits_high;
+        // c1 represents the lowest k-bits_high+1 bits
+        c1 = c & ((1<<k1) - 1);
+        // c represents the highest bits_high bits
+        c = c >> k1;
+        // compress the higher bits using a context table
+        enc->encodeSymbol(mCorrector[k], c);
+        // store the lower k1 bits raw
+        enc->writeBits(k1, c1);
+      }
     }
   }
   else // then c is 0 or 1
@@ -451,17 +456,24 @@ I32 IntegerCompressor::readCorrector(EntropyModel* mBits)
 #ifdef COMPRESS_ONLY_K
   if (k) // then c is either smaller than 0 or bigger than 1
   {
-    c = dec->readBits(k);
+    if (k < 32)
+    {
+      c = dec->readBits(k);
 
-    if (c >= (1<<(k-1))) // if c is in the interval [ 2^(k-1)  ...  + 2^k - 1 ]
-    {
-      // so we translate c back into the interval [ 2^(k-1) + 1  ...  2^k ] by adding 1 
-      c += 1;
+      if (c >= (1<<(k-1))) // if c is in the interval [ 2^(k-1)  ...  + 2^k - 1 ]
+      {
+        // so we translate c back into the interval [ 2^(k-1) + 1  ...  2^k ] by adding 1 
+        c += 1;
+      }
+      else // otherwise c is in the interval [ 0 ...  + 2^(k-1) - 1 ]
+      {
+        // so we translate c back into the interval [ - (2^k - 1)  ...  - (2^(k-1)) ] by subtracting (2^k - 1)
+        c -= ((1<<k) - 1);
+      }
     }
-    else // otherwise c is in the interval [ 0 ...  + 2^(k-1) - 1 ]
+    else
     {
-      // so we translate c back into the interval [ - (2^k - 1)  ...  - (2^(k-1)) ] by subtracting (2^k - 1)
-      c -= ((1<<k) - 1);
+      c = corr_min;
     }
   }
   else // then c is either 0 or 1
@@ -471,33 +483,39 @@ I32 IntegerCompressor::readCorrector(EntropyModel* mBits)
 #else // COMPRESS_ONLY_K
   if (k) // then c is either smaller than 0 or bigger than 1
   {
-    if (k <= bits_high) // for small k we can do this in one step
+    if (k < 32)
     {
-      // decompress c with the range coder
-      c = dec->decodeSymbol(mCorrector[k]);
+      if (k <= bits_high) // for small k we can do this in one step
+      {
+        // decompress c with the range coder
+        c = dec->decodeSymbol(mCorrector[k]);
+      }
+      else
+      {
+        // for larger k we need to do this in two steps
+        int k1 = k-bits_high;
+        // decompress higher bits with table
+        c = dec->decodeSymbol(mCorrector[k]);
+        // read lower bits raw
+        int c1 = dec->readBits(k1);
+        // put the corrector back together
+        c = (c << k1) | c1;
+      }
+      // translate c back into its correct interval
+      if (c >= (1<<(k-1))) // if c is in the interval [ 2^(k-1)  ...  + 2^k - 1 ]
+      {
+        // so we translate c back into the interval [ 2^(k-1) + 1  ...  2^k ] by adding 1 
+        c += 1;
+      }
+      else // otherwise c is in the interval [ 0 ...  + 2^(k-1) - 1 ]
+      {
+        // so we translate c back into the interval [ - (2^k - 1)  ...  - (2^(k-1)) ] by subtracting (2^k - 1)
+        c -= ((1<<k) - 1);
+      }
     }
     else
     {
-      // for larger k we need to do this in two steps
-      int k1 = k-bits_high;
-      // decompress higher bits with table
-      c = dec->decodeSymbol(mCorrector[k]);
-      // read lower bits raw
-      int c1 = dec->readBits(k1);
-      // put the corrector back together
-      c = (c << k1) | c1;
-    }
-
-    // translate c back into its correct interval
-    if (c >= (1<<(k-1))) // if c is in the interval [ 2^(k-1)  ...  + 2^k - 1 ]
-    {
-      // so we translate c back into the interval [ 2^(k-1) + 1  ...  2^k ] by adding 1 
-      c += 1;
-    }
-    else // otherwise c is in the interval [ 0 ...  + 2^(k-1) - 1 ]
-    {
-      // so we translate c back into the interval [ - (2^k - 1)  ...  - (2^(k-1)) ] by subtracting (2^k - 1)
-      c -= ((1<<k) - 1);
+      c = corr_min;
     }
   }
   else // then c is either 0 or 1
