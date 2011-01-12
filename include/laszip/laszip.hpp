@@ -58,7 +58,7 @@ typedef long long SIGNED_INT64;
 #define LASZIP_VERSION_MINOR    0
 #define LASZIP_VERSION_REVISION 0
 
-#include "export.hpp"
+#include "laszipexport.hpp"
 
 class LASZIP_DLL LASitem
 {
