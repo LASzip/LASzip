@@ -47,7 +47,9 @@
 #include "laswritepoint.hpp"
 
 #include "arithmeticencoder.hpp"
+#ifdef LASZIP_HAVE_RANGECODER
 #include "rangeencoder.hpp"
+#endif
 #include "laswriteitemraw.hpp"
 #include "laswriteitemcompressed_v1.hpp"
 
@@ -79,9 +81,11 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, LASzip::Algorithm algor
   case LASzip::POINT_BY_POINT_RAW:
     enc = 0;
     break;
+#ifdef LASZIP_HAVE_RANGECODER
   case LASzip::POINT_BY_POINT_RANGE:
     enc = new RangeEncoder();
     break;
+#endif
   case LASzip::POINT_BY_POINT_ARITHMETIC:
     enc = new ArithmeticEncoder();
     break;

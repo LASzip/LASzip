@@ -47,7 +47,9 @@
 #include "lasreadpoint.hpp"
 
 #include "arithmeticdecoder.hpp"
+#ifdef LASZIP_HAVE_RANGECODER
 #include "rangedecoder.hpp"
+#endif
 #include "lasreaditemraw.hpp"
 #include "lasreaditemcompressed_v1.hpp"
 
@@ -79,9 +81,11 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, LASzip::Algorithm 
   case LASzip::POINT_BY_POINT_RAW:
     dec = 0;
     break;
+#ifdef LASZIP_HAVE_RANGECODER
   case LASzip::POINT_BY_POINT_RANGE:
     dec = new RangeDecoder();
     break;
+#endif
   case LASzip::POINT_BY_POINT_ARITHMETIC:
     dec = new ArithmeticDecoder();
     break;

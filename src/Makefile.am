@@ -13,7 +13,4 @@ liblibrary_la_SOURCES =				arithmeticmodel.cpp \
 						lasreadpoint.cpp \
 						laszip.cpp \
 						laszipper.cpp \
-						lasunzipper.cpp \
-						rangeencoder.cpp \
-						rangedecoder.cpp \
-						rangemodel.cpp
+						lasunzipper.cpp
