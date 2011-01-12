@@ -292,6 +292,7 @@ LASwriteItemCompressed_GPSTIME11_v1::LASwriteItemCompressed_GPSTIME11_v1(Entropy
 LASwriteItemCompressed_GPSTIME11_v1::~LASwriteItemCompressed_GPSTIME11_v1()
 {
   enc->destroySymbolModel(m_gpstime_multi);
+  enc->destroySymbolModel(m_gpstime_0diff);
   delete ic_gpstime;
 }
 

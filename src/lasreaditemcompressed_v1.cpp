@@ -290,6 +290,7 @@ LASreadItemCompressed_GPSTIME11_v1::LASreadItemCompressed_GPSTIME11_v1(EntropyDe
 LASreadItemCompressed_GPSTIME11_v1::~LASreadItemCompressed_GPSTIME11_v1()
 {
   dec->destroySymbolModel(m_gpstime_multi);
+  dec->destroySymbolModel(m_gpstime_0diff);
   delete ic_gpstime;
 }
 
