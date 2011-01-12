@@ -142,7 +142,10 @@ int main(int argc, char *argv[])
 
   LASzipper* laszipper1 = new LASzipper(); // without compression
   LASzipper* laszipper2 = new LASzipper(); // with arithmetic compression
-  LASzipper* laszipper3 = new LASzipper(); // with range compression
+  LASzipper* laszipper3 = NULL;
+#ifdef LASZIP_HAVE_RANGECODER
+  laszipper3 = new LASzipper(); // with range compression
+#endif
 
   if (use_iostream)
   {
@@ -174,6 +177,7 @@ int main(int argc, char *argv[])
       return 0;
     }
 
+#ifdef LASZIP_HAVE_RANGECODER
 #ifdef LZ_WIN32_VC6 
     ofb3.open("test3.lax", ios::out);
     ofb3.setmode(filebuf::binary);
@@ -187,6 +191,9 @@ int main(int argc, char *argv[])
       fprintf(stderr, "ERROR: could not open laszipper3\n");
       return 0;
     }
+#else
+    fprintf(stderr, "(skipping range coder test)\n");
+#endif
   }
   else
   {
@@ -204,12 +211,16 @@ int main(int argc, char *argv[])
       return 0;
     }
 
+#ifdef LASZIP_HAVE_RANGECODER
     ofile3 = fopen("test3.lax", "wb");
     if (laszipper3->open(ofile3, num_items, items, LASzip::POINT_BY_POINT_RANGE) != 0)
     {
       fprintf(stderr, "ERROR: could not open laszipper3\n");
       return 0;
     }
+#else
+    fprintf(stderr, "(skipping range coder test)\n");
+#endif
   }
 
   // write / compress num_points with "random" data
@@ -244,6 +255,7 @@ int main(int argc, char *argv[])
   end_time = taketime();
   fprintf(stderr, "laszipper2 wrote %d bytes in %g seconds\n", num_bytes, end_time-start_time);
 
+#ifdef LASZIP_HAVE_RANGECODER
   start_time = taketime();
   c = 0;
   for (i = 0; i < num_points; i++)
@@ -258,11 +270,11 @@ int main(int argc, char *argv[])
   num_bytes = laszipper3->close();
   end_time = taketime();
   fprintf(stderr, "laszipper3 wrote %d bytes in %g seconds\n", num_bytes, end_time-start_time);
+#endif
 
   delete laszipper1;
   delete laszipper2;
   delete laszipper3;
-
   if (use_iostream)
   {
     delete ostream1;
@@ -276,14 +288,20 @@ int main(int argc, char *argv[])
   }
   else
   {
-    fclose(ofile1);
-    fclose(ofile2);
-    fclose(ofile3);
+    if (ofile1)
+        fclose(ofile1);
+    if (ofile2)
+        fclose(ofile2);
+    if (ofile3)
+        fclose(ofile3);
   }
 
   LASunzipper* lasunzipper1 = new LASunzipper(); // without compression
   LASunzipper* lasunzipper2 = new LASunzipper(); // with arithmetic compression
-  LASunzipper* lasunzipper3 = new LASunzipper(); // with range compression
+  LASunzipper* lasunzipper3 = NULL;
+#ifdef LASZIP_HAVE_RANGECODER
+  lasunzipper3 = new LASunzipper(); // with range compression
+#endif
 
   if (use_iostream)
   {
@@ -313,6 +331,7 @@ int main(int argc, char *argv[])
       fprintf(stderr, "ERROR: could not open lasunzipper2\n");
       return 0;
     }
+#ifdef LASZIP_HAVE_RANGECODER
 #ifdef LZ_WIN32_VC6 
     ifb3.open("test3.lax", ios::in);
     ifb3.setmode(filebuf::binary);
@@ -326,6 +345,7 @@ int main(int argc, char *argv[])
       fprintf(stderr, "ERROR: could not open lasunzipper3\n");
       return 0;
     }
+#endif
   }
   else
   {
@@ -341,12 +361,14 @@ int main(int argc, char *argv[])
       fprintf(stderr, "ERROR: could not open lasunzipper2\n");
       return 0;
     }
+#ifdef LASZIP_HAVE_RANGECODER
     ifile3 = fopen("test3.lax", "rb");
     if (lasunzipper3->open(ifile3, num_items, items, LASzip::POINT_BY_POINT_RANGE) != 0)
     {
       fprintf(stderr, "ERROR: could not open lasunzipper3\n");
       return 0;
     }
+#endif
   }
 
   // read num_points with "random" data
@@ -411,6 +433,7 @@ int main(int argc, char *argv[])
 
   // decompress num_points with "random" data
 
+#ifdef LASZIP_HAVE_RANGECODER
   start_time = taketime();
   num_errors = 0;
   c = 0;
@@ -438,6 +461,7 @@ int main(int argc, char *argv[])
   {
    fprintf(stderr, "SUCCESS: lasunzipper3 read %d bytes in %g seconds\n", num_bytes, end_time-start_time);
   }
+#endif
 
   delete lasunzipper1;
   delete lasunzipper2;
@@ -456,9 +480,12 @@ int main(int argc, char *argv[])
   }
   else
   {
-    fclose(ifile1);
-    fclose(ifile2);
-    fclose(ifile3);
+    if (ifile1)
+        fclose(ifile1);
+    if (ifile2)
+        fclose(ifile2);
+    if (ifile3)
+        fclose(ifile3);
   }
 
   return 0;
