@@ -59,46 +59,237 @@ using namespace std;
 #include <time.h>
 #include <stdio.h>
 
+//#define LASZIP_HAVE_RANGECODER
+
 static double taketime()
 {
   return (double)(clock())/CLOCKS_PER_SEC;
 }
 
+// abstractions for doing I/O, which support VC6 streams, modern streams, and FILE*
+struct OStream
+{
+public:
+    OStream(bool use_iostream, const char* filename) :
+      m_use_iostream(use_iostream),
+      m_filename(filename),
+      ofile(NULL),
+      ostream(NULL)
+    {
+        if (m_use_iostream)
+        {
+#ifdef LZ_WIN32_VC6 
+            ofb.open(filename, ios::out);
+            ofb.setmode(filebuf::binary);
+            ostream = new ostream(&ofb);
+#else
+            ostream = new ofstream();
+            ostream->open(filename, std::ios::out | std::ios::binary );
+#endif 
+        }
+        else
+        {
+            ofile = fopen(filename, "wb");
+        }
+
+        return;
+    }
+
+      ~OStream()
+      {
+          if (m_use_iostream)
+          {
+              delete ostream;
+#ifdef LZ_WIN32_VC6 
+              ofb.close();
+#endif
+          }
+          else
+          {
+              if (ofile)
+                  fclose(ofile);
+          }
+      }
+
+public:
+    bool m_use_iostream;
+    const char* m_filename;
+    FILE* ofile;
+    filebuf ofb;
+#ifdef LZ_WIN32_VC6 
+    ostream* ostream;
+#else
+    ofstream* ostream;
+#endif
+};
+
+
+struct IStream
+{
+public:
+    IStream(bool use_iostream, const char* filename) :
+      m_use_iostream(use_iostream),
+      m_filename(filename),
+      ifile(NULL),
+      istream(NULL)
+    {
+        if (m_use_iostream)
+        {
+#ifdef LZ_WIN32_VC6 
+            ifb.open(filename, ios::in);
+            ifb.setmode(filebuf::binary);
+            istream = new istream(&ifb);
+#else
+            istream = new ifstream();
+            istream->open(filename, std::ios::in | std::ios::binary );
+#endif 
+        }
+        else
+        {
+            ifile = fopen(filename, "rb");
+        }
+      }
+
+      ~IStream()
+      {
+          if (m_use_iostream)
+          {
+              delete istream;
+#ifdef LZ_WIN32_VC6 
+              ifb.close();
+#endif
+          }
+          else
+          {
+              if (ifile)
+                  fclose(ifile);
+          }
+      }
+
+public:
+    const char* m_filename;
+    bool m_use_iostream;
+    FILE* ifile;
+    filebuf ifb;
+#ifdef LZ_WIN32_VC6 
+    istream* istream;
+#else
+    ifstream* istream;
+#endif
+};
+
+
+static LASzipper* make_zipper(OStream* ost, unsigned int num_items, LASitem items[], LASzip::Algorithm alg)
+{
+    LASzipper* zipper = new LASzipper();
+
+    int stat = 0;
+    if (ost->m_use_iostream)
+        stat = zipper->open(*ost->ostream, num_items, items, alg);
+    else
+        stat = zipper->open(ost->ofile, num_items, items, alg);
+
+    if (stat != 0)
+    {
+      fprintf(stderr, "ERROR: could not open laszipper with %s\n", ost->m_filename);
+      exit(1);
+    }
+
+    return zipper;
+}
+
+static LASunzipper* make_unzipper(IStream* ist, unsigned int num_items, LASitem items[], LASzip::Algorithm alg)
+{
+    LASunzipper* unzipper = new LASunzipper();
+
+    int stat = 0;
+    if (ist->m_use_iostream)
+        stat = unzipper->open(*ist->istream, num_items, items, alg);
+    else
+        stat = unzipper->open(ist->ifile, num_items, items, alg);
+
+    if (stat != 0)
+    {
+      fprintf(stderr, "ERROR: could not open lasunzipper with %s\n", ist->m_filename);
+      exit(1);
+    }
+
+    return unzipper;
+}
+
+
+static void write_points(LASzipper* zipper, unsigned int num_points, 
+                         unsigned int point_size, unsigned char* point_data, unsigned char** point)
+{
+    double start_time, end_time;
+    unsigned char c;
+    unsigned int i,j;
+
+    start_time = taketime();
+    c = 0;
+    for (i = 0; i < num_points; i++)
+    {
+        for (j = 0; j < point_size; j++)
+        {
+            point_data[j] = c;
+            c++;
+        }
+        zipper->write(point);
+    }
+
+    unsigned int num_bytes = zipper->close();
+    end_time = taketime();
+    fprintf(stderr, "laszipper wrote %d bytes in %g seconds\n", num_bytes, end_time-start_time);
+
+    return;
+}
+
+static void read_points(LASunzipper* unzipper, unsigned int num_points,
+                        unsigned int point_size, unsigned char* point_data, unsigned char** point)
+{
+    unsigned char c;
+    unsigned int i,j;
+    unsigned int num_errors, num_bytes;
+    double start_time, end_time;
+
+    start_time = taketime();
+    num_errors = 0;
+
+    c = 0;
+    for (i = 0; i < num_points; i++)
+    {
+        unzipper->read(point);
+        for (j = 0; j < point_size; j++)
+        {
+            if (point_data[j] != c)
+            {
+                fprintf(stderr, "%d %d %d != %d\n", i, j, point_data[j], c);
+                num_errors++;
+                if (num_errors > 20) break;
+            }
+            c++;
+        }
+        if (num_errors > 20) break;
+    }
+    num_bytes = unzipper->close();
+    end_time = taketime();
+    if (num_errors)
+    {
+        fprintf(stderr, "ERROR: with lasunzipper %d\n", num_errors);
+    }
+    else
+    {
+        fprintf(stderr, "SUCCESS: lasunzipper read %d bytes in %g seconds\n", num_bytes, end_time-start_time);
+    }
+
+    return;
+}
+
 int main(int argc, char *argv[])
 {
-  unsigned char c;
-  unsigned int i, j;
-  unsigned int num_points = 100000;
-  unsigned int num_errors, num_bytes;
-  double start_time, end_time;
-  FILE* ofile1 = 0;
-  FILE* ofile2 = 0;
-  FILE* ofile3 = 0;
-  FILE* ifile1 = 0;
-  FILE* ifile2 = 0;
-  FILE* ifile3 = 0;
-  filebuf ofb1;
-  filebuf ofb2;
-  filebuf ofb3;
-  filebuf ifb1;
-  filebuf ifb2;
-  filebuf ifb3;
-#ifdef LZ_WIN32_VC6
-  ostream* ostream1 = 0;
-  ostream* ostream2 = 0;
-  ostream* ostream3 = 0;
-  istream* istream1 = 0;
-  istream* istream2 = 0;
-  istream* istream3 = 0;
-#else
-  ofstream* ostream1 = 0;
-  ofstream* ostream2 = 0;
-  ofstream* ostream3 = 0;
-  ifstream* istream1 = 0;
-  ifstream* istream2 = 0;
-  ifstream* istream3 = 0;
-#endif   
+  unsigned int i;
 
+  unsigned int num_points = 100000;
   bool use_iostream = false;
 
   // describe the point structure
@@ -140,353 +331,62 @@ int main(int argc, char *argv[])
     point_offset += items[i].size;
   }
 
-  LASzipper* laszipper1 = new LASzipper(); // without compression
-  LASzipper* laszipper2 = new LASzipper(); // with arithmetic compression
-  LASzipper* laszipper3 = NULL;
+    OStream* ost1 = new OStream(use_iostream, "test1.lax");
+    OStream* ost2 = new OStream(use_iostream, "test2.lax");
+    OStream* ost3 = new OStream(use_iostream, "test3.lax");
+
+    LASzipper* laszipper1 = make_zipper(ost1, num_items, items, LASzip::POINT_BY_POINT_RAW);
+    LASzipper* laszipper2 = make_zipper(ost2, num_items, items, LASzip::POINT_BY_POINT_ARITHMETIC);
 #ifdef LASZIP_HAVE_RANGECODER
-  laszipper3 = new LASzipper(); // with range compression
-#endif
-
-  if (use_iostream)
-  {
-#ifdef LZ_WIN32_VC6 
-    ofb1.open("test1.lax", ios::out);
-    ofb1.setmode(filebuf::binary);
-    ostream1 = new ostream(&ofb1);
-#else
-    ostream1 = new ofstream();
-    ostream1->open("test1.lax", std::ios::out | std::ios::binary );
-#endif 
-    if (laszipper1->open(*ostream1, num_items, items, LASzip::POINT_BY_POINT_RAW) != 0)
-    {
-      fprintf(stderr, "ERROR: could not open laszipper1\n");
-      return 0;
-    }
-
-#ifdef LZ_WIN32_VC6 
-    ofb2.open("test2.lax", ios::out);
-    ofb2.setmode(filebuf::binary);
-    ostream2 = new ostream(&ofb2);
-#else
-    ostream2 = new ofstream();
-    ostream2->open("test2.lax", std::ios::out | std::ios::binary );
-#endif 
-    if (laszipper2->open(*ostream2, num_items, items, LASzip::POINT_BY_POINT_ARITHMETIC) != 0)
-    {
-      fprintf(stderr, "ERROR: could not open laszipper2\n");
-      return 0;
-    }
-
-#ifdef LASZIP_HAVE_RANGECODER
-#ifdef LZ_WIN32_VC6 
-    ofb3.open("test3.lax", ios::out);
-    ofb3.setmode(filebuf::binary);
-    ostream3 = new ostream(&ofb3);
-#else
-    ostream3 = new ofstream();
-    ostream3->open("test3.lax", std::ios::out | std::ios::binary );
-#endif 
-    if (laszipper3->open(*ostream3, num_items, items, LASzip::POINT_BY_POINT_RANGE) != 0)
-    {
-      fprintf(stderr, "ERROR: could not open laszipper3\n");
-      return 0;
-    }
+    LASzipper* laszipper3 = make_zipper(ost3, num_items, items, LASzip::POINT_BY_POINT_RANGE);
 #else
     fprintf(stderr, "(skipping range coder test)\n");
 #endif
-  }
-  else
-  {
-    ofile1 = fopen("test1.lax", "wb");
-    if (laszipper1->open(ofile1, num_items, items, LASzip::POINT_BY_POINT_RAW) != 0)
-    {
-      fprintf(stderr, "ERROR: could not open laszipper1\n");
-      return 0;
-    }
-
-    ofile2 = fopen("test2.lax", "wb");
-    if (laszipper2->open(ofile2, num_items, items, LASzip::POINT_BY_POINT_ARITHMETIC) != 0)
-    {
-      fprintf(stderr, "ERROR: could not open laszipper2\n");
-      return 0;
-    }
-
-#ifdef LASZIP_HAVE_RANGECODER
-    ofile3 = fopen("test3.lax", "wb");
-    if (laszipper3->open(ofile3, num_items, items, LASzip::POINT_BY_POINT_RANGE) != 0)
-    {
-      fprintf(stderr, "ERROR: could not open laszipper3\n");
-      return 0;
-    }
-#else
-    fprintf(stderr, "(skipping range coder test)\n");
-#endif
-  }
 
   // write / compress num_points with "random" data
 
-  start_time = taketime();
-  c = 0;
-  for (i = 0; i < num_points; i++)
-  {
-    for (j = 0; j < point_size; j++)
-    {
-      point_data[j] = c;
-      c++;
-    }
-    laszipper1->write(point);
-  }
-  num_bytes = laszipper1->close();
-  end_time = taketime();
-  fprintf(stderr, "laszipper1 wrote %d bytes in %g seconds\n", num_bytes, end_time-start_time);
-
-  start_time = taketime();
-  c = 0;
-  for (i = 0; i < num_points; i++)
-  {
-    for (j = 0; j < point_size; j++)
-    {
-      point_data[j] = c;
-      c++;
-    }
-    laszipper2->write(point);
-  }
-  num_bytes = laszipper2->close();
-  end_time = taketime();
-  fprintf(stderr, "laszipper2 wrote %d bytes in %g seconds\n", num_bytes, end_time-start_time);
-
+  write_points(laszipper1, num_points, point_size, point_data, point);
+  
+  write_points(laszipper2, num_points, point_size, point_data, point); 
 #ifdef LASZIP_HAVE_RANGECODER
-  start_time = taketime();
-  c = 0;
-  for (i = 0; i < num_points; i++)
-  {
-    for (j = 0; j < point_size; j++)
-    {
-      point_data[j] = c;
-      c++;
-    }
-    laszipper3->write(point);
-  }
-  num_bytes = laszipper3->close();
-  end_time = taketime();
-  fprintf(stderr, "laszipper3 wrote %d bytes in %g seconds\n", num_bytes, end_time-start_time);
+  write_points(laszipper3, num_points, point_size, point_data, point);
 #endif
-
+  
   delete laszipper1;
   delete laszipper2;
+#ifdef LASZIP_HAVE_RANGECODER
   delete laszipper3;
-  if (use_iostream)
-  {
-    delete ostream1;
-    delete ostream2;
-    delete ostream3;
-#ifdef LZ_WIN32_VC6 
-    ofb1.close();
-    ofb2.close();
-    ofb3.close();
 #endif
-  }
-  else
-  {
-    if (ofile1)
-        fclose(ofile1);
-    if (ofile2)
-        fclose(ofile2);
-    if (ofile3)
-        fclose(ofile3);
-  }
 
-  LASunzipper* lasunzipper1 = new LASunzipper(); // without compression
-  LASunzipper* lasunzipper2 = new LASunzipper(); // with arithmetic compression
-  LASunzipper* lasunzipper3 = NULL;
+  delete ost1;
+  delete ost2;
+  delete ost3;
+
+  IStream* ist1 = new IStream(use_iostream, "test1.lax");
+  IStream* ist2 = new IStream(use_iostream, "test2.lax");
+  IStream* ist3 = new IStream(use_iostream, "test3.lax");
+
+  LASunzipper* lasunzipper1 = make_unzipper(ist1, num_items, items, LASzip::POINT_BY_POINT_RAW);
+  LASunzipper* lasunzipper2 = make_unzipper(ist2, num_items, items, LASzip::POINT_BY_POINT_ARITHMETIC);
 #ifdef LASZIP_HAVE_RANGECODER
-  lasunzipper3 = new LASunzipper(); // with range compression
+  LASunzipper* lasunzipper3 = make_unzipper(ist3, num_items, items, LASzip::POINT_BY_POINT_RANGE);
 #endif
 
-  if (use_iostream)
-  {
-#ifdef LZ_WIN32_VC6 
-    ifb1.open("test1.lax", ios::in);
-    ifb1.setmode(filebuf::binary);
-    istream1 = new istream(&ifb1);
-#else
-    istream1 = new ifstream();
-    istream1->open("test1.lax", std::ios::in | std::ios::binary ); 
-#endif
-    if (lasunzipper1->open(*istream1, num_items, items, LASzip::POINT_BY_POINT_RAW) != 0)
-    {
-      fprintf(stderr, "ERROR: could not open lasunzipper1\n");
-      return 0;
-    }
-#ifdef LZ_WIN32_VC6 
-    ifb2.open("test2.lax", ios::in);
-    ifb2.setmode(filebuf::binary);
-    istream2 = new istream(&ifb2);
-#else
-    istream2 = new ifstream();
-    istream2->open("test2.lax", std::ios::in | std::ios::binary ); 
-#endif
-    if (lasunzipper2->open(*istream2, num_items, items, LASzip::POINT_BY_POINT_ARITHMETIC) != 0)
-    {
-      fprintf(stderr, "ERROR: could not open lasunzipper2\n");
-      return 0;
-    }
+  read_points(lasunzipper1, num_points, point_size, point_data, point);
+  read_points(lasunzipper2, num_points, point_size, point_data, point);
 #ifdef LASZIP_HAVE_RANGECODER
-#ifdef LZ_WIN32_VC6 
-    ifb3.open("test3.lax", ios::in);
-    ifb3.setmode(filebuf::binary);
-    istream3 = new istream(&ifb3);
-#else
-    istream3 = new ifstream();
-    istream3->open("test3.lax", std::ios::in | std::ios::binary ); 
-#endif
-    if (lasunzipper3->open(*istream3, num_items, items, LASzip::POINT_BY_POINT_RANGE) != 0)
-    {
-      fprintf(stderr, "ERROR: could not open lasunzipper3\n");
-      return 0;
-    }
-#endif
-  }
-  else
-  {
-    ifile1 = fopen("test1.lax", "rb");
-    if (lasunzipper1->open(ifile1, num_items, items, LASzip::POINT_BY_POINT_RAW) != 0)
-    {
-      fprintf(stderr, "ERROR: could not open lasunzipper1\n");
-      return 0;
-    }
-    ifile2 = fopen("test2.lax", "rb");
-    if (lasunzipper2->open(ifile2, num_items, items, LASzip::POINT_BY_POINT_ARITHMETIC) != 0)
-    {
-      fprintf(stderr, "ERROR: could not open lasunzipper2\n");
-      return 0;
-    }
-#ifdef LASZIP_HAVE_RANGECODER
-    ifile3 = fopen("test3.lax", "rb");
-    if (lasunzipper3->open(ifile3, num_items, items, LASzip::POINT_BY_POINT_RANGE) != 0)
-    {
-      fprintf(stderr, "ERROR: could not open lasunzipper3\n");
-      return 0;
-    }
-#endif
-  }
-
-  // read num_points with "random" data
-
-  start_time = taketime();
-  num_errors = 0;
-  c = 0;
-  for (i = 0; i < num_points; i++)
-  {
-    lasunzipper1->read(point);
-    for (j = 0; j < point_size; j++)
-    {
-      if (point_data[j] != c)
-      {
-        fprintf(stderr, "%d %d %d != %d\n", i, j, point_data[j], c);
-        num_errors++;
-        if (num_errors > 20) return -1;
-      }
-      c++;
-    }
-  }
-  num_bytes = lasunzipper1->close();
-  end_time = taketime();
-  if (num_errors)
-  {
-    fprintf(stderr, "ERROR: with lasunzipper1 %d\n", num_errors);
-  }
-  else
-  {
-   fprintf(stderr, "SUCCESS: lasunzipper1 read %d bytes in %g seconds\n", num_bytes, end_time-start_time);
-  }
-
-  // decompress num_points with "random" data
-
-  start_time = taketime();
-  num_errors = 0;
-  c = 0;
-  for (i = 0; i < num_points; i++)
-  {
-    lasunzipper2->read(point);
-    for (j = 0; j < point_size; j++)
-    {
-      if (point_data[j] != c)
-      {
-        fprintf(stderr, "%d %d %d != %d\n", i, j, point_data[j], c);
-        num_errors++;
-        if (num_errors > 20) return -1;
-      }
-      c++;
-    }
-  }
-  num_bytes = lasunzipper2->close();
-  end_time = taketime();
-  if (num_errors)
-  {
-    fprintf(stderr, "ERROR: with lasunzipper2 %d\n", num_errors);
-  }
-  else
-  {
-   fprintf(stderr, "SUCCESS: lasunzipper2 read %d bytes in %g seconds\n", num_bytes, end_time-start_time);
-  }
-
-  // decompress num_points with "random" data
-
-#ifdef LASZIP_HAVE_RANGECODER
-  start_time = taketime();
-  num_errors = 0;
-  c = 0;
-  for (i = 0; i < num_points; i++)
-  {
-    lasunzipper3->read(point);
-    for (j = 0; j < point_size; j++)
-    {
-      if (point_data[j] != c)
-      {
-        fprintf(stderr, "%d %d %d != %d\n", i, j, point_data[j], c);
-        num_errors++;
-        if (num_errors > 20) return -1;
-      }
-      c++;
-    }
-  }
-  num_bytes = lasunzipper3->close();
-  end_time = taketime();
-  if (num_errors)
-  {
-    fprintf(stderr, "ERROR: with lasunzipper3 %d\n", num_errors);
-  }
-  else
-  {
-   fprintf(stderr, "SUCCESS: lasunzipper3 read %d bytes in %g seconds\n", num_bytes, end_time-start_time);
-  }
+  read_points(lasunzipper3, num_points, point_size, point_data, point);
 #endif
 
   delete lasunzipper1;
   delete lasunzipper2;
+#ifdef LASZIP_HAVE_RANGECODER
   delete lasunzipper3;
-
-  if (use_iostream)
-  {
-    delete istream1;
-    delete istream2;
-    delete istream3;
-#ifdef LZ_WIN32_VC6 
-    ifb1.close();
-    ifb2.close();
-    ifb3.close();
 #endif
-  }
-  else
-  {
-    if (ifile1)
-        fclose(ifile1);
-    if (ifile2)
-        fclose(ifile2);
-    if (ifile3)
-        fclose(ifile3);
-  }
+
+  delete ist1;
+  delete ist2;
+  delete ist3;
 
   return 0;
 }
