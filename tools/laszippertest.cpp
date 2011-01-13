@@ -61,12 +61,18 @@ using namespace std;
 
 //#define LASZIP_HAVE_RANGECODER
 
+
+//---------------------------------------------------------------------------
+
 static double taketime()
 {
   return (double)(clock())/CLOCKS_PER_SEC;
 }
 
+
+//---------------------------------------------------------------------------
 // abstractions for doing I/O, which support VC6 streams, modern streams, and FILE*
+
 struct OStream
 {
 public:
@@ -124,6 +130,8 @@ public:
 };
 
 
+//---------------------------------------------------------------------------
+
 struct IStream
 {
 public:
@@ -179,15 +187,90 @@ public:
 };
 
 
-static LASzipper* make_zipper(OStream* ost, unsigned int num_items, LASitem items[], LASzip::Algorithm alg)
+//---------------------------------------------------------------------------
+
+class Data
 {
+public:
+    Data(unsigned int num_pts, bool random) :
+      num_points(num_pts),
+      use_random(random)
+    {
+        items[0].type = LASitem::POINT10;
+        items[0].size = 20;
+        items[0].version = 0;
+
+        items[1].type = LASitem::GPSTIME11;
+        items[1].size = 8;
+        items[1].version = 0;
+
+        items[2].type = LASitem::RGB12;
+        items[2].size = 6;
+        items[2].version = 0;
+
+        items[3].type = LASitem::WAVEPACKET13;
+        items[3].size = 29;
+        items[3].version = 0;
+
+        items[4].type = LASitem::BYTE;
+        items[4].size = 7;
+        items[4].version = 0;
+
+        unsigned int i;
+
+        // compute the point size
+        point_size = 0;
+        for (i = 0; i < num_items; i++) point_size += items[i].size;
+
+        // create the point data
+        unsigned int point_offset = 0;
+        point = new unsigned char*[num_items];
+        point_data = new unsigned char[point_size];
+        for (i = 0; i < num_items; i++)
+        {
+            point[i] = &(point_data[point_offset]);
+            point_offset += items[i].size;
+        }
+
+        return;
+    }
+
+    ~Data()
+    {
+        delete[] point;
+        delete[] point_data;
+        return;
+    }
+
+    static const unsigned int num_items = 5;
+    LASitem items[num_items];
+    unsigned int point_size;
+    unsigned char* point_data;
+    unsigned char** point;
+    unsigned num_points;
+    bool use_random;
+};
+
+
+//---------------------------------------------------------------------------
+
+static LASzipper* make_zipper(OStream* ost, Data& data, LASzip::Algorithm alg)
+{
+#ifndef LASZIP_HAVE_RANGECODER
+    if (alg == LASzip::POINT_BY_POINT_RANGE)
+    {
+        fprintf(stderr, "(skipping range encoder test)\n");
+        return NULL;
+    }
+#endif
+
     LASzipper* zipper = new LASzipper();
 
     int stat = 0;
     if (ost->m_use_iostream)
-        stat = zipper->open(*ost->ostream, num_items, items, alg);
+        stat = zipper->open(*ost->ostream, data.num_items, data.items, alg);
     else
-        stat = zipper->open(ost->ofile, num_items, items, alg);
+        stat = zipper->open(ost->ofile, data.num_items, data.items, alg);
 
     if (stat != 0)
     {
@@ -198,15 +281,25 @@ static LASzipper* make_zipper(OStream* ost, unsigned int num_items, LASitem item
     return zipper;
 }
 
-static LASunzipper* make_unzipper(IStream* ist, unsigned int num_items, LASitem items[], LASzip::Algorithm alg)
+
+//---------------------------------------------------------------------------
+
+static LASunzipper* make_unzipper(IStream* ist, Data& data, LASzip::Algorithm alg)
 {
+#ifndef LASZIP_HAVE_RANGECODER
+    if (alg == LASzip::POINT_BY_POINT_RANGE)
+    {
+        return NULL;
+    }
+#endif
+
     LASunzipper* unzipper = new LASunzipper();
 
     int stat = 0;
     if (ist->m_use_iostream)
-        stat = unzipper->open(*ist->istream, num_items, items, alg);
+        stat = unzipper->open(*ist->istream, data.num_items, data.items, alg);
     else
-        stat = unzipper->open(ist->ifile, num_items, items, alg);
+        stat = unzipper->open(ist->ifile, data.num_items, data.items, alg);
 
     if (stat != 0)
     {
@@ -218,23 +311,27 @@ static LASunzipper* make_unzipper(IStream* ist, unsigned int num_items, LASitem 
 }
 
 
-static void write_points(LASzipper* zipper, unsigned int num_points, 
-                         unsigned int point_size, unsigned char* point_data, unsigned char** point)
+//---------------------------------------------------------------------------
+
+static void write_points(LASzipper* zipper, Data& data)
 {
+    if (zipper==NULL) // range coder test
+        return;
+
     double start_time, end_time;
     unsigned char c;
     unsigned int i,j;
 
     start_time = taketime();
     c = 0;
-    for (i = 0; i < num_points; i++)
+    for (i = 0; i < data.num_points; i++)
     {
-        for (j = 0; j < point_size; j++)
+        for (j = 0; j < data.point_size; j++)
         {
-            point_data[j] = c;
+            data.point_data[j] = c;
             c++;
         }
-        zipper->write(point);
+        zipper->write(data.point);
     }
 
     unsigned int num_bytes = zipper->close();
@@ -244,9 +341,14 @@ static void write_points(LASzipper* zipper, unsigned int num_points,
     return;
 }
 
-static void read_points(LASunzipper* unzipper, unsigned int num_points,
-                        unsigned int point_size, unsigned char* point_data, unsigned char** point)
+
+//---------------------------------------------------------------------------
+
+static void read_points(LASunzipper* unzipper, Data& data)
 {
+    if (unzipper==NULL) // range coder test
+        return;
+
     unsigned char c;
     unsigned int i,j;
     unsigned int num_errors, num_bytes;
@@ -256,14 +358,14 @@ static void read_points(LASunzipper* unzipper, unsigned int num_points,
     num_errors = 0;
 
     c = 0;
-    for (i = 0; i < num_points; i++)
+    for (i = 0; i < data.num_points; i++)
     {
-        unzipper->read(point);
-        for (j = 0; j < point_size; j++)
+        unzipper->read(data.point);
+        for (j = 0; j < data.point_size; j++)
         {
-            if (point_data[j] != c)
+            if (data.point_data[j] != c)
             {
-                fprintf(stderr, "%d %d %d != %d\n", i, j, point_data[j], c);
+                fprintf(stderr, "%d %d %d != %d\n", i, j, data.point_data[j], c);
                 num_errors++;
                 if (num_errors > 20) break;
             }
@@ -285,108 +387,44 @@ static void read_points(LASunzipper* unzipper, unsigned int num_points,
     return;
 }
 
+
+//---------------------------------------------------------------------------
+
+static void run_test(bool use_iostream, const char* filename, Data& data, LASzip::Algorithm alg)
+{
+  OStream* ost = new OStream(use_iostream, filename);
+  LASzipper* laszipper = make_zipper(ost, data, alg);
+  write_points(laszipper, data);
+  delete laszipper;
+  delete ost;
+
+  IStream* ist = new IStream(use_iostream, filename);
+  LASunzipper* lasunzipper = make_unzipper(ist, data, alg);
+  read_points(lasunzipper, data);
+  delete lasunzipper;
+  delete ist;
+
+  return;
+}
+
+
+//---------------------------------------------------------------------------
+
 int main(int argc, char *argv[])
 {
-  unsigned int i;
-
   unsigned int num_points = 100000;
   bool use_iostream = false;
+  bool forever = false;
+  bool use_random = true;
 
-  // describe the point structure
-
-  unsigned int num_items = 5;
-  LASitem items[5];
-
-  items[0].type = LASitem::POINT10;
-  items[0].size = 20;
-  items[0].version = 0;
-
-  items[1].type = LASitem::GPSTIME11;
-  items[1].size = 8;
-  items[1].version = 0;
-
-  items[2].type = LASitem::RGB12;
-  items[2].size = 6;
-  items[2].version = 0;
-
-  items[3].type = LASitem::WAVEPACKET13;
-  items[3].size = 29;
-  items[3].version = 0;
-
-  items[4].type = LASitem::BYTE;
-  items[4].size = 7;
-  items[4].version = 0;
-
-  // compute the point size
-  unsigned int point_size = 0;
-  for (i = 0; i < num_items; i++) point_size += items[i].size;
-
-  // create the point data
-  unsigned int point_offset = 0;
-  unsigned char** point = new unsigned char*[num_items];
-  unsigned char* point_data = new unsigned char[point_size];
-  for (i = 0; i < num_items; i++)
+  do
   {
-    point[i] = &(point_data[point_offset]);
-    point_offset += items[i].size;
-  }
+    Data data(num_points, use_random);
 
-    OStream* ost1 = new OStream(use_iostream, "test1.lax");
-    OStream* ost2 = new OStream(use_iostream, "test2.lax");
-    OStream* ost3 = new OStream(use_iostream, "test3.lax");
-
-    LASzipper* laszipper1 = make_zipper(ost1, num_items, items, LASzip::POINT_BY_POINT_RAW);
-    LASzipper* laszipper2 = make_zipper(ost2, num_items, items, LASzip::POINT_BY_POINT_ARITHMETIC);
-#ifdef LASZIP_HAVE_RANGECODER
-    LASzipper* laszipper3 = make_zipper(ost3, num_items, items, LASzip::POINT_BY_POINT_RANGE);
-#else
-    fprintf(stderr, "(skipping range coder test)\n");
-#endif
-
-  // write / compress num_points with "random" data
-
-  write_points(laszipper1, num_points, point_size, point_data, point);
-  
-  write_points(laszipper2, num_points, point_size, point_data, point); 
-#ifdef LASZIP_HAVE_RANGECODER
-  write_points(laszipper3, num_points, point_size, point_data, point);
-#endif
-  
-  delete laszipper1;
-  delete laszipper2;
-#ifdef LASZIP_HAVE_RANGECODER
-  delete laszipper3;
-#endif
-
-  delete ost1;
-  delete ost2;
-  delete ost3;
-
-  IStream* ist1 = new IStream(use_iostream, "test1.lax");
-  IStream* ist2 = new IStream(use_iostream, "test2.lax");
-  IStream* ist3 = new IStream(use_iostream, "test3.lax");
-
-  LASunzipper* lasunzipper1 = make_unzipper(ist1, num_items, items, LASzip::POINT_BY_POINT_RAW);
-  LASunzipper* lasunzipper2 = make_unzipper(ist2, num_items, items, LASzip::POINT_BY_POINT_ARITHMETIC);
-#ifdef LASZIP_HAVE_RANGECODER
-  LASunzipper* lasunzipper3 = make_unzipper(ist3, num_items, items, LASzip::POINT_BY_POINT_RANGE);
-#endif
-
-  read_points(lasunzipper1, num_points, point_size, point_data, point);
-  read_points(lasunzipper2, num_points, point_size, point_data, point);
-#ifdef LASZIP_HAVE_RANGECODER
-  read_points(lasunzipper3, num_points, point_size, point_data, point);
-#endif
-
-  delete lasunzipper1;
-  delete lasunzipper2;
-#ifdef LASZIP_HAVE_RANGECODER
-  delete lasunzipper3;
-#endif
-
-  delete ist1;
-  delete ist2;
-  delete ist3;
+    run_test(use_iostream, "test1.lax", data, LASzip::POINT_BY_POINT_RAW);
+    run_test(use_iostream, "test2.lax", data, LASzip::POINT_BY_POINT_ARITHMETIC);
+    run_test(use_iostream, "test3.lax", data, LASzip::POINT_BY_POINT_RANGE);
+  } while (forever);
 
   return 0;
 }
