@@ -2,7 +2,8 @@
 
 set G="NMake Makefiles"
 REM set G="Visual Studio 9 2008"
-REM set G="Visual Studio 2010"
+REM set G="Visual Studio 10"
+REM set G="Visual Studio 9 2008"
 set LASZIP=D:\laszip
 REM set BUILD_TYPE=RelWithDebInfo
 REM set BUILD_TYPE=Debug
