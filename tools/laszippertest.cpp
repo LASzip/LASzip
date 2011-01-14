@@ -512,6 +512,10 @@ int main(int argc, char *argv[])
       else
       {
           fprintf(stderr, "Usage: ziptest [-n NUMBER] [-s] [-f] [-r]\n");
+          fprintf(stderr, "   -n:  number of points to process (default: 100000)\n");
+          fprintf(stderr, "   -s:  use C++ stream I/O (default: use FILE* I/O)\n");
+          fprintf(stderr, "   -f:  run forever (default: run just one pass)\n");
+          fprintf(stderr, "   -r:  use random input data (default: use fixed data)\n");
           exit(1);
       }
   }
