@@ -189,12 +189,10 @@ public:
 
 //---------------------------------------------------------------------------
 
-class Data
+class PointData
 {
 public:
-    Data(unsigned int num_pts, bool random) :
-      num_points(num_pts),
-      use_random(random)
+    PointData()
     {
         items[0].type = LASitem::POINT10;
         items[0].size = 20;
@@ -235,7 +233,7 @@ public:
         return;
     }
 
-    ~Data()
+    ~PointData()
     {
         delete[] point;
         delete[] point_data;
@@ -247,14 +245,39 @@ public:
     unsigned int point_size;
     unsigned char* point_data;
     unsigned char** point;
-    unsigned num_points;
-    bool use_random;
 };
 
 
 //---------------------------------------------------------------------------
 
-static LASzipper* make_zipper(OStream* ost, Data& data, LASzip::Algorithm alg)
+class Settings
+{
+public:
+    Settings(unsigned int num_pts, bool random, bool use_stream) :
+      num_points(num_pts),
+      use_random(random),
+      use_iostream(use_stream)
+    {
+        // use a seed based on the current time
+        seed = (unsigned int)time(NULL);
+        return;
+    }
+
+    ~Settings()
+    {
+        return;
+    }
+
+    unsigned num_points;
+    bool use_random;
+    unsigned int seed;
+    bool use_iostream;
+};
+
+
+//---------------------------------------------------------------------------
+
+static LASzipper* make_zipper(OStream* ost, PointData& data, LASzip::Algorithm alg)
 {
 #ifndef LASZIP_HAVE_RANGECODER
     if (alg == LASzip::POINT_BY_POINT_RANGE)
@@ -284,7 +307,7 @@ static LASzipper* make_zipper(OStream* ost, Data& data, LASzip::Algorithm alg)
 
 //---------------------------------------------------------------------------
 
-static LASunzipper* make_unzipper(IStream* ist, Data& data, LASzip::Algorithm alg)
+static LASunzipper* make_unzipper(IStream* ist, PointData& data, LASzip::Algorithm alg)
 {
 #ifndef LASZIP_HAVE_RANGECODER
     if (alg == LASzip::POINT_BY_POINT_RANGE)
@@ -313,7 +336,7 @@ static LASunzipper* make_unzipper(IStream* ist, Data& data, LASzip::Algorithm al
 
 //---------------------------------------------------------------------------
 
-static void write_points(LASzipper* zipper, Data& data)
+static void write_points(LASzipper* zipper, Settings& settings, PointData& data)
 {
     if (zipper==NULL) // range coder test
         return;
@@ -321,21 +344,44 @@ static void write_points(LASzipper* zipper, Data& data)
     double start_time, end_time;
     unsigned char c;
     unsigned int i,j;
+    unsigned int num_bytes;
 
-    start_time = taketime();
-    c = 0;
-    for (i = 0; i < data.num_points; i++)
+    // the two branches of this IF are the same, except for the use of a random number;
+    // we keep the random case separate, so that we can get fastest timing tests w/o random data
+    if (settings.use_random)
     {
-        for (j = 0; j < data.point_size; j++)
+        srand(settings.seed);
+        start_time = taketime();
+        c = rand() % 256;
+        for (i = 0; i < settings.num_points; i++)
         {
-            data.point_data[j] = c;
-            c++;
+            for (j = 0; j < data.point_size; j++)
+            {
+                data.point_data[j] = c;
+                c = rand() % 256;
+            }
+            zipper->write(data.point);
         }
-        zipper->write(data.point);
+        num_bytes = zipper->close();
+        end_time = taketime();
+    }
+    else
+    {
+        start_time = taketime();
+        c = 0;
+        for (i = 0; i < settings.num_points; i++)
+        {
+            for (j = 0; j < data.point_size; j++)
+            {
+                data.point_data[j] = c;
+                c++;
+            }
+            zipper->write(data.point);
+        }
+        num_bytes = zipper->close();
+        end_time = taketime();
     }
 
-    unsigned int num_bytes = zipper->close();
-    end_time = taketime();
     fprintf(stderr, "laszipper wrote %d bytes in %g seconds\n", num_bytes, end_time-start_time);
 
     return;
@@ -344,7 +390,7 @@ static void write_points(LASzipper* zipper, Data& data)
 
 //---------------------------------------------------------------------------
 
-static void read_points(LASunzipper* unzipper, Data& data)
+static void read_points(LASunzipper* unzipper, Settings& settings, PointData& data)
 {
     if (unzipper==NULL) // range coder test
         return;
@@ -357,24 +403,50 @@ static void read_points(LASunzipper* unzipper, Data& data)
     start_time = taketime();
     num_errors = 0;
 
-    c = 0;
-    for (i = 0; i < data.num_points; i++)
+    if (settings.use_random)
     {
-        unzipper->read(data.point);
-        for (j = 0; j < data.point_size; j++)
+        srand(settings.seed);
+        c = rand() % 256;
+        for (i = 0; i < settings.num_points; i++)
         {
-            if (data.point_data[j] != c)
+            unzipper->read(data.point);
+            for (j = 0; j < data.point_size; j++)
             {
-                fprintf(stderr, "%d %d %d != %d\n", i, j, data.point_data[j], c);
-                num_errors++;
-                if (num_errors > 20) break;
+                if (data.point_data[j] != c)
+                {
+                    fprintf(stderr, "%d %d %d != %d\n", i, j, data.point_data[j], c);
+                    num_errors++;
+                    if (num_errors > 20) break;
+                }
+                c = rand() % 256;
             }
-            c++;
+            if (num_errors > 20) break;
         }
-        if (num_errors > 20) break;
+        num_bytes = unzipper->close();
+        end_time = taketime();
     }
-    num_bytes = unzipper->close();
-    end_time = taketime();
+    else
+    {
+        c = 0;
+        for (i = 0; i < settings.num_points; i++)
+        {
+            unzipper->read(data.point);
+            for (j = 0; j < data.point_size; j++)
+            {
+                if (data.point_data[j] != c)
+                {
+                    fprintf(stderr, "%d %d %d != %d\n", i, j, data.point_data[j], c);
+                    num_errors++;
+                    if (num_errors > 20) break;
+                }
+                c++;
+            }
+            if (num_errors > 20) break;
+        }
+        num_bytes = unzipper->close();
+        end_time = taketime();
+    }
+
     if (num_errors)
     {
         fprintf(stderr, "ERROR: with lasunzipper %d\n", num_errors);
@@ -390,17 +462,17 @@ static void read_points(LASunzipper* unzipper, Data& data)
 
 //---------------------------------------------------------------------------
 
-static void run_test(bool use_iostream, const char* filename, Data& data, LASzip::Algorithm alg)
+static void run_test(const char* filename, Settings& settings, PointData& data, LASzip::Algorithm alg)
 {
-  OStream* ost = new OStream(use_iostream, filename);
+  OStream* ost = new OStream(settings.use_iostream, filename);
   LASzipper* laszipper = make_zipper(ost, data, alg);
-  write_points(laszipper, data);
+  write_points(laszipper, settings, data);
   delete laszipper;
   delete ost;
 
-  IStream* ist = new IStream(use_iostream, filename);
+  IStream* ist = new IStream(settings.use_iostream, filename);
   LASunzipper* lasunzipper = make_unzipper(ist, data, alg);
-  read_points(lasunzipper, data);
+  read_points(lasunzipper, settings, data);
   delete lasunzipper;
   delete ist;
 
@@ -414,17 +486,51 @@ int main(int argc, char *argv[])
 {
   unsigned int num_points = 100000;
   bool use_iostream = false;
-  bool forever = false;
-  bool use_random = true;
+  bool run_forever = false;
+  bool use_random = false;
+
+  for (int i=1; i<argc; i++)
+  {
+      const char* p = argv[i];
+      if (strcmp(p,"-n")==0)
+      {
+          ++i;
+          num_points = atoi(argv[i]);
+      }
+      else if (strcmp(p,"-s")==0)
+      {
+          use_iostream = true;
+      }
+      else if (strcmp(p,"-f")==0)
+      {
+          run_forever = true;
+      }
+      else if (strcmp(p,"-r")==0)
+      {
+          use_random = true;
+      }
+      else
+      {
+          fprintf(stderr, "Usage: ziptest [-n NUMBER] [-s] [-f] [-r]\n");
+          exit(1);
+      }
+  }
+
+  printf("Settings:\n");
+  printf("  num_points=%d, use_iostream=%s, run_forever=%s, use_random=%s\n",
+      num_points, use_iostream?"true":"false", run_forever?"true":"false", use_random?"true":"false");
+
+  Settings settings(num_points, use_random, use_iostream);
 
   do
   {
-    Data data(num_points, use_random);
+    PointData data;
 
-    run_test(use_iostream, "test1.lax", data, LASzip::POINT_BY_POINT_RAW);
-    run_test(use_iostream, "test2.lax", data, LASzip::POINT_BY_POINT_ARITHMETIC);
-    run_test(use_iostream, "test3.lax", data, LASzip::POINT_BY_POINT_RANGE);
-  } while (forever);
+    run_test("test1.lax", settings, data, LASzip::POINT_BY_POINT_RAW);
+    run_test("test2.lax", settings, data, LASzip::POINT_BY_POINT_ARITHMETIC);
+    run_test("test3.lax", settings, data, LASzip::POINT_BY_POINT_RANGE);
+
+  } while (run_forever);
 
   return 0;
 }
