@@ -287,9 +287,14 @@ static void log(const char* format, ...)
 
     va_start(args, format);
     vfprintf(stderr, format, args);
-    vfprintf(settings->logfile, format, args);
     va_end(args);
+    fflush(stderr);
+
+    va_start(args, format);
+    vfprintf(settings->logfile, format, args);
+    va_end(args);    
     fflush(settings->logfile);
+
     return;
 }
 
@@ -552,7 +557,10 @@ int main(int argc, char *argv[])
 
     // use a seed based on the current time
     settings->seed = (unsigned int)time(NULL);
-    log("Seed: %u\n", settings->seed);
+    if (settings->use_random)
+    {
+        log("Seed: %u\n", settings->seed);
+    }
 
     run_test("test1.lax", data, LASzip::POINT_BY_POINT_RAW);
     run_test("test2.lax", data, LASzip::POINT_BY_POINT_ARITHMETIC);
