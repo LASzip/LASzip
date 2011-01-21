@@ -59,6 +59,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LASZIP_BUILD_OUTPUT_DIRECTORY})
 # Output directory in which to build ARCHIVE target files.
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${LASZIP_BUILD_OUTPUT_DIRECTORY}) 
 
+
+set(BUILD_STATIC FALSE CACHE BOOL "Build LASzip statically" )
 ###############################################################################
 # Platform and compiler specific settings
 

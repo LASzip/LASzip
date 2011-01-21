@@ -26,7 +26,9 @@ set(LASZIP_UTILITIES
     )
     
 if(WIN32)
+if(NOT BUILD_STATIC)
     add_definitions("-DLASZIP_DLL_EXPORT=1")
+endif()
 endif()
 
 

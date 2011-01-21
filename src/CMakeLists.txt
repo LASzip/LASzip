@@ -56,7 +56,9 @@ set(LASZIP_SOURCES
   )
 
 if(WIN32)
+if(NOT BUILD_STATIC)
     add_definitions("-DLASZIP_DLL_EXPORT=1")
+endif()
 endif()
 
 # Group source files for IDE source explorers (e.g. Visual Studio)
@@ -68,10 +70,15 @@ source_group("Source Files" FILES ${LASZIP_CPP})
 include_directories(../include ../include/laszip .)
 
 
-add_library(${LASZIP_LIB_NAME} SHARED ${LASZIP_SOURCES})
+if(BUILD_STATIC)
+    add_library(${LASZIP_LIB_NAME} STATIC ${LASZIP_SOURCES})
+else()
+    add_library(${LASZIP_LIB_NAME} SHARED ${LASZIP_SOURCES})
+endif()
+
 set_target_properties(${LASZIP_LIB_NAME}
   PROPERTIES SOVERSION "${LASZIP_LIB_SOVERSION}" )
-
+      
 ###############################################################################
 # Targets installation
 
