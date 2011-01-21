@@ -9,6 +9,8 @@
     #   define LASZIP_DLL   __declspec(dllexport)
     #elif defined(LASZIP_DLL_IMPORT)
     #   define LASZIP_DLL   __declspec(dllimport)
+    #else
+    #   define LASZIP_DLL
     #endif
 #else
     #  if defined(USE_GCC_VISIBILITY_FLAG)
