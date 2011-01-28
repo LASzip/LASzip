@@ -1,21 +1,3 @@
-/******************************************************************************
- *
- * Project:  integrating laszip into liblas - http://liblas.org -
- * Purpose:
- * Author:   Martin Isenburg
- *           isenburg at cs.unc.edu
- *
- ******************************************************************************
- * Copyright (c) 2010, Martin Isenburg
- *
- * This is free software; you can redistribute and/or modify it under
- * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation.
- *
- * See the COPYING file for more information.
- *
- ****************************************************************************/
-
 /*
 ===============================================================================
 
@@ -27,19 +9,23 @@
 
   PROGRAMMERS:
   
-    martin isenburg@cs.unc.edu
+    martin.isenburg@gmail.com
   
   COPYRIGHT:
-  
-    copyright (C) 2007-2010  martin isenburg@cs.unc.edu
-    
-    This software is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    (c) 2007-2011, Martin Isenburg, LASSO - tools to catch reality
+
+    This is free software; you can redistribute and/or modify it under the
+    terms of the GNU Lesser General Licence as published by the Free Software
+    Foundation. See the COPYING file for more information.
+
+    This software is distributed WITHOUT ANY WARRANTY and without even the
+    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   
   CHANGE HISTORY:
   
-    7 December 2010 -- adapted from LASpointWriteer for better code modularity
+    10 January 2011 -- licensing change for LGPL release and liblas integration
+    7 December 2010 -- adapted from LASpointWriter for better code modularity
     3 December 2010 -- updated to (somewhat) support LAS format 1.3
     7 September 2008 -- updated to support LAS format 1.2 
     22 February 2007 -- created about an hour before henna's birthday

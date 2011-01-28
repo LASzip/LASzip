@@ -1,21 +1,3 @@
-/******************************************************************************
- *
- * Project:  integrating laszip into liblas - http://liblas.org -
- * Purpose:
- * Author:   Martin Isenburg
- *           isenburg at cs.unc.edu
- *
- ******************************************************************************
- * Copyright (c) 2010, Martin Isenburg
- *
- * This is free software; you can redistribute and/or modify it under
- * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation.
- *
- * See the COPYING file for more information.
- *
- ****************************************************************************/
-
 /*
 ===============================================================================
 
@@ -26,16 +8,19 @@
     see corresponding header file
   
   PROGRAMMERS:
-  
-    martin isenburg@cs.unc.edu
-  
+
+    martin.isenburg@gmail.com
+
   COPYRIGHT:
-  
-    copyright (C) 2007-10  martin isenburg@cs.unc.edu
-    
-    This software is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    (c) 2011, Martin Isenburg, LASSO - tools to catch reality
+
+    This is free software; you can redistribute and/or modify it under the
+    terms of the GNU Lesser General Licence as published by the Free Software
+    Foundation. See the COPYING file for more information.
+
+    This software is distributed WITHOUT ANY WARRANTY and without even the
+    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   
   CHANGE HISTORY:
   
@@ -47,9 +32,6 @@
 #include "laswritepoint.hpp"
 
 #include "arithmeticencoder.hpp"
-#ifdef LASZIP_HAVE_RANGECODER
-#include "rangeencoder.hpp"
-#endif
 #include "laswriteitemraw.hpp"
 #include "laswriteitemcompressed_v1.hpp"
 
@@ -81,11 +63,6 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, LASzip::Algorithm algor
   case LASzip::POINT_BY_POINT_RAW:
     enc = 0;
     break;
-#ifdef LASZIP_HAVE_RANGECODER
-  case LASzip::POINT_BY_POINT_RANGE:
-    enc = new RangeEncoder();
-    break;
-#endif
   case LASzip::POINT_BY_POINT_ARITHMETIC:
     enc = new ArithmeticEncoder();
     break;
@@ -242,7 +219,7 @@ LASwritePoint::~LASwritePoint()
     {
       delete writers_raw[i];
     }
-    delete[] writers_raw;
+    delete [] writers_raw;
   }
   if (writers_compressed)
   {
@@ -250,7 +227,7 @@ LASwritePoint::~LASwritePoint()
     {
       delete writers_compressed[i];
     }
-    delete[] writers_compressed;
+    delete [] writers_compressed;
   }
   if (enc)
   {

@@ -1,21 +1,3 @@
-/******************************************************************************
- *
- * Project:  integrating laszip into liblas - http://liblas.org -
- * Purpose:
- * Author:   Martin Isenburg
- *           isenburg at cs.unc.edu
- *
- ******************************************************************************
- * Copyright (c) 2010, Martin Isenburg
- *
- * This is free software; you can redistribute and/or modify it under
- * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation.
- *
- * See the COPYING file for more information.
- *
- ****************************************************************************/
-
 /*
 ===============================================================================
 
@@ -25,19 +7,23 @@
       
   PROGRAMMERS:
   
-    martin isenburg@cs.unc.edu
+    martin.isenburg@gmail.com
   
   COPYRIGHT:
-  
-    copyright (C) 2010  martin isenburg@cs.unc.edu
-    
-    This software is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    (c) 2010-2011, Martin Isenburg, LASSO - tools to catch reality
+
+    This is free software; you can redistribute and/or modify it under the
+    terms of the GNU Lesser General Licence as published by the Free Software
+    Foundation. See the COPYING file for more information.
+
+    This software is distributed WITHOUT ANY WARRANTY and without even the
+    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   
   CHANGE HISTORY:
   
-    8 December 2010 -- unified framework for all entropy coders
+    10 January 2011 -- licensing change for LGPL release and liblas integration
+    12 December 2010 -- created from ByteStreamOutFile after Howard got pushy (-;
   
 ===============================================================================
 */
@@ -63,7 +49,7 @@ public:
   virtual bool get32bitsBE(unsigned char* bytes) = 0;
 /* read 64 bit big-endian field                              */
   virtual bool get64bitsBE(unsigned char* bytes) = 0;
-/* is the stream seekable (e.g. standard in is not)          */
+/* is the stream seekable (e.g. stdin is not)                */
   virtual bool isSeekable() const = 0;
 /* returns how many bytes were read since last reset         */
   virtual unsigned int byteCount() const = 0;

@@ -1,23 +1,34 @@
-/******************************************************************************
- *
- * Project:  integrating laszip into liblas - http://liblas.org -
- * Purpose:
- * Author:   Martin Isenburg
- *           isenburg at cs.unc.edu
- *
- ******************************************************************************
- * Copyright (c) 2010, Martin Isenburg
- *
- * This is free software; you can redistribute and/or modify it under
- * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation.
- *
- * See the COPYING file for more information.
- *
- ****************************************************************************/
+/*
+===============================================================================
 
-#ifndef MYDEFS_H
-#define MYDEFS_H
+  FILE:  mydefs.hpp
+  
+  CONTENTS:
+ 
+  PROGRAMMERS:
+  
+    martin.isenburg@gmail.com
+  
+  COPYRIGHT:
+
+    (c) 2005-2011, Martin Isenburg, LASSO - tools to catch reality
+
+    This is free software; you can redistribute and/or modify it under the
+    terms of the GNU Lesser General Licence as published by the Free Software
+    Foundation. See the COPYING file for more information.
+
+    This software is distributed WITHOUT ANY WARRANTY and without even the
+    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  
+  CHANGE HISTORY:
+  
+    10 January 2011 -- licensing change for LGPL release and liblas integration
+    13 July 2005 -- created after returning with many mosquito bites from OBX
+  
+===============================================================================
+*/
+#ifndef MYDEFS_HPP
+#define MYDEFS_HPP
 
 typedef int                I32;
 typedef short              I16;
@@ -52,27 +63,39 @@ typedef union I64F64 { I64 i64; F64 f64; } I64F64;
 #define F32_MAX            +1.0e+30f
 #define F32_MIN            -1.0e+30f
 
-#define U8_MAX             0xFF // 255
-#define U8_MAX_PLUS_ONE    0x0100 // 256
+#define U8_MIN             ((U8)0x0)  // 0
+#define U8_MAX             ((U8)0xFF) // 255
+#define U8_MAX_PLUS_ONE    0x0100     // 256
 
-#define U16_MAX            0xFFFF // 65535
-#define U16_MAX_PLUS_ONE   0x00010000 // 65536
+#define U16_MIN            ((U16)0x0)    // 0
+#define U16_MAX            ((U16)0xFFFF) // 65535
+#define U16_MAX_PLUS_ONE   0x00010000    // 65536
 
-#define U32_MAX            0xFFFFFFFF // 4294967295
+#define U32_MIN            ((U32)0x0)            // 0
+#define U32_MAX            ((U32)0xFFFFFFFF)     // 4294967295
 #if defined(WIN32)            // 64 byte unsigned int constant under Windows 
-#define U32_MAX_PLUS_ONE   0x0000000100000000 // 4294967296
+#define U32_MAX_PLUS_ONE   0x0000000100000000    // 4294967296
 #else                         // 64 byte unsigned int constant elsewhere ... 
 #define U32_MAX_PLUS_ONE   0x0000000100000000ull // 4294967296
 #endif
 
-#define I8_MIN             0x80 // -128
-#define I8_MAX             0x7F // 127
+#define I8_MIN             ((I8)0x80) // -128
+#define I8_MAX             ((I8)0x7F) // 127
 
-#define I16_MIN            0x8000 // -32768
-#define I16_MAX            0x7FFF // 32767
+#define I16_MIN            ((I16)0x8000) // -32768
+#define I16_MAX            ((I16)0x7FFF) // 32767
 
-#define I32_MIN            0x80000000 // -2147483648
-#define I32_MAX            0x7FFFFFFF //  2147483647
+#define I32_MIN            ((I32)0x80000000) // -2147483648
+#define I32_MAX            ((I32)0x7FFFFFFF) //  2147483647
+
+#define I8_CLAMP(n)     ((n <= I8_MIN) ? I8_MIN : ((n >= I8_MAX) ? I8_MAX : ((I8)n)))
+#define U8_CLAMP(n)     ((n <= U8_MIN) ? U8_MIN : ((n >= U8_MAX) ? U8_MAX : ((U8)n)))
+
+#define I16_CLAMP(n)    ((n <= I16_MIN) ? I16_MIN : ((n >= I16_MAX) ? I16_MAX : ((I16)n)))
+#define U16_CLAMP(n)    ((n <= U16_MIN) ? U16_MIN : ((n >= U16_MAX) ? U16_MAX : ((U16)n)))
+
+#define I32_CLAMP(n)    ((n <= I32_MIN) ? I32_MIN : ((n >= I32_MAX) ? I32_MAX : ((I32)n)))
+#define U32_CLAMP(n)    ((n <= U32_MIN) ? U32_MIN : ((n >= U32_MAX) ? U32_MAX : ((U32)n)))
 
 #ifndef FALSE
 #define FALSE   0

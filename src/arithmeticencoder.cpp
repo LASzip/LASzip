@@ -1,21 +1,3 @@
-/******************************************************************************
- *
- * Project:  integrating laszip into liblas - http://liblas.org -
- * Purpose:
- * Author:   Martin Isenburg
- *           isenburg at cs.unc.edu
- *
- ******************************************************************************
- * Copyright (c) 2010, Martin Isenburg
- *
- * This is free software; you can redistribute and/or modify it under
- * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation.
- *
- * See the COPYING file for more information.
- *
- ****************************************************************************/
-
 /*
 ===============================================================================
 
@@ -23,19 +5,23 @@
   
   CONTENTS:
       
-    see header file
+    A modular C++ wrapper for an adapted version of Amir Said's FastAC Code.
+    see: http://www.cipr.rpi.edu/~said/FastAC.html
 
   PROGRAMMERS:
-  
-    martin isenburg@cs.unc.edu
-  
+
+    martin.isenburg@gmail.com
+
   COPYRIGHT:
-  
-    copyright (C) 2009-10 martin isenburg (isenburg@cs.unc.edu)
-    
-    This software is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    (c) 2011, Martin Isenburg, LASSO - tools to catch reality
+
+    This is free software; you can redistribute and/or modify it under the
+    terms of the GNU Lesser General Licence as published by the Free Software
+    Foundation. See the COPYING file for more information.
+
+    This software is distributed WITHOUT ANY WARRANTY and without even the
+    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   
   CHANGE HISTORY:
   
@@ -43,6 +29,44 @@
   
 ===============================================================================
 */
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//                                                                           -
+// Fast arithmetic coding implementation                                     -
+// -> 32-bit variables, 32-bit product, periodic updates, table decoding     -
+//                                                                           -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//                                                                           -
+// Version 1.00  -  April 25, 2004                                           -
+//                                                                           -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//                                                                           -
+//                                  WARNING                                  -
+//                                 =========                                 -
+//                                                                           -
+// The only purpose of this program is to demonstrate the basic principles   -
+// of arithmetic coding. It is provided as is, without any express or        -
+// implied warranty, without even the warranty of fitness for any particular -
+// purpose, or that the implementations are correct.                         -
+//                                                                           -
+// Permission to copy and redistribute this code is hereby granted, provided -
+// that this warning and copyright notices are not removed or altered.       -
+//                                                                           -
+// Copyright (c) 2004 by Amir Said (said@ieee.org) &                         -
+//                       William A. Pearlman (pearlw@ecse.rpi.edu)           -
+//                                                                           -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//                                                                           -
+// A description of the arithmetic coding method used here is available in   -
+//                                                                           -
+// Lossless Compression Handbook, ed. K. Sayood                              -
+// Chapter 5: Arithmetic Coding (A. Said), pp. 101-152, Academic Press, 2003 -
+//                                                                           -
+// A. Said, Introduction to Arithetic Coding Theory and Practice             -
+// HP Labs report HPL-2004-76  -  http://www.hpl.hp.com/techreports/         -
+//                                                                           -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #include "arithmeticencoder.hpp"
 
 #include <string.h>
