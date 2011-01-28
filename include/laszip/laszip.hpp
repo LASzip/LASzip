@@ -1,21 +1,3 @@
-/******************************************************************************
- *
- * Project:  integrating laszip into liblas - http://liblas.org -
- * Purpose:
- * Author:   Martin Isenburg
- *           isenburg at cs.unc.edu
- *
- ******************************************************************************
- * Copyright (c) 2010, Martin Isenburg
- *
- * This is free software; you can redistribute and/or modify it under
- * the terms of the GNU Lesser General Licence as published
- * by the Free Software Foundation.
- *
- * See the COPYING file for more information.
- *
- ****************************************************************************/
-
 /*
 ===============================================================================
 
@@ -28,24 +10,28 @@
 
   PROGRAMMERS:
   
-    martin isenburg@cs.unc.edu
+    martin.isenburg@gmail.com
   
   COPYRIGHT:
-  
-    copyright (C) 2007  martin isenburg@cs.unc.edu
-    
-    This software is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    (c) 2010-2011, Martin Isenburg, LASSO - tools to catch reality
+
+    This is free software; you can redistribute and/or modify it under the
+    terms of the GNU Lesser General Licence as published by the Free Software
+    Foundation. See the COPYING file for more information.
+
+    This software is distributed WITHOUT ANY WARRANTY and without even the
+    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   
   CHANGE HISTORY:
   
+    10 January 2011 -- licensing change for LGPL release and liblas integration
     12 December 2010 -- refactored from lasdefinitions after movies with silke
   
 ===============================================================================
 */
-#ifndef LASZIP_H
-#define LASZIP_H
+#ifndef LASZIP_HPP
+#define LASZIP_HPP
 
 #if defined(_MSC_VER) && (_MSC_VER < 1300)
 #define LZ_WIN32_VC6
@@ -53,6 +39,7 @@ typedef __int64   SIGNED_INT64;
 #else
 typedef long long SIGNED_INT64;
 #endif
+
 
 #define LASZIP_VERSION_MAJOR    1
 #define LASZIP_VERSION_MINOR    0
@@ -87,7 +74,6 @@ public:
   {
     POINT_BY_POINT_RAW        = 0,
     POINT_BY_POINT_ARITHMETIC = 1,
-    POINT_BY_POINT_RANGE      = 2,
     DEFAULT_COMPRESSION       = POINT_BY_POINT_ARITHMETIC,
     DEFAULT_RAW               = POINT_BY_POINT_RAW
   };
