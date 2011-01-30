@@ -5,24 +5,29 @@
   
   CONTENTS  
   
-  This tool reads and writes point data in the LAS 1.X format compressed
-  or uncompressed to test the laszipper and lasunzipper interfaces.
+    This tool reads and writes point data in the LAS 1.X format compressed
+    or uncompressed to test the laszipper and lasunzipper interfaces.
 
-  PROGRAMMERS  
+  PROGRAMMERS:
+
+    martin.isenburg@gmail.com
+
+  COPYRIGHT:
+
+    (c) 2010-2011, Martin Isenburg, LASSO - tools to catch reality
+
+    This is free software; you can redistribute and/or modify it under the
+    terms of the GNU Lesser General Licence as published by the Free Software
+    Foundation. See the COPYING file for more information.
+
+    This software is distributed WITHOUT ANY WARRANTY and without even the
+    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   
-  martin isenburg@cs.unc.edu
+  CHANGE HISTORY:
   
-  COPYRIGHT  
-  
-  copyright (C) 2010 martin isenburg@cs.unc.edu
-  
-  This software is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  
-  CHANGE HISTORY  
-  
-  13 December 2010 -- created to test the remodularized laszip compressor
+    14 January 2011 -- mpg@flaxen.com adds randomness and commandline controls
+    10 January 2011 -- licensing change for LGPL release and liblas integration
+    13 December 2010 -- created to test the remodularized laszip compressor
   
 ===============================================================================
 */
