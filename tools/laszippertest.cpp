@@ -303,7 +303,7 @@ static void log(const char* format, ...)
 
 static LASzipper* make_zipper(OStream* ost, PointData& data, LASzip::Algorithm alg)
 {
-#ifndef LASZIP_HAVE_RANGECODER
+#ifdef LASZIP_HAVE_RANGECODER
     if (alg == LASzip::POINT_BY_POINT_RANGE)
     {
         log("(skipping range encoder test)\n");
@@ -333,7 +333,7 @@ static LASzipper* make_zipper(OStream* ost, PointData& data, LASzip::Algorithm a
 
 static LASunzipper* make_unzipper(IStream* ist, PointData& data, LASzip::Algorithm alg)
 {
-#ifndef LASZIP_HAVE_RANGECODER
+#ifdef LASZIP_HAVE_RANGECODER
     if (alg == LASzip::POINT_BY_POINT_RANGE)
     {
         return NULL;
@@ -564,8 +564,9 @@ int main(int argc, char *argv[])
 
     run_test("test1.lax", data, LASzip::POINT_BY_POINT_RAW);
     run_test("test2.lax", data, LASzip::POINT_BY_POINT_ARITHMETIC);
+#ifdef LASZIP_HAVE_RANGECODER
     run_test("test3.lax", data, LASzip::POINT_BY_POINT_RANGE);
-
+#endif
     log("Finished %u runs\n\n", run);
     ++run;
   } while (run_forever);
