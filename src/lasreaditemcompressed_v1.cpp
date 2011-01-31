@@ -67,12 +67,12 @@ LASreadItemCompressed_POINT10_v1::LASreadItemCompressed_POINT10_v1(EntropyDecode
 
   /* create models and integer compressors */
   ic_dx = new IntegerCompressor(dec, 32);  // 32 bits, 1 context
-	ic_dy = new IntegerCompressor(dec, 32, 20); // 32 bits, 20 contexts
-	ic_z = new IntegerCompressor(dec, 32, 20);  // 32 bits, 20 contexts
-	ic_intensity = new IntegerCompressor(dec, 16);
-	ic_scan_angle_rank = new IntegerCompressor(dec, 8, 2);
-	ic_point_source_ID = new IntegerCompressor(dec, 16);
-	m_changed_values = dec->createSymbolModel(64);
+  ic_dy = new IntegerCompressor(dec, 32, 20); // 32 bits, 20 contexts
+  ic_z = new IntegerCompressor(dec, 32, 20);  // 32 bits, 20 contexts
+  ic_intensity = new IntegerCompressor(dec, 16);
+  ic_scan_angle_rank = new IntegerCompressor(dec, 8, 2);
+  ic_point_source_ID = new IntegerCompressor(dec, 16);
+  m_changed_values = dec->createSymbolModel(64);
   for (i = 0; i < 256; i++)
   {
     m_bit_byte[i] = 0;
@@ -105,8 +105,8 @@ BOOL LASreadItemCompressed_POINT10_v1::init(const U8* item)
   U32 i;
 
   /* init state */
-	last_x_diff[0] = last_x_diff[1] = last_x_diff[2] = 0;
-	last_y_diff[0] = last_y_diff[1] = last_y_diff[2] = 0;
+  last_x_diff[0] = last_x_diff[1] = last_x_diff[2] = 0;
+  last_y_diff[0] = last_y_diff[1] = last_y_diff[2] = 0;
   last_incr = 0;
 
   /* init models and integer compressors */
@@ -186,61 +186,61 @@ inline BOOL LASreadItemCompressed_POINT10_v1::read(U8* item)
   k_bits = (k_bits + ic_dy->getK())/2;
   ((LASpoint10*)item)->z = ic_z->decompress(((LASpoint10*)last_item)->z, (k_bits < 19 ? k_bits : 19));
 
-	// decompress which other values have changed
-	I32 changed_values = dec->decodeSymbol(m_changed_values);
+  // decompress which other values have changed
+  I32 changed_values = dec->decodeSymbol(m_changed_values);
 
   if (changed_values)
   {
-		// decompress the intensity if it has changed
-		if (changed_values & 32)
-		{
-			((LASpoint10*)item)->intensity = (U16)ic_intensity->decompress(((LASpoint10*)last_item)->intensity);
-		}
+    // decompress the intensity if it has changed
+    if (changed_values & 32)
+    {
+      ((LASpoint10*)item)->intensity = (U16)ic_intensity->decompress(((LASpoint10*)last_item)->intensity);
+    }
 
-		// decompress the edge_of_flight_line, scan_direction_flag, ... if it has changed
-		if (changed_values & 16)
-		{
+    // decompress the edge_of_flight_line, scan_direction_flag, ... if it has changed
+    if (changed_values & 16)
+    {
       if (m_bit_byte[last_item[14]] == 0)
       {
         m_bit_byte[last_item[14]] = dec->createSymbolModel(256);
         dec->initSymbolModel(m_bit_byte[last_item[14]]);
       }
-			item[14] = (U8)dec->decodeSymbol(m_bit_byte[last_item[14]]);
-		}
+      item[14] = (U8)dec->decodeSymbol(m_bit_byte[last_item[14]]);
+    }
 
-		// decompress the classification ... if it has changed
-		if (changed_values & 8)
-		{
+    // decompress the classification ... if it has changed
+    if (changed_values & 8)
+    {
       if (m_classification[last_item[15]] == 0)
       {
         m_classification[last_item[15]] = dec->createSymbolModel(256);
         dec->initSymbolModel(m_classification[last_item[15]]);
       }
-			item[15] = (U8)dec->decodeSymbol(m_classification[last_item[15]]);
-		}
-		
-		// decompress the scan_angle_rank ... if it has changed
-		if (changed_values & 4)
-		{
-			item[16] = (U8)ic_scan_angle_rank->decompress(last_item[16], k_bits < 3);
+      item[15] = (U8)dec->decodeSymbol(m_classification[last_item[15]]);
+    }
+    
+    // decompress the scan_angle_rank ... if it has changed
+    if (changed_values & 4)
+    {
+      item[16] = (U8)ic_scan_angle_rank->decompress(last_item[16], k_bits < 3);
     }
 
-		// decompress the user_data ... if it has changed
-		if (changed_values & 2)
-		{
+    // decompress the user_data ... if it has changed
+    if (changed_values & 2)
+    {
       if (m_user_data[last_item[17]] == 0)
       {
         m_user_data[last_item[17]] = dec->createSymbolModel(256);
         dec->initSymbolModel(m_user_data[last_item[17]]);
       }
-			item[17] = (U8)dec->decodeSymbol(m_user_data[last_item[17]]);
-		}
+      item[17] = (U8)dec->decodeSymbol(m_user_data[last_item[17]]);
+    }
 
-		// decompress the point_source_ID ... if it has changed
-		if (changed_values & 1)
-		{
-			((LASpoint10*)item)->point_source_ID = (U16)ic_point_source_ID->decompress(((LASpoint10*)last_item)->point_source_ID);
-		}
+    // decompress the point_source_ID ... if it has changed
+    if (changed_values & 1)
+    {
+      ((LASpoint10*)item)->point_source_ID = (U16)ic_point_source_ID->decompress(((LASpoint10*)last_item)->point_source_ID);
+    }
   }
 
   // record the difference
@@ -325,38 +325,38 @@ inline BOOL LASreadItemCompressed_GPSTIME11_v1::read(U8* item)
         last_gpstime_diff = gpstime_diff;
         multi_extreme_counter = 0;
       }
-	    else if (multi == 0)
-	    {
+      else if (multi == 0)
+      {
         gpstime_diff = ic_gpstime->decompress(last_gpstime_diff/4, 2);
         multi_extreme_counter++;
-	      if (multi_extreme_counter > 3)
-	      {
-	        last_gpstime_diff = gpstime_diff;
-	        multi_extreme_counter = 0;
-	      }
-	    }
-	    else if (multi < 10)
-	    {
-	      gpstime_diff = ic_gpstime->decompress(multi*last_gpstime_diff, 3);
-	    }
+        if (multi_extreme_counter > 3)
+        {
+          last_gpstime_diff = gpstime_diff;
+          multi_extreme_counter = 0;
+        }
+      }
+      else if (multi < 10)
+      {
+        gpstime_diff = ic_gpstime->decompress(multi*last_gpstime_diff, 3);
+      }
       else if (multi < 50)
       {
-	      gpstime_diff = ic_gpstime->decompress(multi*last_gpstime_diff, 4);
-	    }
+        gpstime_diff = ic_gpstime->decompress(multi*last_gpstime_diff, 4);
+      }
       else
       {
-	      gpstime_diff = ic_gpstime->decompress(multi*last_gpstime_diff, 5);
-	      if (multi == LASZIP_GPSTIME_MULTIMAX-3)
-	      {
-	        multi_extreme_counter++;
-	        if (multi_extreme_counter > 3)
-	        {
-	          last_gpstime_diff = gpstime_diff;
-	          multi_extreme_counter = 0;
-	        }
-	      }
+        gpstime_diff = ic_gpstime->decompress(multi*last_gpstime_diff, 5);
+        if (multi == LASZIP_GPSTIME_MULTIMAX-3)
+        {
+          multi_extreme_counter++;
+          if (multi_extreme_counter > 3)
+          {
+            last_gpstime_diff = gpstime_diff;
+            multi_extreme_counter = 0;
+          }
+        }
       }
-	    last_gpstime.i64 += gpstime_diff;
+      last_gpstime.i64 += gpstime_diff;
     }
     else if (multi <  LASZIP_GPSTIME_MULTIMAX-1)
     {
@@ -577,7 +577,7 @@ inline BOOL LASreadItemCompressed_BYTE_v1::read(U8* item)
   U32 i;
   for (i = 0; i < number; i++)
   {
-  	item[i] = (U8)(ic_byte->decompress(last_item[i], i));
+    item[i] = (U8)(ic_byte->decompress(last_item[i], i));
   }
   memcpy(last_item, item, number);
   return TRUE;
