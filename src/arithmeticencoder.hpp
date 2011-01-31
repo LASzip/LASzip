@@ -45,7 +45,7 @@ public:
   ~ArithmeticEncoder();
 
 /* Manage encoding                                           */
-  I32 init(ByteStreamOut* outstream);
+  BOOL init(ByteStreamOut* outstream);
   void done();
 
 /* Manage an entropy model for a single bit                  */

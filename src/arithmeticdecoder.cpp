@@ -79,16 +79,16 @@ ArithmeticDecoder::ArithmeticDecoder()
   instream = 0;
 }
 
-I32 ArithmeticDecoder::init(ByteStreamIn* instream)
+BOOL ArithmeticDecoder::init(ByteStreamIn* instream)
 {
-  assert(instream);
+  if (instream == 0) return FALSE;
   this->instream = instream;
   length = AC__MaxLength;
   value = (instream->getByte() << 24);
   value |= (instream->getByte() << 16);
   value |= (instream->getByte() << 8);
   value |= (instream->getByte());
-  return 0;
+  return TRUE;
 }
 
 void ArithmeticDecoder::done()

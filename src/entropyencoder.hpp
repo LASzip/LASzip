@@ -43,7 +43,7 @@ public:
   virtual ~EntropyEncoder() {};
 
 /* Manage decoding                                           */
-  virtual I32 init(ByteStreamOut* outstream) = 0;
+  virtual BOOL init(ByteStreamOut* outstream) = 0;
   virtual void done() = 0;
 
 /* Manage an entropy model for a single bit                  */

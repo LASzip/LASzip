@@ -87,15 +87,15 @@ ArithmeticEncoder::~ArithmeticEncoder()
   free(outbuffer);
 }
 
-I32 ArithmeticEncoder::init(ByteStreamOut* outstream)
+BOOL ArithmeticEncoder::init(ByteStreamOut* outstream)
 {
-  assert(outstream);
+  if (outstream == 0) return FALSE;
   this->outstream = outstream;
   base   = 0;
   length = AC__MaxLength;
   outbyte = outbuffer;
   endbyte = endbuffer;
-  return 0;
+  return TRUE;
 }
 
 void ArithmeticEncoder::done()
