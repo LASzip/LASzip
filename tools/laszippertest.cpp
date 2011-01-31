@@ -481,6 +481,7 @@ int main(int argc, char *argv[])
   bool use_iostream = false;
   bool run_forever = false;
   bool use_random = false;
+  unsigned int user_seed = (unsigned int)time(NULL);
 
   for (int i=1; i<argc; i++)
   {
@@ -502,6 +503,11 @@ int main(int argc, char *argv[])
     {
       use_random = true;
     }
+    else if (strcmp(p,"-x")==0)
+    {
+        ++i;
+        user_seed = atoi(argv[i]);
+    }    
     else
     {
       fprintf(stderr, "Usage   ziptest [-n NUMBER] [-s] [-f] [-r]\n");
@@ -509,6 +515,7 @@ int main(int argc, char *argv[])
       fprintf(stderr, "   -s    use C++ stream I/O (default   use FILE* I/O)\n");
       fprintf(stderr, "   -f    run forever (default   run just one pass)\n");
       fprintf(stderr, "   -r    use random input data (default   use fixed data)\n");
+      fprintf(stderr, "   -x    set random seed, instead of current time (default: use time)\n");
       exit(1);
     }
   }
@@ -516,8 +523,8 @@ int main(int argc, char *argv[])
   settings = new Settings(num_points, use_random, use_iostream);
 
   log("Settings:\n");
-  log("  num_points=%d, use_iostream=%s, run_forever=%s, use_random=%s\n",
-    num_points, use_iostream?"true":"false", run_forever?"true":"false", use_random?"true":"false");
+  log("  num_points=%d, use_iostream=%s, run_forever=%s, use_random=%s, user_seed=%d\n",
+    num_points, use_iostream?"true":"false", run_forever?"true":"false", use_random?"true":"false", user_seed);
 
   unsigned int run = 1;
   do
@@ -525,7 +532,7 @@ int main(int argc, char *argv[])
   PointData data;
 
   // use a seed based on the current time
-  settings->seed = (unsigned int)time(NULL);
+  settings->seed = user_seed;
   if (settings->use_random)
   {
     log("Seed: %u\n", settings->seed);
