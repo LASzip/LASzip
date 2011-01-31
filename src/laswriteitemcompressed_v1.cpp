@@ -33,8 +33,6 @@
 
 #include <assert.h>
 #include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 /*
 ===============================================================================
@@ -68,12 +66,12 @@ LASwriteItemCompressed_POINT10_v1::LASwriteItemCompressed_POINT10_v1(EntropyEnco
 
   /* create models and integer compressors */
   ic_dx = new IntegerCompressor(enc, 32);  // 32 bits, 1 context
-    ic_dy = new IntegerCompressor(enc, 32, 20); // 32 bits, 20 contexts
-    ic_z = new IntegerCompressor(enc, 32, 20);  // 32 bits, 20 contexts
-    ic_intensity = new IntegerCompressor(enc, 16);
-    ic_scan_angle_rank = new IntegerCompressor(enc, 8, 2);
-    ic_point_source_ID = new IntegerCompressor(enc, 16);
-    m_changed_values = enc->createSymbolModel(64);
+	ic_dy = new IntegerCompressor(enc, 32, 20); // 32 bits, 20 contexts
+	ic_z = new IntegerCompressor(enc, 32, 20);  // 32 bits, 20 contexts
+	ic_intensity = new IntegerCompressor(enc, 16);
+	ic_scan_angle_rank = new IntegerCompressor(enc, 8, 2);
+	ic_point_source_ID = new IntegerCompressor(enc, 16);
+	m_changed_values = enc->createSymbolModel(64);
   for (i = 0; i < 256; i++)
   {
     m_bit_byte[i] = 0;
@@ -106,8 +104,8 @@ BOOL LASwriteItemCompressed_POINT10_v1::init(const U8* item)
   U32 i;
 
   /* init state */
-    last_x_diff[0] = last_x_diff[1] = last_x_diff[2] = 0;
-    last_y_diff[0] = last_y_diff[1] = last_y_diff[2] = 0;
+	last_x_diff[0] = last_x_diff[1] = last_x_diff[2] = 0;
+	last_y_diff[0] = last_y_diff[1] = last_y_diff[2] = 0;
   last_incr = 0;
 
   /* init models and integer compressors */
@@ -226,10 +224,8 @@ inline BOOL LASwriteItemCompressed_POINT10_v1::write(const U8* item)
   // compress the scan_angle_rank ... if it has changed
   if (changed_values & 4)
   {
-    I32 tmp = ((I8*)item)[16];
-    assert(tmp <= 127);
-    assert(tmp >= -128);
-    ic_scan_angle_rank->compress(((I8*)last_item)[16], tmp, k_bits < 3);
+    ic_scan_angle_rank->compress(((I8*)last_item)[16], ((I8*)item)[16], k_bits < 3);
+//    ic_scan_angle_rank->compress(last_item[16], item[16], k_bits < 3);
   }
 
   // compress the user_data ... if it has changed
@@ -361,45 +357,45 @@ inline BOOL LASwriteItemCompressed_GPSTIME11_v1::write(const U8* item)
         // compress this multiplier
         enc->encodeSymbol(m_gpstime_multi, multi);
         // compress the residual curr_gpstime_diff in dependance on the multiplier
-          if (multi == 1)
+	      if (multi == 1)
         {
           // this is the case we assume we get most often
-            ic_gpstime->compress(last_gpstime_diff, curr_gpstime_diff, 1);
+	        ic_gpstime->compress(last_gpstime_diff, curr_gpstime_diff, 1);
           last_gpstime_diff = curr_gpstime_diff;
           multi_extreme_counter = 0;	  
-          }
-          else
+	      }
+	      else
         {
           if (multi == 0)
           {
             ic_gpstime->compress(last_gpstime_diff/4, curr_gpstime_diff, 2);
-              multi_extreme_counter++;
-              if (multi_extreme_counter > 3)
-              {
-                last_gpstime_diff = curr_gpstime_diff;
-                multi_extreme_counter = 0;
-              }
+        	  multi_extreme_counter++;
+	          if (multi_extreme_counter > 3)
+	          {
+	            last_gpstime_diff = curr_gpstime_diff;
+	            multi_extreme_counter = 0;
+	          }
           }
-            else if (multi < 10)
+	        else if (multi < 10)
           {
             ic_gpstime->compress(multi*last_gpstime_diff, curr_gpstime_diff, 3);
           }
           else if (multi < 50)
           {
             ic_gpstime->compress(multi*last_gpstime_diff, curr_gpstime_diff, 4);
-            }
+	        }
           else
           {
             ic_gpstime->compress(multi*last_gpstime_diff, curr_gpstime_diff, 5);
-              if (multi == LASZIP_GPSTIME_MULTIMAX-3)
-              {
-                multi_extreme_counter++;
-                if (multi_extreme_counter > 3)
-                {
-                  last_gpstime_diff = curr_gpstime_diff;
-                  multi_extreme_counter = 0;
-                }
-              }
+	          if (multi == LASZIP_GPSTIME_MULTIMAX-3)
+	          {
+	            multi_extreme_counter++;
+	            if (multi_extreme_counter > 3)
+	            {
+	              last_gpstime_diff = curr_gpstime_diff;
+	              multi_extreme_counter = 0;
+	            }
+	          }
           }
         }
       }
@@ -636,7 +632,7 @@ inline BOOL LASwriteItemCompressed_BYTE_v1::write(const U8* item)
   U32 i;
   for (i = 0; i < number; i++)
   {
-    ic_byte->compress(last_item[i], item[i], i);
+  	ic_byte->compress(last_item[i], item[i], i);
   }
   memcpy(last_item, item, number);
   return TRUE;
