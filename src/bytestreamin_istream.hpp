@@ -64,6 +64,8 @@ private:
 #else
   ios::off_type start;
 #endif
+private:
+    ByteStreamInIstream& operator=(ByteStreamInIstream const& rhs); // not implemented
 };
 
 class ByteStreamInIstreamLE : public ByteStreamInIstream

@@ -72,6 +72,8 @@ private:
   ios::off_type start;
   ios::off_type seek_position;
 #endif
+private:
+    ByteStreamOutOstream& operator=(ByteStreamOutOstream const& rhs); // not implemented
 };
 
 class ByteStreamOutOstreamLE : public ByteStreamOutOstream
