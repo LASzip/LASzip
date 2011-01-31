@@ -309,7 +309,7 @@ inline BOOL LASreadItemCompressed_GPSTIME11_v1::read(U8* item)
     }
     else if (multi == 2) // the difference is huge
     {
-      last_gpstime.i64 = dec->readInt64();
+      last_gpstime.u64 = dec->readInt64();
     }
   }
   else
@@ -360,10 +360,10 @@ inline BOOL LASreadItemCompressed_GPSTIME11_v1::read(U8* item)
     }
     else if (multi <  LASZIP_GPSTIME_MULTIMAX-1)
     {
-      last_gpstime.i64 = dec->readInt64();
+      last_gpstime.u64 = dec->readInt64();
     }
   }
-  *((F64*)item) = last_gpstime.f64;
+  *((I64*)item) = last_gpstime.i64;
   return TRUE;
 }
 
@@ -436,10 +436,10 @@ struct LASwavepacket13
 {
   U64 offset;
   U32 packet_size;
-  I32F32 return_point;
-  I32F32 x;
-  I32F32 y;
-  I32F32 z;
+  U32I32F32 return_point;
+  U32I32F32 x;
+  U32I32F32 y;
+  U32I32F32 z;
 };
 
 LASreadItemCompressed_WAVEPACKET13_v1::LASreadItemCompressed_WAVEPACKET13_v1(EntropyDecoder* dec)

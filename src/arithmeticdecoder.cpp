@@ -247,7 +247,7 @@ U8 ArithmeticDecoder::readByte()
   return (U8)sym;
 }
 
-unsigned short ArithmeticDecoder::readShort()
+U16 ArithmeticDecoder::readShort()
 {
   U32 sym = value / (length >>= 16);           // decode symbol, change length
   value -= length * sym;                                    // update interval
@@ -268,9 +268,9 @@ inline U32 ArithmeticDecoder::readInt()
 
 inline F32 ArithmeticDecoder::readFloat()
 {
-  U32F32 u32f32;
-  u32f32.u32 = readInt();
-  return u32f32.f32;
+  U32I32F32 u32i32f32;
+  u32i32f32.u32 = readInt();
+  return u32i32f32.f32;
 }
 
 inline U64 ArithmeticDecoder::readInt64()
@@ -282,9 +282,9 @@ inline U64 ArithmeticDecoder::readInt64()
 
 inline F64 ArithmeticDecoder::readDouble()
 {
-  U64F64 u64f64;
-  u64f64.u64 = readInt64();
-  return u64f64.f64;
+  U64I64F64 u64i64f64;
+  u64i64f64.u64 = readInt64();
+  return u64i64f64.f64;
 }
 
 ArithmeticDecoder::~ArithmeticDecoder()

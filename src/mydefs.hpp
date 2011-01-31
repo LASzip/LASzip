@@ -4,6 +4,8 @@
   FILE:  mydefs.hpp
   
   CONTENTS:
+
+    Basic data type definitions to be robust across platforms.
  
   PROGRAMMERS:
   
@@ -55,10 +57,8 @@ typedef int                BOOL;
 typedef bool               BOOL;
 #endif
 
-typedef union U32F32 { U32 u32; F32 f32; } U32F32;
-typedef union U64F64 { U64 u64; F64 f64; } U64F64;
-typedef union I32F32 { I32 i32; F32 f32; } I32F32;
-typedef union I64F64 { I64 i64; F64 f64; } I64F64;
+typedef union U32I32F32 { U32 u32; I32 i32; F32 f32; } U32I32F32;
+typedef union U64I64F64 { U64 u64; I64 i64; F64 f64; } U64I64F64;
 
 #define F32_MAX            +1.0e+30f
 #define F32_MIN            -1.0e+30f

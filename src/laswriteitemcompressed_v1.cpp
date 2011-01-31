@@ -299,8 +299,8 @@ BOOL LASwriteItemCompressed_GPSTIME11_v1::init(const U8* item)
 
 inline BOOL LASwriteItemCompressed_GPSTIME11_v1::write(const U8* item)
 {
-  I64F64 this_gpstime;
-  this_gpstime.f64 = *((F64*)item);
+  U64I64F64 this_gpstime;
+  this_gpstime.i64 = *((I64*)item);
 
   if (last_gpstime_diff == 0) // if the last integer difference was zero
   {
@@ -322,9 +322,9 @@ inline BOOL LASwriteItemCompressed_GPSTIME11_v1::write(const U8* item)
       else
       {
         enc->encodeSymbol(m_gpstime_0diff, 2); // the difference is huge
-        enc->writeInt64(this_gpstime.i64);
+        enc->writeInt64(this_gpstime.u64);
       }
-      last_gpstime.f64 = this_gpstime.f64;
+      last_gpstime.i64 = this_gpstime.i64;
     }
   }
   else // the last integer difference was *not* zero
@@ -402,9 +402,9 @@ inline BOOL LASwriteItemCompressed_GPSTIME11_v1::write(const U8* item)
       {
         // if difference is so huge ... we simply write the double
         enc->encodeSymbol(m_gpstime_multi, LASZIP_GPSTIME_MULTIMAX-2);
-        enc->writeInt64(this_gpstime.i64);
+        enc->writeInt64(this_gpstime.u64);
       }
-      last_gpstime.f64 = this_gpstime.f64;
+      last_gpstime.i64 = this_gpstime.i64;
     }
   }
   return TRUE;
@@ -479,10 +479,10 @@ struct LASwavepacket13
 {
   U64 offset;
   U32 packet_size;
-  I32F32 return_point;
-  I32F32 x;
-  I32F32 y;
-  I32F32 z;
+  U32I32F32 return_point;
+  U32I32F32 x;
+  U32I32F32 y;
+  U32I32F32 z;
 };
 
 LASwriteItemCompressed_WAVEPACKET13_v1::LASwriteItemCompressed_WAVEPACKET13_v1(EntropyEncoder* enc)

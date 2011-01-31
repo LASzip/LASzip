@@ -79,7 +79,7 @@ public:
 
 private:
   EntropyEncoder* enc;
-  I64F64 last_gpstime;
+  U64I64F64 last_gpstime;
 
   EntropyModel* m_gpstime_multi;
   EntropyModel* m_gpstime_0diff;

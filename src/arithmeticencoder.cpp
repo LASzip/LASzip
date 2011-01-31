@@ -268,9 +268,9 @@ inline void ArithmeticEncoder::writeInt(U32 sym)
 
 inline void ArithmeticEncoder::writeFloat(F32 sym)
 {
-  U32F32 u32f32;
-  u32f32.f32 = sym;
-  writeInt(u32f32.u32);
+  U32I32F32 u32i32f32;
+  u32i32f32.f32 = sym;
+  writeInt(u32i32f32.u32);
 }
 
 inline void ArithmeticEncoder::writeInt64(U64 sym)
@@ -281,9 +281,9 @@ inline void ArithmeticEncoder::writeInt64(U64 sym)
 
 inline void ArithmeticEncoder::writeDouble(F64 sym)
 {
-  U64F64 u64f64;
-  u64f64.f64 = sym;
-  writeInt64(u64f64.u64);
+  U64I64F64 u64i64f64;
+  u64i64f64.f64 = sym;
+  writeInt64(u64i64f64.u64);
 }
 
 inline void ArithmeticEncoder::propagate_carry()
