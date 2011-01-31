@@ -121,8 +121,6 @@ bool LASitem::supported_type() const
   case BYTE:
       return true;
       break;
-  default:
-      return false;
   }
   return false;
 }
