@@ -262,11 +262,11 @@ void ArithmeticEncoder::writeShort(U16 sym)
 
 inline void ArithmeticEncoder::writeInt(U32 sym)
 {
-  writeShort((U16)(sym % U16_MAX_PLUS_ONE)); // lower 16 bits
-  writeShort((U16)(sym / U16_MAX_PLUS_ONE)); // UPPER 16 bits
+  writeShort((U16)(sym & 0xFFFF)); // lower 16 bits
+  writeShort((U16)(sym >> 16));    // UPPER 16 bits
 }
 
-inline void ArithmeticEncoder::writeFloat(F32 sym)
+inline void ArithmeticEncoder::writeFloat(F32 sym) /* danger in float reinterpretation */
 {
   U32I32F32 u32i32f32;
   u32i32f32.f32 = sym;
@@ -275,11 +275,11 @@ inline void ArithmeticEncoder::writeFloat(F32 sym)
 
 inline void ArithmeticEncoder::writeInt64(U64 sym)
 {
-  writeInt((U32)(sym % U32_MAX_PLUS_ONE)); // lower 32 bits
-  writeInt((U32)(sym / U32_MAX_PLUS_ONE)); // UPPER 32 bits
+  writeInt((U32)(sym & 0xFFFFFFFF)); // lower 32 bits
+  writeInt((U32)(sym >> 32));        // UPPER 32 bits
 }
 
-inline void ArithmeticEncoder::writeDouble(F64 sym)
+inline void ArithmeticEncoder::writeDouble(F64 sym) /* danger in float reinterpretation */
 {
   U64I64F64 u64i64f64;
   u64i64f64.f64 = sym;

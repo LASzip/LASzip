@@ -263,10 +263,10 @@ inline U32 ArithmeticDecoder::readInt()
 {
   U32 lowerInt = readShort();
   U32 upperInt = readShort();
-  return upperInt*U16_MAX_PLUS_ONE+lowerInt;
+  return (upperInt<<16)|lowerInt;
 }
 
-inline F32 ArithmeticDecoder::readFloat()
+inline F32 ArithmeticDecoder::readFloat() /* danger in float reinterpretation */
 {
   U32I32F32 u32i32f32;
   u32i32f32.u32 = readInt();
@@ -277,10 +277,10 @@ inline U64 ArithmeticDecoder::readInt64()
 {
   U64 lowerInt = readInt();
   U64 upperInt = readInt();
-  return upperInt*U32_MAX_PLUS_ONE+lowerInt;
+  return (upperInt<<32)|lowerInt;
 }
 
-inline F64 ArithmeticDecoder::readDouble()
+inline F64 ArithmeticDecoder::readDouble() /* danger in float reinterpretation */
 {
   U64I64F64 u64i64f64;
   u64i64f64.u64 = readInt64();
