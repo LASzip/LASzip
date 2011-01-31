@@ -33,6 +33,8 @@
 
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 /*
 ===============================================================================
@@ -221,7 +223,10 @@ inline BOOL LASreadItemCompressed_POINT10_v1::read(U8* item)
 		// decompress the scan_angle_rank ... if it has changed
 		if (changed_values & 4)
 		{
-			((I8*)item)[16] = ic_scan_angle_rank->decompress(((I8*)last_item)[16], k_bits < 3);
+          I32 tmp = ic_scan_angle_rank->decompress(((I8*)last_item)[16], k_bits < 3);
+          assert(tmp <= 127);
+          assert(tmp >= -128);
+		  ((I8*)item)[16] = tmp;
 		}
 
 		// decompress the user_data ... if it has changed
