@@ -8,13 +8,13 @@ LASzip
 Current Release(s)
 ------------------------------------------------------------------------------
 
-* **2011-01-17** 
+* **2011-02-01** 
 
-  - `laszip-1.0.0-src.tar.gz <http://download.osgeo.org/laszip/laszip-1.0.0.tar.gz>`_ 
-    `(md5) <http://download.osgeo.org/laszip/laszip-1.0.0.tar.gz.md5>`__ 
+  - `laszip-1.0.1-src.tar.gz <http://download.osgeo.org/laszip/laszip-1.0.1.tar.gz>`_ 
+    `(md5) <http://download.osgeo.org/laszip/laszip-1.0.1.tar.gz.md5>`__ 
 
-  - `laszip-1.0.0-src.zip <http://download.osgeo.org/laszip/laszip-1.0.0.zip>`_ 
-    `(md5) <http://download.osgeo.org/liblas/laszip-1.0.0.zip.md5>`__
+  - `laszip-1.0.1-src.zip <http://download.osgeo.org/laszip/laszip-1.0.0.zip>`_ 
+    `(md5) <http://download.osgeo.org/liblas/laszip-1.0.1.zip.md5>`__
 
   - See `OSGeo4W <http://trac.osgeo.org/osgeo4w>`__ for Windows release.
 
