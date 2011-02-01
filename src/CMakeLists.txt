@@ -22,6 +22,7 @@ set(LASZIP_HPP
   bytestreamout.hpp
   bytestreamout_file.hpp
   bytestreamout_ostream.hpp
+  endian.hpp
   entropydecoder.hpp
   entropyencoder.hpp
   integercompressor.hpp

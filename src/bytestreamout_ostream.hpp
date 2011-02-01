@@ -31,6 +31,7 @@
 #define BYTE_STREAM_OUT_OSTREAM_H
 
 #include "bytestreamout.hpp"
+#include "endian.hpp"
 
 #ifdef LZ_WIN32_VC6
 #include <fstream.h>
