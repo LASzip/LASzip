@@ -43,7 +43,7 @@ typedef long long SIGNED_INT64;
 
 #define LASZIP_VERSION_MAJOR    1
 #define LASZIP_VERSION_MINOR    0
-#define LASZIP_VERSION_REVISION 0
+#define LASZIP_VERSION_REVISION 1
 
 #include "laszipexport.hpp"
 
