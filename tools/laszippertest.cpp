@@ -375,7 +375,7 @@ static void write_points(LASzipper* zipper, PointData& data)
     end_time = taketime();
   }
 
-  log("laszipper wrote %d bytes in %g seconds\n", num_bytes, end_time-start_time);
+  log("laszipper wrote %u bytes in %g seconds\n", num_bytes, end_time-start_time);
 
   return;
 }
@@ -446,7 +446,7 @@ static void read_points(LASunzipper* unzipper, PointData& data)
   }
   else
   {
-    log("SUCCESS: lasunzipper read %d bytes in %g seconds\n", num_bytes, end_time-start_time);
+    log("SUCCESS: lasunzipper read %u bytes in %g seconds\n", num_bytes, end_time-start_time);
   }
 
   return;
