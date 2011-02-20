@@ -292,7 +292,7 @@ BOOL LASreadItemCompressed_GPSTIME11_v1::init(const U8* item)
   ic_gpstime->initDecompressor();
 
   /* init last item */
-  last_gpstime.f64 = *((F64*)item);
+  last_gpstime.u64 = *((U64*)item);
   return TRUE;
 }
 
