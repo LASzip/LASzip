@@ -47,6 +47,16 @@ that handle LAS data to read and write LASzip-compressed data. The
 BSD-licensed `libLAS`_ and the LGPL-licensed `LASlib`_ can take
 advantage of LASzip to read and write compressed data.
 
+LASzip is completely lossless. It compresses bulky LAS files into compact LAZ
+files that are only 10-20 percent of the original size, accurately preserving
+every single bit. For example, compressing and decompressing the LAS file 
+lidar.las with `laszip.exe`_ as shown below results in lidar_copy.las that
+is bit-identical to lidar.las. However, the small size of lidar.laz makes it
+much easier to store, copy, transmit, or archive large amounts of LIDAR.
+
+* laszip lidar.las lidar.laz
+* laszip lidar.laz lidar_copy.las
+
 LASzip compression can be many times smaller and many times faster than
 `bz2`_, `gzip`_, and `rar`_ because it takes advantage of knowing what the
 different bytes in a LAS file represent. For example, the ``x`` and ``y``
