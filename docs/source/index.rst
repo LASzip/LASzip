@@ -88,7 +88,17 @@ add native LAZ support to your own software package.
     http://laszip.org while `LASlib`_ currently embeds this same 
     compression/decompression codebase.
 
+Data
+------------------------------------------------------------------------------
 
+LASzip-compressed data is available from :ref:`here <data>`.
+
+
+.. toctree::
+   :hidden: 
+   
+   data
+   
 .. _`OSGeo4W`: http://trac.osgeo.org/osgeo4w
 .. _`Martin Isenburg`: http://www.cs.unc.edu/~isenburg
 .. _`ASPRS LAS format`: http://www.asprs.org/society/committees/standards/lidar_exchange_format.html

@@ -89,3 +89,4 @@ laszip/laszip.sdf
 tools/laszip.pc
 tools/laszip-config
 *.lax
+docs/build
