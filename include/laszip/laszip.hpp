@@ -25,6 +25,7 @@
   
   CHANGE HISTORY:
   
+    20 March 2011 -- incrementing LASZIP_VERSION to 2.0 for improved compression
     10 January 2011 -- licensing change for LGPL release and liblas integration
     12 December 2010 -- refactored from lasdefinitions after movies with silke
   
@@ -40,10 +41,9 @@ typedef __int64   SIGNED_INT64;
 typedef long long SIGNED_INT64;
 #endif
 
-
-#define LASZIP_VERSION_MAJOR    1
+#define LASZIP_VERSION_MAJOR    2
 #define LASZIP_VERSION_MINOR    0
-#define LASZIP_VERSION_REVISION 1
+#define LASZIP_VERSION_REVISION 0
 
 #include "laszipexport.hpp"
 
@@ -61,6 +61,8 @@ public:
   bool supported_version() const;
   bool supported() const;
 
+  const char* get_name() const;
+
 public:
   unsigned short size;
   unsigned short version;
@@ -74,7 +76,9 @@ public:
   {
     POINT_BY_POINT_RAW        = 0,
     POINT_BY_POINT_ARITHMETIC = 1,
+    POINT_BY_POINT_ARITHMETIC_V2 = 2, // temporary fix
     DEFAULT_COMPRESSION       = POINT_BY_POINT_ARITHMETIC,
+    DEFAULT_COMPRESSION_V2    = POINT_BY_POINT_ARITHMETIC_V2, // temporary fix
     DEFAULT_RAW               = POINT_BY_POINT_RAW
   };
 
