@@ -53,7 +53,7 @@ public:
 
   BOOL init(ByteStreamIn* instream);
   BOOL read(U8* const * point);
-  BOOL done() {return TRUE;};
+  BOOL done();
 
 private:
   ByteStreamIn* instream;
