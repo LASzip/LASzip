@@ -9,6 +9,8 @@ liblibrary_la_SOURCES =				arithmeticmodel.cpp \
 						integercompressor.cpp \
 						laswriteitemcompressed_v1.cpp \
 						lasreaditemcompressed_v1.cpp \
+						laswriteitemcompressed_v2.cpp \
+						lasreaditemcompressed_v2.cpp \
 						laswritepoint.cpp \
 						lasreadpoint.cpp \
 						laszip.cpp \
