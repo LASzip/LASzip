@@ -156,8 +156,8 @@ public:
     }
   };
 
-  const char* m_filename;
   bool m_use_iostream;
+  const char* m_filename;
   FILE* ifile;
   filebuf ifb;
 #ifdef LZ_WIN32_VC6 
@@ -443,6 +443,7 @@ static void read_points(LASunzipper* unzipper, PointData& data)
   if (num_errors)
   {
     log("ERROR: with lasunzipper %d\n", num_errors);
+    getc(stdin);
   }
   else
   {
@@ -505,8 +506,8 @@ int main(int argc, char *argv[])
     }
     else if (strcmp(p,"-x")==0)
     {
-        ++i;
-        user_seed = atoi(argv[i]);
+      ++i;
+      user_seed = atoi(argv[i]);
     }    
     else
     {
@@ -523,8 +524,10 @@ int main(int argc, char *argv[])
   settings = new Settings(num_points, use_random, use_iostream);
 
   log("Settings:\n");
-  log("  num_points=%d, use_iostream=%s, run_forever=%s, use_random=%s, user_seed=%d\n",
+  log("  num_points=%u, use_iostream=%s, run_forever=%s, use_random=%s, user_seed=%d\n",
     num_points, use_iostream?"true":"false", run_forever?"true":"false", use_random?"true":"false", user_seed);
+
+  settings->seed = user_seed;
 
   unsigned int run = 1;
   do
@@ -532,14 +535,15 @@ int main(int argc, char *argv[])
   PointData data;
 
   // use a seed based on the current time
-  settings->seed = user_seed;
-  if (settings->use_random)
+  if (run_forever && settings->use_random)
   {
+    settings->seed = (unsigned int)time(NULL);
     log("Seed: %u\n", settings->seed);
   }
 
   run_test("test1.lax", data, LASzip::POINT_BY_POINT_RAW);
   run_test("test2.lax", data, LASzip::POINT_BY_POINT_ARITHMETIC);
+  run_test("test3.lax", data, LASzip::POINT_BY_POINT_ARITHMETIC_V2);
   log("Finished %u runs\n\n", run);
   ++run;
   } while (run_forever);
