@@ -1,11 +1,11 @@
 .. _data:
 
 ******************************************************************************
-LASzip-compressed data available for download
+LAZ data (LASzip-compressed LAS files) available for download
 ******************************************************************************
 
-
 * http://gisfiles.wm.edu/files/lidar/ESLiDAR/LiDAR_ClassifiedPointCloud/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/waseca/laz/
 * http://liblas.org/samples/
 
 .. _`OSGeo4W`: http://trac.osgeo.org/osgeo4w
