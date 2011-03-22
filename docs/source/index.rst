@@ -1,8 +1,15 @@
 .. _home:
 
-LASzip Download
+******************************************************************************
+LASzip - lossless LAS compression
+******************************************************************************
+
+
+Download
 ------------------------------------------------------------------------------
 
+Please note that `libLAS`_ links to the LASzip compression library while
+`LASlib`_ embeds the LASzip codebase.
 
 Source
 ..............................................................................
@@ -63,18 +70,16 @@ decompress and write out the data in an uncompressed form. The availability of
 the two APIs `libLAS`_ and `lasLIB`_ with LASzip capability makes it easy to
 add native LAZ support to your own software package.
 
-.. note::
-    `libLAS`_ externally links to released forms of the library at 
-    http://laszip.org while `LASlib`_ embeds the LASzip codebase.
-
 
 Download LAZ data
 ------------------------------------------------------------------------------
 
+* http://gisfiles.wm.edu/files/lidar/
 * http://gisfiles.wm.edu/files/lidar/ESLiDAR/LiDAR_ClassifiedPointCloud/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/dodge/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/faribault/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/fillmore/laz
+* ftp://lidar.dnr.state.mn.us/data/raw/county/fillmore/laz/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/freeborn/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/waseca/laz/
 * http://liblas.org/samples/
 
