@@ -1,10 +1,11 @@
 .. _data:
 
 ******************************************************************************
-LAZ data (LASzip-compressed LAS files) available for download
+download LAZ data (compressed LAS files)
 ******************************************************************************
 
 * http://gisfiles.wm.edu/files/lidar/ESLiDAR/LiDAR_ClassifiedPointCloud/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/dodge/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/waseca/laz/
 * http://liblas.org/samples/
 
