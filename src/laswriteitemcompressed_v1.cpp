@@ -83,7 +83,6 @@ LASwriteItemCompressed_POINT10_v1::LASwriteItemCompressed_POINT10_v1(EntropyEnco
 LASwriteItemCompressed_POINT10_v1::~LASwriteItemCompressed_POINT10_v1()
 {
   U32 i;
-
   delete ic_dx;
   delete ic_dy;
   delete ic_z;
@@ -344,6 +343,7 @@ inline BOOL LASwriteItemCompressed_GPSTIME11_v1::write(const U8* item)
       {
         // compute multiplier between current and last integer difference
         I32 multi = (I32)(((F32)curr_gpstime_diff / (F32)last_gpstime_diff) + 0.5f);
+
         // limit the multiplier into some bounds
         if (multi >= LASZIP_GPSTIME_MULTIMAX-3)
         {
@@ -636,41 +636,3 @@ inline BOOL LASwriteItemCompressed_BYTE_v1::write(const U8* item)
   memcpy(last_item, item, number);
   return TRUE;
 }
-
-/* for later
-
-#define swap(a,b) { int temp=(a);(a)=(b);(b)=temp; }
-
-int median5(int* a)
-{
-  int a0 = a[0];
-  int a1 = a[1];
-  int a2 = a[2];
-  int a3 = a[3];
-  int a4 = a[4];
-
-  if (a1 < a0) 
-      swap(a0, a1);
-  if (a2 < a0)
-      swap(a0, a2); 
-  if (a3 < a0)
-      swap(a0, a3);
-  if (a4 < a0)
-      swap(a0, a4);
-
-  if (a2 < a1)
-      swap(a1, a2);
-  if (a3 < a1)
-      swap(a1, a3);
-  if (a4 < a1)
-      swap(a1, a4);
-
-  if (a3 < a2)
-      swap(a2, a3);
-  if (a4 < a2)
-    return a4;
-  else
-    return a2;
-};
-
-*/

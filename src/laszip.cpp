@@ -121,6 +121,8 @@ bool LASitem::supported_type() const
   case BYTE:
       return true;
       break;
+  default:
+      return false;
   }
   return false;
 }
@@ -155,19 +157,19 @@ bool LASitem::supported_version() const
   switch (type)
   {
   case POINT10:
-      if (version > 1) return false;
+      if (version > 2) return false;
       break;
   case GPSTIME11:
-      if (version > 1) return false;
+      if (version > 2) return false;
       break;
   case RGB12:
-      if (version > 1) return false;
+      if (version > 2) return false;
       break;
   case WAVEPACKET13:
       if (version > 1) return false;
       break;
   case BYTE:
-      if (version > 1) return false;
+      if (version > 2) return false;
       break;
   default:
       return false;
@@ -177,30 +179,30 @@ bool LASitem::supported_version() const
 
 bool LASitem::supported() const
 {
+  return supported_type() && supported_size() && supported_version();
+}
+
+const char* LASitem::get_name() const
+{
   switch (type)
   {
   case POINT10:
-      if (size != 20) return false;
-      if (version > 1) return false;
+      return "POINT10";
       break;
   case GPSTIME11:
-      if (size != 8) return false;
-      if (version > 1) return false;
+      return "GPSTIME11";
       break;
   case RGB12:
-      if (size != 6) return false;
-      if (version > 1) return false;
+      return "RGB12";
       break;
   case WAVEPACKET13:
-      if (size != 29) return false;
-      if (version > 1) return false;
+      return "WAVEPACKET13";
       break;
   case BYTE:
-      if (size < 1) return false;
-      if (version > 1) return false;
+      return "BYTE";
       break;
   default:
-      return false;
+      break;
   }
-  return true;
+  return 0;
 }

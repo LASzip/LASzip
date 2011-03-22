@@ -34,6 +34,7 @@
 #include "arithmeticencoder.hpp"
 #include "laswriteitemraw.hpp"
 #include "laswriteitemcompressed_v1.hpp"
+#include "laswriteitemcompressed_v2.hpp"
 
 #include <string.h>
 
@@ -64,6 +65,7 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, LASzip::Algorithm algor
     enc = 0;
     break;
   case LASzip::POINT_BY_POINT_ARITHMETIC:
+  case LASzip::POINT_BY_POINT_ARITHMETIC_V2:
     enc = new ArithmeticEncoder();
     break;
   default:
@@ -122,32 +124,66 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, LASzip::Algorithm algor
   if (enc)
   {
     writers_compressed = new LASwriteItem*[num_writers];
-    for (i = 0; i < num_writers; i++)
+    if (algorithm == LASzip::POINT_BY_POINT_ARITHMETIC)
     {
-      switch (items[i].type)
+      for (i = 0; i < num_writers; i++)
       {
-      case LASitem::POINT10:
-        writers_compressed[i] = new LASwriteItemCompressed_POINT10_v1(enc);
-        items[i].version = 1;
-        break;
-      case LASitem::GPSTIME11:
-        writers_compressed[i] = new LASwriteItemCompressed_GPSTIME11_v1(enc);
-        items[i].version = 1;
-        break;
-      case LASitem::RGB12:
-        writers_compressed[i] = new LASwriteItemCompressed_RGB12_v1(enc);
-        items[i].version = 1;
-        break;
-      case LASitem::WAVEPACKET13:
-        writers_compressed[i] = new LASwriteItemCompressed_WAVEPACKET13_v1(enc);
-        items[i].version = 1;
-        break;
-      case LASitem::BYTE:
-        writers_compressed[i] = new LASwriteItemCompressed_BYTE_v1(enc, items[i].size);
-        items[i].version = 1;
-        break;
-      default:
-        return FALSE;
+        switch (items[i].type)
+        {
+        case LASitem::POINT10:
+          writers_compressed[i] = new LASwriteItemCompressed_POINT10_v1(enc);
+          items[i].version = 1;
+          break;
+        case LASitem::GPSTIME11:
+          writers_compressed[i] = new LASwriteItemCompressed_GPSTIME11_v1(enc);
+          items[i].version = 1;
+          break;
+        case LASitem::RGB12:
+          writers_compressed[i] = new LASwriteItemCompressed_RGB12_v1(enc);
+          items[i].version = 1;
+          break;
+        case LASitem::WAVEPACKET13:
+          writers_compressed[i] = new LASwriteItemCompressed_WAVEPACKET13_v1(enc);
+          items[i].version = 1;
+          break;
+        case LASitem::BYTE:
+          writers_compressed[i] = new LASwriteItemCompressed_BYTE_v1(enc, items[i].size);
+          items[i].version = 1;
+          break;
+        default:
+          return FALSE;
+        }
+      }
+    }
+    else
+    {
+      for (i = 0; i < num_writers; i++)
+      {
+        switch (items[i].type)
+        {
+        case LASitem::POINT10:
+          writers_compressed[i] = new LASwriteItemCompressed_POINT10_v2(enc);
+          items[i].version = 2;
+          break;
+        case LASitem::GPSTIME11:
+          writers_compressed[i] = new LASwriteItemCompressed_GPSTIME11_v2(enc);
+          items[i].version = 2;
+          break;
+        case LASitem::RGB12:
+          writers_compressed[i] = new LASwriteItemCompressed_RGB12_v2(enc);
+          items[i].version = 2;
+          break;
+        case LASitem::WAVEPACKET13:
+          writers_compressed[i] = new LASwriteItemCompressed_WAVEPACKET13_v1(enc);
+          items[i].version = 1;
+          break;
+        case LASitem::BYTE:
+          writers_compressed[i] = new LASwriteItemCompressed_BYTE_v2(enc, items[i].size);
+          items[i].version = 2;
+          break;
+        default:
+          return FALSE;
+        }
       }
     }
   }
@@ -202,7 +238,7 @@ BOOL LASwritePoint::write(const U8 * const * point)
 
 BOOL LASwritePoint::done()
 {
-  if (enc)
+  if (writers == writers_compressed)
   {
     enc->done();
   }

@@ -34,6 +34,7 @@
 #include "arithmeticdecoder.hpp"
 #include "lasreaditemraw.hpp"
 #include "lasreaditemcompressed_v1.hpp"
+#include "lasreaditemcompressed_v2.hpp"
 
 #include <string.h>
 
@@ -123,18 +124,24 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, LASzip::Algorithm 
       case LASitem::POINT10:
         if (items[i].version == 1)
           readers_compressed[i] = new LASreadItemCompressed_POINT10_v1(dec);
+        else if (items[i].version == 2)
+          readers_compressed[i] = new LASreadItemCompressed_POINT10_v2(dec);
         else
           return FALSE;
         break;
       case LASitem::GPSTIME11:
         if (items[i].version == 1)
           readers_compressed[i] = new LASreadItemCompressed_GPSTIME11_v1(dec);
+        else if (items[i].version == 2)
+          readers_compressed[i] = new LASreadItemCompressed_GPSTIME11_v2(dec);
         else
           return FALSE;
         break;
       case LASitem::RGB12:
         if (items[i].version == 1)
           readers_compressed[i] = new LASreadItemCompressed_RGB12_v1(dec);
+        else if (items[i].version == 2)
+          readers_compressed[i] = new LASreadItemCompressed_RGB12_v2(dec);
         else
           return FALSE;
         break;
@@ -147,6 +154,8 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, LASzip::Algorithm 
       case LASitem::BYTE:
         if (items[i].version == 1)
           readers_compressed[i] = new LASreadItemCompressed_BYTE_v1(dec, items[i].size);
+        else if (items[i].version == 2)
+          readers_compressed[i] = new LASreadItemCompressed_BYTE_v2(dec, items[i].size);
         else
           return FALSE;
         break;
@@ -197,6 +206,15 @@ BOOL LASreadPoint::read(U8* const * point)
     }
     readers = readers_compressed;
     dec->init(instream);
+  }
+  return TRUE;
+}
+
+BOOL LASreadPoint::done()
+{
+  if (readers == readers_compressed)
+  {
+    dec->done();
   }
   return TRUE;
 }

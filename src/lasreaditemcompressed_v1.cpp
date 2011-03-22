@@ -33,7 +33,6 @@
 
 #include <assert.h>
 #include <string.h>
-#include <stdio.h>
 
 /*
 ===============================================================================
@@ -173,18 +172,15 @@ inline BOOL LASreadItemCompressed_POINT10_v1::read(U8* item)
       median_y = last_y_diff[1];
   }
 
-  // copy point from last point
-  memcpy(item, last_item, 20);
-
   // decompress x y z coordinates
   I32 x_diff = ic_dx->decompress(median_x);
-  ((LASpoint10*)item)->x += x_diff;
+  ((LASpoint10*)last_item)->x += x_diff;
   // we use the number k of bits corrector bits to switch contexts
   U32 k_bits = ic_dx->getK();
   I32 y_diff = ic_dy->decompress(median_y, (k_bits < 19 ? k_bits : 19));
-  ((LASpoint10*)item)->y += y_diff;
+  ((LASpoint10*)last_item)->y += y_diff;
   k_bits = (k_bits + ic_dy->getK())/2;
-  ((LASpoint10*)item)->z = ic_z->decompress(((LASpoint10*)last_item)->z, (k_bits < 19 ? k_bits : 19));
+  ((LASpoint10*)last_item)->z = ic_z->decompress(((LASpoint10*)last_item)->z, (k_bits < 19 ? k_bits : 19));
 
   // decompress which other values have changed
   I32 changed_values = dec->decodeSymbol(m_changed_values);
@@ -194,7 +190,7 @@ inline BOOL LASreadItemCompressed_POINT10_v1::read(U8* item)
     // decompress the intensity if it has changed
     if (changed_values & 32)
     {
-      ((LASpoint10*)item)->intensity = (U16)ic_intensity->decompress(((LASpoint10*)last_item)->intensity);
+      ((LASpoint10*)last_item)->intensity = (U16)ic_intensity->decompress(((LASpoint10*)last_item)->intensity);
     }
 
     // decompress the edge_of_flight_line, scan_direction_flag, ... if it has changed
@@ -205,7 +201,7 @@ inline BOOL LASreadItemCompressed_POINT10_v1::read(U8* item)
         m_bit_byte[last_item[14]] = dec->createSymbolModel(256);
         dec->initSymbolModel(m_bit_byte[last_item[14]]);
       }
-      item[14] = (U8)dec->decodeSymbol(m_bit_byte[last_item[14]]);
+      last_item[14] = (U8)dec->decodeSymbol(m_bit_byte[last_item[14]]);
     }
 
     // decompress the classification ... if it has changed
@@ -216,13 +212,13 @@ inline BOOL LASreadItemCompressed_POINT10_v1::read(U8* item)
         m_classification[last_item[15]] = dec->createSymbolModel(256);
         dec->initSymbolModel(m_classification[last_item[15]]);
       }
-      item[15] = (U8)dec->decodeSymbol(m_classification[last_item[15]]);
+      last_item[15] = (U8)dec->decodeSymbol(m_classification[last_item[15]]);
     }
     
     // decompress the scan_angle_rank ... if it has changed
     if (changed_values & 4)
     {
-      item[16] = (U8)ic_scan_angle_rank->decompress(last_item[16], k_bits < 3);
+      last_item[16] = (U8)ic_scan_angle_rank->decompress(last_item[16], k_bits < 3);
     }
 
     // decompress the user_data ... if it has changed
@@ -233,13 +229,13 @@ inline BOOL LASreadItemCompressed_POINT10_v1::read(U8* item)
         m_user_data[last_item[17]] = dec->createSymbolModel(256);
         dec->initSymbolModel(m_user_data[last_item[17]]);
       }
-      item[17] = (U8)dec->decodeSymbol(m_user_data[last_item[17]]);
+      last_item[17] = (U8)dec->decodeSymbol(m_user_data[last_item[17]]);
     }
 
     // decompress the point_source_ID ... if it has changed
     if (changed_values & 1)
     {
-      ((LASpoint10*)item)->point_source_ID = (U16)ic_point_source_ID->decompress(((LASpoint10*)last_item)->point_source_ID);
+      ((LASpoint10*)last_item)->point_source_ID = (U16)ic_point_source_ID->decompress(((LASpoint10*)last_item)->point_source_ID);
     }
   }
 
@@ -250,7 +246,7 @@ inline BOOL LASreadItemCompressed_POINT10_v1::read(U8* item)
   if (last_incr > 2) last_incr = 0;
 
   // copy the last point
-  memcpy(last_item, item, 20);
+  memcpy(item, last_item, 20);
   return TRUE;
 }
 
@@ -411,15 +407,15 @@ inline BOOL LASreadItemCompressed_RGB12_v1::read(U8* item)
 {
   U32 sym = dec->decodeSymbol(m_byte_used);
   if (sym & (1 << 0)) ((U16*)item)[0] = (U16)ic_rgb->decompress(((U16*)last_item)[0]&255, 0);
-  else ((U16*)item)[0] = ((U16*)last_item)[0]&0xFF;
+  else ((U16*)item)[0] = (U16)(((U16*)last_item)[0]&0xFF);
   if (sym & (1 << 1)) ((U16*)item)[0] |= (((U16)ic_rgb->decompress(((U16*)last_item)[0]>>8, 1)) << 8);
   else ((U16*)item)[0] |= (((U16*)last_item)[0]&0xFF00);
   if (sym & (1 << 2)) ((U16*)item)[1] = (U16)ic_rgb->decompress(((U16*)last_item)[1]&255, 2);
-  else ((U16*)item)[1] = ((U16*)last_item)[1]&0xFF;
+  else ((U16*)item)[1] = (U16)(((U16*)last_item)[1]&0xFF);
   if (sym & (1 << 3)) ((U16*)item)[1] |= (((U16)ic_rgb->decompress(((U16*)last_item)[1]>>8, 3)) << 8);
   else ((U16*)item)[1] |= (((U16*)last_item)[1]&0xFF00);
   if (sym & (1 << 4)) ((U16*)item)[2] = (U16)ic_rgb->decompress(((U16*)last_item)[2]&255, 4);
-  else ((U16*)item)[2] = ((U16*)last_item)[2]&0xFF;
+  else ((U16*)item)[2] = (U16)(((U16*)last_item)[2]&0xFF);
   if (sym & (1 << 5)) ((U16*)item)[2] |= (((U16)ic_rgb->decompress(((U16*)last_item)[2]>>8, 5)) << 8);
   else ((U16*)item)[2] |= (((U16*)last_item)[2]&0xFF00);
   memcpy(last_item, item, 6);
