@@ -1,11 +1,13 @@
 .. _data:
 
-******************************************************************************
+
 download LAZ data (compressed LAS files)
-******************************************************************************
+------------------------------------------------------------------------------
 
 * http://gisfiles.wm.edu/files/lidar/ESLiDAR/LiDAR_ClassifiedPointCloud/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/dodge/laz/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/faribault/laz/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/fillmore/laz
 * ftp://lidar.dnr.state.mn.us/data/raw/county/waseca/laz/
 * http://liblas.org/samples/
 

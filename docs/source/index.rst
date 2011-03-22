@@ -1,12 +1,7 @@
 .. _home:
 
-******************************************************************************
-LASzip
-******************************************************************************
-
-Download
+LASzip Download
 ------------------------------------------------------------------------------
-
 
 
 Source
@@ -27,9 +22,9 @@ Binaries
     include files to compile LASzip into your own application. `libLAS`_ 
     binaries through `OSGeo4W`_ also link LASzip.
 
-  - A simple Windows binary, `laszip.exe`_, is also available for 
-    explicit compression and decompression tasks to and from `ASPRS LAS format`_.
-    
+  - A Windows binary `laszip.exe`_ and a simple makefile to build `laszip`_ are
+    available for explicit compression (decompression) of LAS (LAZ) files.    
+
 
 Development Source
 ------------------------------------------------------------------------------
@@ -59,22 +54,7 @@ much easier to store, copy, transmit, or archive large amounts of LIDAR.
 
 LASzip compression can be many times smaller and many times faster than
 `bz2`_, `gzip`_, and `rar`_ because it takes advantage of knowing what the
-different bytes in a LAS file represent. For example, the ``x`` and ``y``
-coordinate of a point are predicted by adding their delta in the preceding two
-points to the ``x`` and ``y`` of the last point, whereas the difference
-between subsequent points' time values is expressed as a multiple of the most
-common increment, while RGB valued are compressed with simple difference
-coding. In each case the prediction residuals are compressed with adaptive
-arithmetic coding.
-
-The compressor treats the LAS points of types 0, 1, 2, 3, 4, 5, and 6 as
-consisting of a number of items: POINT10, GPSTIME11, RGB12, and WAVEPACKET13
-and uses separate modules with separate version numbers to compress each item.
-This makes it easy to improve, for example, the compressor for the
-``gps_time`` without affecting the other compression schemes while
-guaranteeing full backwards compatibility. More importantly it allows the
-engine to add new LAS point types as the LAS specification evolves into the
-future without affecting existing point types.
+different bytes in a LAS file represent.
 
 Another advantage of LASzip over generic compressors is that it allows you to
 treat the compressed LAZ files just like standard LAS files and load them
@@ -85,14 +65,18 @@ add native LAZ support to your own software package.
 
 .. note::
     `libLAS`_ externally links to released forms of the library at 
-    http://laszip.org while `LASlib`_ currently embeds this same 
-    compression/decompression codebase.
+    http://laszip.org while `LASlib`_ embeds the LASzip codebase.
 
-Data
+
+Download LAZ data
 ------------------------------------------------------------------------------
 
-LASzip-compressed data is available from :ref:`here <data>`.
-
+* http://gisfiles.wm.edu/files/lidar/ESLiDAR/LiDAR_ClassifiedPointCloud/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/dodge/laz/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/faribault/laz/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/fillmore/laz
+* ftp://lidar.dnr.state.mn.us/data/raw/county/waseca/laz/
+* http://liblas.org/samples/
 
 .. toctree::
    :hidden: 
@@ -102,6 +86,7 @@ LASzip-compressed data is available from :ref:`here <data>`.
 .. _`OSGeo4W`: http://trac.osgeo.org/osgeo4w
 .. _`Martin Isenburg`: http://www.cs.unc.edu/~isenburg
 .. _`ASPRS LAS format`: http://www.asprs.org/society/committees/standards/lidar_exchange_format.html
+.. _`LAS`: http://www.asprs.org/society/committees/standards/lidar_exchange_format.html
 .. _`LGPL`: http://en.wikipedia.org/wiki/GNU_Lesser_General_Public_License
 .. _`bz2`: http://en.wikipedia.org/wiki/Bzip2
 .. _`gzip`: http://en.wikipedia.org/wiki/Gzip
@@ -111,3 +96,4 @@ LASzip-compressed data is available from :ref:`here <data>`.
 .. _`lasLIB`: http://www.cs.unc.edu/~isenburg/lastools/download/laslib_README.txt
 .. _`lasLIB source`: http://www.cs.unc.edu/~isenburg/lastools/download/laslib.zip
 .. _`laszip.exe`: http://www.cs.unc.edu/~isenburg/lastools/
+.. _`laszip`: http://www.cs.unc.edu/~isenburg/lastools/download/laslib.zip
