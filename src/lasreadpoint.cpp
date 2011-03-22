@@ -65,6 +65,7 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, LASzip::Algorithm 
     dec = 0;
     break;
   case LASzip::POINT_BY_POINT_ARITHMETIC:
+  case LASzip::POINT_BY_POINT_ARITHMETIC_V2: // temporary fix
     dec = new ArithmeticDecoder();
     break;
   default:

@@ -65,7 +65,7 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, LASzip::Algorithm algor
     enc = 0;
     break;
   case LASzip::POINT_BY_POINT_ARITHMETIC:
-  case LASzip::POINT_BY_POINT_ARITHMETIC_V2:
+  case LASzip::POINT_BY_POINT_ARITHMETIC_V2: // temporary fix
     enc = new ArithmeticEncoder();
     break;
   default:
