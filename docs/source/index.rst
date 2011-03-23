@@ -60,16 +60,13 @@ much easier to store, copy, transmit, or archive large amounts of LIDAR.
 * laszip lidar.laz lidar_copy.las
 
 LASzip compression can be many times smaller and many times faster than
-`bz2`_, `gzip`_, and `rar`_ because it takes advantage of knowing what the
-different bytes in a LAS file represent.
-
-Another advantage of LASzip over generic compressors is that it allows you to
-treat the compressed LAZ files just like standard LAS files and load them
-directly from compressed form into your application without the need to
-decompress and write out the data in an uncompressed form. The availability of
-the two APIs `libLAS`_ and `lasLIB`_ with LASzip capability makes it easy to
+generic compressors like `bz2`_, `gzip`_, and `rar`_ because it knows what
+the different bytes in a LAS file represent. Another advantage of LASzip
+is that it allows you to treat compressed LAZ files just like standard LAS
+files. You can load them directly from compressed form into your application 
+without needing to decompress them onto disk first. The availability of two
+APIs, `libLAS`_ and `lasLIB`_, with LASzip capability makes it very easy to
 add native LAZ support to your own software package.
-
 
 Download LAZ data
 ------------------------------------------------------------------------------
@@ -80,7 +77,15 @@ Download LAZ data
 * ftp://lidar.dnr.state.mn.us/data/raw/county/faribault/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/fillmore/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/freeborn/laz/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/houston/laz/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/mower/laz/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/olmsted/laz/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/pine/laz/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/pope/laz/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/steele/laz/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/wabasha/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/waseca/laz/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/winona/laz/
 * http://liblas.org/samples/
 
 .. toctree::
