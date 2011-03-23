@@ -60,8 +60,8 @@ typedef bool               BOOL;
 typedef union U32I32F32 { U32 u32; I32 i32; F32 f32; } U32I32F32;
 typedef union U64I64F64 { U64 u64; I64 i64; F64 f64; } U64I64F64;
 
-#define F32_MAX            +1.0e+30f
-#define F32_MIN            -1.0e+30f
+#define F32_MAX            +2.0e+37f
+#define F32_MIN            -2.0e+37f
 
 #define U8_MIN             ((U8)0x0)  // 0
 #define U8_MAX             ((U8)0xFF) // 255
@@ -88,14 +88,32 @@ typedef union U64I64F64 { U64 u64; I64 i64; F64 f64; } U64I64F64;
 #define I32_MIN            ((I32)0x80000000) // -2147483648
 #define I32_MAX            ((I32)0x7FFFFFFF) //  2147483647
 
-#define I8_CLAMP(n)     ((n <= I8_MIN) ? I8_MIN : ((n >= I8_MAX) ? I8_MAX : ((I8)n)))
-#define U8_CLAMP(n)     ((n <= U8_MIN) ? U8_MIN : ((n >= U8_MAX) ? U8_MAX : ((U8)n)))
+#define U8_FOLD(n)      (((n) < U8_MIN) ? (n+U8_MAX_PLUS_ONE) : (((n) > U8_MAX) ? (n-U8_MAX_PLUS_ONE) : (n)))
 
-#define I16_CLAMP(n)    ((n <= I16_MIN) ? I16_MIN : ((n >= I16_MAX) ? I16_MAX : ((I16)n)))
-#define U16_CLAMP(n)    ((n <= U16_MIN) ? U16_MIN : ((n >= U16_MAX) ? U16_MAX : ((U16)n)))
+#define I8_CLAMP(n)     (((n) <= I8_MIN) ? I8_MIN : (((n) >= I8_MAX) ? I8_MAX : ((I8)(n))))
+#define U8_CLAMP(n)     (((n) <= U8_MIN) ? U8_MIN : (((n) >= U8_MAX) ? U8_MAX : ((U8)(n))))
 
-#define I32_CLAMP(n)    ((n <= I32_MIN) ? I32_MIN : ((n >= I32_MAX) ? I32_MAX : ((I32)n)))
-#define U32_CLAMP(n)    ((n <= U32_MIN) ? U32_MIN : ((n >= U32_MAX) ? U32_MAX : ((U32)n)))
+#define I16_CLAMP(n)    (((n) <= I16_MIN) ? I16_MIN : (((n) >= I16_MAX) ? I16_MAX : ((I16)(n))))
+#define U16_CLAMP(n)    (((n) <= U16_MIN) ? U16_MIN : (((n) >= U16_MAX) ? U16_MAX : ((U16)(n))))
+
+#define I32_CLAMP(n)    (((n) <= I32_MIN) ? I32_MIN : (((n) >= I32_MAX) ? I32_MAX : ((I32)(n))))
+#define U32_CLAMP(n)    (((n) <= U32_MIN) ? U32_MIN : (((n) >= U32_MAX) ? U32_MAX : ((U32)(n))))
+
+#define I16_QUANTIZE(n) (((n) >= 0) ? (I16)((n)+0.5f) : (I16)((n)-0.5f))
+#define U16_QUANTIZE(n) (((n) >= 0) ? (U16)((n)+0.5f) : (U16)(0))
+
+#define I32_QUANTIZE(n) (((n) >= 0) ? (I32)((n)+0.5f) : (I32)((n)-0.5f))
+#define U32_QUANTIZE(n) (((n) >= 0) ? (U32)((n)+0.5f) : (U32)(0))
+
+#define I16_FLOOR(n) ((((I16)(n)) < (n)) ? (I16)(n) : (((I16)(n))-1))
+#define I32_FLOOR(n) ((((I32)(n)) < (n)) ? (I32)(n) : (((I32)(n))-1))
+#define I64_FLOOR(n) ((((I64)(n)) < (n)) ? (I64)(n) : (((I64)(n))-1))
+
+#define I16_CEIL(n) ((((I16)(n)) > (n)) ? (I16)(n) : (((I16)(n))+1))
+#define I32_CEIL(n) ((((I32)(n)) > (n)) ? (I32)(n) : (((I32)(n))+1))
+#define I64_CEIL(n) ((((I64)(n)) > (n)) ? (I64)(n) : (((I64)(n))+1))
+
+#define U32_ZERO_BIT_0(n) (((n)&(U32)0xFFFFFFFE))
 
 #ifndef FALSE
 #define FALSE   0
