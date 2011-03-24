@@ -28,10 +28,12 @@ set(LASZIP_HPP
   integercompressor.hpp
   lasreaditem.hpp
   lasreaditemcompressed_v1.hpp
+  lasreaditemcompressed_v2.hpp
   lasreaditemraw.hpp
   lasreadpoint.hpp
   laswriteitem.hpp
   laswriteitemcompressed_v1.hpp
+  laswriteitemcompressed_v2.hpp
   laswriteitemraw.hpp
   laswritepoint.hpp
   mydefs.hpp
@@ -43,9 +45,11 @@ set(LASZIP_CPP
     arithmeticmodel.cpp
     integercompressor.cpp
     lasreaditemcompressed_v1.cpp
+    lasreaditemcompressed_v2.cpp
     lasreadpoint.cpp
     lasunzipper.cpp
     laswriteitemcompressed_v1.cpp
+    laswriteitemcompressed_v2.cpp
     laswritepoint.cpp
     laszip.cpp
     laszipper.cpp
