@@ -88,6 +88,15 @@ Download LAZ data
 * ftp://lidar.dnr.state.mn.us/data/raw/county/winona/laz/
 * http://liblas.org/samples/
 
+Users of LASzip
+------------------------------------------------------------------------------
+
+* `Riegl <http://www.riegl.com/>`_
+* `TopoDOT <http://www.certainty3d.com/products/topodot/>`_
+* `Oregon Lidar Consortium <http://www.oregongeology.org/sub/projects/olc/default.htm/>`_
+* `Minnesota Department of Natural Resources <http://www.dnr.state.mn.us/>`_
+* `US Army Corps of Engineers <http://erdc.usace.army.mil/>`_
+
 .. toctree::
    :hidden: 
    
