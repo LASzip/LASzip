@@ -74,6 +74,7 @@ Download LAZ data
 * http://gisfiles.wm.edu/files/lidar/
 * http://gisfiles.wm.edu/files/lidar/ESLiDAR/LiDAR_ClassifiedPointCloud/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/dodge/laz/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/douglas/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/faribault/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/fillmore/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/freeborn/laz/
@@ -93,7 +94,7 @@ Users of LASzip
 
 * `Riegl <http://www.riegl.com/>`_
 * `TopoDOT <http://www.certainty3d.com/products/topodot/>`_
-* `Oregon Lidar Consortium <http://www.oregongeology.org/sub/projects/olc/default.htm/>`_
+* `Oregon Lidar Consortium <http://www.oregongeology.org/sub/projects/olc/default.htm>`_
 * `Minnesota Department of Natural Resources <http://www.dnr.state.mn.us/>`_
 * `US Army Corps of Engineers <http://erdc.usace.army.mil/>`_
 
