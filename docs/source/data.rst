@@ -13,10 +13,12 @@ Download LAZ data (compressed LAS)
 * ftp://lidar.dnr.state.mn.us/data/raw/county/fillmore/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/freeborn/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/houston/laz/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/martin/las/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/mower/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/olmsted/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/pine/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/pope/laz/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/rice/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/steele/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/wabasha/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/waseca/laz/
