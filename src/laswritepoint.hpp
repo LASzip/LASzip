@@ -49,7 +49,7 @@ public:
   ~LASwritePoint();
 
   // should only be called *once*
-  BOOL setup(U32 num_items, LASitem* items, LASzip::Algorithm algorithm);
+  BOOL setup(const U32 num_items, const LASitem* items, LASzip* laszip);
 
   BOOL init(ByteStreamOut* outstream);
   BOOL write(const U8 * const * point);
@@ -62,6 +62,16 @@ private:
   LASwriteItem** writers_raw;
   LASwriteItem** writers_compressed;
   EntropyEncoder* enc;
+  // used for chunking
+  U32 chunk_size;
+  U32 chunk_count;
+  U32 number_chunks;
+  U32 alloced_chunks;
+  U32* chunk_bytes;
+  I64 chunk_start_position;
+  I64 chunk_table_start_position;
+  BOOL add_chunk_to_table();
+  BOOL write_chunk_table();
 };
 
 #endif

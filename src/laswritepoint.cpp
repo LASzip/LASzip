@@ -37,6 +37,7 @@
 #include "laswriteitemcompressed_v2.hpp"
 
 #include <string.h>
+#include <stdlib.h>
 
 LASwritePoint::LASwritePoint()
 {
@@ -46,9 +47,16 @@ LASwritePoint::LASwritePoint()
   writers_raw = 0;
   writers_compressed = 0;
   enc = 0;
+  // used for chunking
+  chunk_size = U32_MAX;
+  chunk_count = 0;
+  number_chunks = 0;
+  alloced_chunks = 0;
+  chunk_bytes = 0;
+  chunk_table_start_position = 0;
 }
 
-BOOL LASwritePoint::setup(U32 num_items, LASitem* items, LASzip::Algorithm algorithm)
+BOOL LASwritePoint::setup(const U32 num_items, const LASitem* items, LASzip* laszip)
 {
   U32 i;
 
@@ -59,23 +67,26 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, LASzip::Algorithm algor
   }
 
   // create entropy encoder (if requested)
-  switch (algorithm)
+  enc = 0;
+  if (laszip && laszip->compressor)
   {
-  case LASzip::POINT_BY_POINT_RAW:
-    enc = 0;
-    break;
-  case LASzip::POINT_BY_POINT_ARITHMETIC:
-  case LASzip::POINT_BY_POINT_ARITHMETIC_V2: // temporary fix
-    enc = new ArithmeticEncoder();
-    break;
-  default:
-    // entropy decoder not supported
-    return FALSE;
+    switch (laszip->coder)
+    {
+    case LASZIP_CODER_ARITHMETIC:
+      enc = new ArithmeticEncoder();
+      break;
+    default:
+      // entropy decoder not supported
+      return FALSE;
+    }
   }
 
   // initizalize the writers
   writers = 0;
   num_writers = num_items;
+
+  // disable chunking
+  chunk_size = U32_MAX;
 
   // always create the raw writers
   writers_raw = new LASwriteItem*[num_writers];
@@ -88,43 +99,39 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, LASzip::Algorithm algor
         writers_raw[i] = new LASwriteItemRaw_POINT10_LE();
       else
         writers_raw[i] = new LASwriteItemRaw_POINT10_BE();
-      items[i].version = 0;
       break;
     case LASitem::GPSTIME11:
       if (IS_LITTLE_ENDIAN())
         writers_raw[i] = new LASwriteItemRaw_GPSTIME11_LE();
       else
         writers_raw[i] = new LASwriteItemRaw_GPSTIME11_BE();
-      items[i].version = 0;
       break;
     case LASitem::RGB12:
       if (IS_LITTLE_ENDIAN())
         writers_raw[i] = new LASwriteItemRaw_RGB12_LE();
       else
         writers_raw[i] = new LASwriteItemRaw_RGB12_BE();
-      items[i].version = 0;
       break;
     case LASitem::WAVEPACKET13:
       if (IS_LITTLE_ENDIAN())
         writers_raw[i] = new LASwriteItemRaw_WAVEPACKET13_LE();
       else
         writers_raw[i] = new LASwriteItemRaw_WAVEPACKET13_BE();
-      items[i].version = 0;
       break;
     case LASitem::BYTE:
       writers_raw[i] = new LASwriteItemRaw_BYTE(items[i].size);
-      items[i].version = 0;
       break;
     default:
       return FALSE;
     }
+    if (laszip) laszip->items[i].version = 0;
   }
 
   // if needed create the compressed writers and set versions
   if (enc)
   {
     writers_compressed = new LASwriteItem*[num_writers];
-    if (algorithm == LASzip::POINT_BY_POINT_ARITHMETIC)
+    if (laszip->requested_version <= 1)
     {
       for (i = 0; i < num_writers; i++)
       {
@@ -132,23 +139,23 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, LASzip::Algorithm algor
         {
         case LASitem::POINT10:
           writers_compressed[i] = new LASwriteItemCompressed_POINT10_v1(enc);
-          items[i].version = 1;
+          laszip->items[i].version = 1;
           break;
         case LASitem::GPSTIME11:
           writers_compressed[i] = new LASwriteItemCompressed_GPSTIME11_v1(enc);
-          items[i].version = 1;
+          laszip->items[i].version = 1;
           break;
         case LASitem::RGB12:
           writers_compressed[i] = new LASwriteItemCompressed_RGB12_v1(enc);
-          items[i].version = 1;
+          laszip->items[i].version = 1;
           break;
         case LASitem::WAVEPACKET13:
           writers_compressed[i] = new LASwriteItemCompressed_WAVEPACKET13_v1(enc);
-          items[i].version = 1;
+          laszip->items[i].version = 1;
           break;
         case LASitem::BYTE:
           writers_compressed[i] = new LASwriteItemCompressed_BYTE_v1(enc, items[i].size);
-          items[i].version = 1;
+          laszip->items[i].version = 1;
           break;
         default:
           return FALSE;
@@ -163,28 +170,34 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, LASzip::Algorithm algor
         {
         case LASitem::POINT10:
           writers_compressed[i] = new LASwriteItemCompressed_POINT10_v2(enc);
-          items[i].version = 2;
+          laszip->items[i].version = 2;
           break;
         case LASitem::GPSTIME11:
           writers_compressed[i] = new LASwriteItemCompressed_GPSTIME11_v2(enc);
-          items[i].version = 2;
+          laszip->items[i].version = 2;
           break;
         case LASitem::RGB12:
           writers_compressed[i] = new LASwriteItemCompressed_RGB12_v2(enc);
-          items[i].version = 2;
+          laszip->items[i].version = 2;
           break;
         case LASitem::WAVEPACKET13:
           writers_compressed[i] = new LASwriteItemCompressed_WAVEPACKET13_v1(enc);
-          items[i].version = 1;
+          laszip->items[i].version = 1;
           break;
         case LASitem::BYTE:
           writers_compressed[i] = new LASwriteItemCompressed_BYTE_v2(enc, items[i].size);
-          items[i].version = 2;
+          laszip->items[i].version = 2;
           break;
         default:
           return FALSE;
         }
       }
+    }
+    if (laszip->compressor == LASZIP_COMPRESSOR_POINTWISE_CHUNKED)
+    {
+      chunk_size = laszip->chunk_size;
+      chunk_count = 0;
+      number_chunks = U32_MAX;
     }
   }
   return TRUE;
@@ -193,6 +206,22 @@ BOOL LASwritePoint::setup(U32 num_items, LASitem* items, LASzip::Algorithm algor
 BOOL LASwritePoint::init(ByteStreamOut* outstream)
 {
   if (!outstream) return FALSE;
+  this->outstream = outstream;
+
+  if (number_chunks == U32_MAX)
+  {
+    number_chunks = 0;
+    if (outstream->isSeekable())
+    {
+      chunk_table_start_position = outstream->position();
+    }
+    else
+    {
+      chunk_table_start_position = 0;
+    }
+    outstream->put64bitsLE((U8*)&chunk_table_start_position);
+    chunk_start_position = outstream->position();
+  }
 
   U32 i;
   for (i = 0; i < num_writers; i++)
@@ -203,18 +232,27 @@ BOOL LASwritePoint::init(ByteStreamOut* outstream)
   if (enc)
   {
     writers = 0;
-    this->outstream = outstream;
   }
   else
   {
     writers = writers_raw;
   }
+
   return TRUE;
 }
 
 BOOL LASwritePoint::write(const U8 * const * point)
 {
   U32 i;
+
+  if (chunk_count == chunk_size)
+  {
+    enc->done();
+    add_chunk_to_table();
+    init(outstream);
+    chunk_count = 0;
+  }
+  chunk_count++;
 
   if (writers)
   {
@@ -241,6 +279,74 @@ BOOL LASwritePoint::done()
   if (writers == writers_compressed)
   {
     enc->done();
+    if (chunk_size != U32_MAX)
+    {
+      if (chunk_count) add_chunk_to_table();
+      return write_chunk_table();
+    }
+  }
+  return TRUE;
+}
+
+BOOL LASwritePoint::add_chunk_to_table()
+{
+  if (number_chunks == alloced_chunks)
+  {
+    if (chunk_bytes == 0)
+    {
+      alloced_chunks = 1024;
+      chunk_bytes = (U32*)malloc(sizeof(U32)*alloced_chunks); 
+    }
+    else
+    {
+      alloced_chunks *= 2;
+      chunk_bytes = (U32*)realloc(chunk_bytes, sizeof(U32)*alloced_chunks); 
+    }
+    if (chunk_bytes == 0) return FALSE;
+  }
+  I64 position = outstream->position();
+  chunk_bytes[number_chunks] = (U32)(position - chunk_start_position);
+  chunk_start_position = position;
+  number_chunks++;
+  return TRUE;
+}
+
+BOOL LASwritePoint::write_chunk_table()
+{
+  U32 i;
+  I64 position = outstream->position();
+  if (chunk_table_start_position) // stream is seekable
+  {
+    if (!outstream->seek((long)chunk_table_start_position))
+    {
+      return FALSE;
+    }
+    if (!outstream->put64bitsLE((U8*)&position))
+    {
+      return FALSE;
+    }
+    if (!outstream->seek((long)position))
+    {
+      return FALSE;
+    }
+  }
+  if (!outstream->put32bitsLE((U8*)&number_chunks))
+  {
+    return FALSE;
+  }
+  for (i = 0; i < number_chunks; i++)
+  {
+    if (!outstream->put32bitsLE((U8*)&chunk_bytes[i]))
+    {
+      return FALSE;
+    }
+  }
+  if (!chunk_table_start_position) // stream is not-seekable
+  {
+    if (!outstream->put64bitsLE((U8*)&position))
+    {
+      return FALSE;
+    }
   }
   return TRUE;
 }
@@ -269,4 +375,6 @@ LASwritePoint::~LASwritePoint()
   {
     delete enc;
   }
+
+  if (chunk_bytes) delete [] chunk_bytes;
 }

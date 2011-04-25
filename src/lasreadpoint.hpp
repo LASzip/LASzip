@@ -1,7 +1,7 @@
 /*
 ===============================================================================
 
-  FILE:  LASreadPoint.hpp
+  FILE:  lasreadpoint.hpp
   
   CONTENTS:
   
@@ -49,9 +49,10 @@ public:
   ~LASreadPoint();
 
   // should only be called *once*
-  BOOL setup(U32 num_items, const LASitem* items, LASzip::Algorithm algorithm);
+  BOOL setup(const U32 num_items, const LASitem* items, const LASzip* laszip=0);
 
   BOOL init(ByteStreamIn* instream);
+  BOOL seek(const U32 current, const U32 target);
   BOOL read(U8* const * point);
   BOOL done();
 
@@ -62,6 +63,16 @@ private:
   LASreadItem** readers_raw;
   LASreadItem** readers_compressed;
   EntropyDecoder* dec;
+  // used for chunking
+  U32 chunk_size;
+  U32 chunk_count;
+  U32 number_chunks;
+  long* chunk_starts;
+  BOOL read_chunk_table();
+  // used for seeking
+  U32 point_start;
+  U32 point_size;
+  U8** seek_point;
 };
 
 #endif
