@@ -47,9 +47,15 @@ public:
 /* read a single byte                                        */
   unsigned int getByte();
 /* read an array of bytes                                    */
-  bool getBytes(unsigned char* bytes, unsigned int num_bytes);
+  bool getBytes(unsigned char* bytes, const unsigned int num_bytes);
 /* is the stream seekable (e.g. standard in is not)          */
   bool isSeekable() const;
+/* get current position of stream                            */
+  long position() const;
+/* seek to this position in the stream                       */
+  bool seek(const long position);
+/* seek to the end of the file                               */
+  bool seekEnd(const long distance=0);
 /* returns how many bytes were read since last reset         */
   unsigned int byteCount() const;
 /* reset byte counter                                        */
@@ -64,8 +70,6 @@ private:
 #else
   ios::off_type start;
 #endif
-private:
-    ByteStreamInIstream& operator=(ByteStreamInIstream const& rhs); // not implemented
 };
 
 class ByteStreamInIstreamLE : public ByteStreamInIstream
@@ -125,7 +129,7 @@ inline unsigned int ByteStreamInIstream::getByte()
   return (unsigned int)byte;
 }
 
-inline bool ByteStreamInIstream::getBytes(unsigned char* bytes, unsigned int num_bytes)
+inline bool ByteStreamInIstream::getBytes(unsigned char* bytes, const unsigned int num_bytes)
 {
   stream.read((char*)bytes, num_bytes);
   return !!(stream.good());
@@ -136,15 +140,26 @@ inline bool ByteStreamInIstream::isSeekable() const
   return (!!(static_cast<ifstream&>(stream)));
 }
 
+inline long ByteStreamInIstream::position() const
+{
+  return (long)stream.tellg();
+}
+
+inline bool ByteStreamInIstream::seek(const long position)
+{
+  stream.seekg(position);
+  return !!(stream.good());
+}
+
+inline bool ByteStreamInIstream::seekEnd(const long distance)
+{
+  stream.seekg(-distance, ios::end);
+  return !!(stream.good());
+}
+
 inline unsigned int ByteStreamInIstream::byteCount() const
 {
-#ifdef LZ_WIN32_VC6
-  return (stream.tellg() - start);
-#else
-  ios::pos_type end = stream.tellg();
-  ios::off_type size = end - start;
-  return static_cast<unsigned int>(size);
-#endif
+  return (unsigned int)(stream.tellg() - start);
 }
 
 inline void ByteStreamInIstream::resetCount()

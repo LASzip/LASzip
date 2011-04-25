@@ -38,16 +38,18 @@ class ByteStreamOutFile : public ByteStreamOut
 {
 public:
   ByteStreamOutFile(FILE* file);
+/* replace a closed FILE* with a reopened FILE* in "ab" mode */
+  bool refile(FILE* file);
 /* write a single byte                                       */
   bool putByte(unsigned char byte);
 /* write an array of bytes                                   */
   bool putBytes(const unsigned char* bytes, unsigned int num_bytes);
 /* is the stream seekable (e.g. standard out is not)         */
   bool isSeekable() const;
-/* save position in the stream for (forward) seeking later   */
-  bool saveSeekPosition();
-/* seek forward from last saved position (or start of file)  */
-  bool seek(long offset);
+/* get current position of stream                            */
+  long position() const;
+/* seek to this position in the stream                       */
+  bool seek(const long position);
 /* seek to the end of the file                               */
   bool seekEnd();
 /* returns how many bytes were written                       */
@@ -60,7 +62,6 @@ protected:
   FILE* file;
 private:
   long start;
-  long seek_position;
 };
 
 class ByteStreamOutFileLE : public ByteStreamOutFile
@@ -107,7 +108,13 @@ inline ByteStreamOutFile::ByteStreamOutFile(FILE* file)
 {
   this->file = file;
   start = ftell(file);
-  seek_position = ftell(file);
+}
+
+inline bool ByteStreamOutFile::refile(FILE* file)
+{
+  if (file == 0) return false;
+  this->file = file;
+  return true;
 }
 
 inline bool ByteStreamOutFile::putByte(unsigned char byte)
@@ -125,15 +132,14 @@ inline bool ByteStreamOutFile::isSeekable() const
   return (file != stdout);
 }
 
-inline bool ByteStreamOutFile::saveSeekPosition()
+inline long ByteStreamOutFile::position() const
 {
-  seek_position = ftell(file);
-  return (seek_position != -1L);
+  return ftell(file);
 }
 
-inline bool ByteStreamOutFile::seek(long offset)
+inline bool ByteStreamOutFile::seek(long position)
 {
-  return !(fseek(file, seek_position+offset, SEEK_SET));
+  return !(fseek(file, position, SEEK_SET));
 }
 
 inline bool ByteStreamOutFile::seekEnd()

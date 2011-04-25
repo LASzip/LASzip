@@ -41,15 +41,15 @@ public:
 /* read a single byte                                        */
   unsigned int getByte();
 /* read an array of bytes                                    */
-  bool getBytes(unsigned char* bytes, unsigned int num_bytes);
+  bool getBytes(unsigned char* bytes, const unsigned int num_bytes);
 /* is the stream seekable (e.g. standard in is not)          */
   bool isSeekable() const;
-/* save position in the stream for (forward) seeking later   */
-  bool saveSeekPosition();
-/* seek by offset from saved position (or start of file)     */
-  bool seek(long offset);
+/* get current position of stream                            */
+  long position() const;
+/* seek to this position in the stream                       */
+  bool seek(const long position);
 /* seek to the end of the file                               */
-  bool seekEnd();
+  bool seekEnd(const long distance=0);
 /* returns how many bytes were read since last reset         */
   unsigned int byteCount() const;
 /* reset byte counter                                        */
@@ -60,7 +60,6 @@ protected:
   FILE* file;
 private:
   long start;
-  long seek_position;
 };
 
 class ByteStreamInFileLE : public ByteStreamInFile
@@ -107,7 +106,6 @@ inline ByteStreamInFile::ByteStreamInFile(FILE* file)
 {
   this->file = file;
   start = ftell(file);
-  seek_position = ftell(file);
 }
 
 inline unsigned int ByteStreamInFile::getByte()
@@ -121,7 +119,7 @@ inline unsigned int ByteStreamInFile::getByte()
   return (unsigned int)byte;
 }
 
-inline bool ByteStreamInFile::getBytes(unsigned char* bytes, unsigned int num_bytes)
+inline bool ByteStreamInFile::getBytes(unsigned char* bytes, const unsigned int num_bytes)
 {
   return (fread(bytes, 1, num_bytes, file) == num_bytes);
 }
@@ -131,15 +129,19 @@ inline bool ByteStreamInFile::isSeekable() const
   return (file != stdin);
 }
 
-inline bool ByteStreamInFile::saveSeekPosition()
+inline long ByteStreamInFile::position() const
 {
-  seek_position = ftell(file);
-  return (seek_position != -1L);
+  return ftell(file);
 }
 
-inline bool ByteStreamInFile::seek(long offset)
+inline bool ByteStreamInFile::seek(const long position)
 {
-  return !fseek(file, seek_position+offset, SEEK_SET);
+  return !(fseek(file, position, SEEK_SET));
+}
+
+inline bool ByteStreamInFile::seekEnd(const long distance)
+{
+  return !(fseek(file, -distance, SEEK_END));
 }
 
 inline unsigned int ByteStreamInFile::byteCount() const

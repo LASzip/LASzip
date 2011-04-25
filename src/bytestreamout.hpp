@@ -53,10 +53,10 @@ public:
   virtual bool put64bitsBE(const unsigned char* bytes) = 0;
 /* is the stream seekable (e.g. standard out is not)         */
   virtual bool isSeekable() const = 0;
-/* save position in the stream for (forward) seeking later   */
-  virtual bool saveSeekPosition() = 0;
-/* seek forward from last saved position (or start of file)  */
-  virtual bool seek(long offset) = 0;
+/* get current position of stream                            */
+  virtual long position() const = 0;
+/* seek to this position in the stream                       */
+  virtual bool seek(const long position) = 0;
 /* seek to the end of the file                               */
   virtual bool seekEnd() = 0;
 /* returns how many bytes were written since reset           */

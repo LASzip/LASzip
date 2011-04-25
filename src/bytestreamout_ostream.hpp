@@ -31,7 +31,6 @@
 #define BYTE_STREAM_OUT_OSTREAM_H
 
 #include "bytestreamout.hpp"
-#include "endian.hpp"
 
 #ifdef LZ_WIN32_VC6
 #include <fstream.h>
@@ -51,10 +50,10 @@ public:
   bool putBytes(const unsigned char* bytes, unsigned int num_bytes);
 /* is the stream seekable (e.g. standard out is not)         */
   bool isSeekable() const;
-/* save position in the stream for (forward) seeking later   */
-  bool saveSeekPosition();
-/* seek by offset from saved position (or start of file)     */
-  bool seek(long offset);
+/* get current position of stream                            */
+  long position() const;
+/* seek to this position in the stream                       */
+  bool seek(const long position);
 /* seek to the end of the file                               */
   bool seekEnd();
 /* returns how many bytes were written since last reset      */
@@ -68,13 +67,9 @@ protected:
 private:
 #ifdef LZ_WIN32_VC6
   long start;
-  long seek_position;
 #else
   ios::off_type start;
-  ios::off_type seek_position;
 #endif
-private:
-    ByteStreamOutOstream& operator=(ByteStreamOutOstream const& rhs); // not implemented
 };
 
 class ByteStreamOutOstreamLE : public ByteStreamOutOstream
@@ -121,7 +116,6 @@ inline ByteStreamOutOstream::ByteStreamOutOstream(ostream& stream_param) :
     stream(stream_param)
 {
   start = stream.tellp();
-  seek_position = stream.tellp();
 }
 
 inline bool ByteStreamOutOstream::putByte(unsigned char byte)
@@ -141,15 +135,14 @@ inline bool ByteStreamOutOstream::isSeekable() const
   return (!!(static_cast<ofstream&>(stream)));
 }
 
-inline bool ByteStreamOutOstream::saveSeekPosition()
+inline long ByteStreamOutOstream::position() const
 {
-  seek_position = stream.tellp();
-  return !!(stream.good());
+  return (long)stream.tellp();
 }
 
-inline bool ByteStreamOutOstream::seek(long offset)
+inline bool ByteStreamOutOstream::seek(long position)
 {
-  stream.seekp(seek_position+offset);
+  stream.seekp(position);
   return !!(stream.good());
 }
 
@@ -161,13 +154,7 @@ inline bool ByteStreamOutOstream::seekEnd()
 
 inline unsigned int ByteStreamOutOstream::byteCount() const
 {
-#ifdef LZ_WIN32_VC6
-  return (stream.tellp() - start);
-#else
-  ios::pos_type end = stream.tellp();
-  ios::off_type size = end - start;
-  return static_cast<unsigned int>(size);
-#endif
+  return (unsigned int)(stream.tellp() - start);
 }
 
 inline void ByteStreamOutOstream::resetCount()

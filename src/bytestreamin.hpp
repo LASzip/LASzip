@@ -27,8 +27,8 @@
   
 ===============================================================================
 */
-#ifndef BYTE_STREAM_IN_H
-#define BYTE_STREAM_IN_H
+#ifndef BYTE_STREAM_IN_HPP
+#define BYTE_STREAM_IN_HPP
 
 class ByteStreamIn
 {
@@ -36,7 +36,7 @@ public:
 /* read a single byte                                        */
   virtual unsigned int getByte() = 0;
 /* read an array of bytes                                    */
-  virtual bool getBytes(unsigned char* bytes, unsigned int num_bytes) = 0;
+  virtual bool getBytes(unsigned char* bytes, const unsigned int num_bytes) = 0;
 /* read 16 bit low-endian field                              */
   virtual bool get16bitsLE(unsigned char* bytes) = 0;
 /* read 32 bit low-endian field                              */
@@ -51,10 +51,16 @@ public:
   virtual bool get64bitsBE(unsigned char* bytes) = 0;
 /* is the stream seekable (e.g. stdin is not)                */
   virtual bool isSeekable() const = 0;
-/* returns how many bytes were read since last reset         */
-  virtual unsigned int byteCount() const = 0;
+/* get current position of stream                            */
+  virtual long position() const = 0;
+/* seek to this position in the stream                       */
+  virtual bool seek(const long position) = 0;
+/* seek to the end of the file                               */
+  virtual bool seekEnd(const long distance=0) = 0;
 /* reset byte counter                                        */
   virtual void resetCount() = 0;
+/* returns how many bytes were read since last reset         */
+  virtual unsigned int byteCount() const = 0;
 /* destructor                                                */
   virtual ~ByteStreamIn() {};
 };
