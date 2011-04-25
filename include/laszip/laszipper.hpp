@@ -24,13 +24,14 @@
   
   CHANGE HISTORY:
   
+    23 April 2011 -- changed interface for easier future compressor support
     10 January 2011 -- licensing change for LGPL release and liblas integration
     12 December 2010 -- created from LASwriter/LASreader after Howard got pushy (-;
   
 ===============================================================================
 */
-#ifndef LAS_ZIPPER_H
-#define LAS_ZIPPER_H
+#ifndef LAS_ZIPPER_HPP
+#define LAS_ZIPPER_HPP
 
 #include <stdio.h>
 
@@ -50,8 +51,9 @@ class LASwritePoint;
 class LASZIP_DLL LASzipper
 {
 public:
-  unsigned int open(FILE* outfile, unsigned int num_items, LASitem items[], LASzip::Algorithm algorithm);
-  unsigned int open(ostream& outstream, unsigned int num_items, LASitem items[], LASzip::Algorithm algorithm);
+  unsigned int setup(LASzip* laszip);
+  unsigned int open(FILE* outfile);
+  unsigned int open(ostream& outstream);
   bool write(const unsigned char* const * point);
   unsigned int close();
 
@@ -59,7 +61,7 @@ public:
   ~LASzipper();
 
 private:
-  int count;
+  unsigned int count;
   ByteStreamOut* stream;
   LASwritePoint* writer;
 };
