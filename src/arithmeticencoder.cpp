@@ -72,6 +72,10 @@
 #include <string.h>
 #include <assert.h>
 
+#include <stdio.h>
+
+FILE* file = 0;
+
 #include "arithmeticmodel.hpp"
 
 ArithmeticEncoder::ArithmeticEncoder()
@@ -101,6 +105,7 @@ BOOL ArithmeticEncoder::init(ByteStreamOut* outstream)
 void ArithmeticEncoder::done()
 {
   U32 init_base = base;                 // done encoding: set final data bytes
+  BOOL another_byte = TRUE;
 
   if (length > 2 * AC__MinLength) {
     base  += AC__MinLength;                                     // base offset
@@ -109,6 +114,7 @@ void ArithmeticEncoder::done()
   else {
     base  += AC__MinLength >> 1;                                // base offset
     length = AC__MinLength >> 9;            // set new length for 2 more bytes
+    another_byte = FALSE;
   }
 
   if (init_base > base) propagate_carry();                 // overflow = carry
@@ -122,10 +128,10 @@ void ArithmeticEncoder::done()
   U32 buffer_size = outbyte - outbuffer;
   if (buffer_size) outstream->putBytes(outbuffer, buffer_size);
 
-  // write three zero bytes to be sure the decoder does not read past the array
+  // write two or three zero bytes to be in sync with the decoder's byte reads
   outstream->putByte(0);
   outstream->putByte(0);
-  outstream->putByte(0);
+  if (another_byte) outstream->putByte(0);
 
   outstream = 0;
 }
