@@ -105,13 +105,16 @@ typedef union U64I64F64 { U64 u64; I64 i64; F64 f64; } U64I64F64;
 #define I32_QUANTIZE(n) (((n) >= 0) ? (I32)((n)+0.5f) : (I32)((n)-0.5f))
 #define U32_QUANTIZE(n) (((n) >= 0) ? (U32)((n)+0.5f) : (U32)(0))
 
-#define I16_FLOOR(n) ((((I16)(n)) < (n)) ? (I16)(n) : (((I16)(n))-1))
-#define I32_FLOOR(n) ((((I32)(n)) < (n)) ? (I32)(n) : (((I32)(n))-1))
-#define I64_FLOOR(n) ((((I64)(n)) < (n)) ? (I64)(n) : (((I64)(n))-1))
+#define I64_QUANTIZE(n) (((n) >= 0) ? (I64)((n)+0.5f) : (I64)((n)-0.5f))
+#define U64_QUANTIZE(n) (((n) >= 0) ? (U64)((n)+0.5f) : (U64)(0))
 
-#define I16_CEIL(n) ((((I16)(n)) > (n)) ? (I16)(n) : (((I16)(n))+1))
-#define I32_CEIL(n) ((((I32)(n)) > (n)) ? (I32)(n) : (((I32)(n))+1))
-#define I64_CEIL(n) ((((I64)(n)) > (n)) ? (I64)(n) : (((I64)(n))+1))
+#define I16_FLOOR(n) ((((I16)(n)) > (n)) ? (((I16)(n))-1) : ((I16)(n)))
+#define I32_FLOOR(n) ((((I32)(n)) > (n)) ? (((I32)(n))-1) : ((I32)(n)))
+#define I64_FLOOR(n) ((((I64)(n)) > (n)) ? (((I64)(n))-1) : ((I64)(n)))
+
+#define I16_CEIL(n) ((((I16)(n)) < (n)) ? (((I16)(n))+1) : ((I16)(n)))
+#define I32_CEIL(n) ((((I32)(n)) < (n)) ? (((I32)(n))+1) : ((I32)(n)))
+#define I64_CEIL(n) ((((I64)(n)) < (n)) ? (((I64)(n))+1) : ((I64)(n)))
 
 #define U32_ZERO_BIT_0(n) (((n)&(U32)0xFFFFFFFE))
 
