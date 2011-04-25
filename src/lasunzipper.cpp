@@ -34,51 +34,75 @@
 #include "bytestreamin_istream.hpp"
 #include "lasreadpoint.hpp"
 
-unsigned int LASunzipper::open(FILE* infile, unsigned int num_items, const LASitem items[], LASzip::Algorithm algorithm)
+unsigned int LASunzipper::setup(const LASzip* laszip)
 {
+  if (!laszip) return 1;
   count = 0;
+  if (reader) delete reader;
+  reader = new LASreadPoint();
+  if (!reader) return 1;
+  if (!reader->setup(laszip->num_items, laszip->items, laszip)) return 1;
+  return 0;
+}
+
+unsigned int LASunzipper::open(FILE* infile)
+{
+  if (!infile) return 1;
+  if (!reader) return 1;
+  if (stream) delete stream;
   if (IS_LITTLE_ENDIAN())
     stream = new ByteStreamInFileLE(infile);
   else
     stream = new ByteStreamInFileBE(infile);
   if (!stream) return 1;
-  reader = new LASreadPoint();
-  if (!reader) return 1;
-  if (!reader->setup(num_items, items, algorithm)) return 1;
   if (!reader->init(stream)) return 1;
   return 0;
 }
 
-unsigned int LASunzipper::open(istream& instream, unsigned int num_items, const LASitem items[], LASzip::Algorithm algorithm)
+unsigned int LASunzipper::open(istream& instream)
 {
-  count = 0;
+  if (!reader) return 1;
+  if (stream) delete stream;
   if (IS_LITTLE_ENDIAN())
     stream = new ByteStreamInIstreamLE(instream);
   else
     stream = new ByteStreamInIstreamBE(instream);
   if (!stream) return 1;
-  reader = new LASreadPoint();
-  if (!reader) return 1;
-  if (!reader->setup(num_items, items, algorithm)) return 1;
   if (!reader->init(stream)) return 1;
   return 0;
+}
+
+bool LASunzipper::seek(const unsigned int position)
+{
+  if (reader->seek(count, position))
+  {
+    count = position;
+    return true;
+  }
+  return false;
 }
 
 bool LASunzipper::read(unsigned char * const * point)
 {
   count++;
-  return reader->read(point);
+  return (reader->read(point) == TRUE);
 }
 
 unsigned int LASunzipper::close()
 {
-  if (!reader->done()) return 1;
-  count = 0;
-  if (reader) delete reader;
-  reader = 0;
-  unsigned int byteCount = stream->byteCount();
-  delete stream;
-  stream = 0;
+  unsigned int byteCount = 0;
+  if (reader)
+  {
+    reader->done();
+    delete reader;
+    reader = 0;
+  }
+  if (stream)
+  {
+    byteCount = stream->byteCount();
+    delete stream;
+    stream = 0;
+  }
   return byteCount;
 }
 

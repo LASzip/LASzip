@@ -32,16 +32,53 @@
 
 LASzip::LASzip()
 {
-  algorithm = POINT_BY_POINT_RAW;
-  version_major = 1;
-  version_minor = 0;
-  version_revision = 0;
+  compressor = LASZIP_COMPRESSOR_DEFAULT;
+  coder = LASZIP_CODER_ARITHMETIC;
+  version_major = LASZIP_VERSION_MAJOR;
+  version_minor = LASZIP_VERSION_MINOR;
+  version_revision = LASZIP_VERSION_REVISION;
   options = 0;
   num_items = 0;
-  num_chunks = 1;
+  chunk_size = 0;
   num_points = -1;
   num_bytes = -1;
   items = 0;
+  requested_version = 0;
+}
+
+bool LASzip::setup(const unsigned int num_items, const LASitem* items, const unsigned short compressor)
+{
+  unsigned int i;
+  if (num_items == 0) return false;
+  if (items == 0) return false;
+  if (compressor > LASZIP_COMPRESSOR_POINTWISE_CHUNKED) return false;
+  for (i = 0; i < num_items; i++)
+  {
+    if (!items[i].supported()) return false;
+  }
+  this->num_items = num_items;
+  if (this->items) delete [] this->items;
+  this->items = new LASitem[num_items];
+  for (i = 0; i < num_items; i++)
+  {
+    this->items[i] = items[i];
+  }
+  this->compressor = compressor;
+  if (this->compressor == LASZIP_COMPRESSOR_POINTWISE_CHUNKED)
+  {
+    if (chunk_size == 0) chunk_size = LASZIP_CHUNK_SIZE_DEFAULT;
+  }
+  return true;
+}
+
+void LASzip::set_chunk_size(const unsigned int chunk_size)
+{
+  this->chunk_size = chunk_size;
+}
+
+void LASzip::request_version(const unsigned int requested_version)
+{
+  this->requested_version = requested_version;
 }
 
 LASzip::~LASzip()
@@ -56,27 +93,22 @@ void LASitem::set(LASitem::Type t, unsigned short number)
   case LASitem::POINT10:
       type = LASitem::POINT10;
       size = 20;
-      version = 1;
       break;
   case LASitem::GPSTIME11:
       type = LASitem::GPSTIME11;
       size = 8;
-      version = 1;
       break;
   case LASitem::RGB12:
       type = LASitem::RGB12;
       size = 6;
-      version = 1;
       break;
   case LASitem::WAVEPACKET13:
       type = LASitem::WAVEPACKET13;
       size = 29;
-      version = 0;
       break;
   case LASitem::BYTE:
       type = LASitem::BYTE;
       size = number;
-      version = 1;
       break;
   default:
       throw 0; // BUG
