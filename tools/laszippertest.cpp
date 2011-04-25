@@ -282,50 +282,65 @@ static void log(const char* format, ...)
   return;
 }
 
+//---------------------------------------------------------------------------
+
+static LASzipper* make_zipper(LASzip* laszip)
+{
+  LASzipper* zipper = new LASzipper();
+  int stat = zipper->setup(laszip);
+  if (stat != 0)
+  {
+    log("ERROR: could not make laszipper\n");
+    exit(1);
+  }
+  return zipper;
+}
 
 //---------------------------------------------------------------------------
 
-static LASzipper* make_zipper(OStream* ost, PointData& data, LASzip::Algorithm alg)
+static void open_zipper(LASzipper* zipper, OStream* ost)
 {
-  LASzipper* zipper = new LASzipper();
-
   int stat = 0;
   if (ost->m_use_iostream)
-    stat = zipper->open(*ost->streamo, data.num_items, data.items, alg);
+    stat = zipper->open(*ost->streamo);
   else
-    stat = zipper->open(ost->ofile, data.num_items, data.items, alg);
-
+    stat = zipper->open(ost->ofile);
   if (stat != 0)
   {
     log("ERROR: could not open laszipper with %s\n", ost->m_filename);
     exit(1);
   }
-
-  return zipper;
 }
-
 
 //---------------------------------------------------------------------------
 
-static LASunzipper* make_unzipper(IStream* ist, PointData& data, LASzip::Algorithm alg)
+static LASunzipper* make_unzipper(LASzip* laszip)
 {
   LASunzipper* unzipper = new LASunzipper();
-
-  int stat = 0;
-  if (ist->m_use_iostream)
-    stat = unzipper->open(*ist->streami, data.num_items, data.items, alg);
-  else
-    stat = unzipper->open(ist->ifile, data.num_items, data.items, alg);
-
+  int stat = unzipper->setup(laszip);
   if (stat != 0)
   {
-    log("ERROR: could not open lasunzipper with %s\n", ist->m_filename);
+    log("ERROR: could not make lasunzipper\n");
     exit(1);
   }
-
   return unzipper;
 }
 
+//---------------------------------------------------------------------------
+
+static void open_unzipper(LASunzipper* unzipper, IStream* ist)
+{
+  int stat = 0;
+  if (ist->m_use_iostream)
+    stat = unzipper->open(*ist->streami);
+  else
+    stat = unzipper->open(ist->ifile);
+  if (stat != 0)
+  {
+    log("ERROR: could not open laszipper with %s\n", ist->m_filename);
+    exit(1);
+  }
+}
 
 //---------------------------------------------------------------------------
 
@@ -456,16 +471,23 @@ static void read_points(LASunzipper* unzipper, PointData& data)
 
 //---------------------------------------------------------------------------
 
-static void run_test(const char* filename, PointData& data, LASzip::Algorithm alg)
+static void run_test(const char* filename, PointData& data, unsigned short compressor, unsigned short requested_version=0, unsigned short chunk_size=0)
 {
+  LASzip laszip;
+  laszip.setup(data.num_items, data.items, compressor);
+  if (requested_version) laszip.request_version(requested_version);
+  if (chunk_size) laszip.set_chunk_size(chunk_size);
+
+  LASzipper* laszipper = make_zipper(&laszip);
   OStream* ost = new OStream(settings->use_iostream, filename);
-  LASzipper* laszipper = make_zipper(ost, data, alg);
+  open_zipper(laszipper, ost);
   write_points(laszipper, data);
   delete laszipper;
   delete ost;
 
+  LASunzipper* lasunzipper = make_unzipper(&laszip);
   IStream* ist = new IStream(settings->use_iostream, filename);
-  LASunzipper* lasunzipper = make_unzipper(ist, data, alg);
+  open_unzipper(lasunzipper, ist);
   read_points(lasunzipper, data);
   delete lasunzipper;
   delete ist;
@@ -541,9 +563,11 @@ int main(int argc, char *argv[])
     log("Seed: %u\n", settings->seed);
   }
 
-  run_test("test1.lax", data, LASzip::POINT_BY_POINT_RAW);
-  run_test("test2.lax", data, LASzip::POINT_BY_POINT_ARITHMETIC);
-  run_test("test3.lax", data, LASzip::POINT_BY_POINT_ARITHMETIC_V2);
+  run_test("test1.lax", data, LASZIP_COMPRESSOR_NONE);
+  run_test("test2.lax", data, LASZIP_COMPRESSOR_DEFAULT);
+  run_test("test3.lax", data, LASZIP_COMPRESSOR_DEFAULT, 2);
+  run_test("test4.lax", data, LASZIP_COMPRESSOR_CHUNKED);
+  run_test("test5.lax", data, LASZIP_COMPRESSOR_CHUNKED, 2);
   log("Finished %u runs\n\n", run);
   ++run;
   } while (run_forever);
