@@ -45,6 +45,17 @@ typedef long long SIGNED_INT64;
 #define LASZIP_VERSION_MINOR    2
 #define LASZIP_VERSION_REVISION 0
 
+#define LASZIP_COMPRESSOR_NONE              0
+#define LASZIP_COMPRESSOR_POINTWISE         1
+#define LASZIP_COMPRESSOR_POINTWISE_CHUNKED 2
+
+#define LASZIP_COMPRESSOR_DEFAULT LASZIP_COMPRESSOR_POINTWISE
+#define LASZIP_COMPRESSOR_CHUNKED LASZIP_COMPRESSOR_POINTWISE_CHUNKED
+
+#define LASZIP_CODER_ARITHMETIC             0
+
+#define LASZIP_CHUNK_SIZE_DEFAULT 50000
+
 #include "laszipexport.hpp"
 
 class LASZIP_DLL LASitem
@@ -72,37 +83,28 @@ class LASZIP_DLL LASzip
 {
 public:
 
-  enum Algorithm
-  {
-    POINT_BY_POINT_RAW        = 0,
-    POINT_BY_POINT_ARITHMETIC = 1,
-    POINT_BY_POINT_ARITHMETIC_V2 = 2, // temporary fix
-    DEFAULT_COMPRESSION       = POINT_BY_POINT_ARITHMETIC,
-    DEFAULT_COMPRESSION_V2    = POINT_BY_POINT_ARITHMETIC_V2, // temporary fix
-    DEFAULT_RAW               = POINT_BY_POINT_RAW
-  };
-
   LASzip();
   ~LASzip();
 
-  Algorithm algorithm;
+  bool setup(const unsigned int num_items, const LASitem* items, const unsigned short compressor=LASZIP_COMPRESSOR_DEFAULT);
+  void set_chunk_size(const unsigned int chunk_size);
+  void request_version(const unsigned int requested_version);
+
+  // to be stored in LASzip VLR
+  unsigned short compressor;
+  unsigned short coder;
   unsigned char version_major;
   unsigned char version_minor;
   unsigned short version_revision;
   unsigned int options;
   unsigned int num_items;
-  unsigned int num_chunks;  /* not used yet  ...               */ 
+  unsigned int chunk_size; 
   SIGNED_INT64 num_points;  /* not mandatory ... -1 if unknown */
   SIGNED_INT64 num_bytes;   /* not mandatory ... -1 if unknown */
   LASitem* items;
-};
 
-/*
-struct LASchunk
-{
-  unsigned int count;
-  unsigned int bytes;
-}; 
-*/
+  // not to be stored
+  unsigned short requested_version;
+};
 
 #endif
