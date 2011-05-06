@@ -62,21 +62,15 @@ class LASZIP_DLL LASitem
 {
 public:
   enum Type { BYTE = 0, SHORT, INT, LONG, FLOAT, DOUBLE, POINT10, GPSTIME11, RGB12, WAVEPACKET13 } type;
+  unsigned short size;
+  unsigned short version;
 
   // number parameter only used when setting to BYTE
   void set(LASitem::Type t, unsigned short number=1);
-
   bool is_type(LASitem::Type t) const;
-  bool supported_type() const;
-  bool supported_size() const;
-  bool supported_version() const;
   bool supported() const;
 
   const char* get_name() const;
-
-public:
-  unsigned short size;
-  unsigned short version;
 };
 
 class LASZIP_DLL LASzip
@@ -86,24 +80,31 @@ public:
   LASzip();
   ~LASzip();
 
-  bool setup(const unsigned int num_items, const LASitem* items, const unsigned short compressor=LASZIP_COMPRESSOR_DEFAULT);
+  // pack to and unpack from VLR
+  unsigned char* bytes;
+  bool unpack(const unsigned char* bytes, const int num);
+  bool pack(unsigned char*& bytes, int& num);
+
+  // setup
+  bool setup(const unsigned char point_type, const unsigned short point_size, const unsigned short compressor=LASZIP_COMPRESSOR_DEFAULT);
+  bool setup(const unsigned short num_items, const LASitem* items, const unsigned short compressor=LASZIP_COMPRESSOR_DEFAULT);
   void set_chunk_size(const unsigned int chunk_size);
   void request_version(const unsigned int requested_version);
 
-  // to be stored in LASzip VLR
+  // stored in LASzip VLR data section
   unsigned short compressor;
   unsigned short coder;
   unsigned char version_major;
   unsigned char version_minor;
   unsigned short version_revision;
   unsigned int options;
-  unsigned int num_items;
   unsigned int chunk_size; 
   SIGNED_INT64 num_points;  /* not mandatory ... -1 if unknown */
   SIGNED_INT64 num_bytes;   /* not mandatory ... -1 if unknown */
+  unsigned short num_items;
   LASitem* items;
 
-  // not to be stored
+  // not stored LASzip VLR data section
   unsigned short requested_version;
 };
 
