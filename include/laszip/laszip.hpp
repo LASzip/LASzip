@@ -71,6 +71,10 @@ public:
   bool supported() const;
 
   const char* get_name() const;
+
+  // back and forth between item array and point type and size
+  bool setup(const unsigned char point_type, const unsigned short point_size, unsigned short* num_items, LASitem** items) const;
+  bool is_standard(const unsigned short num_items, const LASitem* items, unsigned char* point_type=0, unsigned short* record_length=0) const;
 };
 
 class LASZIP_DLL LASzip
@@ -90,6 +94,9 @@ public:
   bool setup(const unsigned short num_items, const LASitem* items, const unsigned short compressor=LASZIP_COMPRESSOR_DEFAULT);
   void set_chunk_size(const unsigned int chunk_size);
   void request_version(const unsigned int requested_version);
+
+  // query point type and size
+  bool is_standard(unsigned char* point_type=0, unsigned short* record_length=0) const;
 
   // stored in LASzip VLR data section
   unsigned short compressor;
