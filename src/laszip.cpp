@@ -29,6 +29,8 @@
 ===============================================================================
 */
 #include "laszip.hpp"
+#include "mydefs.hpp"
+#include <assert.h>
 
 LASzip::LASzip()
 {
@@ -44,11 +46,238 @@ LASzip::LASzip()
   num_bytes = -1;
   items = 0;
   requested_version = 0;
+  bytes = 0;
 }
 
-bool LASzip::setup(const unsigned int num_items, const LASitem* items, const unsigned short compressor)
+LASzip::~LASzip()
 {
-  unsigned int i;
+  if (items) delete [] items;
+  if (bytes) delete [] bytes;
+}
+
+// unpack from VLR data
+bool LASzip::unpack(const U8* bytes, const I32 num)
+{
+  if (num < 34) return false; // too few bytes
+  if (((num - 34) % 6) != 0) return false; // wrong number bytes
+  if (((num - 34) / 6) == 0) return false; // too few items
+  num_items = (num - 34) / 6;
+  if (items) delete [] items;
+  items = new LASitem[num_items];
+
+  // the data of the LASzip VLR
+  //     U16  compressor         2 bytes 
+  //     U16  coder              2 bytes 
+  //     U8   version_major      1 byte 
+  //     U8   version_minor      1 byte
+  //     U16  version_revision   2 bytes
+  //     U32  options            4 bytes 
+  //     U32  chunk_size         4 bytes
+  //     I64  num_points         8 bytes
+  //     I64  num_bytes          8 bytes
+  //     U16  num_items          2 bytes
+  //        U16 type                2 bytes * num_items
+  //        U16 size                2 bytes * num_items
+  //        U16 version             2 bytes * num_items
+  // which totals 34+6*num_items
+
+  U16 i;
+  const U8* b = bytes;
+  compressor = *((U16*)b);
+  b += 2;
+  coder = *((U16*)b);
+  b += 2;
+  version_major = *((U8*)b);
+  b += 1;
+  version_minor = *((U8*)b);
+  b += 1;
+  version_revision = *((U16*)b);
+  b += 2;
+  options = *((U32*)b);
+  b += 4;
+  chunk_size = *((U32*)b);
+  b += 4;
+  num_points = *((I64*)b);
+  b += 8;
+  num_bytes = *((I64*)b);
+  b += 8;
+  num_items = *((U16*)b);
+  b += 2;
+  for (i = 0; i < num_items; i++)
+  {
+    items[i].type = (LASitem::Type)*((U16*)b);
+    b += 2;
+    items[i].size = *((U16*)b);
+    b += 2;
+    items[i].version = *((U16*)b);
+    b += 2;
+  }
+  assert((bytes + num) == b);
+  for (i = 0; i < num_items; i++)
+  {
+    if (!items[i].supported()) return false;
+  }
+  return true;
+}
+
+// pack to VLR data
+bool LASzip::pack(U8*& bytes, I32& num)
+{
+  num = 34 + 6*num_items;
+  if (this->bytes) delete [] this->bytes;
+  this->bytes = bytes = new U8[num];
+
+  // the data of the LASzip VLR
+  //     U16  compressor         2 bytes 
+  //     U16  coder              2 bytes 
+  //     U8   version_major      1 byte 
+  //     U8   version_minor      1 byte
+  //     U16  version_revision   2 bytes
+  //     U32  options            4 bytes 
+  //     U32  chunk_size         4 bytes
+  //     I64  num_points         8 bytes
+  //     I64  num_bytes          8 bytes
+  //     U16  num_items          2 bytes
+  //        U16 type                2 bytes * num_items
+  //        U16 size                2 bytes * num_items
+  //        U16 version             2 bytes * num_items
+  // which totals 34+6*num_items
+
+  U16 i;
+  U8* b = bytes;
+  *((U16*)b) = compressor;
+  b += 2;
+  *((U16*)b) = coder;
+  b += 2;
+  *((U8*)b) = version_major;
+  b += 1;
+  *((U8*)b) = version_minor;
+  b += 1;
+  *((U16*)b) = version_revision;
+  b += 2;
+  *((U32*)b) = options;
+  b += 4;
+  *((U32*)b) = chunk_size;
+  b += 4;
+  *((I64*)b) = num_points;
+  b += 8;
+  *((I64*)b) = num_bytes;
+  b += 8;
+  *((U16*)b) = num_items;
+  b += 2;
+  for (i = 0; i < num_items; i++)
+  {
+    *((U16*)b) = (U16)items[i].type;
+    b += 2;
+    *((U16*)b) = items[i].size;
+    b += 2;
+    *((U16*)b) = items[i].version;
+    b += 2;
+  }
+  assert((bytes + num) == b);
+  for (i = 0; i < num_items; i++)
+  {
+    if (!items[i].supported()) return false;
+  }
+  return true;
+}
+
+bool LASzip::setup(const U8 point_type, const U16 point_size, const U16 compressor)
+{
+  if (compressor > LASZIP_COMPRESSOR_POINTWISE_CHUNKED) return false;
+
+  // switch over the point types we know
+
+  BOOL have_gps_time = FALSE;
+  BOOL have_rgb = FALSE;
+  BOOL have_wavepacket = FALSE;
+  I32 extra_bytes_number = 0;
+
+  switch (point_type)
+  {
+  case 0:
+    extra_bytes_number = (I32)point_size - 20;
+    break;
+  case 1:
+    have_gps_time = TRUE;
+    extra_bytes_number = (I32)point_size - 28;
+    break;
+  case 2:
+    have_rgb = TRUE;
+    extra_bytes_number = (I32)point_size - 26;
+    break;
+  case 3:
+    have_gps_time = TRUE;
+    have_rgb = TRUE;
+    extra_bytes_number = (I32)point_size - 34;
+    break;
+  case 4:
+    have_gps_time = TRUE;
+    have_wavepacket = TRUE;
+    extra_bytes_number = (I32)point_size - 57;
+    break;
+  case 5:
+    have_gps_time = TRUE;
+    have_rgb = TRUE;
+    have_wavepacket = TRUE;
+    extra_bytes_number = (I32)point_size - 63;
+    break;
+  default:
+    return false;
+  }
+
+  if (extra_bytes_number < 0) return false;
+
+  // create item description
+
+  if (items) delete [] items;
+  num_items = 1 + !!(have_gps_time) + !!(have_rgb) + !!(have_wavepacket) + !!(extra_bytes_number);
+  items = new LASitem[num_items];
+
+  U16 i = 1;
+  items[0].type = LASitem::POINT10;
+  items[0].size = 20;
+  items[0].version = 0;
+  if (have_gps_time)
+  {
+    items[i].type = LASitem::GPSTIME11;
+    items[i].size = 8;
+    items[i].version = 0;
+    i++;
+  }
+  if (have_rgb)
+  {
+    items[i].type = LASitem::RGB12;
+    items[i].size = 6;
+    items[i].version = 0;
+    i++;
+  }
+  if (have_wavepacket)
+  {
+    items[i].type = LASitem::WAVEPACKET13;
+    items[i].size = 29;
+    items[i].version = 0;
+    i++;
+  }
+  if (extra_bytes_number)
+  {
+    items[i].type = LASitem::BYTE;
+    items[i].size = extra_bytes_number;
+    items[i].version = 0;
+    i++;
+  }
+  assert(i == num_items);
+  this->compressor = compressor;
+  if (this->compressor == LASZIP_COMPRESSOR_POINTWISE_CHUNKED)
+  {
+    if (chunk_size == 0) chunk_size = LASZIP_CHUNK_SIZE_DEFAULT;
+  }
+  return true;
+}
+
+bool LASzip::setup(const U16 num_items, const LASitem* items, const U16 compressor)
+{
+  U16 i;
   if (num_items == 0) return false;
   if (items == 0) return false;
   if (compressor > LASZIP_COMPRESSOR_POINTWISE_CHUNKED) return false;
@@ -71,49 +300,14 @@ bool LASzip::setup(const unsigned int num_items, const LASitem* items, const uns
   return true;
 }
 
-void LASzip::set_chunk_size(const unsigned int chunk_size)
+void LASzip::set_chunk_size(const U32 chunk_size)
 {
   this->chunk_size = chunk_size;
 }
 
-void LASzip::request_version(const unsigned int requested_version)
+void LASzip::request_version(const U32 requested_version)
 {
   this->requested_version = requested_version;
-}
-
-LASzip::~LASzip()
-{
-  if (items) delete [] items;
-}
-
-void LASitem::set(LASitem::Type t, unsigned short number)
-{
-  switch (t)
-  {
-  case LASitem::POINT10:
-      type = LASitem::POINT10;
-      size = 20;
-      break;
-  case LASitem::GPSTIME11:
-      type = LASitem::GPSTIME11;
-      size = 8;
-      break;
-  case LASitem::RGB12:
-      type = LASitem::RGB12;
-      size = 6;
-      break;
-  case LASitem::WAVEPACKET13:
-      type = LASitem::WAVEPACKET13;
-      size = 29;
-      break;
-  case LASitem::BYTE:
-      type = LASitem::BYTE;
-      size = number;
-      break;
-  default:
-      throw 0; // BUG
-  }
-  return;
 }
 
 bool LASitem::is_type(LASitem::Type t) const
@@ -142,76 +336,34 @@ bool LASitem::is_type(LASitem::Type t) const
   return true;
 }
 
-bool LASitem::supported_type() const
-{
-  switch (type)
-  {
-  case POINT10:
-  case GPSTIME11:
-  case RGB12:
-  case WAVEPACKET13:
-  case BYTE:
-      return true;
-      break;
-  default:
-      return false;
-  }
-  return false;
-}
-
-bool LASitem::supported_size() const
+bool LASitem::supported() const
 {
   switch (type)
   {
   case POINT10:
       if (size != 20) return false;
+      if (version > 2) return false;
       break;
   case GPSTIME11:
       if (size != 8) return false;
+      if (version > 2) return false;
       break;
   case RGB12:
       if (size != 6) return false;
+      if (version > 2) return false;
       break;
   case WAVEPACKET13:
       if (size != 29) return false;
-      break;
-  case BYTE:
-      if (size < 1) return false;
-      break;
-  default:
-      return false;
-  }
-  return true;
-}
-
-bool LASitem::supported_version() const
-{
-  switch (type)
-  {
-  case POINT10:
-      if (version > 2) return false;
-      break;
-  case GPSTIME11:
-      if (version > 2) return false;
-      break;
-  case RGB12:
-      if (version > 2) return false;
-      break;
-  case WAVEPACKET13:
       if (version > 1) return false;
       break;
   case BYTE:
+      if (size < 1) return false;
       if (version > 2) return false;
       break;
   default:
       return false;
   }
   return true;
-}
-
-bool LASitem::supported() const
-{
-  return supported_type() && supported_size() && supported_version();
 }
 
 const char* LASitem::get_name() const
