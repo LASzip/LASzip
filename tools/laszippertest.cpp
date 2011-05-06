@@ -202,6 +202,7 @@ public:
     unsigned int i;
 
     // compute the point size
+    point_type = 5;
     point_size = 0;
     for (i = 0; i < num_items; i++) point_size += items[i].size;
 
@@ -227,7 +228,8 @@ public:
 
   unsigned int num_items;
   LASitem items[NUM_ITEMS];
-  unsigned int point_size;
+  unsigned char point_type;
+  unsigned short point_size;
   unsigned char* point_data;
   unsigned char** point;
 };
@@ -314,7 +316,7 @@ static void open_zipper(LASzipper* zipper, OStream* ost)
 
 //---------------------------------------------------------------------------
 
-static LASunzipper* make_unzipper(LASzip* laszip)
+static LASunzipper* make_unzipper(const LASzip* laszip)
 {
   LASunzipper* unzipper = new LASunzipper();
   int stat = unzipper->setup(laszip);
@@ -479,13 +481,20 @@ static void run_test(const char* filename, PointData& data, unsigned short compr
   if (chunk_size) laszip.set_chunk_size(chunk_size);
 
   LASzipper* laszipper = make_zipper(&laszip);
+  // only now (that the version numbers were set) can we pack laszip 
+  unsigned char* bytes;
+  int num;
+  laszip.pack(bytes, num);
   OStream* ost = new OStream(settings->use_iostream, filename);
   open_zipper(laszipper, ost);
   write_points(laszipper, data);
   delete laszipper;
   delete ost;
 
-  LASunzipper* lasunzipper = make_unzipper(&laszip);
+  // copy VLR to laszip
+  LASzip laszip_dec;
+  laszip_dec.unpack(bytes, num);
+  LASunzipper* lasunzipper = make_unzipper(&laszip_dec);
   IStream* ist = new IStream(settings->use_iostream, filename);
   open_unzipper(lasunzipper, ist);
   read_points(lasunzipper, data);
