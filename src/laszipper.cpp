@@ -78,6 +78,11 @@ bool LASzipper::write(const unsigned char * const * point)
   return (writer->write(point) == TRUE);
 }
 
+bool LASzipper::chunk()
+{
+  return (writer->chunk() == TRUE);
+}
+
 unsigned int LASzipper::close()
 {
   unsigned int byteCount = 0;

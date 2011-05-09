@@ -24,6 +24,7 @@
   
   CHANGE HISTORY:
   
+    25 April 2011 -- added chunked laszip for random access decompression
     10 January 2011 -- licensing change for LGPL release and liblas integration
     7 December 2010 -- adapted from LASpointReader for better code modularity
     3 December 2010 -- updated to (somewhat) support LAS format 1.3
@@ -66,9 +67,12 @@ private:
   // used for chunking
   U32 chunk_size;
   U32 chunk_count;
+  U32 current_chunk;
   U32 number_chunks;
   long* chunk_starts;
+  U32* chunk_totals;
   BOOL read_chunk_table();
+  U32 search_chunk_table(const U32 index, const U32 lower, const U32 upper);
   // used for seeking
   U32 point_start;
   U32 point_size;

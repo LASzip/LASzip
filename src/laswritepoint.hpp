@@ -24,6 +24,7 @@
   
   CHANGE HISTORY:
   
+    25 April 2011 -- added chunked laszip for random access decompression
     10 January 2011 -- licensing change for LGPL release and liblas integration
     7 December 2010 -- adapted from LASpointWriter for better code modularity
     3 December 2010 -- updated to (somewhat) support LAS format 1.3
@@ -53,6 +54,7 @@ public:
 
   BOOL init(ByteStreamOut* outstream);
   BOOL write(const U8 * const * point);
+  BOOL chunk();
   BOOL done();
 
 private:
@@ -67,6 +69,7 @@ private:
   U32 chunk_count;
   U32 number_chunks;
   U32 alloced_chunks;
+  U32* chunk_sizes;
   U32* chunk_bytes;
   I64 chunk_start_position;
   I64 chunk_table_start_position;

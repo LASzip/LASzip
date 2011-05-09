@@ -52,8 +52,10 @@ LASwritePoint::LASwritePoint()
   chunk_count = 0;
   number_chunks = 0;
   alloced_chunks = 0;
+  chunk_sizes = 0;
   chunk_bytes = 0;
   chunk_table_start_position = 0;
+  chunk_start_position = 0;
 }
 
 BOOL LASwritePoint::setup(const U32 num_items, const LASitem* items, LASzip* laszip)
@@ -195,7 +197,7 @@ BOOL LASwritePoint::setup(const U32 num_items, const LASitem* items, LASzip* las
     }
     if (laszip->compressor == LASZIP_COMPRESSOR_POINTWISE_CHUNKED)
     {
-      chunk_size = laszip->chunk_size;
+      if (laszip->chunk_size) chunk_size = laszip->chunk_size;
       chunk_count = 0;
       number_chunks = U32_MAX;
     }
@@ -208,6 +210,7 @@ BOOL LASwritePoint::init(ByteStreamOut* outstream)
   if (!outstream) return FALSE;
   this->outstream = outstream;
 
+  // if chunking is enabled
   if (number_chunks == U32_MAX)
   {
     number_chunks = 0;
@@ -274,12 +277,25 @@ BOOL LASwritePoint::write(const U8 * const * point)
   return TRUE;
 }
 
+BOOL LASwritePoint::chunk()
+{
+  if (chunk_start_position == 0 || chunk_size != U32_MAX)
+  {
+    return FALSE;
+  }
+  enc->done();
+  add_chunk_to_table();
+  init(outstream);
+  chunk_count = 0;
+  return TRUE;
+}
+
 BOOL LASwritePoint::done()
 {
   if (writers == writers_compressed)
   {
     enc->done();
-    if (chunk_size != U32_MAX)
+    if (chunk_start_position)
     {
       if (chunk_count) add_chunk_to_table();
       return write_chunk_table();
@@ -295,16 +311,20 @@ BOOL LASwritePoint::add_chunk_to_table()
     if (chunk_bytes == 0)
     {
       alloced_chunks = 1024;
+      if (chunk_size == U32_MAX) chunk_sizes = (U32*)malloc(sizeof(U32)*alloced_chunks); 
       chunk_bytes = (U32*)malloc(sizeof(U32)*alloced_chunks); 
     }
     else
     {
       alloced_chunks *= 2;
+      if (chunk_size == U32_MAX) chunk_sizes = (U32*)realloc(chunk_sizes, sizeof(U32)*alloced_chunks); 
       chunk_bytes = (U32*)realloc(chunk_bytes, sizeof(U32)*alloced_chunks); 
     }
+    if (chunk_size == U32_MAX && chunk_sizes == 0) return FALSE;
     if (chunk_bytes == 0) return FALSE;
   }
   I64 position = outstream->position();
+  if (chunk_size == U32_MAX) chunk_sizes[number_chunks] = chunk_count;
   chunk_bytes[number_chunks] = (U32)(position - chunk_start_position);
   chunk_start_position = position;
   number_chunks++;
@@ -336,6 +356,13 @@ BOOL LASwritePoint::write_chunk_table()
   }
   for (i = 0; i < number_chunks; i++)
   {
+    if (chunk_size == U32_MAX) 
+    {
+      if (!outstream->put32bitsLE((U8*)&chunk_sizes[i]))
+      {
+        return FALSE;
+      }
+    }
     if (!outstream->put32bitsLE((U8*)&chunk_bytes[i]))
     {
       return FALSE;

@@ -50,7 +50,9 @@ LASreadPoint::LASreadPoint()
   // used for chunking
   chunk_size = U32_MAX;
   chunk_count = 0;
+  current_chunk = 0;
   number_chunks = 0;
+  chunk_totals = 0;
   chunk_starts = 0;
   // used for seeking
   seek_point = 0;
@@ -84,6 +86,9 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, const LASzip* lasz
   // initizalize the readers
   readers = 0;
   num_readers = num_items;
+
+  // disable chunking
+  chunk_size = U32_MAX;
 
   // always create the raw readers
   readers_raw = new LASreadItem*[num_readers];
@@ -186,7 +191,7 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, const LASzip* lasz
     }
     if (laszip->compressor == LASZIP_COMPRESSOR_POINTWISE_CHUNKED)
     {
-      chunk_size = laszip->chunk_size;
+      if (laszip->chunk_size) chunk_size = laszip->chunk_size;
       number_chunks = U32_MAX;
     }
   }
@@ -198,12 +203,14 @@ BOOL LASreadPoint::init(ByteStreamIn* instream)
   if (!instream) return FALSE;
   this->instream = instream;
 
+  // if chunking is enabled
   if (number_chunks == U32_MAX)
   {
     if (!read_chunk_table())
     {
       return FALSE;
     }
+    current_chunk = 0;
   }
 
   point_start = instream->position();
@@ -232,17 +239,27 @@ BOOL LASreadPoint::seek(const U32 current, const U32 target)
   U32 delta = 0;
   if (dec)
   {
-    if (number_chunks)
+    if (chunk_starts)
     {
-      U32 current_chunk = current/chunk_size;
-      U32 target_chunk = target/chunk_size;
+      U32 target_chunk;
+      if (chunk_totals)
+      {
+        target_chunk = search_chunk_table(target, 0, number_chunks);
+        chunk_size = chunk_totals[target_chunk+1]-chunk_totals[target_chunk];
+        delta = target - chunk_totals[target_chunk];
+      }
+      else
+      {
+        target_chunk = target/chunk_size;
+        delta = target%chunk_size;
+      }
       if (current_chunk != target_chunk || current > target)
       {
         dec->done();
-        instream->seek(chunk_starts[target_chunk]);
+        current_chunk = target_chunk;
+        instream->seek(chunk_starts[current_chunk]);
         init(instream);
         chunk_count = 0;
-        delta = target%chunk_size;
       }
       else
       {
@@ -282,6 +299,11 @@ BOOL LASreadPoint::read(U8* const * point)
 
   if (chunk_count == chunk_size)
   {
+    current_chunk++;
+    if (chunk_totals)
+    {
+      chunk_size = chunk_totals[current_chunk+1]-chunk_totals[current_chunk];
+    }
     dec->done();
     init(instream);
     chunk_count = 0;
@@ -353,12 +375,25 @@ BOOL LASreadPoint::read_chunk_table()
   {
     return FALSE;
   }
+  if (chunk_totals) delete [] chunk_totals;
+  chunk_totals = 0;
   if (chunk_starts) delete [] chunk_starts;
-  chunk_starts = new long[number_chunks];
+  chunk_starts = 0;
+  if (chunk_size == U32_MAX) chunk_totals = new U32[number_chunks+1];
+  chunk_starts = new long[number_chunks+1];
+  if (chunk_size == U32_MAX) chunk_totals[0] = 0;
   chunk_starts[0] = chunks_start;
   U32 i;
-  for (i = 1; i < number_chunks; i++)
+  for (i = 1; i <= number_chunks; i++)
   {
+    if (chunk_size == U32_MAX)
+    {
+      if (!instream->get32bitsLE((U8*)&chunk_totals[i]))
+      {
+        return FALSE;
+      }
+      chunk_totals[i] += chunk_totals[i-1];
+    }
     if (!instream->get32bitsLE((U8*)&chunk_starts[i]))
     {
       return FALSE;
@@ -367,6 +402,16 @@ BOOL LASreadPoint::read_chunk_table()
   }
   instream->seek(chunks_start);
   return TRUE;
+}
+
+U32 LASreadPoint::search_chunk_table(const U32 index, const U32 lower, const U32 upper)
+{
+  if (lower + 1 == upper) return lower;
+  U32 mid = (lower+upper)/2;
+  if (index >= chunk_totals[mid])
+    return search_chunk_table(index, mid, upper);
+  else
+    return search_chunk_table(index, lower, mid);
 }
 
 LASreadPoint::~LASreadPoint()
