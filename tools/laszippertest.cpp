@@ -170,68 +170,42 @@ public:
 
 //---------------------------------------------------------------------------
 
-#define NUM_ITEMS 5
-
 class PointData
 {
 public:
-  PointData()
+  PointData(unsigned char type=5, unsigned short size=70)
   {
-    num_items = NUM_ITEMS;
+    point_type = type;
+    point_size = size;
+    point = 0;
+    point_data = 0;
+  }
 
-    items[0].type = LASitem::POINT10;
-    items[0].size = 20;
-    items[0].version = 0;
-
-    items[1].type = LASitem::GPSTIME11;
-    items[1].size = 8;
-    items[1].version = 0;
-
-    items[2].type = LASitem::RGB12;
-    items[2].size = 6;
-    items[2].version = 0;
-
-    items[3].type = LASitem::WAVEPACKET13;
-    items[3].size = 29;
-    items[3].version = 0;
-
-    items[4].type = LASitem::BYTE;
-    items[4].size = 7;
-    items[4].version = 0;
-
-    unsigned int i;
-
-    // compute the point size
-    point_type = 5;
-    point_size = 0;
-    for (i = 0; i < num_items; i++) point_size += items[i].size;
-
-    // create the point data
-    unsigned int point_offset = 0;
+  bool PointData::setup(unsigned int num_items, const LASitem* items)
+  {
+    unsigned int offset = 0;
+    if (point) delete [] point;
     point = new unsigned char*[num_items];
+    if (point_data) delete [] point_data;
     point_data = new unsigned char[point_size];
-    for (i = 0; i < num_items; i++)
+    for (unsigned int i = 0; i < num_items; i++)
     {
-      point[i] = &(point_data[point_offset]);
-      point_offset += items[i].size;
+      point[i] = &(point_data[offset]);
+      offset += items[i].size;
     }
-
-    return;
+    return (offset == point_size);
   }
 
   ~PointData()
   {
-    delete[] point;
-    delete[] point_data;
-    return;
+    if (point) delete [] point;
+    if (point_data) delete [] point_data;
   }
 
-  unsigned int num_items;
-  LASitem items[NUM_ITEMS];
   unsigned char point_type;
   unsigned short point_size;
-  unsigned char* point_data;
   unsigned char** point;
+  unsigned char* point_data;
 };
 
 
@@ -476,7 +450,8 @@ static void read_points(LASunzipper* unzipper, PointData& data)
 static void run_test(const char* filename, PointData& data, unsigned short compressor, unsigned short requested_version=0, unsigned short chunk_size=0)
 {
   LASzip laszip;
-  laszip.setup(data.num_items, data.items, compressor);
+  laszip.setup(data.point_type, data.point_size, compressor);
+  data.setup(laszip.num_items, laszip.items);
   if (requested_version) laszip.request_version(requested_version);
   if (chunk_size) laszip.set_chunk_size(chunk_size);
 
@@ -494,6 +469,7 @@ static void run_test(const char* filename, PointData& data, unsigned short compr
   // copy VLR to laszip
   LASzip laszip_dec;
   laszip_dec.unpack(bytes, num);
+  data.setup(laszip_dec.num_items, laszip_dec.items);
   LASunzipper* lasunzipper = make_unzipper(&laszip_dec);
   IStream* ist = new IStream(settings->use_iostream, filename);
   open_unzipper(lasunzipper, ist);
