@@ -14,7 +14,7 @@
   
   COPYRIGHT:
 
-    (c) 2010-2011, Martin Isenburg, LASSO - tools to catch reality
+    (c) 2007-2011, Martin Isenburg, LASSO - tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -25,7 +25,9 @@
   
   CHANGE HISTORY:
   
-    20 March 2011 -- incrementing LASZIP_VERSION to 2.0 for improved compression
+    8 May 2011 -- added an option for variable chunking via chunk()
+    23 April 2011 -- changed interface for simplicity and chunking support
+    20 March 2011 -- incrementing LASZIP_VERSION to 1.2 for improved compression
     10 January 2011 -- licensing change for LGPL release and liblas integration
     12 December 2010 -- refactored from lasdefinitions after movies with silke
   

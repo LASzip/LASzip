@@ -24,7 +24,8 @@
   
   CHANGE HISTORY:
   
-    23 April 2011 -- changed interface for easier future compressor support
+    8 May 2011 -- added an option for variable chunking via chunk()
+    23 April 2011 -- changed interface for simplicity and chunking support
     10 January 2011 -- licensing change for LGPL release and liblas integration
     12 December 2010 -- created from LASwriter/LASreader after Howard got pushy (-;
   
@@ -55,6 +56,7 @@ public:
   unsigned int open(FILE* outfile);
   unsigned int open(ostream& outstream);
   bool write(const unsigned char* const * point);
+  bool chunk();
   unsigned int close();
 
   LASzipper();
