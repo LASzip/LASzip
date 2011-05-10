@@ -45,7 +45,6 @@ LASzip::LASzip()
   num_points = -1;
   num_bytes = -1;
   items = 0;
-  requested_version = 0;
   bytes = 0;
 }
 
@@ -188,7 +187,7 @@ bool LASzip::setup(const U8 point_type, const U16 point_size, const U16 compress
   this->num_items = 0;
   if (this->items) delete [] this->items;
   this->items = 0;
-  if (!LASitem().setup(point_type, point_size, &num_items, &items)) return false;
+  if (!LASitem().setup(&num_items, &items, point_type, point_size, compressor)) return false;
   this->compressor = compressor;
   if (this->compressor == LASZIP_COMPRESSOR_POINTWISE_CHUNKED)
   {
@@ -224,14 +223,21 @@ bool LASzip::setup(const U16 num_items, const LASitem* items, const U16 compress
   return true;
 }
 
-void LASzip::set_chunk_size(const U32 chunk_size)
+bool LASzip::set_chunk_size(const U32 chunk_size)
 {
-  this->chunk_size = chunk_size;
+  if (num_items == 0) return false;
+  if (this->compressor == LASZIP_COMPRESSOR_POINTWISE_CHUNKED)
+  {
+    this->chunk_size = chunk_size;
+    return true;
+  }
+  return false;
 }
 
-void LASzip::request_version(const U32 requested_version)
+bool LASzip::request_version(const U16 requested_version)
 {
-  this->requested_version = requested_version;
+  if (num_items == 0) return false;
+  return LASitem().request_version(num_items, items, compressor, requested_version);
 }
 
 bool LASzip::is_standard(U8* point_type, U16* record_length) const
@@ -239,7 +245,7 @@ bool LASzip::is_standard(U8* point_type, U16* record_length) const
   return LASitem().is_standard(num_items, items, point_type, record_length);
 }
 
-bool LASitem::setup(const U8 point_type, const U16 point_size, U16* num_items, LASitem** items) const
+bool LASitem::setup(U16* num_items, LASitem** items, const U8 point_type, const U16 point_size, const U16 compressor) const
 {
   BOOL have_gps_time = FALSE;
   BOOL have_rgb = FALSE;
@@ -282,6 +288,10 @@ bool LASitem::setup(const U8 point_type, const U16 point_size, U16* num_items, L
 
   if (extra_bytes_number < 0) return false;
 
+  // choose version
+  U16 version = 0;
+  if (compressor) version = 1;
+
   // create item description
 
   (*num_items) = 1 + !!(have_gps_time) + !!(have_rgb) + !!(have_wavepacket) + !!(extra_bytes_number);
@@ -290,33 +300,33 @@ bool LASitem::setup(const U8 point_type, const U16 point_size, U16* num_items, L
   U16 i = 1;
   (*items)[0].type = LASitem::POINT10;
   (*items)[0].size = 20;
-  (*items)[0].version = 0;
+  (*items)[0].version = version;
   if (have_gps_time)
   {
     (*items)[i].type = LASitem::GPSTIME11;
     (*items)[i].size = 8;
-    (*items)[i].version = 0;
+    (*items)[i].version = version;
     i++;
   }
   if (have_rgb)
   {
     (*items)[i].type = LASitem::RGB12;
     (*items)[i].size = 6;
-    (*items)[i].version = 0;
+    (*items)[i].version = version;
     i++;
   }
   if (have_wavepacket)
   {
     (*items)[i].type = LASitem::WAVEPACKET13;
     (*items)[i].size = 29;
-    (*items)[i].version = 0;
+    (*items)[i].version = version;
     i++;
   }
   if (extra_bytes_number)
   {
     (*items)[i].type = LASitem::BYTE;
     (*items)[i].size = extra_bytes_number;
-    (*items)[i].version = 0;
+    (*items)[i].version = version;
     i++;
   }
   assert(i == *num_items);
@@ -553,4 +563,48 @@ const char* LASitem::get_name() const
       break;
   }
   return 0;
+}
+
+bool LASitem::request_version(U16 num_items, LASitem* items, const U16 compressor, const U16 requested_version) const
+{
+  U16 i;
+  for (i = 0; i < num_items; i++)
+  {
+    if (!items[i].request_version(compressor, requested_version)) return false;
+  }
+  return true;
+}
+
+bool LASitem::request_version(const U16 compressor, const U16 requested_version)
+{
+  if (compressor == LASZIP_COMPRESSOR_NONE)
+  {
+    if (requested_version > 0) return false;
+  }
+  else
+  {
+    if (requested_version < 1) return false;
+    if (requested_version > 2) return false;
+  }
+  switch (type)
+  {
+  case POINT10:
+      version = requested_version;
+      break;
+  case GPSTIME11:
+      version = requested_version;
+      break;
+  case RGB12:
+      version = requested_version;
+      break;
+  case WAVEPACKET13:
+      version = 1; // no version 2
+      break;
+  case BYTE:
+      version = requested_version;
+      break;
+  default:
+      return false;
+  }
+  return true;
 }

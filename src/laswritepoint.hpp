@@ -50,7 +50,7 @@ public:
   ~LASwritePoint();
 
   // should only be called *once*
-  BOOL setup(const U32 num_items, const LASitem* items, LASzip* laszip);
+  BOOL setup(const U32 num_items, const LASitem* items, const LASzip* laszip=0);
 
   BOOL init(ByteStreamOut* outstream);
   BOOL write(const U8 * const * point);

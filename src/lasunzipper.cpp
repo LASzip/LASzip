@@ -34,21 +34,16 @@
 #include "bytestreamin_istream.hpp"
 #include "lasreadpoint.hpp"
 
-unsigned int LASunzipper::setup(const LASzip* laszip)
+
+unsigned int LASunzipper::open(FILE* infile, const LASzip* laszip)
 {
+  if (!infile) return 1;
   if (!laszip) return 1;
   count = 0;
   if (reader) delete reader;
   reader = new LASreadPoint();
   if (!reader) return 1;
   if (!reader->setup(laszip->num_items, laszip->items, laszip)) return 1;
-  return 0;
-}
-
-unsigned int LASunzipper::open(FILE* infile)
-{
-  if (!infile) return 1;
-  if (!reader) return 1;
   if (stream) delete stream;
   if (IS_LITTLE_ENDIAN())
     stream = new ByteStreamInFileLE(infile);
@@ -59,9 +54,14 @@ unsigned int LASunzipper::open(FILE* infile)
   return 0;
 }
 
-unsigned int LASunzipper::open(istream& instream)
+unsigned int LASunzipper::open(istream& instream, const LASzip* laszip)
 {
+  if (!laszip) return 1;
+  count = 0;
+  if (reader) delete reader;
+  reader = new LASreadPoint();
   if (!reader) return 1;
+  if (!reader->setup(laszip->num_items, laszip->items, laszip)) return 1;
   if (stream) delete stream;
   if (IS_LITTLE_ENDIAN())
     stream = new ByteStreamInIstreamLE(instream);
@@ -80,6 +80,11 @@ bool LASunzipper::seek(const unsigned int position)
     return true;
   }
   return false;
+}
+
+unsigned int LASunzipper::tell() const
+{
+  return count;
 }
 
 bool LASunzipper::read(unsigned char * const * point)

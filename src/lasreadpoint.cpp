@@ -62,6 +62,13 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, const LASzip* lasz
 {
   U32 i;
 
+  // is laszip exists then we must use its items
+  if (laszip)
+  {
+    if (num_items != laszip->num_items) return FALSE;
+    if (items != laszip->items) return FALSE;
+  }
+
   // check if we support the items
   for (i = 0; i < num_items; i++)
   {

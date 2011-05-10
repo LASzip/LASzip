@@ -34,21 +34,15 @@
 #include "bytestreamout_ostream.hpp"
 #include "laswritepoint.hpp"
 
-unsigned int LASzipper::setup(LASzip* laszip)
+unsigned int LASzipper::open(FILE* outfile, const LASzip* laszip)
 {
+  if (!outfile) return 1;
   if (!laszip) return 1;
   count = 0;
   if (writer) delete writer;
   writer = new LASwritePoint();
   if (!writer) return 1;
   if (!writer->setup(laszip->num_items, laszip->items, laszip)) return 1;
-  return 0;
-}
-
-unsigned int LASzipper::open(FILE* outfile)
-{
-  if (!outfile) return 1;
-  if (!writer) return 1;
   if (stream) delete stream;
   if (IS_LITTLE_ENDIAN())
     stream = new ByteStreamOutFileLE(outfile);
@@ -59,9 +53,14 @@ unsigned int LASzipper::open(FILE* outfile)
   return 0;
 }
 
-unsigned int LASzipper::open(ostream& outstream)
+unsigned int LASzipper::open(ostream& outstream, const LASzip* laszip)
 {
+  if (!laszip) return 1;
+  count = 0;
+  if (writer) delete writer;
+  writer = new LASwritePoint();
   if (!writer) return 1;
+  if (!writer->setup(laszip->num_items, laszip->items, laszip)) return 1;
   if (stream) delete stream;
   if (IS_LITTLE_ENDIAN())
     stream = new ByteStreamOutOstreamLE(outstream);

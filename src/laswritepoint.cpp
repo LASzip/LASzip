@@ -58,9 +58,16 @@ LASwritePoint::LASwritePoint()
   chunk_start_position = 0;
 }
 
-BOOL LASwritePoint::setup(const U32 num_items, const LASitem* items, LASzip* laszip)
+BOOL LASwritePoint::setup(const U32 num_items, const LASitem* items, const LASzip* laszip)
 {
   U32 i;
+
+  // is laszip exists then we must use its items
+  if (laszip)
+  {
+    if (num_items != laszip->num_items) return FALSE;
+    if (items != laszip->items) return FALSE;
+  }
 
   // check if we support the items
   for (i = 0; i < num_items; i++)
@@ -126,73 +133,56 @@ BOOL LASwritePoint::setup(const U32 num_items, const LASitem* items, LASzip* las
     default:
       return FALSE;
     }
-    if (laszip) laszip->items[i].version = 0;
   }
 
   // if needed create the compressed writers and set versions
   if (enc)
   {
     writers_compressed = new LASwriteItem*[num_writers];
-    if (laszip->requested_version <= 1)
+    for (i = 0; i < num_writers; i++)
     {
-      for (i = 0; i < num_writers; i++)
+      switch (items[i].type)
       {
-        switch (items[i].type)
-        {
-        case LASitem::POINT10:
+      case LASitem::POINT10:
+        if (items[i].version == 1)
           writers_compressed[i] = new LASwriteItemCompressed_POINT10_v1(enc);
-          laszip->items[i].version = 1;
-          break;
-        case LASitem::GPSTIME11:
-          writers_compressed[i] = new LASwriteItemCompressed_GPSTIME11_v1(enc);
-          laszip->items[i].version = 1;
-          break;
-        case LASitem::RGB12:
-          writers_compressed[i] = new LASwriteItemCompressed_RGB12_v1(enc);
-          laszip->items[i].version = 1;
-          break;
-        case LASitem::WAVEPACKET13:
-          writers_compressed[i] = new LASwriteItemCompressed_WAVEPACKET13_v1(enc);
-          laszip->items[i].version = 1;
-          break;
-        case LASitem::BYTE:
-          writers_compressed[i] = new LASwriteItemCompressed_BYTE_v1(enc, items[i].size);
-          laszip->items[i].version = 1;
-          break;
-        default:
-          return FALSE;
-        }
-      }
-    }
-    else
-    {
-      for (i = 0; i < num_writers; i++)
-      {
-        switch (items[i].type)
-        {
-        case LASitem::POINT10:
+        else if (items[i].version == 2)
           writers_compressed[i] = new LASwriteItemCompressed_POINT10_v2(enc);
-          laszip->items[i].version = 2;
-          break;
-        case LASitem::GPSTIME11:
-          writers_compressed[i] = new LASwriteItemCompressed_GPSTIME11_v2(enc);
-          laszip->items[i].version = 2;
-          break;
-        case LASitem::RGB12:
-          writers_compressed[i] = new LASwriteItemCompressed_RGB12_v2(enc);
-          laszip->items[i].version = 2;
-          break;
-        case LASitem::WAVEPACKET13:
-          writers_compressed[i] = new LASwriteItemCompressed_WAVEPACKET13_v1(enc);
-          laszip->items[i].version = 1;
-          break;
-        case LASitem::BYTE:
-          writers_compressed[i] = new LASwriteItemCompressed_BYTE_v2(enc, items[i].size);
-          laszip->items[i].version = 2;
-          break;
-        default:
+        else
           return FALSE;
-        }
+        break;
+      case LASitem::GPSTIME11:
+        if (items[i].version == 1)
+          writers_compressed[i] = new LASwriteItemCompressed_GPSTIME11_v1(enc);
+        else if (items[i].version == 2)
+          writers_compressed[i] = new LASwriteItemCompressed_GPSTIME11_v2(enc);
+        else
+          return FALSE;
+        break;
+      case LASitem::RGB12:
+        if (items[i].version == 1)
+          writers_compressed[i] = new LASwriteItemCompressed_RGB12_v1(enc);
+        else if (items[i].version == 2)
+          writers_compressed[i] = new LASwriteItemCompressed_RGB12_v2(enc);
+        else
+          return FALSE;
+        break;
+      case LASitem::WAVEPACKET13:
+        if (items[i].version == 1)
+         writers_compressed[i] = new LASwriteItemCompressed_WAVEPACKET13_v1(enc);
+        else
+          return FALSE;
+        break;
+      case LASitem::BYTE:
+        if (items[i].version == 1)
+         writers_compressed[i] = new LASwriteItemCompressed_BYTE_v1(enc, items[i].size);
+        else if (items[i].version == 2)
+          writers_compressed[i] = new LASwriteItemCompressed_BYTE_v2(enc, items[i].size);
+        else
+          return FALSE;
+        break;
+      default:
+        return FALSE;
       }
     }
     if (laszip->compressor == LASZIP_COMPRESSOR_POINTWISE_CHUNKED)
