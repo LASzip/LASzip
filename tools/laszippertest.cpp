@@ -260,13 +260,22 @@ static void log(const char* format, ...)
 
 //---------------------------------------------------------------------------
 
-static LASzipper* make_zipper(LASzip* laszip)
+static LASzipper* make_zipper(OStream* ost, const LASzip* laszip)
 {
   LASzipper* zipper = new LASzipper();
-  int stat = zipper->setup(laszip);
-  if (stat != 0)
+  if (zipper == 0)
   {
     log("ERROR: could not make laszipper\n");
+    exit(1);
+  }
+  int stat = 0;
+  if (ost->m_use_iostream)
+    stat = zipper->open(*ost->streamo, laszip);
+  else
+    stat = zipper->open(ost->ofile, laszip);
+  if (stat != 0)
+  {
+    log("ERROR: could not open laszipper with %s\n", ost->m_filename);
     exit(1);
   }
   return zipper;
@@ -274,48 +283,25 @@ static LASzipper* make_zipper(LASzip* laszip)
 
 //---------------------------------------------------------------------------
 
-static void open_zipper(LASzipper* zipper, OStream* ost)
-{
-  int stat = 0;
-  if (ost->m_use_iostream)
-    stat = zipper->open(*ost->streamo);
-  else
-    stat = zipper->open(ost->ofile);
-  if (stat != 0)
-  {
-    log("ERROR: could not open laszipper with %s\n", ost->m_filename);
-    exit(1);
-  }
-}
-
-//---------------------------------------------------------------------------
-
-static LASunzipper* make_unzipper(const LASzip* laszip)
+static LASunzipper* make_unzipper(IStream* ist, const LASzip* laszip)
 {
   LASunzipper* unzipper = new LASunzipper();
-  int stat = unzipper->setup(laszip);
-  if (stat != 0)
+  if (unzipper == 0)
   {
     log("ERROR: could not make lasunzipper\n");
     exit(1);
   }
-  return unzipper;
-}
-
-//---------------------------------------------------------------------------
-
-static void open_unzipper(LASunzipper* unzipper, IStream* ist)
-{
   int stat = 0;
   if (ist->m_use_iostream)
-    stat = unzipper->open(*ist->streami);
+    stat = unzipper->open(*ist->streami, laszip);
   else
-    stat = unzipper->open(ist->ifile);
+    stat = unzipper->open(ist->ifile, laszip);
   if (stat != 0)
   {
     log("ERROR: could not open laszipper with %s\n", ist->m_filename);
     exit(1);
   }
+  return unzipper;
 }
 
 //---------------------------------------------------------------------------
@@ -447,33 +433,60 @@ static void read_points(LASunzipper* unzipper, PointData& data)
 
 //---------------------------------------------------------------------------
 
-static void run_test(const char* filename, PointData& data, unsigned short compressor, unsigned short requested_version=0, unsigned short chunk_size=0)
+static void run_test(const char* filename, PointData& data, unsigned short compressor, unsigned short requested_version=0, int chunk_size=-1)
 {
+  //
+  // COMPRESSION
+  //
+
+  // setting up LASzip parameters
   LASzip laszip;
   laszip.setup(data.point_type, data.point_size, compressor);
-  data.setup(laszip.num_items, laszip.items);
-  if (requested_version) laszip.request_version(requested_version);
-  if (chunk_size) laszip.set_chunk_size(chunk_size);
+  if (requested_version > 0) laszip.request_version(requested_version);
+  if (chunk_size > -1) laszip.set_chunk_size((unsigned int)chunk_size);
 
-  LASzipper* laszipper = make_zipper(&laszip);
-  // only now (that the version numbers were set) can we pack laszip 
+  // packing up LASzip
   unsigned char* bytes;
   int num;
   laszip.pack(bytes, num);
+
+  // creating the output stream
   OStream* ost = new OStream(settings->use_iostream, filename);
-  open_zipper(laszipper, ost);
+
+  // creating the zipper
+  LASzipper* laszipper = make_zipper(ost, &laszip);
+
+  // allocating the data to read from
+  data.setup(laszip.num_items, laszip.items);
+
+  // writing the points
   write_points(laszipper, data);
+
+  // cleaning up
   delete laszipper;
   delete ost;
 
-  // copy VLR to laszip
+  //
+  // DECOMPRESSION
+  //
+
+  // setting up LASzip parameters
   LASzip laszip_dec;
   laszip_dec.unpack(bytes, num);
-  data.setup(laszip_dec.num_items, laszip_dec.items);
-  LASunzipper* lasunzipper = make_unzipper(&laszip_dec);
+
+  // creating the input stream
   IStream* ist = new IStream(settings->use_iostream, filename);
-  open_unzipper(lasunzipper, ist);
+
+  // creating the zipper
+  LASunzipper* lasunzipper = make_unzipper(ist, &laszip_dec);
+
+  // allocating the data to write into
+  data.setup(laszip_dec.num_items, laszip_dec.items);
+  
+  // reading the points
   read_points(lasunzipper, data);
+
+  // cleaning up
   delete lasunzipper;
   delete ist;
 
