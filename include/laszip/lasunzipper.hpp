@@ -51,9 +51,10 @@ class LASreadPoint;
 class LASZIP_DLL LASunzipper
 {
 public:
-  unsigned int setup(const LASzip* laszip);
-  unsigned int open(FILE* file);
-  unsigned int open(istream& stream);
+  unsigned int open(FILE* file, const LASzip* laszip);
+  unsigned int open(istream& stream, const LASzip* laszip);
+ 
+  unsigned int tell() const;
   bool seek(const unsigned int position);
   bool read(unsigned char * const * point);
   unsigned int close();

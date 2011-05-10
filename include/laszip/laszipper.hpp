@@ -52,9 +52,9 @@ class LASwritePoint;
 class LASZIP_DLL LASzipper
 {
 public:
-  unsigned int setup(LASzip* laszip);
-  unsigned int open(FILE* outfile);
-  unsigned int open(ostream& outstream);
+  unsigned int open(FILE* outfile, const LASzip* laszip);
+  unsigned int open(ostream& outstream, const LASzip* laszip);
+
   bool write(const unsigned char* const * point);
   bool chunk();
   unsigned int close();

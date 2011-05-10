@@ -58,7 +58,7 @@ typedef long long SIGNED_INT64;
 
 #define LASZIP_CHUNK_SIZE_DEFAULT 50000
 
-#include "laszipexport.hpp"
+#define LASZIP_DLL
 
 class LASZIP_DLL LASitem
 {
@@ -68,15 +68,18 @@ public:
   unsigned short version;
 
   // number parameter only used when setting to BYTE
-  void set(LASitem::Type t, unsigned short number=1);
   bool is_type(LASitem::Type t) const;
   bool supported() const;
 
   const char* get_name() const;
 
   // back and forth between item array and point type and size
-  bool setup(const unsigned char point_type, const unsigned short point_size, unsigned short* num_items, LASitem** items) const;
+  bool setup(unsigned short* num_items, LASitem** items, const unsigned char point_type, const unsigned short point_size, const unsigned short compressor=LASZIP_COMPRESSOR_NONE) const;
   bool is_standard(const unsigned short num_items, const LASitem* items, unsigned char* point_type=0, unsigned short* record_length=0) const;
+
+  // version control
+  bool request_version(unsigned short num_items, LASitem* items, const unsigned short compressor, const unsigned short requested_version) const;
+  bool request_version(const unsigned short compressor, const unsigned short requested_version);
 };
 
 class LASZIP_DLL LASzip
@@ -94,8 +97,8 @@ public:
   // setup
   bool setup(const unsigned char point_type, const unsigned short point_size, const unsigned short compressor=LASZIP_COMPRESSOR_DEFAULT);
   bool setup(const unsigned short num_items, const LASitem* items, const unsigned short compressor=LASZIP_COMPRESSOR_DEFAULT);
-  void set_chunk_size(const unsigned int chunk_size);
-  void request_version(const unsigned int requested_version);
+  bool set_chunk_size(const unsigned int chunk_size);
+  bool request_version(const unsigned short requested_version);
 
   // query point type and size
   bool is_standard(unsigned char* point_type=0, unsigned short* record_length=0) const;
@@ -112,9 +115,6 @@ public:
   SIGNED_INT64 num_bytes;   /* not mandatory ... -1 if unknown */
   unsigned short num_items;
   LASitem* items;
-
-  // not stored LASzip VLR data section
-  unsigned short requested_version;
 };
 
 #endif
