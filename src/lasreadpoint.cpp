@@ -194,7 +194,7 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, const LASzip* lasz
       default:
         return FALSE;
       }
-      if (i) seek_point[i] = seek_point[i-1]+items[i].size;
+      if (i) seek_point[i] = seek_point[i-1]+items[i-1].size;
     }
     if (laszip->compressor == LASZIP_COMPRESSOR_POINTWISE_CHUNKED)
     {
