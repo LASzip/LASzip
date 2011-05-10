@@ -58,7 +58,7 @@ typedef long long SIGNED_INT64;
 
 #define LASZIP_CHUNK_SIZE_DEFAULT 50000
 
-#define LASZIP_DLL
+#include "laszipexport.hpp"
 
 class LASZIP_DLL LASitem
 {
