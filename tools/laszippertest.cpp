@@ -181,7 +181,7 @@ public:
     point_data = 0;
   }
 
-  bool PointData::setup(unsigned int num_items, const LASitem* items)
+  bool setup(unsigned int num_items, const LASitem* items)
   {
     unsigned int offset = 0;
     if (point) delete [] point;
