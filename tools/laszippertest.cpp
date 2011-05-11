@@ -495,11 +495,12 @@ static void read_points_seek(LASunzipper* unzipper, PointData& data)
 
   unsigned char c;
   unsigned int i,j;
-  unsigned int num_errors, num_bytes;
+  unsigned int num_errors, num_bytes, num_seeks;
   double start_time, end_time;
 
   start_time = taketime();
   num_errors = 0;
+  num_seeks = 0;
 
   if (settings->use_random)
   {
@@ -507,9 +508,11 @@ static void read_points_seek(LASunzipper* unzipper, PointData& data)
     {
       if (i%1000 == 0)
       {
+        if (num_seeks > 100) break;
         int s = (rand()*rand())%settings->num_points;
         fprintf(stderr, "at position %d seeking to %d\n", i, s);
         unzipper->seek(s);
+        num_seeks++;
         i = s;
       }
       unzipper->read(data.point);
@@ -535,9 +538,11 @@ static void read_points_seek(LASunzipper* unzipper, PointData& data)
     {
       if (i%1000 == 0)
       {
+        if (num_seeks > 100) break;
         int s = (rand()*rand())%settings->num_points;
         fprintf(stderr, "at position %d seeking to %d\n", i, s);
         unzipper->seek(s);
+        num_seeks++;
         i = s;
       }
       unzipper->read(data.point);
@@ -713,7 +718,7 @@ int main(int argc, char *argv[])
   run_test("test4.lax", data, LASZIP_COMPRESSOR_CHUNKED);
   run_test("test5.lax", data, LASZIP_COMPRESSOR_CHUNKED, 2);
 
-  run_test("test0.lax", data, LASZIP_COMPRESSOR_CHUNKED, 1, -1, true);
+  run_test("test0.lax", data, LASZIP_COMPRESSOR_CHUNKED, 1, 10000, true);
 
   log("Finished %u runs\n\n", run);
   ++run;
