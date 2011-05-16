@@ -240,7 +240,7 @@ inline BOOL LASreadItemCompressed_POINT10_v2::read(U8* item)
 ===============================================================================
 */
 
-#define LASZIP_GPSTIME_MULTI 512
+#define LASZIP_GPSTIME_MULTI 500
 #define LASZIP_GPSTIME_MULTI_1024 (LASZIP_GPSTIME_MULTI + 0)
 #define LASZIP_GPSTIME_MULTI_2048 (LASZIP_GPSTIME_MULTI + 1)
 #define LASZIP_GPSTIME_MULTI_4096 (LASZIP_GPSTIME_MULTI + 2)
@@ -248,11 +248,10 @@ inline BOOL LASreadItemCompressed_POINT10_v2::read(U8* item)
 #define LASZIP_GPSTIME_MULTI_MINUS_5500 (LASZIP_GPSTIME_MULTI + 4)
 #define LASZIP_GPSTIME_MULTI_MINUS_550 (LASZIP_GPSTIME_MULTI + 5)
 #define LASZIP_GPSTIME_MULTI_MINUS_55 (LASZIP_GPSTIME_MULTI + 6)
-#define LASZIP_GPSTIME_MULTI_MINUS_5 (LASZIP_GPSTIME_MULTI + 7)
-#define LASZIP_GPSTIME_MULTI_UNCHANGED (LASZIP_GPSTIME_MULTI + 8)
-#define LASZIP_GPSTIME_MULTI_DOUBLE (LASZIP_GPSTIME_MULTI + 9)
+#define LASZIP_GPSTIME_MULTI_UNCHANGED (LASZIP_GPSTIME_MULTI + 17)
+#define LASZIP_GPSTIME_MULTI_DOUBLE (LASZIP_GPSTIME_MULTI + 18)
 
-#define LASZIP_GPSTIME_MULTI_TOTAL (LASZIP_GPSTIME_MULTI + 10) 
+#define LASZIP_GPSTIME_MULTI_TOTAL (LASZIP_GPSTIME_MULTI + 22) 
 
 LASreadItemCompressed_GPSTIME11_v2::LASreadItemCompressed_GPSTIME11_v2(EntropyDecoder* dec)
 {
@@ -261,7 +260,7 @@ LASreadItemCompressed_GPSTIME11_v2::LASreadItemCompressed_GPSTIME11_v2(EntropyDe
   this->dec = dec;
   /* create entropy models and integer compressors */
   m_gpstime_multi = dec->createSymbolModel(LASZIP_GPSTIME_MULTI_TOTAL);
-  m_gpstime_0diff = dec->createSymbolModel(3);
+  m_gpstime_0diff = dec->createSymbolModel(6);
   ic_gpstime = new IntegerCompressor(dec, 32, 7); // 32 bits, 7 contexts
 }
 
@@ -275,8 +274,15 @@ LASreadItemCompressed_GPSTIME11_v2::~LASreadItemCompressed_GPSTIME11_v2()
 BOOL LASreadItemCompressed_GPSTIME11_v2::init(const U8* item)
 {
   /* init state */
-  last_gpstime_diff = 0;
-  multi_extreme_counter = 0;
+  last = 0, next = 0;
+  last_gpstime_diff[0] = 0;
+  last_gpstime_diff[1] = 0;
+  last_gpstime_diff[2] = 0;
+  last_gpstime_diff[3] = 0;
+  multi_extreme_counter[0] = 0;
+  multi_extreme_counter[1] = 0;
+  multi_extreme_counter[2] = 0;
+  multi_extreme_counter[3] = 0;
 
   /* init models and integer compressors */
   dec->initSymbolModel(m_gpstime_multi);
@@ -284,24 +290,37 @@ BOOL LASreadItemCompressed_GPSTIME11_v2::init(const U8* item)
   ic_gpstime->initDecompressor();
 
   /* init last item */
-  last_gpstime.u64 = *((U64*)item);
+  last_gpstime[0].u64 = *((U64*)item);
+  last_gpstime[1].u64 = 0;
+  last_gpstime[2].u64 = 0;
+  last_gpstime[3].u64 = 0;
   return TRUE;
 }
 
 inline BOOL LASreadItemCompressed_GPSTIME11_v2::read(U8* item)
 {
   I32 multi;
-  if (last_gpstime_diff == 0) // if the last integer difference was zero
+  if (last_gpstime_diff[last] == 0) // if the last integer difference was zero
   {
     multi = dec->decodeSymbol(m_gpstime_0diff);
     if (multi == 1) // the difference can be represented with 32 bits
     {
-      last_gpstime_diff = ic_gpstime->decompress(0, 0);
-      last_gpstime.i64 += last_gpstime_diff;      
+      last_gpstime_diff[last] = ic_gpstime->decompress(0, 0);
+      last_gpstime[last].i64 += last_gpstime_diff[last];
+      multi_extreme_counter[last] = 0; 
     }
     else if (multi == 2) // the difference is huge
     {
-      last_gpstime.u64 = dec->readInt64();
+      next = (next+1)&3;
+      last = next;
+      last_gpstime_diff[last] = 0;
+      multi_extreme_counter[last] = 0; 
+      last_gpstime[last].u64 = dec->readInt64();
+    }
+    else if (multi > 2) // we switch to another sequence
+    {
+      last = (last+multi-2)&3;
+      return read(item);
     }
   }
   else
@@ -309,8 +328,8 @@ inline BOOL LASreadItemCompressed_GPSTIME11_v2::read(U8* item)
     multi = dec->decodeSymbol(m_gpstime_multi);
     if (multi == 1)
     {
-      last_gpstime.i64 += ic_gpstime->decompress(last_gpstime_diff, 1);;
-      multi_extreme_counter = 0;
+      last_gpstime[last].i64 += ic_gpstime->decompress(last_gpstime_diff[last], 1);;
+      multi_extreme_counter[last] = 0;
     }
     else if (multi < LASZIP_GPSTIME_MULTI_UNCHANGED)
     {
@@ -318,19 +337,19 @@ inline BOOL LASreadItemCompressed_GPSTIME11_v2::read(U8* item)
       if (multi == 0)
       {
         gpstime_diff = ic_gpstime->decompress(0, 6);
-        multi_extreme_counter++;
-        if (multi_extreme_counter > 3)
+        multi_extreme_counter[last]++;
+        if (multi_extreme_counter[last] > 3)
         {
-          last_gpstime_diff = gpstime_diff;
-          multi_extreme_counter = 0;
+          last_gpstime_diff[last] = gpstime_diff;
+          multi_extreme_counter[last] = 0;
         }
       }
       else if (multi < LASZIP_GPSTIME_MULTI)
       {
         if (multi < 10)
-          gpstime_diff = ic_gpstime->decompress(multi*last_gpstime_diff, 2);
+          gpstime_diff = ic_gpstime->decompress(multi*last_gpstime_diff[last], 2);
         else
-          gpstime_diff = ic_gpstime->decompress(multi*last_gpstime_diff, 3);
+          gpstime_diff = ic_gpstime->decompress(multi*last_gpstime_diff[last], 3);
       }
       else if (multi < LASZIP_GPSTIME_MULTI_MINUS_11000)
       {
@@ -340,12 +359,12 @@ inline BOOL LASreadItemCompressed_GPSTIME11_v2::read(U8* item)
           multi = 2048;
         else
           multi = 4096;
-        gpstime_diff = ic_gpstime->decompress(multi*last_gpstime_diff, 4);
-        multi_extreme_counter++;
-        if (multi_extreme_counter > 3)
+        gpstime_diff = ic_gpstime->decompress(multi*last_gpstime_diff[last], 4);
+        multi_extreme_counter[last]++;
+        if (multi_extreme_counter[last] > 3)
         {
-          last_gpstime_diff = gpstime_diff;
-          multi_extreme_counter = 0;
+          last_gpstime_diff[last] = gpstime_diff;
+          multi_extreme_counter[last] = 0;
         }
       }
       else
@@ -359,17 +378,26 @@ inline BOOL LASreadItemCompressed_GPSTIME11_v2::read(U8* item)
         else if (multi == LASZIP_GPSTIME_MULTI_MINUS_55)
           multi = -55;
         else
-          multi = -5;
-        gpstime_diff = ic_gpstime->decompress(multi*last_gpstime_diff, 5);
+          multi = LASZIP_GPSTIME_MULTI_MINUS_55-multi;
+        gpstime_diff = ic_gpstime->decompress(multi*last_gpstime_diff[last], 5);
       }
-      last_gpstime.i64 += gpstime_diff;
+      last_gpstime[last].i64 += gpstime_diff;
     }
     else if (multi ==  LASZIP_GPSTIME_MULTI_DOUBLE)
     {
-      last_gpstime.u64 = dec->readInt64();
+      next = (next+1)&3;
+      last = next;
+      last_gpstime_diff[last] = 0;
+      multi_extreme_counter[last] = 0; 
+      last_gpstime[last].u64 = dec->readInt64();
+    }
+    else if (multi >=  LASZIP_GPSTIME_MULTI_DOUBLE)
+    {
+      last = (last+multi-LASZIP_GPSTIME_MULTI_DOUBLE)&3;
+      return read(item);
     }
   }
-  *((I64*)item) = last_gpstime.i64;
+  *((I64*)item) = last_gpstime[last].i64;
   return TRUE;
 }
 

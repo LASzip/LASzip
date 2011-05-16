@@ -210,7 +210,7 @@ BOOL LASreadPoint::init(ByteStreamIn* instream)
   if (!instream) return FALSE;
   this->instream = instream;
 
-  // if chunking is enabled
+  // on very first init with chunking enabled
   if (number_chunks == U32_MAX)
   {
     if (!read_chunk_table())
@@ -218,6 +218,7 @@ BOOL LASreadPoint::init(ByteStreamIn* instream)
       return FALSE;
     }
     current_chunk = 0;
+    if (chunk_totals) chunk_size = chunk_totals[1];
   }
 
   point_start = instream->position();
@@ -374,6 +375,11 @@ BOOL LASreadPoint::read_chunk_table()
   {
     return false;
   }
+  U32 version;
+  if (!instream->get32bitsLE((U8*)&version) || version != 0)
+  {
+    return FALSE;
+  }
   if (!instream->get32bitsLE((U8*)&number_chunks))
   {
     return FALSE;
@@ -391,20 +397,18 @@ BOOL LASreadPoint::read_chunk_table()
   if (chunk_size == U32_MAX) chunk_totals[0] = 0;
   chunk_starts[0] = chunks_start;
   U32 i;
+  dec->init(instream);
+  IntegerCompressor ic(dec, 32, 2);
+  ic.initDecompressor();
   for (i = 1; i <= number_chunks; i++)
   {
-    if (chunk_size == U32_MAX)
-    {
-      if (!instream->get32bitsLE((U8*)&chunk_totals[i]))
-      {
-        return FALSE;
-      }
-      chunk_totals[i] += chunk_totals[i-1];
-    }
-    if (!instream->get32bitsLE((U8*)&chunk_starts[i]))
-    {
-      return FALSE;
-    }
+    if (chunk_size == U32_MAX) chunk_totals[i] = ic.decompress((i>1 ? chunk_totals[i-1] : 0), 0);
+    chunk_starts[i] = ic.decompress((i>1 ? chunk_starts[i-1] : 0), 1);
+  }
+  dec->done();
+  for (i = 1; i <= number_chunks; i++)
+  {
+    if (chunk_size == U32_MAX) chunk_totals[i] += chunk_totals[i-1];
     chunk_starts[i] += chunk_starts[i-1];
   }
   instream->seek(chunks_start);

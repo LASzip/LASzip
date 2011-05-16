@@ -340,24 +340,24 @@ BOOL LASwritePoint::write_chunk_table()
       return FALSE;
     }
   }
+  U32 version = 0;
+  if (!outstream->put32bitsLE((U8*)&version))
+  {
+    return FALSE;
+  }
   if (!outstream->put32bitsLE((U8*)&number_chunks))
   {
     return FALSE;
   }
+  enc->init(outstream);
+  IntegerCompressor ic(enc, 32, 2);
+  ic.initCompressor();
   for (i = 0; i < number_chunks; i++)
   {
-    if (chunk_size == U32_MAX) 
-    {
-      if (!outstream->put32bitsLE((U8*)&chunk_sizes[i]))
-      {
-        return FALSE;
-      }
-    }
-    if (!outstream->put32bitsLE((U8*)&chunk_bytes[i]))
-    {
-      return FALSE;
-    }
+    if (chunk_size == U32_MAX) ic.compress((i ? chunk_sizes[i-1] : 0), chunk_sizes[i], 0);
+    ic.compress((i ? chunk_bytes[i-1] : 0), chunk_bytes[i], 1);
   }
+  enc->done();
   if (!chunk_table_start_position) // stream is not-seekable
   {
     if (!outstream->put64bitsLE((U8*)&position))

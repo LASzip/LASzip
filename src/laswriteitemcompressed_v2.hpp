@@ -81,13 +81,14 @@ public:
 
 private:
   EntropyEncoder* enc;
-  U64I64F64 last_gpstime;
+  U32 last, next;
+  U64I64F64 last_gpstime[4];
+  I32 last_gpstime_diff[4];
+  I32 multi_extreme_counter[4];
 
   EntropyModel* m_gpstime_multi;
   EntropyModel* m_gpstime_0diff;
   IntegerCompressor* ic_gpstime;
-  I32 multi_extreme_counter;
-  I32 last_gpstime_diff;
 };
 
 class LASwriteItemCompressed_RGB12_v2 : public LASwriteItemCompressed
