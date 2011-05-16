@@ -430,9 +430,6 @@ static void read_points(LASunzipper* unzipper, PointData& data)
   return;
 }
 
-
-//---------------------------------------------------------------------------
-
 //---------------------------------------------------------------------------
 
 static void write_points_seek(LASzipper* zipper, PointData& data)
@@ -579,6 +576,138 @@ static void read_points_seek(LASunzipper* unzipper, PointData& data)
 
 //---------------------------------------------------------------------------
 
+static void write_points_explicit_chunk(LASzipper* zipper, PointData& data)
+{
+  if (zipper==NULL)
+    return;
+
+  double start_time, end_time;
+  unsigned char c;
+  unsigned int i,j;
+  unsigned int num_bytes;
+  unsigned int next_chunk = settings->num_points/10;
+
+  // the two branches of this IF are the same, except for the use of a random number;
+  // we keep the random case separate, so that we can get fastest timing tests w/o random data
+  if (settings->use_random)
+  {
+    srand(settings->seed);
+    start_time = taketime();
+    c = rand() % 256;
+    for (i = 0; i < settings->num_points; i++)
+    {
+      for (j = 0; j < data.point_size; j++)
+      {
+        data.point_data[j] = c;
+        c = rand() % 256;
+      }
+      zipper->write(data.point);
+      if (i == next_chunk)
+      {
+        zipper->chunk();
+        next_chunk += settings->num_points/10;
+        next_chunk -= c;
+      }
+    }
+    num_bytes = zipper->close();
+    end_time = taketime();
+  }
+  else
+  {
+    start_time = taketime();
+    c = 0;
+    for (i = 0; i < settings->num_points; i++)
+    {
+      for (j = 0; j < data.point_size; j++)
+      {
+        data.point_data[j] = c;
+        c++;
+      }
+      zipper->write(data.point);
+      if (i == next_chunk)
+      {
+        zipper->chunk();
+        next_chunk += settings->num_points/10;
+        next_chunk -= (rand() % 256);
+      }
+    }
+    num_bytes = zipper->close();
+    end_time = taketime();
+  }
+
+  log("laszipper wrote %u bytes in %g seconds\n", num_bytes, end_time-start_time);
+
+  return;
+}
+
+//---------------------------------------------------------------------------
+
+static void write_points_explicit_chunk_seek(LASzipper* zipper, PointData& data)
+{
+  if (zipper==NULL)
+    return;
+
+  double start_time, end_time;
+  unsigned char c;
+  unsigned int i,j;
+  unsigned int num_bytes;
+  unsigned int next_chunk = settings->num_points/10;
+
+  start_time = taketime();
+
+  // the two branches of this IF are the same, except for the use of a random number;
+  // we keep the random case separate, so that we can get fastest timing tests w/o random data
+  if (settings->use_random)
+  {
+    for (i = 0; i < settings->num_points; i++)
+    {
+      srand(i);
+      c = rand() % 256;
+      for (j = 0; j < data.point_size; j++)
+      {
+        data.point_data[j] = c;
+        c = rand() % 256;
+      }
+      zipper->write(data.point);
+      if (i == next_chunk)
+      {
+        zipper->chunk();
+        next_chunk += settings->num_points/10;
+        next_chunk -= c;
+      }
+    }
+    num_bytes = zipper->close();
+  }
+  else
+  {
+    for (i = 0; i < settings->num_points; i++)
+    {
+      c = (unsigned char)i;
+      for (j = 0; j < data.point_size; j++)
+      {
+        data.point_data[j] = c;
+        c++;
+      }
+      zipper->write(data.point);
+      if (i == next_chunk)
+      {
+        zipper->chunk();
+        next_chunk += settings->num_points/10;
+        next_chunk -= (rand() % 256);
+      }
+    }
+    num_bytes = zipper->close();
+  }
+
+  end_time = taketime();
+
+  log("laszipper wrote %u bytes in %g seconds\n", num_bytes, end_time-start_time);
+
+  return;
+}
+
+//---------------------------------------------------------------------------
+
 static void run_test(const char* filename, PointData& data, unsigned short compressor, unsigned short requested_version=0, int chunk_size=-1, bool random_seeks=false)
 {
   //
@@ -606,10 +735,20 @@ static void run_test(const char* filename, PointData& data, unsigned short compr
   data.setup(laszip.num_items, laszip.items);
 
   // writing the points
-  if (random_seeks)
-    write_points_seek(laszipper, data);
+  if (chunk_size == 0)
+  {
+    if (random_seeks)
+      write_points_explicit_chunk_seek(laszipper, data);
+    else
+      write_points_explicit_chunk(laszipper, data);
+  }
   else
-    write_points(laszipper, data);
+  {
+    if (random_seeks)
+      write_points_seek(laszipper, data);
+    else
+      write_points(laszipper, data);
+  }
 
   // cleaning up
   delete laszipper;
@@ -712,13 +851,27 @@ int main(int argc, char *argv[])
     log("Seed: %u\n", settings->seed);
   }
 
-  run_test("test1.lax", data, LASZIP_COMPRESSOR_NONE);
-  run_test("test2.lax", data, LASZIP_COMPRESSOR_DEFAULT);
-  run_test("test3.lax", data, LASZIP_COMPRESSOR_DEFAULT, 2);
-  run_test("test4.lax", data, LASZIP_COMPRESSOR_CHUNKED);
-  run_test("test5.lax", data, LASZIP_COMPRESSOR_CHUNKED, 2);
+  run_test("test.tmp", data, LASZIP_COMPRESSOR_NONE);
 
-  run_test("test0.lax", data, LASZIP_COMPRESSOR_CHUNKED, 1, 10000, true);
+  // sequential version 1.0 and version 2.0
+  run_test("test.tmp", data, LASZIP_COMPRESSOR_DEFAULT, 1);
+  run_test("test.tmp", data, LASZIP_COMPRESSOR_DEFAULT, 2);
+
+  // chunk every 10000 points
+  run_test("test.tmp", data, LASZIP_COMPRESSOR_CHUNKED, 1, 10000);
+  run_test("test.tmp", data, LASZIP_COMPRESSOR_CHUNKED, 2, 10000);
+
+  // explicit chunk() calls
+  run_test("test.tmp", data, LASZIP_COMPRESSOR_CHUNKED, 1, 0); 
+  run_test("test.tmp", data, LASZIP_COMPRESSOR_CHUNKED, 2, 0);
+
+  // chunk every 10000 points and random seeks during read
+  run_test("test.tmp", data, LASZIP_COMPRESSOR_CHUNKED, 1, 10000, true);
+  run_test("test.tmp", data, LASZIP_COMPRESSOR_CHUNKED, 2, 10000, true);
+
+  // explicit chunk() calls and random seeks during read
+  run_test("test.tmp", data, LASZIP_COMPRESSOR_CHUNKED, 1, 0, true);
+  run_test("test.tmp", data, LASZIP_COMPRESSOR_CHUNKED, 2, 0, true);
 
   log("Finished %u runs\n\n", run);
   ++run;
