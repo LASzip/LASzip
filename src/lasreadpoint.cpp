@@ -299,35 +299,42 @@ BOOL LASreadPoint::read(U8* const * point)
 {
   U32 i;
 
-  if (chunk_count == chunk_size)
+  try
   {
-    current_chunk++;
-    if (chunk_totals)
+    if (chunk_count == chunk_size)
     {
-      chunk_size = chunk_totals[current_chunk+1]-chunk_totals[current_chunk];
+      current_chunk++;
+      if (chunk_totals)
+      {
+        chunk_size = chunk_totals[current_chunk+1]-chunk_totals[current_chunk];
+      }
+      dec->done();
+      init(instream);
+      chunk_count = 0;
     }
-    dec->done();
-    init(instream);
-    chunk_count = 0;
-  }
-  chunk_count++;
+    chunk_count++;
 
-  if (readers)
-  {
-    for (i = 0; i < num_readers; i++)
+    if (readers)
     {
-      readers[i]->read(point[i]);
+      for (i = 0; i < num_readers; i++)
+      {
+        readers[i]->read(point[i]);
+      }
+    }
+    else
+    {
+      for (i = 0; i < num_readers; i++)
+      {
+        readers_raw[i]->read(point[i]);
+        ((LASreadItemCompressed*)(readers_compressed[i]))->init(point[i]);
+      }
+      readers = readers_compressed;
+      dec->init(instream);
     }
   }
-  else
+  catch (...)
   {
-    for (i = 0; i < num_readers; i++)
-    {
-      readers_raw[i]->read(point[i]);
-      ((LASreadItemCompressed*)(readers_compressed[i]))->init(point[i]);
-    }
-    readers = readers_compressed;
-    dec->init(instream);
+    return FALSE;
   }
   return TRUE;
 }

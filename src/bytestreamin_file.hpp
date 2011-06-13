@@ -113,8 +113,7 @@ inline unsigned int ByteStreamInFile::getByte()
   int byte = getc(file);
   if (byte == EOF)
   {
-//    fprintf(stderr, "reading EOF\n");
-    byte = 0;
+    throw EOF;
   }
   return (unsigned int)byte;
 }
@@ -136,6 +135,7 @@ inline long ByteStreamInFile::position() const
 
 inline bool ByteStreamInFile::seek(const long position)
 {
+//  return !(_fseeki64(file, (I64)position, SEEK_SET));
   return !(fseek(file, position, SEEK_SET));
 }
 
