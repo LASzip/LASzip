@@ -179,6 +179,11 @@ bool LASzip::pack(U8*& bytes, I32& num)
   return true;
 }
 
+const char* LASzip::get_error() const
+{
+  return error_string;
+}
+
 bool LASzip::return_error(const char* error)
 {
   char err[256];
