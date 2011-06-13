@@ -237,17 +237,11 @@ inline BOOL LASwriteItemCompressed_POINT10_v2::write(const U8* item)
 */
 
 #define LASZIP_GPSTIME_MULTI 500
-#define LASZIP_GPSTIME_MULTI_1024 (LASZIP_GPSTIME_MULTI + 0)
-#define LASZIP_GPSTIME_MULTI_2048 (LASZIP_GPSTIME_MULTI + 1)
-#define LASZIP_GPSTIME_MULTI_4096 (LASZIP_GPSTIME_MULTI + 2)
-#define LASZIP_GPSTIME_MULTI_MINUS_11000 (LASZIP_GPSTIME_MULTI + 3)
-#define LASZIP_GPSTIME_MULTI_MINUS_5500 (LASZIP_GPSTIME_MULTI + 4)
-#define LASZIP_GPSTIME_MULTI_MINUS_550 (LASZIP_GPSTIME_MULTI + 5)
-#define LASZIP_GPSTIME_MULTI_MINUS_55 (LASZIP_GPSTIME_MULTI + 6)
-#define LASZIP_GPSTIME_MULTI_UNCHANGED (LASZIP_GPSTIME_MULTI + 17)
-#define LASZIP_GPSTIME_MULTI_DOUBLE (LASZIP_GPSTIME_MULTI + 18)
+#define LASZIP_GPSTIME_MULTI_MINUS -10
+#define LASZIP_GPSTIME_MULTI_UNCHANGED (LASZIP_GPSTIME_MULTI - LASZIP_GPSTIME_MULTI_MINUS + 1)
+#define LASZIP_GPSTIME_MULTI_CODE_FULL (LASZIP_GPSTIME_MULTI - LASZIP_GPSTIME_MULTI_MINUS + 2)
 
-#define LASZIP_GPSTIME_MULTI_TOTAL (LASZIP_GPSTIME_MULTI + 22) 
+#define LASZIP_GPSTIME_MULTI_TOTAL (LASZIP_GPSTIME_MULTI - LASZIP_GPSTIME_MULTI_MINUS + 6) 
 
 LASwriteItemCompressed_GPSTIME11_v2::LASwriteItemCompressed_GPSTIME11_v2(EntropyEncoder* enc)
 {
@@ -257,7 +251,7 @@ LASwriteItemCompressed_GPSTIME11_v2::LASwriteItemCompressed_GPSTIME11_v2(Entropy
   /* create entropy models and integer compressors */
   m_gpstime_multi = enc->createSymbolModel(LASZIP_GPSTIME_MULTI_TOTAL);
   m_gpstime_0diff = enc->createSymbolModel(6);
-  ic_gpstime = new IntegerCompressor(enc, 32, 7); // 32 bits, 7 contexts
+  ic_gpstime = new IntegerCompressor(enc, 32, 9); // 32 bits, 9 contexts
 }
 
 LASwriteItemCompressed_GPSTIME11_v2::~LASwriteItemCompressed_GPSTIME11_v2()
@@ -333,7 +327,8 @@ inline BOOL LASwriteItemCompressed_GPSTIME11_v2::write(const U8* item)
         }
         // no other sequence found. start new sequence.
         enc->encodeSymbol(m_gpstime_0diff, 2); 
-        enc->writeInt64(this_gpstime.u64);
+        ic_gpstime->compress((I32)(last_gpstime[last].u64 >> 32), (I32)(this_gpstime.u64 >> 32), 8);
+        enc->writeInt((U32)(this_gpstime.u64));
         next = (next+1)&3;
         last = next;
         last_gpstime_diff[last] = 0;
@@ -354,6 +349,7 @@ inline BOOL LASwriteItemCompressed_GPSTIME11_v2::write(const U8* item)
       // calculate the difference between the two doubles as an integer
       I64 curr_gpstime_diff_64 = this_gpstime.i64 - last_gpstime[last].i64;
       I32 curr_gpstime_diff = (I32)curr_gpstime_diff_64;
+
       // if the current gpstime difference can be represented with 32 bits
       if (curr_gpstime_diff_64 == (I64)(curr_gpstime_diff))
       {
@@ -364,14 +360,14 @@ inline BOOL LASwriteItemCompressed_GPSTIME11_v2::write(const U8* item)
         // compress the residual curr_gpstime_diff in dependance on the multiplier
         if (multi == 1)
         {
-          // this is the case we assume we get most often
+          // this is the case we assume we get most often for regular spaced pulses
           enc->encodeSymbol(m_gpstime_multi, 1);
           ic_gpstime->compress(last_gpstime_diff[last], curr_gpstime_diff, 1);
           multi_extreme_counter[last] = 0; 
         }
         else if (multi > 0)
         {
-          if (multi < LASZIP_GPSTIME_MULTI)
+          if (multi < LASZIP_GPSTIME_MULTI) // positive multipliers up to LASZIP_GPSTIME_MULTI are compressed directly
           {
             enc->encodeSymbol(m_gpstime_multi, multi);
             if (multi < 10)
@@ -381,22 +377,8 @@ inline BOOL LASwriteItemCompressed_GPSTIME11_v2::write(const U8* item)
           }
           else
           {
-            if (multi < 1536)
-            {
-              multi = 1024;
-              enc->encodeSymbol(m_gpstime_multi, LASZIP_GPSTIME_MULTI_1024);
-            }
-            else if (multi < 3072)
-            {
-              multi = 2048;
-              enc->encodeSymbol(m_gpstime_multi, LASZIP_GPSTIME_MULTI_2048);
-            }
-            else
-            {
-              multi = 4096;
-              enc->encodeSymbol(m_gpstime_multi, LASZIP_GPSTIME_MULTI_4096);
-            }
-            ic_gpstime->compress(multi*last_gpstime_diff[last], curr_gpstime_diff, 4);
+            enc->encodeSymbol(m_gpstime_multi, LASZIP_GPSTIME_MULTI);
+            ic_gpstime->compress(LASZIP_GPSTIME_MULTI*last_gpstime_diff[last], curr_gpstime_diff, 4);
             multi_extreme_counter[last]++;
             if (multi_extreme_counter[last] > 3)
             {
@@ -407,36 +389,27 @@ inline BOOL LASwriteItemCompressed_GPSTIME11_v2::write(const U8* item)
         }
         else if (multi < 0)
         {
-          if (multi < -10000)
+          if (multi > LASZIP_GPSTIME_MULTI_MINUS) // negative multipliers larger than LASZIP_GPSTIME_MULTI_MINUS are compressed directly
           {
-            multi = -11000;
-            enc->encodeSymbol(m_gpstime_multi, LASZIP_GPSTIME_MULTI_MINUS_11000);
+            enc->encodeSymbol(m_gpstime_multi, LASZIP_GPSTIME_MULTI - multi);
+            ic_gpstime->compress(multi*last_gpstime_diff[last], curr_gpstime_diff, 5);
           }
-          else if (multi < -1000)
+          else
           {
-            multi = -5500;
-            enc->encodeSymbol(m_gpstime_multi, LASZIP_GPSTIME_MULTI_MINUS_5500);
+            enc->encodeSymbol(m_gpstime_multi, LASZIP_GPSTIME_MULTI - LASZIP_GPSTIME_MULTI_MINUS);
+            ic_gpstime->compress(LASZIP_GPSTIME_MULTI_MINUS*last_gpstime_diff[last], curr_gpstime_diff, 6);
+            multi_extreme_counter[last]++;
+            if (multi_extreme_counter[last] > 3)
+            {
+              last_gpstime_diff[last] = curr_gpstime_diff;
+              multi_extreme_counter[last] = 0;
+            }
           }
-          else if (multi < -100)
-          {
-            multi = -550;
-            enc->encodeSymbol(m_gpstime_multi, LASZIP_GPSTIME_MULTI_MINUS_550);
-          }
-          else if (multi < -10)
-          {
-            multi = -55;
-            enc->encodeSymbol(m_gpstime_multi, LASZIP_GPSTIME_MULTI_MINUS_55);
-          }
-          else // multi ranges from -10 to -1
-          {
-            enc->encodeSymbol(m_gpstime_multi, LASZIP_GPSTIME_MULTI_MINUS_55 - multi);
-          }
-          ic_gpstime->compress(multi*last_gpstime_diff[last], curr_gpstime_diff, 5);
         }
         else
         {
           enc->encodeSymbol(m_gpstime_multi, 0);
-          ic_gpstime->compress(0, curr_gpstime_diff, 6);
+          ic_gpstime->compress(0, curr_gpstime_diff, 7);
           multi_extreme_counter[last]++;
           if (multi_extreme_counter[last] > 3)
           {
@@ -456,14 +429,15 @@ inline BOOL LASwriteItemCompressed_GPSTIME11_v2::write(const U8* item)
           if (other_gpstime_diff_64 == (I64)(other_gpstime_diff))
           {
             // it belongs to this sequence 
-            enc->encodeSymbol(m_gpstime_multi, i+LASZIP_GPSTIME_MULTI_DOUBLE);
+            enc->encodeSymbol(m_gpstime_multi, LASZIP_GPSTIME_MULTI_CODE_FULL+i);
             last = (last+i)&3;
             return write(item);
           }
         }
         // no other sequence found. start new sequence.
-        enc->encodeSymbol(m_gpstime_multi, LASZIP_GPSTIME_MULTI_DOUBLE);
-        enc->writeInt64(this_gpstime.u64);
+        enc->encodeSymbol(m_gpstime_multi, LASZIP_GPSTIME_MULTI_CODE_FULL);
+        ic_gpstime->compress((I32)(last_gpstime[last].u64 >> 32), (I32)(this_gpstime.u64 >> 32), 8);
+        enc->writeInt((U32)(this_gpstime.u64));
         next = (next+1)&3;
         last = next;
         last_gpstime_diff[last] = 0;

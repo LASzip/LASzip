@@ -88,6 +88,9 @@ typedef union U64I64F64 { U64 u64; I64 i64; F64 f64; } U64I64F64;
 #define I32_MIN            ((I32)0x80000000) // -2147483648
 #define I32_MAX            ((I32)0x7FFFFFFF) //  2147483647
 
+#define I64_MIN            ((I64)0x8000000000000000)
+#define I64_MAX            ((I64)0x7FFFFFFFFFFFFFFF)
+
 #define U8_FOLD(n)      (((n) < U8_MIN) ? (n+U8_MAX_PLUS_ONE) : (((n) > U8_MAX) ? (n-U8_MAX_PLUS_ONE) : (n)))
 
 #define I8_CLAMP(n)     (((n) <= I8_MIN) ? I8_MIN : (((n) >= I8_MAX) ? I8_MAX : ((I8)(n))))
@@ -115,6 +118,11 @@ typedef union U64I64F64 { U64 u64; I64 i64; F64 f64; } U64I64F64;
 #define I16_CEIL(n) ((((I16)(n)) < (n)) ? (((I16)(n))+1) : ((I16)(n)))
 #define I32_CEIL(n) ((((I32)(n)) < (n)) ? (((I32)(n))+1) : ((I32)(n)))
 #define I64_CEIL(n) ((((I64)(n)) < (n)) ? (((I64)(n))+1) : ((I64)(n)))
+
+#define I8_FITS_IN_RANGE(n) (((n) >= I8_MIN) || ((n) <= I8_MAX) ? TRUE : FALSE)
+#define U8_FITS_IN_RANGE(n) (((n) >= U8_MIN) || ((n) <= U8_MAX) ? TRUE : FALSE)
+#define I16_FITS_IN_RANGE(n) (((n) >= I16_MIN) || ((n) <= I16_MAX) ? TRUE : FALSE)
+#define U16_FITS_IN_RANGE(n) (((n) >= U16_MIN) || ((n) <= U16_MAX) ? TRUE : FALSE)
 
 #define U32_ZERO_BIT_0(n) (((n)&(U32)0xFFFFFFFE))
 

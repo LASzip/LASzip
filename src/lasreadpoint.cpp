@@ -69,12 +69,6 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, const LASzip* lasz
     if (items != laszip->items) return FALSE;
   }
 
-  // check if we support the items
-  for (i = 0; i < num_items; i++)
-  {
-    if (!items[i].supported()) return FALSE;
-  }
-
   // create entropy decoder (if requested)
   dec = 0;
   if (laszip && laszip->compressor)
@@ -342,7 +336,7 @@ BOOL LASreadPoint::done()
 {
   if (readers == readers_compressed)
   {
-    dec->done();
+    if (dec) dec->done();
   }
   return TRUE;
 }

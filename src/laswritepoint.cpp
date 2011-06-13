@@ -69,12 +69,6 @@ BOOL LASwritePoint::setup(const U32 num_items, const LASitem* items, const LASzi
     if (items != laszip->items) return FALSE;
   }
 
-  // check if we support the items
-  for (i = 0; i < num_items; i++)
-  {
-    if (!items[i].supported()) return FALSE;
-  }
-
   // create entropy encoder (if requested)
   enc = 0;
   if (laszip && laszip->compressor)
