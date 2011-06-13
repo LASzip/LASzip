@@ -99,6 +99,9 @@ public:
   bool set_chunk_size(const unsigned int chunk_size);             /* for compressor only */
   bool request_version(const unsigned short requested_version);   /* for compressor only */
 
+  // in case a function returns false this string describes the problem
+  const char* get_error() const;
+
   // stored in LASzip VLR data section
   unsigned short compressor;
   unsigned short coder;
@@ -115,6 +118,7 @@ public:
   LASzip();
   ~LASzip();
 
+private:
   bool return_error(const char* err);
   char* error_string;
 };

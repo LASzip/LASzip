@@ -62,12 +62,15 @@ public:
   LASunzipper();
   ~LASunzipper();
 
-  char* error_string;
+  // in case a function returns false this string describes the problem
+  const char* get_error() const;
 
 private:
   unsigned int count;
   ByteStreamIn* stream;
   LASreadPoint* reader;
+  bool return_error(const char* err);
+  char* error_string;
 };
 
 #endif
