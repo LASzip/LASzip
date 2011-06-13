@@ -50,44 +50,43 @@ typedef long long SIGNED_INT64;
 #define LASZIP_COMPRESSOR_NONE              0
 #define LASZIP_COMPRESSOR_POINTWISE         1
 #define LASZIP_COMPRESSOR_POINTWISE_CHUNKED 2
+#define LASZIP_COMPRESSOR_TOTAL_NUMBER_OF   3
 
 #define LASZIP_COMPRESSOR_DEFAULT LASZIP_COMPRESSOR_POINTWISE
 #define LASZIP_COMPRESSOR_CHUNKED LASZIP_COMPRESSOR_POINTWISE_CHUNKED
 
 #define LASZIP_CODER_ARITHMETIC             0
+#define LASZIP_CODER_TOTAL_NUMBER_OF        1
 
-#define LASZIP_CHUNK_SIZE_DEFAULT 50000
+#define LASZIP_CHUNK_SIZE_DEFAULT           50000
 
 #include "laszipexport.hpp"
 
-class LASZIP_DLL LASitem
+class LASitem
 {
 public:
   enum Type { BYTE = 0, SHORT, INT, LONG, FLOAT, DOUBLE, POINT10, GPSTIME11, RGB12, WAVEPACKET13 } type;
   unsigned short size;
   unsigned short version;
-
-  // number parameter only used when setting to BYTE
   bool is_type(LASitem::Type t) const;
-  bool supported() const;
-
   const char* get_name() const;
-
-  // back and forth between item array and point type and size
-  bool setup(unsigned short* num_items, LASitem** items, const unsigned char point_type, const unsigned short point_size, const unsigned short compressor=LASZIP_COMPRESSOR_NONE) const;
-  bool is_standard(const unsigned short num_items, const LASitem* items, unsigned char* point_type=0, unsigned short* record_length=0) const;
-
-  // version control
-  bool request_version(unsigned short num_items, LASitem* items, const unsigned short compressor, const unsigned short requested_version) const;
-  bool request_version(const unsigned short compressor, const unsigned short requested_version);
 };
 
 class LASZIP_DLL LASzip
 {
 public:
 
-  LASzip();
-  ~LASzip();
+  // supported version control
+  bool check_compressor(const unsigned short compressor);
+  bool check_coder(const unsigned short coder);
+  bool check_item(const LASitem* item);
+  bool check_items(const unsigned short num_items, const LASitem* items);
+  bool check();
+
+  // go back and forth between item array and point type & size
+  bool setup(unsigned short* num_items, LASitem** items, const unsigned char point_type, const unsigned short point_size, const unsigned short compressor=LASZIP_COMPRESSOR_NONE);
+  bool is_standard(const unsigned short num_items, const LASitem* items, unsigned char* point_type=0, unsigned short* record_length=0) const;
+  bool is_standard(unsigned char* point_type=0, unsigned short* record_length=0) const;
 
   // pack to and unpack from VLR
   unsigned char* bytes;
@@ -97,11 +96,8 @@ public:
   // setup
   bool setup(const unsigned char point_type, const unsigned short point_size, const unsigned short compressor=LASZIP_COMPRESSOR_DEFAULT);
   bool setup(const unsigned short num_items, const LASitem* items, const unsigned short compressor=LASZIP_COMPRESSOR_DEFAULT);
-  bool set_chunk_size(const unsigned int chunk_size);
-  bool request_version(const unsigned short requested_version);
-
-  // query point type and size
-  bool is_standard(unsigned char* point_type=0, unsigned short* record_length=0) const;
+  bool set_chunk_size(const unsigned int chunk_size);             /* for compressor only */
+  bool request_version(const unsigned short requested_version);   /* for compressor only */
 
   // stored in LASzip VLR data section
   unsigned short compressor;
@@ -115,6 +111,12 @@ public:
   SIGNED_INT64 num_bytes;   /* not mandatory ... -1 if unknown */
   unsigned short num_items;
   LASitem* items;
+
+  LASzip();
+  ~LASzip();
+
+  bool return_error(const char* err);
+  char* error_string;
 };
 
 #endif
