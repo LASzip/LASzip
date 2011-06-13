@@ -30,46 +30,48 @@
 */
 #include "lasunzipper.hpp"
 
+#include <string.h>
+#include <stdlib.h>
+
 #include "bytestreamin_file.hpp"
 #include "bytestreamin_istream.hpp"
 #include "lasreadpoint.hpp"
 
-
-unsigned int LASunzipper::open(FILE* infile, const LASzip* laszip)
+bool LASunzipper::open(FILE* infile, const LASzip* laszip)
 {
-  if (!infile) return 1;
-  if (!laszip) return 1;
+  if (!infile) { error_string = strdup("FILE* infile pointer is NULL"); return false; };
+  if (!laszip) { error_string = strdup("const LASzip* laszip pointer is NULL"); return false; };
   count = 0;
   if (reader) delete reader;
   reader = new LASreadPoint();
-  if (!reader) return 1;
-  if (!reader->setup(laszip->num_items, laszip->items, laszip)) return 1;
+  if (!reader) { error_string = strdup("alloc of LASreadPoint failed"); return false; };
+  if (!reader->setup(laszip->num_items, laszip->items, laszip)) { error_string = strdup("setup() of LASreadPoint failed"); return false; };
   if (stream) delete stream;
   if (IS_LITTLE_ENDIAN())
     stream = new ByteStreamInFileLE(infile);
   else
     stream = new ByteStreamInFileBE(infile);
-  if (!stream) return 1;
-  if (!reader->init(stream)) return 1;
-  return 0;
+  if (!stream) { error_string = strdup("alloc of ByteStreamInFile failed"); return false; };
+  if (!reader->init(stream)) { error_string = strdup("init() of LASreadPoint failed"); return false; };
+  return true;
 }
 
-unsigned int LASunzipper::open(istream& instream, const LASzip* laszip)
+bool LASunzipper::open(istream& instream, const LASzip* laszip)
 {
-  if (!laszip) return 1;
+  if (!laszip) { error_string = strdup("const LASzip* laszip pointer is NULL"); return false; };
   count = 0;
   if (reader) delete reader;
   reader = new LASreadPoint();
-  if (!reader) return 1;
-  if (!reader->setup(laszip->num_items, laszip->items, laszip)) return 1;
+  if (!reader) { error_string = strdup("alloc of LASreadPoint failed"); return false; };
+  if (!reader->setup(laszip->num_items, laszip->items, laszip)) { error_string = strdup("setup() of LASreadPoint failed"); return false; };
   if (stream) delete stream;
   if (IS_LITTLE_ENDIAN())
     stream = new ByteStreamInIstreamLE(instream);
   else
     stream = new ByteStreamInIstreamBE(instream);
-  if (!stream) return 1;
-  if (!reader->init(stream)) return 1;
-  return 0;
+  if (!stream) { error_string = strdup("alloc of ByteStreamInStream failed"); return false; };
+  if (!reader->init(stream)) { error_string = strdup("init() of LASreadPoint failed"); return false; };
+  return true;
 }
 
 bool LASunzipper::seek(const unsigned int position)
@@ -93,26 +95,27 @@ bool LASunzipper::read(unsigned char * const * point)
   return (reader->read(point) == TRUE);
 }
 
-unsigned int LASunzipper::close()
+bool LASunzipper::close()
 {
-  unsigned int byteCount = 0;
+  BOOL done = TRUE;
   if (reader)
   {
-    reader->done();
+    done = reader->done();
     delete reader;
     reader = 0;
   }
   if (stream)
   {
-    byteCount = stream->byteCount();
     delete stream;
     stream = 0;
   }
-  return byteCount;
+  if (!done) { error_string = strdup("done() of LASreadPoint failed"); return false; }
+  return true;
 }
 
 LASunzipper::LASunzipper()
 {
+  error_string = 0;
   count = 0;
   stream = 0;
   reader = 0;
@@ -120,5 +123,6 @@ LASunzipper::LASunzipper()
 
 LASunzipper::~LASunzipper()
 {
+  if (error_string) free(error_string);
   if (reader || stream) close();
 }

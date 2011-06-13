@@ -30,45 +30,48 @@
 */
 #include "laszipper.hpp"
 
+#include <string.h>
+#include <stdlib.h>
+
 #include "bytestreamout_file.hpp"
 #include "bytestreamout_ostream.hpp"
 #include "laswritepoint.hpp"
 
-unsigned int LASzipper::open(FILE* outfile, const LASzip* laszip)
+bool LASzipper::open(FILE* outfile, const LASzip* laszip)
 {
-  if (!outfile) return 1;
-  if (!laszip) return 1;
+  if (!outfile) { error_string = strdup("FILE* outfile pointer is NULL"); return false; };
+  if (!laszip) { error_string = strdup("const LASzip* laszip pointer is NULL"); return false; };
   count = 0;
   if (writer) delete writer;
   writer = new LASwritePoint();
-  if (!writer) return 1;
-  if (!writer->setup(laszip->num_items, laszip->items, laszip)) return 1;
+  if (!writer) { error_string = strdup("alloc of LASwritePoint failed"); return false; };
+  if (!writer->setup(laszip->num_items, laszip->items, laszip)) { error_string = strdup("setup() of LASwritePoint failed"); return false; };
   if (stream) delete stream;
   if (IS_LITTLE_ENDIAN())
     stream = new ByteStreamOutFileLE(outfile);
   else
     stream = new ByteStreamOutFileBE(outfile);
-  if (!stream) return 1;
-  if (!writer->init(stream)) return 1;
-  return 0;
+  if (!stream) { error_string = strdup("alloc of ByteStreamOutFile failed"); return false; };
+  if (!writer->init(stream)) { error_string = strdup("init() of LASwritePoint failed"); return false; };
+  return true;
 }
 
-unsigned int LASzipper::open(ostream& outstream, const LASzip* laszip)
+bool LASzipper::open(ostream& outstream, const LASzip* laszip)
 {
-  if (!laszip) return 1;
+  if (!laszip) { error_string = strdup("const LASzip* laszip pointer is NULL"); return false; };
   count = 0;
   if (writer) delete writer;
   writer = new LASwritePoint();
-  if (!writer) return 1;
-  if (!writer->setup(laszip->num_items, laszip->items, laszip)) return 1;
+  if (!writer) { error_string = strdup("alloc of LASwritePoint failed"); return false; };
+  if (!writer->setup(laszip->num_items, laszip->items, laszip)) { error_string = strdup("setup() of LASwritePoint failed"); return false; };
   if (stream) delete stream;
   if (IS_LITTLE_ENDIAN())
     stream = new ByteStreamOutOstreamLE(outstream);
   else
     stream = new ByteStreamOutOstreamBE(outstream);
-  if (!stream) return 1;
-  if (!writer->init(stream)) return 1;
-  return 0;
+  if (!stream) { error_string = strdup("alloc of ByteStreamOutStream failed"); return false; };
+  if (!writer->init(stream)) { error_string = strdup("init() of LASwritePoint failed"); return false; };
+  return true;
 }
 
 bool LASzipper::write(const unsigned char * const * point)
@@ -82,26 +85,27 @@ bool LASzipper::chunk()
   return (writer->chunk() == TRUE);
 }
 
-unsigned int LASzipper::close()
+bool LASzipper::close()
 {
-  unsigned int byteCount = 0;
+  BOOL done = TRUE;
   if (writer)
   {
-    writer->done();
+    BOOL done = writer->done();
     delete writer;
     writer = 0;
   }
   if (stream)
   {
-    byteCount = stream->byteCount();
     delete stream;
     stream = 0;
   }
-  return byteCount;
+  if (!done) { error_string = strdup("done() of LASwritePoint failed"); return false; }
+  return true;
 }
 
 LASzipper::LASzipper()
 {
+  error_string = 0;
   count = 0;
   stream = 0;
   writer = 0;
@@ -109,5 +113,6 @@ LASzipper::LASzipper()
 
 LASzipper::~LASzipper()
 {
+  if (error_string) free(error_string);
   if (writer || stream) close();
 }

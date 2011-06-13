@@ -32,6 +32,10 @@
 #include "mydefs.hpp"
 #include <assert.h>
 
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
 LASzip::LASzip()
 {
   compressor = LASZIP_COMPRESSOR_DEFAULT;
@@ -44,42 +48,48 @@ LASzip::LASzip()
   chunk_size = 0;
   num_points = -1;
   num_bytes = -1;
+  error_string = 0;
   items = 0;
   bytes = 0;
 }
 
 LASzip::~LASzip()
 {
+  if (error_string) free(error_string);
   if (items) delete [] items;
   if (bytes) delete [] bytes;
 }
 
+// the data of the LASzip VLR
+//     U16  compressor         2 bytes 
+//     U16  coder              2 bytes 
+//     U8   version_major      1 byte 
+//     U8   version_minor      1 byte
+//     U16  version_revision   2 bytes
+//     U32  options            4 bytes 
+//     U32  chunk_size         4 bytes
+//     I64  num_points         8 bytes
+//     I64  num_bytes          8 bytes
+//     U16  num_items          2 bytes
+//        U16 type                2 bytes * num_items
+//        U16 size                2 bytes * num_items
+//        U16 version             2 bytes * num_items
+// which totals 34+6*num_items
+
 // unpack from VLR data
 bool LASzip::unpack(const U8* bytes, const I32 num)
 {
-  if (num < 34) return false; // too few bytes
-  if (((num - 34) % 6) != 0) return false; // wrong number bytes
-  if (((num - 34) / 6) == 0) return false; // too few items
+  // check input
+  if (num < 34) return return_error("too few bytes to unpack");
+  if (((num - 34) % 6) != 0) return return_error("wrong number bytes to unpack"); 
+  if (((num - 34) / 6) == 0) return return_error("zero items to unpack");
   num_items = (num - 34) / 6;
+
+  // create item list
   if (items) delete [] items;
   items = new LASitem[num_items];
 
-  // the data of the LASzip VLR
-  //     U16  compressor         2 bytes 
-  //     U16  coder              2 bytes 
-  //     U8   version_major      1 byte 
-  //     U8   version_minor      1 byte
-  //     U16  version_revision   2 bytes
-  //     U32  options            4 bytes 
-  //     U32  chunk_size         4 bytes
-  //     I64  num_points         8 bytes
-  //     I64  num_bytes          8 bytes
-  //     U16  num_items          2 bytes
-  //        U16 type                2 bytes * num_items
-  //        U16 size                2 bytes * num_items
-  //        U16 version             2 bytes * num_items
-  // which totals 34+6*num_items
-
+  // do the unpacking
   U16 i;
   const U8* b = bytes;
   compressor = *((U16*)b);
@@ -112,9 +122,12 @@ bool LASzip::unpack(const U8* bytes, const I32 num)
     b += 2;
   }
   assert((bytes + num) == b);
+
+  // check if we support the contents
+
   for (i = 0; i < num_items; i++)
   {
-    if (!items[i].supported()) return false;
+    if (!check_item(&items[i])) return false;
   }
   return true;
 }
@@ -122,26 +135,15 @@ bool LASzip::unpack(const U8* bytes, const I32 num)
 // pack to VLR data
 bool LASzip::pack(U8*& bytes, I32& num)
 {
+  // check if we support the contents
+  if (!check()) return false;
+
+  // prepare output
   num = 34 + 6*num_items;
   if (this->bytes) delete [] this->bytes;
   this->bytes = bytes = new U8[num];
 
-  // the data of the LASzip VLR
-  //     U16  compressor         2 bytes 
-  //     U16  coder              2 bytes 
-  //     U8   version_major      1 byte 
-  //     U8   version_minor      1 byte
-  //     U16  version_revision   2 bytes
-  //     U32  options            4 bytes 
-  //     U32  chunk_size         4 bytes
-  //     I64  num_points         8 bytes
-  //     I64  num_bytes          8 bytes
-  //     U16  num_items          2 bytes
-  //        U16 type                2 bytes * num_items
-  //        U16 size                2 bytes * num_items
-  //        U16 version             2 bytes * num_items
-  // which totals 34+6*num_items
-
+  // pack
   U16 i;
   U8* b = bytes;
   *((U16*)b) = compressor;
@@ -174,20 +176,96 @@ bool LASzip::pack(U8*& bytes, I32& num)
     b += 2;
   }
   assert((bytes + num) == b);
+  return true;
+}
+
+bool LASzip::return_error(const char* error)
+{
+  char err[256];
+  sprintf(err, "%s (LASzip v%d.%dr%d)", error, LASZIP_VERSION_MAJOR, LASZIP_VERSION_MINOR, LASZIP_VERSION_REVISION);
+  if (error_string) free(error_string);
+  error_string = strdup(err);
+  return false;
+}
+
+bool LASzip::check_compressor(const U16 compressor)
+{
+  if (compressor < LASZIP_COMPRESSOR_TOTAL_NUMBER_OF) return true;
+  char error[64];
+  sprintf(error, "compressor %d not supported", compressor);
+  return return_error(error);
+}
+
+bool LASzip::check_coder(const U16 coder)
+{
+  if (coder < LASZIP_CODER_TOTAL_NUMBER_OF) return true;
+  char error[64];
+  sprintf(error, "coder %d not supported", coder);
+  return return_error(error);
+}
+
+bool LASzip::check_item(const LASitem* item)
+{
+  switch (item->type)
+  {
+  case LASitem::POINT10:
+    if (item->size != 20) return return_error("POINT10 has size != 20");
+    if (item->version > 2) return return_error("POINT10 has version > 2");
+    break;
+  case LASitem::GPSTIME11:
+    if (item->size != 8) return return_error("GPSTIME11 has size != 8");
+    if (item->version > 2) return return_error("GPSTIME11 has version > 2");
+    break;
+  case LASitem::RGB12:
+    if (item->size != 6) return return_error("RGB12 has size != 6");
+    if (item->version > 2) return return_error("RGB12 has version > 2");
+    break;
+  case LASitem::WAVEPACKET13:
+    if (item->size != 29) return return_error("WAVEPACKET13 has size != 29");
+    if (item->version > 1) return return_error("WAVEPACKET13 has version > 1");
+    break;
+  case LASitem::BYTE:
+    if (item->size < 1) return return_error("BYTE has size < 1");
+    if (item->version > 2) return return_error("BYTE has version > 2");
+    break;
+  default:
+    if (1)
+    {
+      char error[64];
+      sprintf(error, "item unknown (%d,%d,%d)", item->type, item->size, item->version);
+      return return_error(error);
+    }
+  }
+  return true;
+}
+
+bool LASzip::check_items(const U16 num_items, const LASitem* items)
+{
+  if (num_items == 0) return return_error("number of items cannot be zero");
+  if (items == 0) return return_error("items pointer cannot be NULL");
+  U16 i;
   for (i = 0; i < num_items; i++)
   {
-    if (!items[i].supported()) return false;
+    if (!check_item(&items[i])) return false;
   }
+  return true;
+}
+
+bool LASzip::check()
+{
+  if (!check_compressor(compressor)) return false;
+  if (!check_coder(coder)) return false;
+  if (!check_items(num_items, items)) return false;
   return true;
 }
 
 bool LASzip::setup(const U8 point_type, const U16 point_size, const U16 compressor)
 {
-  if (compressor > LASZIP_COMPRESSOR_POINTWISE_CHUNKED) return false;
+  if (!check_compressor(compressor)) return false;
   this->num_items = 0;
   if (this->items) delete [] this->items;
   this->items = 0;
-  if (!LASitem().setup(&num_items, &items, point_type, point_size, compressor)) return false;
+  if (!setup(&num_items, &items, point_type, point_size, compressor)) return false;
   this->compressor = compressor;
   if (this->compressor == LASZIP_COMPRESSOR_POINTWISE_CHUNKED)
   {
@@ -198,54 +276,35 @@ bool LASzip::setup(const U8 point_type, const U16 point_size, const U16 compress
 
 bool LASzip::setup(const U16 num_items, const LASitem* items, const U16 compressor)
 {
-  U16 i;
-  if (num_items == 0) return false;
-  if (items == 0) return false;
-  if (compressor > LASZIP_COMPRESSOR_POINTWISE_CHUNKED) return false;
-  this->num_items = 0;
-  if (this->items) delete [] this->items;
-  this->items = 0;
-  for (i = 0; i < num_items; i++)
-  {
-    if (!items[i].supported()) return false;
-  }
-  this->num_items = num_items;
-  this->items = new LASitem[num_items];
-  for (i = 0; i < num_items; i++)
-  {
-    this->items[i] = items[i];
-  }
+  // check input
+  if (!check_compressor(compressor)) return false;
+  if (!check_items(num_items, items)) return false;
+
+  // setup compressor
   this->compressor = compressor;
   if (this->compressor == LASZIP_COMPRESSOR_POINTWISE_CHUNKED)
   {
     if (chunk_size == 0) chunk_size = LASZIP_CHUNK_SIZE_DEFAULT;
   }
+
+  // prepare items
+  this->num_items = 0;
+  if (this->items) delete [] this->items;
+  this->items = 0;
+  this->num_items = num_items;
+  this->items = new LASitem[num_items];
+
+  // setup items
+  U16 i;
+  for (i = 0; i < num_items; i++)
+  {
+    this->items[i] = items[i];
+  }
+
   return true;
 }
 
-bool LASzip::set_chunk_size(const U32 chunk_size)
-{
-  if (num_items == 0) return false;
-  if (this->compressor == LASZIP_COMPRESSOR_POINTWISE_CHUNKED)
-  {
-    this->chunk_size = chunk_size;
-    return true;
-  }
-  return false;
-}
-
-bool LASzip::request_version(const U16 requested_version)
-{
-  if (num_items == 0) return false;
-  return LASitem().request_version(num_items, items, compressor, requested_version);
-}
-
-bool LASzip::is_standard(U8* point_type, U16* record_length) const
-{
-  return LASitem().is_standard(num_items, items, point_type, record_length);
-}
-
-bool LASitem::setup(U16* num_items, LASitem** items, const U8 point_type, const U16 point_size, const U16 compressor) const
+bool LASzip::setup(U16* num_items, LASitem** items, const U8 point_type, const U16 point_size, const U16 compressor)
 {
   BOOL have_gps_time = FALSE;
   BOOL have_rgb = FALSE;
@@ -283,10 +342,20 @@ bool LASitem::setup(U16* num_items, LASitem** items, const U8 point_type, const 
     extra_bytes_number = (I32)point_size - 63;
     break;
   default:
-    return false;
+    if (1)
+    {
+      char error[64];
+      sprintf(error, "point type %d unknown", point_type);
+      return return_error(error);
+    }
   }
 
-  if (extra_bytes_number < 0) return false;
+  if (extra_bytes_number < 0)
+  {
+    char error[64];
+    sprintf(error, "point size %d too small for point type %d by %d bytes", point_size, point_type, -extra_bytes_number);
+    return return_error(error);
+  }
 
   // choose version
   U16 version = 0;
@@ -333,7 +402,56 @@ bool LASitem::setup(U16* num_items, LASitem** items, const U8 point_type, const 
   return true;
 }
 
-bool LASitem::is_standard(const U16 num_items, const LASitem* items, U8* point_type, U16* record_length) const
+bool LASzip::set_chunk_size(const U32 chunk_size)
+{
+  if (num_items == 0) return return_error("call setup() before setting chunk size");
+  if (this->compressor == LASZIP_COMPRESSOR_POINTWISE_CHUNKED)
+  {
+    this->chunk_size = chunk_size;
+    return true;
+  }
+  return false;
+}
+
+bool LASzip::request_version(const U16 requested_version)
+{
+  if (num_items == 0) return return_error("call setup() before requesting version");
+  if (compressor == LASZIP_COMPRESSOR_NONE)
+  {
+    if (requested_version > 0) return return_error("without compression version is always 0");
+  }
+  else
+  {
+    if (requested_version < 1) return return_error("with compression version is at least 1");
+    if (requested_version > 2) return return_error("version larger than 2 not supported");
+  }
+  U16 i;
+  for (i = 0; i < num_items; i++)
+  {
+    switch (items[i].type)
+    {
+    case LASitem::POINT10:
+    case LASitem::GPSTIME11:
+    case LASitem::RGB12:
+    case LASitem::BYTE:
+        items[i].version = requested_version;
+        break;
+    case LASitem::WAVEPACKET13:
+        items[i].version = 1; // no version 2
+        break;
+    default:
+        return false;
+    }
+  }
+  return true;
+}
+
+bool LASzip::is_standard(U8* point_type, U16* record_length) const
+{
+  return is_standard(num_items, items, point_type, record_length);
+}
+
+bool LASzip::is_standard(const U16 num_items, const LASitem* items, U8* point_type, U16* record_length) const
 {
   if (items == 0) return false;
 
@@ -510,36 +628,6 @@ bool LASitem::is_type(LASitem::Type t) const
   return true;
 }
 
-bool LASitem::supported() const
-{
-  switch (type)
-  {
-  case POINT10:
-      if (size != 20) return false;
-      if (version > 2) return false;
-      break;
-  case GPSTIME11:
-      if (size != 8) return false;
-      if (version > 2) return false;
-      break;
-  case RGB12:
-      if (size != 6) return false;
-      if (version > 2) return false;
-      break;
-  case WAVEPACKET13:
-      if (size != 29) return false;
-      if (version > 1) return false;
-      break;
-  case BYTE:
-      if (size < 1) return false;
-      if (version > 2) return false;
-      break;
-  default:
-      return false;
-  }
-  return true;
-}
-
 const char* LASitem::get_name() const
 {
   switch (type)
@@ -565,46 +653,3 @@ const char* LASitem::get_name() const
   return 0;
 }
 
-bool LASitem::request_version(U16 num_items, LASitem* items, const U16 compressor, const U16 requested_version) const
-{
-  U16 i;
-  for (i = 0; i < num_items; i++)
-  {
-    if (!items[i].request_version(compressor, requested_version)) return false;
-  }
-  return true;
-}
-
-bool LASitem::request_version(const U16 compressor, const U16 requested_version)
-{
-  if (compressor == LASZIP_COMPRESSOR_NONE)
-  {
-    if (requested_version > 0) return false;
-  }
-  else
-  {
-    if (requested_version < 1) return false;
-    if (requested_version > 2) return false;
-  }
-  switch (type)
-  {
-  case POINT10:
-      version = requested_version;
-      break;
-  case GPSTIME11:
-      version = requested_version;
-      break;
-  case RGB12:
-      version = requested_version;
-      break;
-  case WAVEPACKET13:
-      version = 1; // no version 2
-      break;
-  case BYTE:
-      version = requested_version;
-      break;
-  default:
-      return false;
-  }
-  return true;
-}
