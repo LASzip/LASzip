@@ -275,7 +275,7 @@ static LASzipper* make_zipper(OStream* ost, const LASzip* laszip)
     success = zipper->open(ost->ofile, laszip);
   if (!success)
   {
-    log("ERROR: could not open laszipper with %s\n", ost->m_filename);
+    log("ERROR: could not open laszipper with %s because %s\n", ost->m_filename, zipper->get_error());
     exit(1);
   }
   return zipper;
@@ -298,7 +298,7 @@ static LASunzipper* make_unzipper(IStream* ist, const LASzip* laszip)
     success = unzipper->open(ist->ifile, laszip);
   if (!success)
   {
-    log("ERROR: could not open laszipper with %s\n", ist->m_filename);
+    log("ERROR: could not open laszipper with %s because %s\n", ist->m_filename, unzipper->get_error());
     exit(1);
   }
   return unzipper;
@@ -349,7 +349,7 @@ static void write_points(LASzipper* zipper, PointData& data)
 
   if (!zipper->close())
   {
-    log("ERROR on zipper->close(): %s\n", zipper->error_string);
+    log("ERROR on zipper->close(): %s\n", zipper->get_error());
   }
   end_time = taketime();
 
@@ -416,7 +416,7 @@ static void read_points(LASunzipper* unzipper, PointData& data)
 
   if (!unzipper->close())
   {
-    log("ERROR on unzipper->close(): %s\n", unzipper->error_string);
+    log("ERROR on unzipper->close(): %s\n", unzipper->get_error());
   }
   end_time = taketime();
 
@@ -478,7 +478,7 @@ static void write_points_seek(LASzipper* zipper, PointData& data)
 
   if (!zipper->close())
   {
-    log("ERROR on zipper->close(): %s\n", zipper->error_string);
+    log("ERROR on zipper->close(): %s\n", zipper->get_error());
   }
   end_time = taketime();
 
@@ -563,7 +563,7 @@ static void read_points_seek(LASunzipper* unzipper, PointData& data)
 
   if (!unzipper->close())
   {
-    log("ERROR on unzipper->close(): %s\n", unzipper->error_string);
+    log("ERROR on unzipper->close(): %s\n", unzipper->get_error());
   }
   end_time = taketime();
 
@@ -638,7 +638,7 @@ static void write_points_explicit_chunk(LASzipper* zipper, PointData& data)
 
   if (!zipper->close())
   {
-    log("ERROR on zipper->close(): %s\n", zipper->error_string);
+    log("ERROR on zipper->close(): %s\n", zipper->get_error());
   }
   end_time = taketime();
 
@@ -705,7 +705,7 @@ static void write_points_explicit_chunk_seek(LASzipper* zipper, PointData& data)
 
   if (!zipper->close())
   {
-    log("ERROR on zipper->close(): %s\n", zipper->error_string);
+    log("ERROR on zipper->close(): %s\n", zipper->get_error());
   }
   end_time = taketime();
 
@@ -726,7 +726,7 @@ static void run_test(const char* filename, PointData& data, unsigned short compr
   LASzip laszip;
   if (!laszip.setup(data.point_type, data.point_size, compressor))
   {
-    log("ERROR on laszip.setup(): %s\n", laszip.error_string);
+    log("ERROR on laszip.setup(): %s\n", laszip.get_error());
   }
   if (requested_version > 0) laszip.request_version(requested_version);
   if (chunk_size > -1) laszip.set_chunk_size((unsigned int)chunk_size);
@@ -736,7 +736,7 @@ static void run_test(const char* filename, PointData& data, unsigned short compr
   int num;
   if (!laszip.pack(bytes, num))
   {
-    log("ERROR on laszip.pack(): %s\n", laszip.error_string);
+    log("ERROR on laszip.pack(): %s\n", laszip.get_error());
   }
 
   // creating the output stream
@@ -776,7 +776,7 @@ static void run_test(const char* filename, PointData& data, unsigned short compr
   LASzip laszip_dec;
   if (!laszip_dec.unpack(bytes, num))
   {
-    log("ERROR on laszip_dec.unpack(): %s\n", laszip_dec.error_string);
+    log("ERROR on laszip_dec.unpack(): %s\n", laszip_dec.get_error());
   }
 
   // creating the input stream
