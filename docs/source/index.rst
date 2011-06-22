@@ -82,7 +82,7 @@ Download LAZ data
 * ftp://lidar.dnr.state.mn.us/data/raw/county/houston/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/jackson/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/lesueur/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/martin/las/
+* ftp://lidar.dnr.state.mn.us/data/raw/county/martin/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/mower/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/murray/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/nobles/laz/
