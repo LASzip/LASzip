@@ -127,6 +127,10 @@ BOOL LASreadItemCompressed_POINT10_v2::init(const U8* item)
   /* init last item */
   memcpy(last_item, item, 20);
 
+  /* but set intensity to zero */ 
+  last_item[12] = 0;
+  last_item[13] = 0;
+
   return TRUE;
 }
 
