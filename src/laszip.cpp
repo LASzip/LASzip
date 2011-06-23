@@ -45,7 +45,7 @@ LASzip::LASzip()
   version_revision = LASZIP_VERSION_REVISION;
   options = 0;
   num_items = 0;
-  chunk_size = 0;
+  chunk_size = LASZIP_CHUNK_SIZE_DEFAULT;
   num_points = -1;
   num_bytes = -1;
   error_string = 0;
@@ -362,10 +362,6 @@ bool LASzip::setup(U16* num_items, LASitem** items, const U8 point_type, const U
     return return_error(error);
   }
 
-  // choose version
-  U16 version = 0;
-  if (compressor) version = 1;
-
   // create item description
 
   (*num_items) = 1 + !!(have_gps_time) + !!(have_rgb) + !!(have_wavepacket) + !!(extra_bytes_number);
@@ -374,35 +370,36 @@ bool LASzip::setup(U16* num_items, LASitem** items, const U8 point_type, const U
   U16 i = 1;
   (*items)[0].type = LASitem::POINT10;
   (*items)[0].size = 20;
-  (*items)[0].version = version;
+  (*items)[0].version = 0;
   if (have_gps_time)
   {
     (*items)[i].type = LASitem::GPSTIME11;
     (*items)[i].size = 8;
-    (*items)[i].version = version;
+    (*items)[i].version = 0;
     i++;
   }
   if (have_rgb)
   {
     (*items)[i].type = LASitem::RGB12;
     (*items)[i].size = 6;
-    (*items)[i].version = version;
+    (*items)[i].version = 0;
     i++;
   }
   if (have_wavepacket)
   {
     (*items)[i].type = LASitem::WAVEPACKET13;
     (*items)[i].size = 29;
-    (*items)[i].version = version;
+    (*items)[i].version = 0;
     i++;
   }
   if (extra_bytes_number)
   {
     (*items)[i].type = LASitem::BYTE;
     (*items)[i].size = extra_bytes_number;
-    (*items)[i].version = version;
+    (*items)[i].version = 0;
     i++;
   }
+  if (compressor) request_version(2);
   assert(i == *num_items);
   return true;
 }
@@ -445,20 +442,20 @@ bool LASzip::request_version(const U16 requested_version)
         items[i].version = 1; // no version 2
         break;
     default:
-        return false;
+        return return_error("itrm type not supported");
     }
   }
   return true;
 }
 
-bool LASzip::is_standard(U8* point_type, U16* record_length) const
+bool LASzip::is_standard(U8* point_type, U16* record_length)
 {
   return is_standard(num_items, items, point_type, record_length);
 }
 
-bool LASzip::is_standard(const U16 num_items, const LASitem* items, U8* point_type, U16* record_length) const
+bool LASzip::is_standard(const U16 num_items, const LASitem* items, U8* point_type, U16* record_length)
 {
-  if (items == 0) return false;
+  if (items == 0) return return_error("LASitem array is zero");
 
   // this is always true
   if (point_type) *point_type = 127;
@@ -473,12 +470,12 @@ bool LASzip::is_standard(const U16 num_items, const LASitem* items, U8* point_ty
   }
 
   // the minimal number of items is 1
-  if (num_items < 1) return false;
+  if (num_items < 1) return return_error("less than one LASitem entries");
   // the maximal number of items is 5
-  if (num_items > 5) return false;
+  if (num_items > 5) return return_error("more than five LASitem entries");
 
   // all standard point types start with POINT10
-  if (!items[0].is_type(LASitem::POINT10)) return false;
+  if (!items[0].is_type(LASitem::POINT10)) return_error("first LASitem is not POINT10");
 
   // consider all the other combinations
   if (num_items == 1)
@@ -604,7 +601,7 @@ bool LASzip::is_standard(const U16 num_items, const LASitem* items, U8* point_ty
       }
     }
   }
-  return false;
+  return return_error("LASitem array does not match LAS specification 1.3");
 }
 
 bool LASitem::is_type(LASitem::Type t) const
