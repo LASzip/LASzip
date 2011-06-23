@@ -716,7 +716,7 @@ static void write_points_explicit_chunk_seek(LASzipper* zipper, PointData& data)
 
 //---------------------------------------------------------------------------
 
-static void run_test(const char* filename, PointData& data, unsigned short compressor, unsigned short requested_version=0, int chunk_size=-1, bool random_seeks=false)
+static void run_test(const char* filename, PointData& data, unsigned short compressor, int requested_version=-1, int chunk_size=-1, bool random_seeks=false)
 {
   //
   // COMPRESSION
@@ -728,7 +728,7 @@ static void run_test(const char* filename, PointData& data, unsigned short compr
   {
     log("ERROR on laszip.setup(): %s\n", laszip.get_error());
   }
-  if (requested_version > 0) laszip.request_version(requested_version);
+  if (requested_version > -1) laszip.request_version((unsigned short)requested_version);
   if (chunk_size > -1) laszip.set_chunk_size((unsigned int)chunk_size);
 
   // packing up LASzip
@@ -870,9 +870,9 @@ int main(int argc, char *argv[])
 
   run_test("test.tmp", data, LASZIP_COMPRESSOR_NONE);
 
-  // sequential version 1.0 and sequential version 2.0
-  run_test("test.tmp", data, LASZIP_COMPRESSOR_DEFAULT, 1);
-  run_test("test.tmp", data, LASZIP_COMPRESSOR_DEFAULT, 2);
+  // not chunked version 1.0 and sequential version 2.0
+  run_test("test.tmp", data, LASZIP_COMPRESSOR_NOT_CHUNKED, 1);
+  run_test("test.tmp", data, LASZIP_COMPRESSOR_NOT_CHUNKED, 2);
 
   // chunk every 10000 points
   run_test("test.tmp", data, LASZIP_COMPRESSOR_CHUNKED, 1, 10000);
