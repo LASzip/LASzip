@@ -25,6 +25,7 @@
   
   CHANGE HISTORY:
   
+    23 June 2011 -- turned on LASzip version 2.0 compressor with chunking 
     8 May 2011 -- added an option for variable chunking via chunk()
     23 April 2011 -- changed interface for simplicity and chunking support
     20 March 2011 -- incrementing LASZIP_VERSION to 1.2 for improved compression
@@ -43,8 +44,8 @@ typedef __int64   SIGNED_INT64;
 typedef long long SIGNED_INT64;
 #endif
 
-#define LASZIP_VERSION_MAJOR    1
-#define LASZIP_VERSION_MINOR    2
+#define LASZIP_VERSION_MAJOR    2
+#define LASZIP_VERSION_MINOR    0
 #define LASZIP_VERSION_REVISION 0
 
 #define LASZIP_COMPRESSOR_NONE              0
@@ -52,8 +53,10 @@ typedef long long SIGNED_INT64;
 #define LASZIP_COMPRESSOR_POINTWISE_CHUNKED 2
 #define LASZIP_COMPRESSOR_TOTAL_NUMBER_OF   3
 
-#define LASZIP_COMPRESSOR_DEFAULT LASZIP_COMPRESSOR_POINTWISE
 #define LASZIP_COMPRESSOR_CHUNKED LASZIP_COMPRESSOR_POINTWISE_CHUNKED
+#define LASZIP_COMPRESSOR_NOT_CHUNKED LASZIP_COMPRESSOR_POINTWISE
+
+#define LASZIP_COMPRESSOR_DEFAULT LASZIP_COMPRESSOR_CHUNKED
 
 #define LASZIP_CODER_ARITHMETIC             0
 #define LASZIP_CODER_TOTAL_NUMBER_OF        1
@@ -85,8 +88,8 @@ public:
 
   // go back and forth between item array and point type & size
   bool setup(unsigned short* num_items, LASitem** items, const unsigned char point_type, const unsigned short point_size, const unsigned short compressor=LASZIP_COMPRESSOR_NONE);
-  bool is_standard(const unsigned short num_items, const LASitem* items, unsigned char* point_type=0, unsigned short* record_length=0) const;
-  bool is_standard(unsigned char* point_type=0, unsigned short* record_length=0) const;
+  bool is_standard(const unsigned short num_items, const LASitem* items, unsigned char* point_type=0, unsigned short* record_length=0);
+  bool is_standard(unsigned char* point_type=0, unsigned short* record_length=0);
 
   // pack to and unpack from VLR
   unsigned char* bytes;
@@ -95,7 +98,7 @@ public:
 
   // setup
   bool setup(const unsigned char point_type, const unsigned short point_size, const unsigned short compressor=LASZIP_COMPRESSOR_DEFAULT);
-  bool setup(const unsigned short num_items, const LASitem* items, const unsigned short compressor=LASZIP_COMPRESSOR_DEFAULT);
+  bool setup(const unsigned short num_items, const LASitem* items, const unsigned short compressor);
   bool set_chunk_size(const unsigned int chunk_size);             /* for compressor only */
   bool request_version(const unsigned short requested_version);   /* for compressor only */
 
