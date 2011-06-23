@@ -91,7 +91,7 @@ bool LASzipper::close()
   BOOL done = TRUE;
   if (writer)
   {
-    BOOL done = writer->done();
+    done = writer->done();
     delete writer;
     writer = 0;
   }
