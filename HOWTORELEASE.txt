@@ -19,16 +19,21 @@ Release Process
  
   - CMakeLists.txt
    
-    * SET(LASZIP_VERSION_MAJOR "1")
+    * SET(LASZIP_VERSION_MAJOR "2")
     * SET(LASZIP_VERSION_MINOR "0")
-    * SET(LASZIP_VERSION_PATCH "0b1")
+    * SET(LASZIP_VERSION_PATCH "0")
     
   - include/laszip/laszip.hpp
 
-    * #define LASZIP_VERSION_MAJOR    1
+    * #define LASZIP_VERSION_MAJOR    2
     * #define LASZIP_VERSION_MINOR    0
-    * #define LASZIP_VERSION_REV      0b1
+    * #define LASZIP_VERSION_REV      0
 
+  - configure.ac
+    
+    * m4_define([laszip_version_major], [2])
+    * m4_define([laszip_version_minor], [0])
+    * m4_define([laszip_version_micro], [0])
 
 
 2) Update README to include any relevant info about the release that 
