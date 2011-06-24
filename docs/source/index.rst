@@ -14,7 +14,7 @@ Please note that `libLAS`_ links to the LASzip compression library while
 Source
 ..............................................................................
 
-* **2011-06-23** 
+* **2011-06-24** 
 
   - `laszip-2.0.0-src.tar.gz <http://download.osgeo.org/laszip/laszip-2.0.0.tar.gz>`_ 
     `(md5) <http://download.osgeo.org/laszip/laszip-2.0.0.tar.gz.md5>`__ 
