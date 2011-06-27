@@ -387,5 +387,5 @@ LASwritePoint::~LASwritePoint()
     delete enc;
   }
 
-  if (chunk_bytes) delete [] chunk_bytes;
+  if (chunk_bytes) free(chunk_bytes);
 }
