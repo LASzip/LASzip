@@ -285,6 +285,14 @@ BOOL LASwritePoint::done()
       return write_chunk_table();
     }
   }
+  else if (writers == 0)
+  {
+    if (chunk_start_position)
+    {
+      return write_chunk_table();
+    }
+  }
+
   return TRUE;
 }
 
@@ -343,15 +351,18 @@ BOOL LASwritePoint::write_chunk_table()
   {
     return FALSE;
   }
-  enc->init(outstream);
-  IntegerCompressor ic(enc, 32, 2);
-  ic.initCompressor();
-  for (i = 0; i < number_chunks; i++)
+  if (number_chunks > 0)
   {
-    if (chunk_size == U32_MAX) ic.compress((i ? chunk_sizes[i-1] : 0), chunk_sizes[i], 0);
-    ic.compress((i ? chunk_bytes[i-1] : 0), chunk_bytes[i], 1);
+    enc->init(outstream);
+    IntegerCompressor ic(enc, 32, 2);
+    ic.initCompressor();
+    for (i = 0; i < number_chunks; i++)
+    {
+      if (chunk_size == U32_MAX) ic.compress((i ? chunk_sizes[i-1] : 0), chunk_sizes[i], 0);
+      ic.compress((i ? chunk_bytes[i-1] : 0), chunk_bytes[i], 1);
+    }
+    enc->done();
   }
-  enc->done();
   if (!chunk_table_start_position) // stream is not-seekable
   {
     if (!outstream->put64bitsLE((U8*)&position))

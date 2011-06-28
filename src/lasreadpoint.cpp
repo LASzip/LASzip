@@ -385,10 +385,6 @@ BOOL LASreadPoint::read_chunk_table()
   {
     return FALSE;
   }
-  if (number_chunks == 0)
-  {
-    return FALSE;
-  }
   if (chunk_totals) delete [] chunk_totals;
   chunk_totals = 0;
   if (chunk_starts) delete [] chunk_starts;
@@ -397,20 +393,23 @@ BOOL LASreadPoint::read_chunk_table()
   chunk_starts = new long[number_chunks+1];
   if (chunk_size == U32_MAX) chunk_totals[0] = 0;
   chunk_starts[0] = chunks_start;
-  U32 i;
-  dec->init(instream);
-  IntegerCompressor ic(dec, 32, 2);
-  ic.initDecompressor();
-  for (i = 1; i <= number_chunks; i++)
+  if (number_chunks > 0)
   {
-    if (chunk_size == U32_MAX) chunk_totals[i] = ic.decompress((i>1 ? chunk_totals[i-1] : 0), 0);
-    chunk_starts[i] = ic.decompress((i>1 ? chunk_starts[i-1] : 0), 1);
-  }
-  dec->done();
-  for (i = 1; i <= number_chunks; i++)
-  {
-    if (chunk_size == U32_MAX) chunk_totals[i] += chunk_totals[i-1];
-    chunk_starts[i] += chunk_starts[i-1];
+    U32 i;
+    dec->init(instream);
+    IntegerCompressor ic(dec, 32, 2);
+    ic.initDecompressor();
+    for (i = 1; i <= number_chunks; i++)
+    {
+      if (chunk_size == U32_MAX) chunk_totals[i] = ic.decompress((i>1 ? chunk_totals[i-1] : 0), 0);
+      chunk_starts[i] = ic.decompress((i>1 ? chunk_starts[i-1] : 0), 1);
+    }
+    dec->done();
+    for (i = 1; i <= number_chunks; i++)
+    {
+      if (chunk_size == U32_MAX) chunk_totals[i] += chunk_totals[i-1];
+      chunk_starts[i] += chunk_starts[i-1];
+    }
   }
   instream->seek(chunks_start);
   return TRUE;
