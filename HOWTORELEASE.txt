@@ -22,6 +22,7 @@ Release Process
     * SET(LASZIP_VERSION_MAJOR "2")
     * SET(LASZIP_VERSION_MINOR "0")
     * SET(LASZIP_VERSION_PATCH "0")
+    * SET(LASZIP_LIB_SOVERSION "4.0.2")
     
   - include/laszip/laszip.hpp
 
@@ -35,7 +36,9 @@ Release Process
     * m4_define([laszip_version_minor], [0])
     * m4_define([laszip_version_micro], [0])
 
-
+  - src/Makefile.am -- see http://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html
+    * liblaszip_la_LDFLAGS = -version-info 4:2:0
+    
 2) Update README to include any relevant info about the release that 
    might have changed.
 
