@@ -36,7 +36,7 @@ Binaries
 Development Source
 ------------------------------------------------------------------------------
 
-* Current Trunk: http://hg.liblas.org/zip
+* Current Trunk: https://github.com/LASzip/LASzip
 
 
 Background
