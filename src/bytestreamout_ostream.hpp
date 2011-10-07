@@ -132,7 +132,7 @@ inline I64 ByteStreamOutOstream::tell() const
 
 inline BOOL ByteStreamOutOstream::seek(I64 position)
 {
-  stream.seekp((streampos)position);
+  stream.seekp(static_cast<streamoff>(position));
   return stream.good();
 }
 
