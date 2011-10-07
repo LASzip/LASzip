@@ -25,6 +25,7 @@
   
   CHANGE HISTORY:
   
+    6 October 2011 -- large file support, ability to read with missing chunk table
     23 June 2011 -- turned on LASzip version 2.0 compressor with chunking 
     8 May 2011 -- added an option for variable chunking via chunk()
     23 April 2011 -- changed interface for simplicity and chunking support
@@ -46,7 +47,7 @@ typedef long long SIGNED_INT64;
 
 #define LASZIP_VERSION_MAJOR    2
 #define LASZIP_VERSION_MINOR    0
-#define LASZIP_VERSION_REVISION 1
+#define LASZIP_VERSION_REVISION 2
 
 #define LASZIP_COMPRESSOR_NONE              0
 #define LASZIP_COMPRESSOR_POINTWISE         1
@@ -65,7 +66,7 @@ typedef long long SIGNED_INT64;
 
 #include "laszipexport.hpp"
 
-class LASZIP_DLL LASitem
+class LASitem
 {
 public:
   enum Type { BYTE = 0, SHORT, INT, LONG, FLOAT, DOUBLE, POINT10, GPSTIME11, RGB12, WAVEPACKET13 } type;

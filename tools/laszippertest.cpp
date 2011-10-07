@@ -782,7 +782,7 @@ static void run_test(const char* filename, PointData& data, unsigned short compr
   // creating the input stream
   IStream* ist = new IStream(settings->use_iostream, filename);
 
-  // creating the zipper
+  // creating the unzipper
   LASunzipper* lasunzipper = make_unzipper(ist, &laszip_dec);
 
   // allocating the data to write into
@@ -871,23 +871,33 @@ int main(int argc, char *argv[])
   run_test("test.tmp", data, LASZIP_COMPRESSOR_NONE);
 
   // not chunked version 1.0 and sequential version 2.0
+  log("run_test(test.tmp, data, LASZIP_COMPRESSOR_NOT_CHUNKED, 1);\n");
   run_test("test.tmp", data, LASZIP_COMPRESSOR_NOT_CHUNKED, 1);
+  log("run_test(test.tmp, data, LASZIP_COMPRESSOR_NOT_CHUNKED, 2);\n");
   run_test("test.tmp", data, LASZIP_COMPRESSOR_NOT_CHUNKED, 2);
 
   // chunk every 10000 points
+  log("run_test(test.tmp, data, LASZIP_COMPRESSOR_CHUNKED, 1, 10000);\n");
   run_test("test.tmp", data, LASZIP_COMPRESSOR_CHUNKED, 1, 10000);
+  log("run_test(test.tmp, data, LASZIP_COMPRESSOR_CHUNKED, 2, 10000);\n");
   run_test("test.tmp", data, LASZIP_COMPRESSOR_CHUNKED, 2, 10000);
 
   // explicit chunk() calls
+  log("run_test(test.tmp, data, LASZIP_COMPRESSOR_CHUNKED, 1, 0);\n");
   run_test("test.tmp", data, LASZIP_COMPRESSOR_CHUNKED, 1, 0); 
+  log("run_test(test.tmp, data, LASZIP_COMPRESSOR_CHUNKED, 2, 0);\n");
   run_test("test.tmp", data, LASZIP_COMPRESSOR_CHUNKED, 2, 0);
 
   // chunk every 10000 points and random seeks during read
+  log("run_test(test.tmp, data, LASZIP_COMPRESSOR_CHUNKED, 1, 10000, true);\n");
   run_test("test.tmp", data, LASZIP_COMPRESSOR_CHUNKED, 1, 10000, true);
+  log("run_test(test.tmp, data, LASZIP_COMPRESSOR_CHUNKED, 2, 10000, true);\n");
   run_test("test.tmp", data, LASZIP_COMPRESSOR_CHUNKED, 2, 10000, true);
 
   // explicit chunk() calls and random seeks during read
+  log("run_test(test.tmp, data, LASZIP_COMPRESSOR_CHUNKED, 1, 0, true);\n");
   run_test("test.tmp", data, LASZIP_COMPRESSOR_CHUNKED, 1, 0, true);
+  log("run_test(test.tmp, data, LASZIP_COMPRESSOR_CHUNKED, 2, 0, true);\n");
   run_test("test.tmp", data, LASZIP_COMPRESSOR_CHUNKED, 2, 0, true);
 
   log("Finished %u runs\n\n", run);

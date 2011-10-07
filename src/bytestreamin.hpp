@@ -22,6 +22,7 @@
   
   CHANGE HISTORY:
   
+     1 October 2011 -- added 64 bit file support in MSVC 6.0 at McCafe at Hbf Linz
     10 January 2011 -- licensing change for LGPL release and liblas integration
     12 December 2010 -- created from ByteStreamOutFile after Howard got pushy (-;
   
@@ -30,37 +31,35 @@
 #ifndef BYTE_STREAM_IN_HPP
 #define BYTE_STREAM_IN_HPP
 
+#include "mydefs.hpp"
+
 class ByteStreamIn
 {
 public:
 /* read a single byte                                        */
-  virtual unsigned int getByte() = 0;
+  virtual U32 getByte() = 0;
 /* read an array of bytes                                    */
-  virtual bool getBytes(unsigned char* bytes, const unsigned int num_bytes) = 0;
+  virtual BOOL getBytes(U8* bytes, const U32 num_bytes) = 0;
 /* read 16 bit low-endian field                              */
-  virtual bool get16bitsLE(unsigned char* bytes) = 0;
+  virtual BOOL get16bitsLE(U8* bytes) = 0;
 /* read 32 bit low-endian field                              */
-  virtual bool get32bitsLE(unsigned char* bytes) = 0;
+  virtual BOOL get32bitsLE(U8* bytes) = 0;
 /* read 64 bit low-endian field                              */
-  virtual bool get64bitsLE(unsigned char* bytes) = 0;
+  virtual BOOL get64bitsLE(U8* bytes) = 0;
 /* read 16 bit big-endian field                              */
-  virtual bool get16bitsBE(unsigned char* bytes) = 0;
+  virtual BOOL get16bitsBE(U8* bytes) = 0;
 /* read 32 bit big-endian field                              */
-  virtual bool get32bitsBE(unsigned char* bytes) = 0;
+  virtual BOOL get32bitsBE(U8* bytes) = 0;
 /* read 64 bit big-endian field                              */
-  virtual bool get64bitsBE(unsigned char* bytes) = 0;
+  virtual BOOL get64bitsBE(U8* bytes) = 0;
 /* is the stream seekable (e.g. stdin is not)                */
-  virtual bool isSeekable() const = 0;
+  virtual BOOL isSeekable() const = 0;
 /* get current position of stream                            */
-  virtual long position() const = 0;
+  virtual I64 tell() const = 0;
 /* seek to this position in the stream                       */
-  virtual bool seek(const long position) = 0;
+  virtual BOOL seek(const I64 position) = 0;
 /* seek to the end of the file                               */
-  virtual bool seekEnd(const long distance=0) = 0;
-/* reset byte counter                                        */
-  virtual void resetCount() = 0;
-/* returns how many bytes were read since last reset         */
-  virtual unsigned int byteCount() const = 0;
+  virtual BOOL seekEnd(const I64 distance=0) = 0;
 /* destructor                                                */
   virtual ~ByteStreamIn() {};
 };

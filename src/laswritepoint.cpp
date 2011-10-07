@@ -200,14 +200,14 @@ BOOL LASwritePoint::init(ByteStreamOut* outstream)
     number_chunks = 0;
     if (outstream->isSeekable())
     {
-      chunk_table_start_position = outstream->position();
+      chunk_table_start_position = outstream->tell();
     }
     else
     {
-      chunk_table_start_position = 0;
+      chunk_table_start_position = -1;
     }
     outstream->put64bitsLE((U8*)&chunk_table_start_position);
-    chunk_start_position = outstream->position();
+    chunk_start_position = outstream->tell();
   }
 
   U32 i;
@@ -315,7 +315,7 @@ BOOL LASwritePoint::add_chunk_to_table()
     if (chunk_size == U32_MAX && chunk_sizes == 0) return FALSE;
     if (chunk_bytes == 0) return FALSE;
   }
-  I64 position = outstream->position();
+  I64 position = outstream->tell();
   if (chunk_size == U32_MAX) chunk_sizes[number_chunks] = chunk_count;
   chunk_bytes[number_chunks] = (U32)(position - chunk_start_position);
   chunk_start_position = position;
@@ -326,10 +326,10 @@ BOOL LASwritePoint::add_chunk_to_table()
 BOOL LASwritePoint::write_chunk_table()
 {
   U32 i;
-  I64 position = outstream->position();
-  if (chunk_table_start_position) // stream is seekable
+  I64 position = outstream->tell();
+  if (chunk_table_start_position != -1) // stream is seekable
   {
-    if (!outstream->seek((long)chunk_table_start_position))
+    if (!outstream->seek(chunk_table_start_position))
     {
       return FALSE;
     }
@@ -337,7 +337,7 @@ BOOL LASwritePoint::write_chunk_table()
     {
       return FALSE;
     }
-    if (!outstream->seek((long)position))
+    if (!outstream->seek(position))
     {
       return FALSE;
     }
@@ -363,7 +363,7 @@ BOOL LASwritePoint::write_chunk_table()
     }
     enc->done();
   }
-  if (!chunk_table_start_position) // stream is not-seekable
+  if (chunk_table_start_position == -1) // stream is not-seekable
   {
     if (!outstream->put64bitsLE((U8*)&position))
     {

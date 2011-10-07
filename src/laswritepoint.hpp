@@ -24,6 +24,8 @@
   
   CHANGE HISTORY:
   
+    6 October 2011 -- large file support & reading with missing chunk table
+    9 May 2011 -- the chunked compressor now allows variable chunk sizes
     25 April 2011 -- added chunked laszip for random access decompression
     10 January 2011 -- licensing change for LGPL release and liblas integration
     7 December 2010 -- adapted from LASpointWriter for better code modularity

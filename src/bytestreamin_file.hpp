@@ -22,6 +22,7 @@
   
   CHANGE HISTORY:
   
+     1 October 2011 -- added 64 bit file support in MSVC 6.0 at McCafe at Hbf Linz
     10 January 2011 -- licensing change for LGPL release and liblas integration
     12 December 2010 -- created from ByteStreamOutFile after Howard got pushy (-;
   
@@ -34,32 +35,31 @@
 
 #include <stdio.h>
 
+#if defined(_MSC_VER) && (_MSC_VER < 1300)
+extern "C" __int64 _cdecl _ftelli64(FILE*);
+extern "C" int _cdecl _fseeki64(FILE*, __int64, int);
+#endif
+
 class ByteStreamInFile : public ByteStreamIn
 {
 public:
   ByteStreamInFile(FILE* file);
 /* read a single byte                                        */
-  unsigned int getByte();
+  U32 getByte();
 /* read an array of bytes                                    */
-  bool getBytes(unsigned char* bytes, const unsigned int num_bytes);
-/* is the stream seekable (e.g. standard in is not)          */
-  bool isSeekable() const;
+  BOOL getBytes(U8* bytes, const U32 num_bytes);
+/* is the stream seekable (e.g. stdin is not)                */
+  BOOL isSeekable() const;
 /* get current position of stream                            */
-  long position() const;
+  I64 tell() const;
 /* seek to this position in the stream                       */
-  bool seek(const long position);
+  BOOL seek(const I64 position);
 /* seek to the end of the file                               */
-  bool seekEnd(const long distance=0);
-/* returns how many bytes were read since last reset         */
-  unsigned int byteCount() const;
-/* reset byte counter                                        */
-  void resetCount();
+  BOOL seekEnd(const I64 distance=0);
 /* destructor                                                */
   ~ByteStreamInFile(){};
 protected:
   FILE* file;
-private:
-  long start;
 };
 
 class ByteStreamInFileLE : public ByteStreamInFile
@@ -67,19 +67,19 @@ class ByteStreamInFileLE : public ByteStreamInFile
 public:
   ByteStreamInFileLE(FILE* file);
 /* read 16 bit low-endian field                              */
-  bool get16bitsLE(unsigned char* bytes);
+  BOOL get16bitsLE(U8* bytes);
 /* read 32 bit low-endian field                              */
-  bool get32bitsLE(unsigned char* bytes);
+  BOOL get32bitsLE(U8* bytes);
 /* read 64 bit low-endian field                              */
-  bool get64bitsLE(unsigned char* bytes);
+  BOOL get64bitsLE(U8* bytes);
 /* read 16 bit big-endian field                              */
-  bool get16bitsBE(unsigned char* bytes);
+  BOOL get16bitsBE(U8* bytes);
 /* read 32 bit big-endian field                              */
-  bool get32bitsBE(unsigned char* bytes);
+  BOOL get32bitsBE(U8* bytes);
 /* read 64 bit big-endian field                              */
-  bool get64bitsBE(unsigned char* bytes);
+  BOOL get64bitsBE(U8* bytes);
 private:
-  unsigned char swapped[8];
+  U8 swapped[8];
 };
 
 class ByteStreamInFileBE : public ByteStreamInFile
@@ -87,104 +87,104 @@ class ByteStreamInFileBE : public ByteStreamInFile
 public:
   ByteStreamInFileBE(FILE* file);
 /* read 16 bit low-endian field                              */
-  bool get16bitsLE(unsigned char* bytes);
+  BOOL get16bitsLE(U8* bytes);
 /* read 32 bit low-endian field                              */
-  bool get32bitsLE(unsigned char* bytes);
+  BOOL get32bitsLE(U8* bytes);
 /* read 64 bit low-endian field                              */
-  bool get64bitsLE(unsigned char* bytes);
+  BOOL get64bitsLE(U8* bytes);
 /* read 16 bit big-endian field                              */
-  bool get16bitsBE(unsigned char* bytes);
+  BOOL get16bitsBE(U8* bytes);
 /* read 32 bit big-endian field                              */
-  bool get32bitsBE(unsigned char* bytes);
+  BOOL get32bitsBE(U8* bytes);
 /* read 64 bit big-endian field                              */
-  bool get64bitsBE(unsigned char* bytes);
+  BOOL get64bitsBE(U8* bytes);
 private:
-  unsigned char swapped[8];
+  U8 swapped[8];
 };
 
 inline ByteStreamInFile::ByteStreamInFile(FILE* file)
 {
   this->file = file;
-  start = ftell(file);
 }
 
-inline unsigned int ByteStreamInFile::getByte()
+inline U32 ByteStreamInFile::getByte()
 {
   int byte = getc(file);
   if (byte == EOF)
   {
     throw EOF;
   }
-  return (unsigned int)byte;
+  return (U32)byte;
 }
 
-inline bool ByteStreamInFile::getBytes(unsigned char* bytes, const unsigned int num_bytes)
+inline BOOL ByteStreamInFile::getBytes(U8* bytes, const U32 num_bytes)
 {
   return (fread(bytes, 1, num_bytes, file) == num_bytes);
 }
 
-inline bool ByteStreamInFile::isSeekable() const
+inline BOOL ByteStreamInFile::isSeekable() const
 {
   return (file != stdin);
 }
 
-inline long ByteStreamInFile::position() const
+inline I64 ByteStreamInFile::tell() const
 {
-  return ftell(file);
+#ifdef _WIN32
+  return _ftelli64(file);
+#else
+  return (I64)ftello(file);
+#endif
 }
 
-inline bool ByteStreamInFile::seek(const long position)
+inline BOOL ByteStreamInFile::seek(const I64 position)
 {
-//  return !(_fseeki64(file, (I64)position, SEEK_SET));
-  return !(fseek(file, position, SEEK_SET));
+#ifdef _WIN32
+  return !(_fseeki64(file, position, SEEK_SET));
+#else
+  return !(fseeko(file, (off_t)position, SEEK_SET));
+#endif
 }
 
-inline bool ByteStreamInFile::seekEnd(const long distance)
+inline BOOL ByteStreamInFile::seekEnd(const I64 distance)
 {
-  return !(fseek(file, -distance, SEEK_END));
-}
-
-inline unsigned int ByteStreamInFile::byteCount() const
-{
-  return ftell(file)-start;
-}
-
-inline void ByteStreamInFile::resetCount()
-{
-  start = ftell(file);
+#ifdef _WIN32
+  return !(_fseeki64(file, -distance, SEEK_END));
+#else
+  return !(fseeko(file, (off_t)-distance, SEEK_END));
+#endif
 }
 
 inline ByteStreamInFileLE::ByteStreamInFileLE(FILE* file) : ByteStreamInFile(file)
 {
 }
 
-inline bool ByteStreamInFileLE::get16bitsLE(unsigned char* bytes)
+inline BOOL ByteStreamInFileLE::get16bitsLE(U8* bytes)
 {
   return getBytes(bytes, 2);
 }
 
-inline bool ByteStreamInFileLE::get32bitsLE(unsigned char* bytes)
+inline BOOL ByteStreamInFileLE::get32bitsLE(U8* bytes)
 {
   return getBytes(bytes, 4);
 }
 
-inline bool ByteStreamInFileLE::get64bitsLE(unsigned char* bytes)
+inline BOOL ByteStreamInFileLE::get64bitsLE(U8* bytes)
 {
   return getBytes(bytes, 8);
 }
 
-inline bool ByteStreamInFileLE::get16bitsBE(unsigned char* bytes)
+inline BOOL ByteStreamInFileLE::get16bitsBE(U8* bytes)
 {
   if (getBytes(swapped, 2))
   {
     bytes[0] = swapped[1];
     bytes[1] = swapped[0];
-    return true;
+    return TRUE;
   }
-  return false;
+  return FALSE;
 }
 
-inline bool ByteStreamInFileLE::get32bitsBE(unsigned char* bytes)
+inline BOOL ByteStreamInFileLE::get32bitsBE(U8* bytes)
 {
   if (getBytes(swapped, 4))
   {
@@ -192,12 +192,12 @@ inline bool ByteStreamInFileLE::get32bitsBE(unsigned char* bytes)
     bytes[1] = swapped[2];
     bytes[2] = swapped[1];
     bytes[3] = swapped[0];
-    return true;
+    return TRUE;
   }
-  return false;
+  return FALSE;
 }
 
-inline bool ByteStreamInFileLE::get64bitsBE(unsigned char* bytes)
+inline BOOL ByteStreamInFileLE::get64bitsBE(U8* bytes)
 {
   if (getBytes(swapped, 8))
   {
@@ -209,27 +209,27 @@ inline bool ByteStreamInFileLE::get64bitsBE(unsigned char* bytes)
     bytes[5] = swapped[2];
     bytes[6] = swapped[1];
     bytes[7] = swapped[0];
-    return true;
+    return TRUE;
   }
-  return false;
+  return FALSE;
 }
 
 inline ByteStreamInFileBE::ByteStreamInFileBE(FILE* file) : ByteStreamInFile(file)
 {
 }
 
-inline bool ByteStreamInFileBE::get16bitsLE(unsigned char* bytes)
+inline BOOL ByteStreamInFileBE::get16bitsLE(U8* bytes)
 {
   if (getBytes(swapped, 2))
   {
     bytes[0] = swapped[1];
     bytes[1] = swapped[0];
-    return true;
+    return TRUE;
   }
-  return false;
+  return FALSE;
 }
 
-inline bool ByteStreamInFileBE::get32bitsLE(unsigned char* bytes)
+inline BOOL ByteStreamInFileBE::get32bitsLE(U8* bytes)
 {
   if (getBytes(swapped, 4))
   {
@@ -237,12 +237,12 @@ inline bool ByteStreamInFileBE::get32bitsLE(unsigned char* bytes)
     bytes[1] = swapped[2];
     bytes[2] = swapped[1];
     bytes[3] = swapped[0];
-    return true;
+    return TRUE;
   }
-  return false;
+  return FALSE;
 }
 
-inline bool ByteStreamInFileBE::get64bitsLE(unsigned char* bytes)
+inline BOOL ByteStreamInFileBE::get64bitsLE(U8* bytes)
 {
   if (getBytes(swapped, 8))
   {
@@ -254,22 +254,22 @@ inline bool ByteStreamInFileBE::get64bitsLE(unsigned char* bytes)
     bytes[5] = swapped[2];
     bytes[6] = swapped[1];
     bytes[7] = swapped[0];
-    return true;
+    return TRUE;
   }
-  return false;
+  return FALSE;
 }
 
-inline bool ByteStreamInFileBE::get16bitsBE(unsigned char* bytes)
+inline BOOL ByteStreamInFileBE::get16bitsBE(U8* bytes)
 {
   return getBytes(bytes, 2);
 }
 
-inline bool ByteStreamInFileBE::get32bitsBE(unsigned char* bytes)
+inline BOOL ByteStreamInFileBE::get32bitsBE(U8* bytes)
 {
   return getBytes(bytes, 4);
 }
 
-inline bool ByteStreamInFileBE::get64bitsBE(unsigned char* bytes)
+inline BOOL ByteStreamInFileBE::get64bitsBE(U8* bytes)
 {
   return getBytes(bytes, 8);
 }
