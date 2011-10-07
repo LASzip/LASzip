@@ -11,9 +11,9 @@ project(laszip)
 
 SET(LASZIP_VERSION_MAJOR "2")
 SET(LASZIP_VERSION_MINOR "0")
-SET(LASZIP_VERSION_PATCH "1")
+SET(LASZIP_VERSION_PATCH "2")
 set(VERSION "${LASZIP_VERSION_MAJOR}.${LASZIP_VERSION_MINOR}.${LASZIP_VERSION_PATCH}")
-SET(LASZIP_LIB_SOVERSION "4.0.2")
+SET(LASZIP_LIB_SOVERSION "4.0.3")
 
 # Name of C++ library
 set(LASZIP_LIB_NAME laszip)
@@ -153,6 +153,6 @@ include(CPack)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
-#if (WIN32)
-#    include(BuildOSGeo4W)
-#endif(WIN32)
+if (WIN32)
+    include(BuildOSGeo4W)
+endif(WIN32)
