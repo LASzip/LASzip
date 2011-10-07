@@ -147,7 +147,8 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "unused")
 
 list(APPEND CPACK_SOURCE_IGNORE_FILES "CMakeCache.txt")
 # 
-# list(APPEND CPACK_SOURCE_IGNORE_FILES "CPackConfig.cmake")
+list(APPEND CPACK_SOURCE_IGNORE_FILES ".git/")
+list(APPEND CPACK_SOURCE_IGNORE_FILES ".gitignore")
 
 include(CPack)
 
