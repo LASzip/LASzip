@@ -45,6 +45,13 @@ typedef __int64   SIGNED_INT64;
 typedef long long SIGNED_INT64;
 #endif
 
+#if defined(_MSC_VER) && \
+    (_MSC_FULL_VER >= 150000000)
+#define LASCopyString _strdup
+#else
+#define LASCopyString strdup
+#endif
+
 #define LASZIP_VERSION_MAJOR    2
 #define LASZIP_VERSION_MINOR    0
 #define LASZIP_VERSION_REVISION 2
