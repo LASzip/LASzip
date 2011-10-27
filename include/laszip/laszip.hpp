@@ -73,7 +73,7 @@ typedef long long SIGNED_INT64;
 
 #include "laszipexport.hpp"
 
-class LASitem
+class LASZIP_DLL LASitem
 {
 public:
   enum Type { BYTE = 0, SHORT, INT, LONG, FLOAT, DOUBLE, POINT10, GPSTIME11, RGB12, WAVEPACKET13 } type;
