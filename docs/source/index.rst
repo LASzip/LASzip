@@ -22,6 +22,7 @@ Source
   - `laszip-2.0.2.zip <http://download.osgeo.org/laszip/laszip-2.0.2.zip>`_ 
     `(md5) <http://download.osgeo.org/liblas/laszip-2.0.2.zip.md5>`__
 
+
 Binaries
 ..............................................................................
 
@@ -31,6 +32,12 @@ Binaries
 
   - A Windows binary `laszip.exe`_ and a Linux makefile to build `laszip`_ are
     available for explicit compression (decompression) of LAS (LAZ) files.    
+
+
+Documentation
+..............................................................................
+
+  - The LASzip `paper`_ and `video`_ from the ELMF 2011 presentation in Salzburg, Austria. 
 
 
 Development Source
@@ -65,12 +72,14 @@ the different bytes in a LAS file represent. Another advantage of LASzip
 is that it allows you to treat compressed LAZ files just like standard LAS
 files. You can load them directly from compressed form into your application 
 without needing to decompress them onto disk first. The availability of two
-APIs, `libLAS`_ and `lasLIB`_, with LASzip capability makes it very easy to
+APIs, `libLAS`_ and `LASlib`_, with LASzip capability makes it very easy to
 add native LAZ support to your own software package.
 
 Download LAZ data
 ------------------------------------------------------------------------------
 
+* http://opentopography.org/
+* http://www.csc.noaa.gov/digitalcoast/data/chartstopobathy/download.html
 * http://gisfiles.wm.edu/files/lidar/
 * http://gisfiles.wm.edu/files/lidar/ESLiDAR/LiDAR_ClassifiedPointCloud/
 * http://gisfiles.wm.edu/files/lidar/a11county/LAZ/
@@ -100,7 +109,12 @@ Download LAZ data
 Users of LASzip
 ------------------------------------------------------------------------------
 
+* `Blom <http://www.blomasa.com/>`_
+* `Watershed Sciences, Inc. <http://www.watershedsciences.com/>`_
 * `Riegl <http://www.riegl.com/>`_
+* `NOAA <http://www.noaa.gov/>`_
+* `USGS <http://www.usgs.gov/>`_
+* `Dielmo 3D <http://www.dielmo.com/>`_
 * `TopoDOT <http://www.certainty3d.com/products/topodot/>`_
 * `Oregon Lidar Consortium <http://www.oregongeology.org/sub/projects/olc/default.htm>`_
 * `Minnesota Department of Natural Resources <http://www.dnr.state.mn.us/>`_
@@ -121,7 +135,8 @@ Users of LASzip
 .. _`rar`: http://en.wikipedia.org/wiki/Rar
 .. _`LAStools`: http://lastools.org
 .. _`libLAS`: http://liblas.org
-.. _`lasLIB`: http://www.cs.unc.edu/~isenburg/lastools/download/laslib_README.txt
-.. _`lasLIB source`: http://www.cs.unc.edu/~isenburg/lastools/download/laslib.zip
-.. _`laszip.exe`: http://www.cs.unc.edu/~isenburg/lastools/
-.. _`laszip`: http://www.cs.unc.edu/~isenburg/lastools/download/laslib.zip
+.. _`LASlib`: http://lastools.org/download/laslib_README.txt
+.. _`LASlib source`: http://lastools.org/download/laslib.zip
+.. _`laszip.exe`: http://lastools.org/
+.. _`paper`: http://lastools.org/download/laslib.pdf
+.. _`video`: http://www.youtube.com/watch?v=A0s0fVktj6U
