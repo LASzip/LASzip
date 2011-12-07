@@ -30,8 +30,9 @@ Binaries
     include files to compile LASzip into your own application. `libLAS`_ 
     binaries through `OSGeo4W`_ also link LASzip.
 
-  - A Windows binary `laszip.exe`_ and a Linux makefile to build `laszip`_ are
-    available for explicit compression (decompression) of LAS (LAZ) files.    
+  - For explicit compression (decompression) of LAS (LAZ) files a Windows
+    binary `laszip.exe`_ is available, as well as the source code and a
+    makefile to build `laszip`_ on Windows, Linux, or MacOS.
 
 
 Documentation
@@ -137,6 +138,7 @@ Users of LASzip
 .. _`libLAS`: http://liblas.org
 .. _`LASlib`: http://lastools.org/download/laslib_README.txt
 .. _`LASlib source`: http://lastools.org/download/laslib.zip
+.. _`laszip`: http://lastools.org/download/laszip.zip
 .. _`laszip.exe`: http://lastools.org/
-.. _`paper`: http://lastools.org/download/laslib.pdf
+.. _`paper`: http://lastools.org/download/laszip.pdf
 .. _`video`: http://www.youtube.com/watch?v=A0s0fVktj6U
