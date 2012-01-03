@@ -71,6 +71,7 @@ private:
   U32 chunk_count;
   U32 current_chunk;
   U32 number_chunks;
+  U32 tabled_chunks;
   I64* chunk_starts;
   U32* chunk_totals;
   BOOL read_chunk_table();
