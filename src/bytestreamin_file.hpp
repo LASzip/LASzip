@@ -47,7 +47,7 @@ public:
 /* read a single byte                                        */
   U32 getByte();
 /* read an array of bytes                                    */
-  BOOL getBytes(U8* bytes, const U32 num_bytes);
+  void getBytes(U8* bytes, const U32 num_bytes);
 /* is the stream seekable (e.g. stdin is not)                */
   BOOL isSeekable() const;
 /* get current position of stream                            */
@@ -67,17 +67,17 @@ class ByteStreamInFileLE : public ByteStreamInFile
 public:
   ByteStreamInFileLE(FILE* file);
 /* read 16 bit low-endian field                              */
-  BOOL get16bitsLE(U8* bytes);
+  void get16bitsLE(U8* bytes);
 /* read 32 bit low-endian field                              */
-  BOOL get32bitsLE(U8* bytes);
+  void get32bitsLE(U8* bytes);
 /* read 64 bit low-endian field                              */
-  BOOL get64bitsLE(U8* bytes);
+  void get64bitsLE(U8* bytes);
 /* read 16 bit big-endian field                              */
-  BOOL get16bitsBE(U8* bytes);
+  void get16bitsBE(U8* bytes);
 /* read 32 bit big-endian field                              */
-  BOOL get32bitsBE(U8* bytes);
+  void get32bitsBE(U8* bytes);
 /* read 64 bit big-endian field                              */
-  BOOL get64bitsBE(U8* bytes);
+  void get64bitsBE(U8* bytes);
 private:
   U8 swapped[8];
 };
@@ -87,17 +87,17 @@ class ByteStreamInFileBE : public ByteStreamInFile
 public:
   ByteStreamInFileBE(FILE* file);
 /* read 16 bit low-endian field                              */
-  BOOL get16bitsLE(U8* bytes);
+  void get16bitsLE(U8* bytes);
 /* read 32 bit low-endian field                              */
-  BOOL get32bitsLE(U8* bytes);
+  void get32bitsLE(U8* bytes);
 /* read 64 bit low-endian field                              */
-  BOOL get64bitsLE(U8* bytes);
+  void get64bitsLE(U8* bytes);
 /* read 16 bit big-endian field                              */
-  BOOL get16bitsBE(U8* bytes);
+  void get16bitsBE(U8* bytes);
 /* read 32 bit big-endian field                              */
-  BOOL get32bitsBE(U8* bytes);
+  void get32bitsBE(U8* bytes);
 /* read 64 bit big-endian field                              */
-  BOOL get64bitsBE(U8* bytes);
+  void get64bitsBE(U8* bytes);
 private:
   U8 swapped[8];
 };
@@ -117,9 +117,12 @@ inline U32 ByteStreamInFile::getByte()
   return (U32)byte;
 }
 
-inline BOOL ByteStreamInFile::getBytes(U8* bytes, const U32 num_bytes)
+inline void ByteStreamInFile::getBytes(U8* bytes, const U32 num_bytes)
 {
-  return (fread(bytes, 1, num_bytes, file) == num_bytes);
+  if (fread(bytes, 1, num_bytes, file) != num_bytes)
+  {
+    throw EOF;
+  }
 }
 
 inline BOOL ByteStreamInFile::isSeekable() const
@@ -158,120 +161,96 @@ inline ByteStreamInFileLE::ByteStreamInFileLE(FILE* file) : ByteStreamInFile(fil
 {
 }
 
-inline BOOL ByteStreamInFileLE::get16bitsLE(U8* bytes)
+inline void ByteStreamInFileLE::get16bitsLE(U8* bytes)
 {
-  return getBytes(bytes, 2);
+  getBytes(bytes, 2);
 }
 
-inline BOOL ByteStreamInFileLE::get32bitsLE(U8* bytes)
+inline void ByteStreamInFileLE::get32bitsLE(U8* bytes)
 {
-  return getBytes(bytes, 4);
+  getBytes(bytes, 4);
 }
 
-inline BOOL ByteStreamInFileLE::get64bitsLE(U8* bytes)
+inline void ByteStreamInFileLE::get64bitsLE(U8* bytes)
 {
-  return getBytes(bytes, 8);
+  getBytes(bytes, 8);
 }
 
-inline BOOL ByteStreamInFileLE::get16bitsBE(U8* bytes)
+inline void ByteStreamInFileLE::get16bitsBE(U8* bytes)
 {
-  if (getBytes(swapped, 2))
-  {
-    bytes[0] = swapped[1];
-    bytes[1] = swapped[0];
-    return TRUE;
-  }
-  return FALSE;
+  getBytes(swapped, 2);
+  bytes[0] = swapped[1];
+  bytes[1] = swapped[0];
 }
 
-inline BOOL ByteStreamInFileLE::get32bitsBE(U8* bytes)
+inline void ByteStreamInFileLE::get32bitsBE(U8* bytes)
 {
-  if (getBytes(swapped, 4))
-  {
-    bytes[0] = swapped[3];
-    bytes[1] = swapped[2];
-    bytes[2] = swapped[1];
-    bytes[3] = swapped[0];
-    return TRUE;
-  }
-  return FALSE;
+  getBytes(swapped, 4);
+  bytes[0] = swapped[3];
+  bytes[1] = swapped[2];
+  bytes[2] = swapped[1];
+  bytes[3] = swapped[0];
 }
 
-inline BOOL ByteStreamInFileLE::get64bitsBE(U8* bytes)
+inline void ByteStreamInFileLE::get64bitsBE(U8* bytes)
 {
-  if (getBytes(swapped, 8))
-  {
-    bytes[0] = swapped[7];
-    bytes[1] = swapped[6];
-    bytes[2] = swapped[5];
-    bytes[3] = swapped[4];
-    bytes[4] = swapped[3];
-    bytes[5] = swapped[2];
-    bytes[6] = swapped[1];
-    bytes[7] = swapped[0];
-    return TRUE;
-  }
-  return FALSE;
+  getBytes(swapped, 8);
+  bytes[0] = swapped[7];
+  bytes[1] = swapped[6];
+  bytes[2] = swapped[5];
+  bytes[3] = swapped[4];
+  bytes[4] = swapped[3];
+  bytes[5] = swapped[2];
+  bytes[6] = swapped[1];
+  bytes[7] = swapped[0];
 }
 
 inline ByteStreamInFileBE::ByteStreamInFileBE(FILE* file) : ByteStreamInFile(file)
 {
 }
 
-inline BOOL ByteStreamInFileBE::get16bitsLE(U8* bytes)
+inline void ByteStreamInFileBE::get16bitsLE(U8* bytes)
 {
-  if (getBytes(swapped, 2))
-  {
-    bytes[0] = swapped[1];
-    bytes[1] = swapped[0];
-    return TRUE;
-  }
-  return FALSE;
+  getBytes(swapped, 2);
+  bytes[0] = swapped[1];
+  bytes[1] = swapped[0];
 }
 
-inline BOOL ByteStreamInFileBE::get32bitsLE(U8* bytes)
+inline void ByteStreamInFileBE::get32bitsLE(U8* bytes)
 {
-  if (getBytes(swapped, 4))
-  {
-    bytes[0] = swapped[3];
-    bytes[1] = swapped[2];
-    bytes[2] = swapped[1];
-    bytes[3] = swapped[0];
-    return TRUE;
-  }
-  return FALSE;
+  getBytes(swapped, 4);
+  bytes[0] = swapped[3];
+  bytes[1] = swapped[2];
+  bytes[2] = swapped[1];
+  bytes[3] = swapped[0];
 }
 
-inline BOOL ByteStreamInFileBE::get64bitsLE(U8* bytes)
+inline void ByteStreamInFileBE::get64bitsLE(U8* bytes)
 {
-  if (getBytes(swapped, 8))
-  {
-    bytes[0] = swapped[7];
-    bytes[1] = swapped[6];
-    bytes[2] = swapped[5];
-    bytes[3] = swapped[4];
-    bytes[4] = swapped[3];
-    bytes[5] = swapped[2];
-    bytes[6] = swapped[1];
-    bytes[7] = swapped[0];
-    return TRUE;
-  }
-  return FALSE;
+  getBytes(swapped, 8);
+  bytes[0] = swapped[7];
+  bytes[1] = swapped[6];
+  bytes[2] = swapped[5];
+  bytes[3] = swapped[4];
+  bytes[4] = swapped[3];
+  bytes[5] = swapped[2];
+  bytes[6] = swapped[1];
+  bytes[7] = swapped[0];
 }
 
-inline BOOL ByteStreamInFileBE::get16bitsBE(U8* bytes)
+inline void ByteStreamInFileBE::get16bitsBE(U8* bytes)
 {
-  return getBytes(bytes, 2);
+  getBytes(bytes, 2);
 }
 
-inline BOOL ByteStreamInFileBE::get32bitsBE(U8* bytes)
+inline void ByteStreamInFileBE::get32bitsBE(U8* bytes)
 {
-  return getBytes(bytes, 4);
+  getBytes(bytes, 4);
 }
 
-inline BOOL ByteStreamInFileBE::get64bitsBE(U8* bytes)
+inline void ByteStreamInFileBE::get64bitsBE(U8* bytes)
 {
-  return getBytes(bytes, 8);
+  getBytes(bytes, 8);
 }
 
 #endif
