@@ -124,6 +124,18 @@ BOOL LASwritePoint::setup(const U32 num_items, const LASitem* items, const LASzi
     case LASitem::BYTE:
       writers_raw[i] = new LASwriteItemRaw_BYTE(items[i].size);
       break;
+    case LASitem::POINT14:
+      if (IS_LITTLE_ENDIAN())
+        writers_raw[i] = new LASwriteItemRaw_POINT14_LE();
+      else
+        return FALSE;
+      break;
+    case LASitem::RGBNIR14:
+      if (IS_LITTLE_ENDIAN())
+        writers_raw[i] = new LASwriteItemRaw_RGBNIR14_LE();
+      else
+        writers_raw[i] = new LASwriteItemRaw_RGBNIR14_BE();
+      break;
     default:
       return FALSE;
     }
