@@ -36,6 +36,7 @@
 #include "lasreaditemcompressed_v1.hpp"
 #include "lasreaditemcompressed_v2.hpp"
 
+#include <stdlib.h>
 #include <string.h>
 
 LASreadPoint::LASreadPoint()
@@ -52,9 +53,11 @@ LASreadPoint::LASreadPoint()
   chunk_count = 0;
   current_chunk = 0;
   number_chunks = 0;
+  tabled_chunks = 0;
   chunk_totals = 0;
   chunk_starts = 0;
   // used for seeking
+  point_start = 0;
   seek_point = 0;
 }
 
@@ -123,6 +126,18 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, const LASzip* lasz
       break;
     case LASitem::BYTE:
       readers_raw[i] = new LASreadItemRaw_BYTE(items[i].size);
+      break;
+    case LASitem::POINT14:
+      if (IS_LITTLE_ENDIAN())
+        readers_raw[i] = new LASreadItemRaw_POINT14_LE();
+      else
+        return FALSE;
+      break;
+    case LASitem::RGBNIR14:
+      if (IS_LITTLE_ENDIAN())
+        readers_raw[i] = new LASreadItemRaw_RGBNIR14_LE();
+      else
+        readers_raw[i] = new LASreadItemRaw_RGBNIR14_BE();
       break;
     default:
       return FALSE;
@@ -255,7 +270,19 @@ BOOL LASreadPoint::seek(const U32 current, const U32 target)
         target_chunk = target/chunk_size;
         delta = target%chunk_size;
       }
-      if (current_chunk != target_chunk || current > target)
+      if (target_chunk >= tabled_chunks)
+      {
+        if (current_chunk < (tabled_chunks-1))
+        {
+          dec->done();
+          current_chunk = (tabled_chunks-1);
+          instream->seek(chunk_starts[current_chunk]);
+          init(instream);
+          chunk_count = 0;
+        }
+        delta += (chunk_size*(target_chunk-current_chunk) - chunk_count);
+      }
+      else if (current_chunk != target_chunk || current > target)
       {
         dec->done();
         current_chunk = target_chunk;
@@ -306,12 +333,22 @@ BOOL LASreadPoint::read(U8* const * point)
       if (chunk_count == chunk_size)
       {
         current_chunk++;
-        if (chunk_totals)
+        dec->done();
+        init(instream);
+        if (tabled_chunks == current_chunk) // no or incomplete chunk table?
+        {
+          if (current_chunk == number_chunks)
+          {
+            number_chunks += 256;
+            chunk_starts = (I64*)realloc(chunk_starts, sizeof(I64)*number_chunks);
+          }
+          chunk_starts[tabled_chunks] = point_start; // needs fixing
+          tabled_chunks++;
+        }
+        else if (chunk_totals) // variable sized chunks?
         {
           chunk_size = chunk_totals[current_chunk+1]-chunk_totals[current_chunk];
         }
-        dec->done();
-        init(instream);
         chunk_count = 0;
       }
       chunk_count++;
@@ -360,88 +397,110 @@ BOOL LASreadPoint::done()
 
 BOOL LASreadPoint::read_chunk_table()
 {
-  I64 chunks_start = instream->tell();
+  // read the 8 bytes that store the location of the chunk table
   I64 chunk_table_start_position;
-  if (!instream->get64bitsLE((U8*)&chunk_table_start_position))
+  try { instream->get64bitsLE((U8*)&chunk_table_start_position); } catch(...)
   {
     return FALSE;
   }
-  if (chunk_table_start_position == chunks_start)
+
+  // this is where the chunks start
+  I64 chunks_start = instream->tell();
+
+  if ((chunk_table_start_position + 8) == chunks_start)
   {
-    // compressor was interrupted and did not write chunk table 
-    number_chunks = 0;
+    // then compressor was interrupted before getting a chance to write the chunk table
+    number_chunks = 256;
+    chunk_starts = (I64*)malloc(sizeof(I64)*number_chunks);
+    if (chunk_starts == 0)
+    {
+      return FALSE;
+    }
+    chunk_starts[0] = chunks_start;
+    tabled_chunks = 1;
     return TRUE;
   }
+
   if (!instream->isSeekable())
   {
-    // we cannot seek to the chunk table and back
-    number_chunks = 0;
+    // if the stream is not seekable we cannot seek to the chunk table but won't need it anyways
+    tabled_chunks = 0;
     return TRUE;
   }
-  chunks_start += 8;
+
   if (chunk_table_start_position == -1)
   {
-    // streaming compressor was wrote chunk table start at the end
+    // the compressor was writing to a non-seekable stream and wrote the chunk table start at the end
     if (!instream->seekEnd(8))
     {
       return FALSE;
     }
-    if (!instream->get64bitsLE((U8*)&chunk_table_start_position))
+    try { instream->get64bitsLE((U8*)&chunk_table_start_position); } catch(...)
     {
       return FALSE;
     }
   }
-  else
+
+  // read the chunk table
+  try
   {
     instream->seek(chunk_table_start_position);
-    U32 dummy;
-    if (!instream->get32bitsLE((U8*)&dummy))
+    U32 version;
+    instream->get32bitsLE((U8*)&version);
+    if (version != 0)
     {
-      // the file transfer was interrupted. no chunk table.
-      if (!instream->seek(chunks_start))
+      throw;
+    }
+    instream->get32bitsLE((U8*)&number_chunks);
+    if (chunk_totals) delete [] chunk_totals;
+    chunk_totals = 0;
+    if (chunk_starts) free(chunk_starts);
+    chunk_starts = 0;
+    if (chunk_size == U32_MAX)
+    {
+      chunk_totals = new U32[number_chunks+1];
+      if (chunk_totals == 0)
       {
-        return FALSE;
+        throw;
       }
-      number_chunks = 0;
-      return TRUE;
+      chunk_totals[0] = 0;
+    }
+    chunk_starts = (I64*)malloc(sizeof(I64)*(number_chunks+1));
+    if (chunk_starts == 0)
+    {
+      throw;
+    }
+    chunk_starts[0] = chunks_start;
+    tabled_chunks = 1;
+    if (number_chunks > 0)
+    {
+      U32 i;
+      dec->init(instream);
+      IntegerCompressor ic(dec, 32, 2);
+      ic.initDecompressor();
+      for (i = 1; i <= number_chunks; i++)
+      {
+        if (chunk_size == U32_MAX) chunk_totals[i] = ic.decompress((i>1 ? chunk_totals[i-1] : 0), 0);
+        chunk_starts[i] = ic.decompress((i>1 ? (U32)(chunk_starts[i-1]) : 0), 1);
+        tabled_chunks++;
+      }
+      dec->done();
+      for (i = 1; i <= number_chunks; i++)
+      {
+        if (chunk_size == U32_MAX) chunk_totals[i] += chunk_totals[i-1];
+        chunk_starts[i] += chunk_starts[i-1];
+      }
     }
   }
-  if (!instream->seek(chunk_table_start_position))
+  catch (...)
   {
-    return FALSE;
-  }
-  U32 version;
-  if (!instream->get32bitsLE((U8*)&version) || version != 0)
-  {
-    return FALSE;
-  }
-  if (!instream->get32bitsLE((U8*)&number_chunks))
-  {
-    return FALSE;
-  }
-  if (chunk_totals) delete [] chunk_totals;
-  chunk_totals = 0;
-  if (chunk_starts) delete [] chunk_starts;
-  chunk_starts = 0;
-  if (chunk_size == U32_MAX) chunk_totals = new U32[number_chunks+1];
-  chunk_starts = new I64[number_chunks+1];
-  if (chunk_size == U32_MAX) chunk_totals[0] = 0;
-  chunk_starts[0] = chunks_start;
-  if (number_chunks > 0)
-  {
+    // something went wrong while reading the chunk table
+    if (chunk_totals) delete [] chunk_totals;
+    chunk_totals = 0;
+    // fix as many additional chunk_starts as possible
     U32 i;
-    dec->init(instream);
-    IntegerCompressor ic(dec, 32, 2);
-    ic.initDecompressor();
-    for (i = 1; i <= number_chunks; i++)
+    for (i = 1; i < tabled_chunks; i++)
     {
-      if (chunk_size == U32_MAX) chunk_totals[i] = ic.decompress((i>1 ? chunk_totals[i-1] : 0), 0);
-      chunk_starts[i] = ic.decompress((i>1 ? (U32)(chunk_starts[i-1]) : 0), 1);
-    }
-    dec->done();
-    for (i = 1; i <= number_chunks; i++)
-    {
-      if (chunk_size == U32_MAX) chunk_totals[i] += chunk_totals[i-1];
       chunk_starts[i] += chunk_starts[i-1];
     }
   }
@@ -489,6 +548,7 @@ LASreadPoint::~LASreadPoint()
     delete dec;
   }
 
+  if (chunk_totals) delete [] chunk_totals;
   if (chunk_starts) delete [] chunk_starts;
 
   if (seek_point)
