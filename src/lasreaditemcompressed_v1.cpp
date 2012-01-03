@@ -129,7 +129,7 @@ BOOL LASreadItemCompressed_POINT10_v1::init(const U8* item)
   return TRUE;
 }
 
-inline BOOL LASreadItemCompressed_POINT10_v1::read(U8* item)
+inline void LASreadItemCompressed_POINT10_v1::read(U8* item)
 {
   // find median difference for x and y from 3 preceding differences
   I32 median_x;
@@ -247,7 +247,6 @@ inline BOOL LASreadItemCompressed_POINT10_v1::read(U8* item)
 
   // copy the last point
   memcpy(item, last_item, 20);
-  return TRUE;
 }
 
 /*
@@ -292,7 +291,7 @@ BOOL LASreadItemCompressed_GPSTIME11_v1::init(const U8* item)
   return TRUE;
 }
 
-inline BOOL LASreadItemCompressed_GPSTIME11_v1::read(U8* item)
+inline void LASreadItemCompressed_GPSTIME11_v1::read(U8* item)
 {
   I32 multi;
   if (last_gpstime_diff == 0) // if the last integer difference was zero
@@ -360,7 +359,6 @@ inline BOOL LASreadItemCompressed_GPSTIME11_v1::read(U8* item)
     }
   }
   *((I64*)item) = last_gpstime.i64;
-  return TRUE;
 }
 
 /*
@@ -403,7 +401,7 @@ BOOL LASreadItemCompressed_RGB12_v1::init(const U8* item)
   return TRUE;
 }
 
-inline BOOL LASreadItemCompressed_RGB12_v1::read(U8* item)
+inline void LASreadItemCompressed_RGB12_v1::read(U8* item)
 {
   U32 sym = dec->decodeSymbol(m_byte_used);
   if (sym & (1 << 0)) ((U16*)item)[0] = (U16)ic_rgb->decompress(((U16*)last_item)[0]&255, 0);
@@ -419,7 +417,6 @@ inline BOOL LASreadItemCompressed_RGB12_v1::read(U8* item)
   if (sym & (1 << 5)) ((U16*)item)[2] |= (((U16)ic_rgb->decompress(((U16*)last_item)[2]>>8, 5)) << 8);
   else ((U16*)item)[2] |= (((U16*)last_item)[2]&0xFF00);
   memcpy(last_item, item, 6);
-  return TRUE;
 }
 
 /*
@@ -496,7 +493,7 @@ BOOL LASreadItemCompressed_WAVEPACKET13_v1::init(const U8* item)
   return TRUE;
 }
 
-inline BOOL LASreadItemCompressed_WAVEPACKET13_v1::read(U8* item)
+inline void LASreadItemCompressed_WAVEPACKET13_v1::read(U8* item)
 {
   item[0] = (U8)(dec->decodeSymbol(m_packet_index));
   item++;
@@ -526,7 +523,6 @@ inline BOOL LASreadItemCompressed_WAVEPACKET13_v1::read(U8* item)
   ((LASwavepacket13*)item)->y.i32 = ic_xyz->decompress(((LASwavepacket13*)last_item)->y.i32, 1);
   ((LASwavepacket13*)item)->z.i32 = ic_xyz->decompress(((LASwavepacket13*)last_item)->z.i32, 2);
   memcpy(last_item, item, 28);
-  return TRUE;
 }
 
 /*
@@ -568,7 +564,7 @@ BOOL LASreadItemCompressed_BYTE_v1::init(const U8* item)
   return TRUE;
 }
 
-inline BOOL LASreadItemCompressed_BYTE_v1::read(U8* item)
+inline void LASreadItemCompressed_BYTE_v1::read(U8* item)
 {
   U32 i;
   for (i = 0; i < number; i++)
@@ -576,5 +572,4 @@ inline BOOL LASreadItemCompressed_BYTE_v1::read(U8* item)
     item[i] = (U8)(ic_byte->decompress(last_item[i], i));
   }
   memcpy(last_item, item, number);
-  return TRUE;
 }
