@@ -189,7 +189,7 @@ bool LASzip::return_error(const char* error)
   char err[256];
   sprintf(err, "%s (LASzip v%d.%dr%d)", error, LASZIP_VERSION_MAJOR, LASZIP_VERSION_MINOR, LASZIP_VERSION_REVISION);
   if (error_string) free(error_string);
-  error_string = LASCopyString(err);
+  error_string = strdup(err);
   return false;
 }
 
@@ -232,6 +232,14 @@ bool LASzip::check_item(const LASitem* item)
   case LASitem::BYTE:
     if (item->size < 1) return return_error("BYTE has size < 1");
     if (item->version > 2) return return_error("BYTE has version > 2");
+    break;
+  case LASitem::POINT14:
+    if (item->size != 30) return return_error("POINT14 has size != 30");
+    if (item->version > 0) return return_error("POINT14 has version > 0");
+    break;
+  case LASitem::RGBNIR14:
+    if (item->size != 8) return return_error("RGBNIR14 has size != 8");
+    if (item->version > 0) return return_error("RGBNIR14 has version > 0");
     break;
   default:
     if (1)
@@ -311,8 +319,10 @@ bool LASzip::setup(const U16 num_items, const LASitem* items, const U16 compress
 
 bool LASzip::setup(U16* num_items, LASitem** items, const U8 point_type, const U16 point_size, const U16 compressor)
 {
+  BOOL have_point14 = FALSE;
   BOOL have_gps_time = FALSE;
   BOOL have_rgb = FALSE;
+  BOOL have_nir = FALSE;
   BOOL have_wavepacket = FALSE;
   I32 extra_bytes_number = 0;
 
@@ -346,6 +356,33 @@ bool LASzip::setup(U16* num_items, LASitem** items, const U8 point_type, const U
     have_wavepacket = TRUE;
     extra_bytes_number = (I32)point_size - 63;
     break;
+  case 6:
+    have_point14 = TRUE;
+    extra_bytes_number = (I32)point_size - 30;
+    break;
+  case 7:
+    have_point14 = TRUE;
+    have_rgb = TRUE;
+    extra_bytes_number = (I32)point_size - 36;
+    break;
+  case 8:
+    have_point14 = TRUE;
+    have_rgb = TRUE;
+    have_nir = TRUE;
+    extra_bytes_number = (I32)point_size - 38;
+    break;
+  case 9:
+    have_point14 = TRUE;
+    have_wavepacket = TRUE;
+    extra_bytes_number = (I32)point_size - 59;
+    break;
+  case 10:
+    have_point14 = TRUE;
+    have_rgb = TRUE;
+    have_nir = TRUE;
+    have_wavepacket = TRUE;
+    extra_bytes_number = (I32)point_size - 67;
+    break;
   default:
     if (1)
     {
@@ -368,9 +405,18 @@ bool LASzip::setup(U16* num_items, LASitem** items, const U8 point_type, const U
   (*items) = new LASitem[*num_items];
 
   U16 i = 1;
-  (*items)[0].type = LASitem::POINT10;
-  (*items)[0].size = 20;
-  (*items)[0].version = 0;
+  if (have_point14)
+  {
+    (*items)[0].type = LASitem::POINT14;
+    (*items)[0].size = 30;
+    (*items)[0].version = 0;
+  }
+  else
+  {
+    (*items)[0].type = LASitem::POINT10;
+    (*items)[0].size = 20;
+    (*items)[0].version = 0;
+  }
   if (have_gps_time)
   {
     (*items)[i].type = LASitem::GPSTIME11;
@@ -380,10 +426,19 @@ bool LASzip::setup(U16* num_items, LASitem** items, const U8 point_type, const U
   }
   if (have_rgb)
   {
-    (*items)[i].type = LASitem::RGB12;
-    (*items)[i].size = 6;
-    (*items)[i].version = 0;
-    i++;
+    if (have_nir)
+    {
+      (*items)[i].type = LASitem::RGBNIR14;
+      (*items)[i].size = 8;
+      (*items)[i].version = 0;
+    }
+    else
+    {
+      (*items)[i].type = LASitem::RGB12;
+      (*items)[i].size = 6;
+      (*items)[i].version = 0;
+      i++;
+    }
   }
   if (have_wavepacket)
   {
@@ -474,134 +529,244 @@ bool LASzip::is_standard(const U16 num_items, const LASitem* items, U8* point_ty
   // the maximal number of items is 5
   if (num_items > 5) return return_error("more than five LASitem entries");
 
-  // all standard point types start with POINT10
-  if (!items[0].is_type(LASitem::POINT10)) return_error("first LASitem is not POINT10");
-
-  // consider all the other combinations
-  if (num_items == 1)
+  if (items[0].is_type(LASitem::POINT10))
   {
-    if (point_type) *point_type = 0;
-    if (record_length) assert(*record_length == 20);
-    return true;
-  }
-  else
-  {
-    if (items[1].is_type(LASitem::GPSTIME11))
+    // consider all the POINT10 combinations
+    if (num_items == 1)
     {
-      if (num_items == 2)
+      if (point_type) *point_type = 0;
+      if (record_length) assert(*record_length == 20);
+      return true;
+    }
+    else
+    {
+      if (items[1].is_type(LASitem::GPSTIME11))
       {
-        if (point_type) *point_type = 1;
-        if (record_length) assert(*record_length == 28);
-        return true;
-      }
-      else
-      {
-        if (items[2].is_type(LASitem::RGB12))
+        if (num_items == 2)
         {
-          if (num_items == 3)
+          if (point_type) *point_type = 1;
+          if (record_length) assert(*record_length == 28);
+          return true;
+        }
+        else
+        {
+          if (items[2].is_type(LASitem::RGB12))
           {
-            if (point_type) *point_type = 3;
-            if (record_length) assert(*record_length == 34);
-            return true;
-          }
-          else
-          {
-            if (items[3].is_type(LASitem::WAVEPACKET13))
+            if (num_items == 3)
             {
-              if (num_items == 4)
+              if (point_type) *point_type = 3;
+              if (record_length) assert(*record_length == 34);
+              return true;
+            }
+            else
+            {
+              if (items[3].is_type(LASitem::WAVEPACKET13))
               {
-                if (point_type) *point_type = 5;
-                if (record_length) assert(*record_length == 63);
-                return true;
-              }
-              else
-              {
-                if (items[4].is_type(LASitem::BYTE))
+                if (num_items == 4)
                 {
-                  if (num_items == 5)
+                  if (point_type) *point_type = 5;
+                  if (record_length) assert(*record_length == 63);
+                  return true;
+                }
+                else
+                {
+                  if (items[4].is_type(LASitem::BYTE))
                   {
-                    if (point_type) *point_type = 5;
-                    if (record_length) assert(*record_length == (63 + items[4].size));
-                    return true;
+                    if (num_items == 5)
+                    {
+                      if (point_type) *point_type = 5;
+                      if (record_length) assert(*record_length == (63 + items[4].size));
+                      return true;
+                    }
                   }
                 }
               }
-            }
-            else if (items[3].is_type(LASitem::BYTE))
-            {
-              if (num_items == 4)
+              else if (items[3].is_type(LASitem::BYTE))
               {
-                if (point_type) *point_type = 3;
-                if (record_length) assert(*record_length == (34 + items[3].size));
-                return true;
+                if (num_items == 4)
+                {
+                  if (point_type) *point_type = 3;
+                  if (record_length) assert(*record_length == (34 + items[3].size));
+                  return true;
+                }
               }
             }
           }
-        }
-        else if (items[2].is_type(LASitem::WAVEPACKET13))
-        {
-          if (num_items == 3)
+          else if (items[2].is_type(LASitem::WAVEPACKET13))
           {
-            if (point_type) *point_type = 4;
-            if (record_length) assert(*record_length == 57);
-            return true;
-          }
-          else 
-          {
-            if (items[3].is_type(LASitem::BYTE))
+            if (num_items == 3)
             {
-              if (num_items == 4)
+              if (point_type) *point_type = 4;
+              if (record_length) assert(*record_length == 57);
+              return true;
+            }
+            else 
+            {
+              if (items[3].is_type(LASitem::BYTE))
               {
-                if (point_type) *point_type = 4;
-                if (record_length) assert(*record_length == (57 + items[3].size));
-                return true;
+                if (num_items == 4)
+                {
+                  if (point_type) *point_type = 4;
+                  if (record_length) assert(*record_length == (57 + items[3].size));
+                  return true;
+                }
               }
             }
           }
-        }
-        else if (items[2].is_type(LASitem::BYTE))
-        {
-          if (num_items == 3)
+          else if (items[2].is_type(LASitem::BYTE))
           {
-            if (point_type) *point_type = 1;
-            if (record_length) assert(*record_length == (28 + items[2].size));
-            return true;
+            if (num_items == 3)
+            {
+              if (point_type) *point_type = 1;
+              if (record_length) assert(*record_length == (28 + items[2].size));
+              return true;
+            }
           }
         }
       }
-    }
-    else if (items[1].is_type(LASitem::RGB12))
-    {
-      if (num_items == 2)
+      else if (items[1].is_type(LASitem::RGB12))
       {
-        if (point_type) *point_type = 2;
-        if (record_length) assert(*record_length == 26);
-        return true;
-      }
-      else
-      {
-        if (items[2].is_type(LASitem::BYTE))
+        if (num_items == 2)
         {
-          if (num_items == 3)
+          if (point_type) *point_type = 2;
+          if (record_length) assert(*record_length == 26);
+          return true;
+        }
+        else
+        {
+          if (items[2].is_type(LASitem::BYTE))
           {
-            if (point_type) *point_type = 2;
-            if (record_length) assert(*record_length == (26 + items[2].size));
-            return true;
+            if (num_items == 3)
+            {
+              if (point_type) *point_type = 2;
+              if (record_length) assert(*record_length == (26 + items[2].size));
+              return true;
+            }
           }
         }
       }
-    }
-    else if (items[1].is_type(LASitem::BYTE))
-    {
-      if (num_items == 2)
+      else if (items[1].is_type(LASitem::BYTE))
       {
-        if (point_type) *point_type = 0;
-        if (record_length) assert(*record_length == (20 + items[1].size));
-        return true;
+        if (num_items == 2)
+        {
+          if (point_type) *point_type = 0;
+          if (record_length) assert(*record_length == (20 + items[1].size));
+          return true;
+        }
       }
     }
   }
-  return return_error("LASitem array does not match LAS specification 1.3");
+  else if (items[0].is_type(LASitem::POINT14))
+  {
+    // consider all the POINT14 combinations
+    if (num_items == 1)
+    {
+      if (point_type) *point_type = 6;
+      if (record_length) assert(*record_length == 30);
+      return true;
+    }
+    else
+    {
+      if (items[1].is_type(LASitem::RGB12))
+      {
+        if (num_items == 2)
+        {
+          if (point_type) *point_type = 7;
+          if (record_length) assert(*record_length == 36);
+          return true;
+        }
+        else
+        {
+          if (items[2].is_type(LASitem::BYTE))
+          {
+            if (num_items == 3)
+            {
+              if (point_type) *point_type = 7;
+              if (record_length) assert(*record_length == (36 + items[2].size));
+              return true;
+            }
+          }
+        }
+      }
+      else if (items[1].is_type(LASitem::RGBNIR14))
+      {
+        if (num_items == 2)
+        {
+          if (point_type) *point_type = 8;
+          if (record_length) assert(*record_length == 38);
+          return true;
+        }
+        else
+        {
+          if (items[2].is_type(LASitem::WAVEPACKET13))
+          {
+            if (num_items == 3)
+            {
+              if (point_type) *point_type = 10;
+              if (record_length) assert(*record_length == 67);
+              return true;
+            }
+            else 
+            {
+              if (items[3].is_type(LASitem::BYTE))
+              {
+                if (num_items == 4)
+                {
+                  if (point_type) *point_type = 10;
+                  if (record_length) assert(*record_length == (67 + items[3].size));
+                  return true;
+                }
+              }
+            }
+          }
+          else if (items[2].is_type(LASitem::BYTE))
+          {
+            if (num_items == 3)
+            {
+              if (point_type) *point_type = 8;
+              if (record_length) assert(*record_length == (38 + items[2].size));
+              return true;
+            }
+          }
+        }
+      }
+      else if (items[1].is_type(LASitem::WAVEPACKET13))
+      {
+        if (num_items == 2)
+        {
+          if (point_type) *point_type = 9;
+          if (record_length) assert(*record_length == 59);
+          return true;
+        }
+        else
+        {
+          if (items[2].is_type(LASitem::BYTE))
+          {
+            if (num_items == 3)
+            {
+              if (point_type) *point_type = 9;
+              if (record_length) assert(*record_length == (59 + items[2].size));
+              return true;
+            }
+          }
+        }
+      }
+      else if (items[1].is_type(LASitem::BYTE))
+      {
+        if (num_items == 2)
+        {
+          if (point_type) *point_type = 6;
+          if (record_length) assert(*record_length == (30 + items[1].size));
+          return true;
+        }
+      }
+    }
+  }
+  else
+  {
+    return_error("first LASitem is neither POINT10 nor POINT14");
+  }
+  return return_error("LASitem array does not match LAS specification 1.4");
 }
 
 bool LASitem::is_type(LASitem::Type t) const
