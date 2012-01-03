@@ -25,6 +25,7 @@
   
   CHANGE HISTORY:
   
+    5 December 2011 -- learns the chunk table if it is missing (e.g. truncated LAZ)
     6 October 2011 -- large file support, ability to read with missing chunk table
     23 June 2011 -- turned on LASzip version 2.0 compressor with chunking 
     8 May 2011 -- added an option for variable chunking via chunk()
@@ -54,7 +55,7 @@ typedef long long SIGNED_INT64;
 
 #define LASZIP_VERSION_MAJOR    2
 #define LASZIP_VERSION_MINOR    0
-#define LASZIP_VERSION_REVISION 2
+#define LASZIP_VERSION_REVISION 3
 
 #define LASZIP_COMPRESSOR_NONE              0
 #define LASZIP_COMPRESSOR_POINTWISE         1
@@ -76,7 +77,7 @@ typedef long long SIGNED_INT64;
 class LASitem
 {
 public:
-  enum Type { BYTE = 0, SHORT, INT, LONG, FLOAT, DOUBLE, POINT10, GPSTIME11, RGB12, WAVEPACKET13 } type;
+  enum Type { BYTE = 0, SHORT, INT, LONG, FLOAT, DOUBLE, POINT10, GPSTIME11, RGB12, WAVEPACKET13, POINT14, RGBNIR14 } type;
   unsigned short size;
   unsigned short version;
   bool is_type(LASitem::Type t) const;
