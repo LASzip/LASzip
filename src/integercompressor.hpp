@@ -17,7 +17,7 @@
     The k-bit number is usually coded broken in two chunks. The highest
     bits are compressed using an arithmetic range table. The lower bits
     are stored raw without predicive coding. How many of the higher bits
-    are compressed can be specified with BITS_HIGH. The default is 8.
+    are compressed can be specified with bits_high. The default is 8.
 
   PROGRAMMERS:
   
@@ -44,8 +44,8 @@
   
 ===============================================================================
 */
-#ifndef INTEGER_COMPRESSOR_H
-#define INTEGER_COMPRESSOR_H
+#ifndef INTEGER_COMPRESSOR_HPP
+#define INTEGER_COMPRESSOR_HPP
 
 #include "entropyencoder.hpp"
 #include "entropydecoder.hpp"
