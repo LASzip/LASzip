@@ -39,7 +39,7 @@ class ByteStreamIn;
 class LASreadItem
 {
 public:
-  virtual BOOL read(U8* item)=0;
+  virtual void read(U8* item)=0;
 
   virtual ~LASreadItem(){};
 };
