@@ -134,7 +134,7 @@ BOOL LASreadItemCompressed_POINT10_v2::init(const U8* item)
   return TRUE;
 }
 
-inline BOOL LASreadItemCompressed_POINT10_v2::read(U8* item)
+inline void LASreadItemCompressed_POINT10_v2::read(U8* item)
 {
   U32 r, n, m, l;
   U32 k_bits;
@@ -235,7 +235,6 @@ inline BOOL LASreadItemCompressed_POINT10_v2::read(U8* item)
 
   // copy the last point
   memcpy(item, last_item, 20);
-  return TRUE;
 }
 
 /*
@@ -295,7 +294,7 @@ BOOL LASreadItemCompressed_GPSTIME11_v2::init(const U8* item)
   return TRUE;
 }
 
-inline BOOL LASreadItemCompressed_GPSTIME11_v2::read(U8* item)
+inline void LASreadItemCompressed_GPSTIME11_v2::read(U8* item)
 {
   I32 multi;
   if (last_gpstime_diff[last] == 0) // if the last integer difference was zero
@@ -320,7 +319,7 @@ inline BOOL LASreadItemCompressed_GPSTIME11_v2::read(U8* item)
     else if (multi > 2) // we switch to another sequence
     {
       last = (last+multi-2)&3;
-      return read(item);
+      read(item);
     }
   }
   else
@@ -394,11 +393,10 @@ inline BOOL LASreadItemCompressed_GPSTIME11_v2::read(U8* item)
     else if (multi >=  LASZIP_GPSTIME_MULTI_CODE_FULL)
     {
       last = (last+multi-LASZIP_GPSTIME_MULTI_CODE_FULL)&3;
-      return read(item);
+      read(item);
     }
   }
   *((I64*)item) = last_gpstime[last].i64;
-  return TRUE;
 }
 
 /*
@@ -452,7 +450,7 @@ BOOL LASreadItemCompressed_RGB12_v2::init(const U8* item)
   return TRUE;
 }
 
-inline BOOL LASreadItemCompressed_RGB12_v2::read(U8* item)
+inline void LASreadItemCompressed_RGB12_v2::read(U8* item)
 {
   U8 corr;
   I32 diff = 0;
@@ -524,7 +522,6 @@ inline BOOL LASreadItemCompressed_RGB12_v2::read(U8* item)
     ((U16*)item)[2] = ((U16*)item)[0];
   }
   memcpy(last_item, item, 6);
-  return TRUE;
 }
 
 /*
@@ -581,7 +578,7 @@ BOOL LASreadItemCompressed_BYTE_v2::init(const U8* item)
   return TRUE;
 }
 
-inline BOOL LASreadItemCompressed_BYTE_v2::read(U8* item)
+inline void LASreadItemCompressed_BYTE_v2::read(U8* item)
 {
   U32 i;
   I32 value;
@@ -591,5 +588,4 @@ inline BOOL LASreadItemCompressed_BYTE_v2::read(U8* item)
     item[i] = U8_FOLD(value);
   }
   memcpy(last_item, item, number);
-  return TRUE;
 }
