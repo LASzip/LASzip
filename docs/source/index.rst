@@ -14,13 +14,13 @@ Please note that `libLAS`_ links to the LASzip compression library while
 Source
 ..............................................................................
 
-* **2011-10-07** 
+* **2012-01-04** 
 
-  - `laszip-2.0.2.tar.gz <http://download.osgeo.org/laszip/laszip-2.0.2.tar.gz>`_ 
-    `(md5) <http://download.osgeo.org/laszip/laszip-2.0.2.tar.gz.md5>`__ 
+  - `laszip-2.1.0.tar.gz <http://download.osgeo.org/laszip/laszip-2.1.0.tar.gz>`_ 
+    `(md5) <http://download.osgeo.org/laszip/laszip-2.1.0.tar.gz.md5>`__ 
 
-  - `laszip-2.0.2.zip <http://download.osgeo.org/laszip/laszip-2.0.2.zip>`_ 
-    `(md5) <http://download.osgeo.org/liblas/laszip-2.0.2.zip.md5>`__
+  - `laszip-2.1.0.zip <http://download.osgeo.org/laszip/laszip-2.1.0.zip>`_ 
+    `(md5) <http://download.osgeo.org/liblas/laszip-2.1.0.zip.md5>`__
 
 
 Binaries
