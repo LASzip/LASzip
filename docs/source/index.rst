@@ -81,6 +81,7 @@ Download LAZ data
 
 * http://opentopography.org/
 * http://www.csc.noaa.gov/digitalcoast/data/chartstopobathy/download.html
+* https://www.lidar-online.com/product-list.php
 * http://gisfiles.wm.edu/files/lidar/
 * http://gisfiles.wm.edu/files/lidar/ESLiDAR/LiDAR_ClassifiedPointCloud/
 * http://gisfiles.wm.edu/files/lidar/a11county/LAZ/
@@ -110,6 +111,7 @@ Download LAZ data
 Users of LASzip
 ------------------------------------------------------------------------------
 
+* `Safe Software <http://www.safe.com/>`_
 * `Blom <http://www.blomasa.com/>`_
 * `Watershed Sciences, Inc. <http://www.watershedsciences.com/>`_
 * `Riegl <http://www.riegl.com/>`_
