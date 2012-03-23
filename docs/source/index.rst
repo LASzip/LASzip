@@ -76,9 +76,17 @@ without needing to decompress them onto disk first. The availability of two
 APIs, `libLAS`_ and `LASlib`_, with LASzip capability makes it very easy to
 add native LAZ support to your own software package.
 
+Software with native LAZ support
+------------------------------------------------------------------------------
+* TopoDOT by `Certainty3D <http://www.certainty3d.com/products/topodot/>`_
+* FME 2012 by `Safe Software <http://www.safe.com/>`_
+* Global Mapper 13.1 by `Blue Marble Geo <http://www.bluemarblegeo.com/>`_
+* Voyager 1.3 by `Voyager GIS <http://www.voyagergis.com/>`_
+* LAStools by `LASSO - tools to catch reality <http://www.rapidlasso.com/>`_
+* OPALS by `TU Vienna <http://www.ipf.tuwien.ac.at/opals/>`_
+
 Download LAZ data
 ------------------------------------------------------------------------------
-
 * http://opentopography.org/
 * http://www.csc.noaa.gov/digitalcoast/data/chartstopobathy/download.html
 * https://www.lidar-online.com/product-list.php
@@ -87,15 +95,10 @@ Download LAZ data
 * http://gisfiles.wm.edu/files/lidar/a11county/LAZ/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/dodge/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/douglas/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/faribault/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/fillmore/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/freeborn/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/houston/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/jackson/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/lesueur/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/martin/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/mower/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/murray/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/nobles/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/olmsted/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/pine/laz/
@@ -103,22 +106,19 @@ Download LAZ data
 * ftp://lidar.dnr.state.mn.us/data/raw/county/rice/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/rock/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/steele/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/wabasha/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/waseca/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/winona/laz/
 * http://liblas.org/samples/
 
 Users of LASzip
 ------------------------------------------------------------------------------
 
-* `Safe Software <http://www.safe.com/>`_
+* `Fugro <http://www.fugro.com/>`_
 * `Blom <http://www.blomasa.com/>`_
 * `Watershed Sciences, Inc. <http://www.watershedsciences.com/>`_
 * `Riegl <http://www.riegl.com/>`_
 * `NOAA <http://www.noaa.gov/>`_
 * `USGS <http://www.usgs.gov/>`_
 * `Dielmo 3D <http://www.dielmo.com/>`_
-* `TopoDOT <http://www.certainty3d.com/products/topodot/>`_
 * `Oregon Lidar Consortium <http://www.oregongeology.org/sub/projects/olc/default.htm>`_
 * `Minnesota Department of Natural Resources <http://www.dnr.state.mn.us/>`_
 * `US Army Corps of Engineers <http://erdc.usace.army.mil/>`_
