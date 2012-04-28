@@ -4,6 +4,7 @@
 LASzip - lossless LAS compression
 ******************************************************************************
 
+Winner of Geospatial World Forum 2012 Technology Innovation Award in LiDAR Processing.
 
 Download
 ------------------------------------------------------------------------------
