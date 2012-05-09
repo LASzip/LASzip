@@ -90,6 +90,7 @@ Download LAZ data
 ------------------------------------------------------------------------------
 * http://opentopography.org/
 * http://www.csc.noaa.gov/digitalcoast/data/chartstopobathy/download.html
+* https://tiedostopalvelu.maanmittauslaitos.fi/tp/kartta?lang=en
 * https://www.lidar-online.com/product-list.php
 * http://gisfiles.wm.edu/files/lidar/
 * http://gisfiles.wm.edu/files/lidar/ESLiDAR/LiDAR_ClassifiedPointCloud/
