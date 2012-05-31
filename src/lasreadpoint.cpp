@@ -424,6 +424,7 @@ BOOL LASreadPoint::read_chunk_table()
   if (!instream->isSeekable())
   {
     // if the stream is not seekable we cannot seek to the chunk table but won't need it anyways
+    number_chunks = U32_MAX-1;
     tabled_chunks = 0;
     return TRUE;
   }
