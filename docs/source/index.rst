@@ -109,6 +109,15 @@ Download LAZ data
 * ftp://lidar.dnr.state.mn.us/data/raw/county/rock/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/steele/laz/
 * ftp://lidar.dnr.state.mn.us/data/raw/county/winona/laz/
+* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_1/laz/
+* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_2/laz/
+* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_3/laz/
+* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_5/laz/
+* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/mn_river_basin_south_dakota/laz/
+* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/lyon/laz/
+* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/meeker/laz/
+* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/renville/laz/
+* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/redwood/laz/
 * http://liblas.org/samples/
 
 Users of LASzip
