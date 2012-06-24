@@ -142,6 +142,7 @@ Uncompressed LAS data (yet to be lazzed)
 * `Iowa LiDAR Mapping Project <http://geotree2.geog.uni.edu/IowaLidar/>`_
 * `Sacramento-San Joaquin Delta LiDAR <ftp://atlas.ca.gov/pub/delta-vision/lidar2009/>`_
 * `Illinois Height Modernization Project LiDAR <http://www.isgs.illinois.edu/nsdihome/webdocs/ilhmp/data.html>`_
+* `Alaska Energy Matanuska-Susitna LiDAR <http://matsu.gina.alaska.edu/LiDAR/>`_
 
 .. toctree::
    :hidden: 
