@@ -134,6 +134,15 @@ Users of LASzip
 * `Minnesota Department of Natural Resources <http://www.dnr.state.mn.us/>`_
 * `US Army Corps of Engineers <http://erdc.usace.army.mil/>`_
 
+Uncompressed LAS data (yet to be lazzed)
+------------------------------------------------------------------------------
+
+* `PAMAP - LiDAR data of Pennsylvania <ftp://pamap.pasda.psu.edu/pamap_lidar/>`_
+* `Puget Sound LiDAR Consortium <http://pugetsoundlidar.ess.washington.edu/lidardata/>`_
+* `Iowa LiDAR Mapping Project <http://geotree2.geog.uni.edu/IowaLidar/>`_
+* `Sacramento-San Joaquin Delta LiDAR <ftp://atlas.ca.gov/pub/delta-vision/lidar2009/>`_
+* `Illinois Height Modernization Project LiDAR <http://www.isgs.illinois.edu/nsdihome/webdocs/ilhmp/data.html>`_
+
 .. toctree::
    :hidden: 
    
