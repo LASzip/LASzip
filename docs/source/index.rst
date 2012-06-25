@@ -143,6 +143,7 @@ Uncompressed LAS data (yet to be lazzed)
 * `Sacramento-San Joaquin Delta LiDAR <ftp://atlas.ca.gov/pub/delta-vision/lidar2009/>`_
 * `Illinois Height Modernization Project LiDAR <http://www.isgs.illinois.edu/nsdihome/webdocs/ilhmp/data.html>`_
 * `Alaska Energy Matanuska-Susitna LiDAR <http://matsu.gina.alaska.edu/LiDAR/>`_
+* `Utah Salt Lake County LiDAR <http://mapserv.utah.gov/rasterindicies/lidar_raw.html>`_
 
 .. toctree::
    :hidden: 
