@@ -82,15 +82,16 @@ Software with native LAZ support
 * TopoDOT by `Certainty3D <http://www.certainty3d.com/products/topodot/>`_
 * FME 2012 by `Safe Software <http://www.safe.com/>`_
 * Global Mapper 13.1 by `Blue Marble Geo <http://www.bluemarblegeo.com/>`_
-* Voyager 1.3 by `Voyager GIS <http://www.voyagergis.com/>`_
-* LAStools by `LASSO - tools to catch reality <http://www.rapidlasso.com/>`_
+* LAStools by `rapidlasso - fast tools to catch reality <http://www.rapidlasso.com/>`_
 * OPALS by `TU Vienna <http://www.ipf.tuwien.ac.at/opals/>`_
+* Voyager 1.3 by `Voyager GIS <http://www.voyagergis.com/>`_
 
 Download LAZ data
 ------------------------------------------------------------------------------
+* open LiDAR data strategy of the `National Land Survey of Finland <https://tiedostopalvelu.maanmittauslaitos.fi/tp/kartta?lang=en>`_
+* Digital Coast data by `NOAA <http://www.csc.noaa.gov/digitalcoast/data/chartstopobathy/download.html>`_
+* LiDAR and Imagery Project by the `Matanuska-Susitna Borough <http://matsu.gina.alaska.edu/LiDAR/Point_MacKenzie/Point_Cloud/Classified.laz/>`_
 * http://opentopography.org/
-* http://www.csc.noaa.gov/digitalcoast/data/chartstopobathy/download.html
-* https://tiedostopalvelu.maanmittauslaitos.fi/tp/kartta?lang=en
 * https://www.lidar-online.com/product-list.php
 * http://gisfiles.wm.edu/files/lidar/
 * http://gisfiles.wm.edu/files/lidar/ESLiDAR/LiDAR_ClassifiedPointCloud/
@@ -133,7 +134,8 @@ Users of LASzip
 * `Oregon Lidar Consortium <http://www.oregongeology.org/sub/projects/olc/default.htm>`_
 * `Minnesota Department of Natural Resources <http://www.dnr.state.mn.us/>`_
 * `US Army Corps of Engineers <http://erdc.usace.army.mil/>`_
-
+* ...
+x
 Uncompressed LAS data (yet to be lazzed)
 ------------------------------------------------------------------------------
 
@@ -142,7 +144,6 @@ Uncompressed LAS data (yet to be lazzed)
 * `Iowa LiDAR Mapping Project <http://geotree2.geog.uni.edu/IowaLidar/>`_
 * `Sacramento-San Joaquin Delta LiDAR <ftp://atlas.ca.gov/pub/delta-vision/lidar2009/>`_
 * `Illinois Height Modernization Project LiDAR <http://www.isgs.illinois.edu/nsdihome/webdocs/ilhmp/data.html>`_
-* `Alaska Energy Matanuska-Susitna LiDAR <http://matsu.gina.alaska.edu/LiDAR/>`_
 * `Utah Salt Lake County LiDAR <http://mapserv.utah.gov/rasterindicies/lidar_raw.html>`_
 
 .. toctree::
@@ -163,6 +164,6 @@ Uncompressed LAS data (yet to be lazzed)
 .. _`LASlib`: http://lastools.org/download/laslib_README.txt
 .. _`LASlib source`: http://lastools.org/download/laslib.zip
 .. _`laszip`: http://lastools.org/download/laszip.zip
-.. _`laszip.exe`: http://lastools.org/
+.. _`laszip.exe`: http://lastools.org/download/laszip.exe
 .. _`paper`: http://lastools.org/download/laszip.pdf
 .. _`video`: http://www.youtube.com/watch?v=A0s0fVktj6U
