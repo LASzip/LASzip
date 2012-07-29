@@ -82,44 +82,25 @@ Software with native LAZ support
 * TopoDOT by `Certainty3D <http://www.certainty3d.com/products/topodot/>`_
 * FME 2012 by `Safe Software <http://www.safe.com/>`_
 * Global Mapper 13.1 by `Blue Marble Geo <http://www.bluemarblegeo.com/>`_
-* LAStools by `rapidlasso - fast tools to catch reality <http://www.rapidlasso.com/>`_
-* OPALS by `TU Vienna <http://www.ipf.tuwien.ac.at/opals/>`_
+* QT Modeler 7.1.6 by `Applied Imagery <http://www.appliedimagery.com/>`_
 * Voyager 1.3 by `Voyager GIS <http://www.voyagergis.com/>`_
+* LAStools by `rapidlasso - fast tools to catch reality <http://rapidlasso.com/>`_
+* OPALS by `TU Vienna <http://www.ipf.tuwien.ac.at/opals/>`_
 
 Download LAZ data
 ------------------------------------------------------------------------------
 * open LiDAR data strategy of the `National Land Survey of Finland <https://tiedostopalvelu.maanmittauslaitos.fi/tp/kartta?lang=en>`_
 * Digital Coast data by `NOAA <http://www.csc.noaa.gov/digitalcoast/data/chartstopobathy/download.html>`_
 * LiDAR and Imagery Project by the `Matanuska-Susitna Borough <http://matsu.gina.alaska.edu/LiDAR/Point_MacKenzie/Point_Cloud/Classified.laz/>`_
-* http://opentopography.org/
+* NSF-funded LiDAR hosting facility `OpenTopography <http://opentopo.sdsc.edu/gridsphere/gridsphere?cid=geonlidar>`_
+* Statewide LiDAR of `Elevation Mapping Project by Minnesota DNR <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/>`_
+  * counties: `brown <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/brown/laz/>`_, `chippewa <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/chippewa/laz/>`_, `chisago <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/chisago/laz/>`_, `cottonwood <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/cottonwood/laz/>`_, `crowwing <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/crowwing/laz/>`_, `dodge <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/dodge/laz/>`_, `douglas <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/douglas/laz/>`_, `faribault <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/faribault/laz/>`_, `fillmore <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/fillmore/laz/>`_, `freeborn <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/freeborn/laz/>`_, `houston <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/houston/laz/>`_, `jackson <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/jackson/laz/>`_, `kandiyohi <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/kandiyohi/laz/>`_, `kandiyohi <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/kandiyohi/laz/>`_, `lesueur <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/lesueur/laz/>`_, `lincoln <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/lincoln/laz/>`_, `lyon <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/lyon/laz/>`_, `martin <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/martin/laz/>`_, `meeker <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/meeker/laz/>`_, `mower <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/mower/laz/>`_, `murray <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/murray/laz/>`_, `nicollet <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/nicollet/laz/>`_, `nobles <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/nobles/laz/>`_, `olmsted <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/olmsted/laz/>`_, `pine <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/pine/laz/>`_, `pipestone <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/pipestone/laz/>`_, `pope <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/pope/laz/>`_, `redwood <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/redwood/laz/>`_, `renville <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/renville/laz/>`_, `rice <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/rice/laz/>`_, `rock <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/rock/laz/>`_, `sibley <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/sibley/laz/>`_, `stearns <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/stearns/laz/>`_, `steele <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/steele/laz/>`_, `swift <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/swift/laz/>`_, `wabasha <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/wabasha/laz/>`_, `waseca <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/waseca/laz/>`_, `watonwan <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/watonwan/laz/>`_, `winona <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/winona/laz/>`_, `wright <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/wright/laz/>`_, `yellowmedicine <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/yellowmedicine/laz/>`_
+  * projects: `arrowhead (block 1) <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_1/laz/>`_, `arrowhead (block 2) <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_2/laz/>`_, `arrowhead (block 3) <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_3/laz/>`_, `arrowhead (block 4) <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_4/laz/>`_, `arrowhead (block 5) <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_5/laz/>`_
+* http://liblas.org/samples/
 * https://www.lidar-online.com/product-list.php
 * http://gisfiles.wm.edu/files/lidar/
 * http://gisfiles.wm.edu/files/lidar/ESLiDAR/LiDAR_ClassifiedPointCloud/
 * http://gisfiles.wm.edu/files/lidar/a11county/LAZ/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/dodge/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/douglas/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/fillmore/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/houston/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/jackson/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/martin/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/nobles/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/olmsted/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/pine/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/pope/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/rice/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/rock/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/steele/laz/
-* ftp://lidar.dnr.state.mn.us/data/raw/county/winona/laz/
-* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_1/laz/
-* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_2/laz/
-* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_3/laz/
-* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_5/laz/
-* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/mn_river_basin_south_dakota/laz/
-* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/lyon/laz/
-* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/meeker/laz/
-* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/renville/laz/
-* ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/county/redwood/laz/
-* http://liblas.org/samples/
 
 Users of LASzip
 ------------------------------------------------------------------------------
@@ -135,8 +116,8 @@ Users of LASzip
 * `Minnesota Department of Natural Resources <http://www.dnr.state.mn.us/>`_
 * `US Army Corps of Engineers <http://erdc.usace.army.mil/>`_
 * ...
-x
-Uncompressed LAS data (yet to be lazzed)
+
+Download LAS data (yet to be laszipped)
 ------------------------------------------------------------------------------
 
 * `PAMAP - LiDAR data of Pennsylvania <ftp://pamap.pasda.psu.edu/pamap_lidar/>`_
