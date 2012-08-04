@@ -90,8 +90,8 @@ Software with native LAZ support
 Download LAZ data
 ------------------------------------------------------------------------------
 * open LiDAR data strategy of the `National Land Survey of Finland <https://tiedostopalvelu.maanmittauslaitos.fi/tp/kartta?lang=en>`_
-* Digital Coast data by `NOAA <http://www.csc.noaa.gov/digitalcoast/data/chartstopobathy/download.html>`_
-* LiDAR and Imagery Project by the `Matanuska-Susitna Borough <http://matsu.gina.alaska.edu/LiDAR/Point_MacKenzie/Point_Cloud/Classified.laz/>`_
+* `Digital Coast LiDAR <http://www.csc.noaa.gov/digitalcoast/data/chartstopobathy/download>`_ by NOAA
+* Alaska LiDAR in the `Matanuska-Susitna Borough <http://matsu.gina.alaska.edu/LiDAR/Point_MacKenzie/Point_Cloud/Classified.laz/>`_
 * NSF-funded LiDAR hosting facility `OpenTopography <http://opentopo.sdsc.edu/gridsphere/gridsphere?cid=geonlidar>`_
 
 * Statewide LiDAR of `Elevation Mapping Project by Minnesota DNR <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/>`_
@@ -101,10 +101,8 @@ Download LAZ data
   * projects: `arrowhead (block 1) <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_1/laz/>`_, `arrowhead (block 2) <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_2/laz/>`_, `arrowhead (block 3) <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_3/laz/>`_, `arrowhead (block 4) <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_4/laz/>`_, `arrowhead (block 5) <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/arrowhead/block_5/laz/>`_
 
 * http://liblas.org/samples/
+* `Virginia LiDAR <http://www.wm.edu/as/cga/Data%20Services/VALIDAR/index.php>`_ of College of William and Mary: `Eleven Coastal Counties <http://gisfiles.wm.edu/files/lidar/a11county/LAZ/>`_, `Eastern Shore <http://gisfiles.wm.edu/files/lidar/ESLiDAR/LiDAR_ClassifiedPointCloud/>`_, `Shenandoah Valley <http://gisfiles.wm.edu/files/lidar/SV/laz/>`_
 * https://www.lidar-online.com/product-list.php
-* http://gisfiles.wm.edu/files/lidar/
-* http://gisfiles.wm.edu/files/lidar/ESLiDAR/LiDAR_ClassifiedPointCloud/
-* http://gisfiles.wm.edu/files/lidar/a11county/LAZ/
 
 Users of LASzip
 ------------------------------------------------------------------------------
@@ -130,11 +128,11 @@ Download LAS data (yet to be laszipped)
 * `Sacramento-San Joaquin Delta LiDAR <ftp://atlas.ca.gov/pub/delta-vision/lidar2009/>`_
 * `Illinois Height Modernization Project LiDAR <http://www.isgs.illinois.edu/nsdihome/webdocs/ilhmp/data.html>`_
 * `Utah Salt Lake County LiDAR <http://mapserv.utah.gov/rasterindicies/lidar_raw.html>`_
+* Washington University in St. Louis: `Franklin <ftp://lidar.wustl.edu/from_WRC/Franklin/LAS_Files/>`_, `Jasper <ftp://lidar.wustl.edu/from_WRC/Jasper/Lidar_Photoscience/JasperCounty_Classified_LAS/>`_, `Washington Iron <ftp://lidar.wustl.edu/from_WRC/Washington_Iron/LAS_Files/>`_, `St. Francois <ftp://lidar.wustl.edu/from_WRC/St_Francois/LAS_Files/>`_, `Jefferson City (1) <ftp://lidar.wustl.edu/from_WRC/Cole_Callaway_Osage/08232010/JeffersonCity/Classified_LAS/>`_, `Jefferson City (2) <ftp://lidar.wustl.edu/from_WRC/Cole_Callaway_Osage/08272010/JeffersonCity/Classified_LAS/>`_, `Jefferson City (3) <ftp://lidar.wustl.edu/from_WRC/Cole_Callaway_Osage/09012010/JeffersonCity_Classified_LAS/>`_, `Jefferson Ste Genevieve <ftp://lidar.wustl.edu/from_WRC/Jefferson_Ste_Genevieve/LAS_Files/>`_, `USGS Drive <ftp://lidar.wustl.edu/USGS_Drive/BE_LIDAR/>`_, `Stone County MO <ftp://lidar.wustl.edu/Stone/Stone_County_MO_Classified_LAS_G10PD00579/>`_
+* Spain: `Pais Vasco LiDAR <ftp://ftp.geo.euskadi.net/lidar/LIDAR_2008_ETRS89/LAS/>`_
 
 .. toctree::
    :hidden: 
-   
-   data
    
 .. _`OSGeo4W`: http://trac.osgeo.org/osgeo4w
 .. _`Martin Isenburg`: http://www.cs.unc.edu/~isenburg
