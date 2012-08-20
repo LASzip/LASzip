@@ -83,6 +83,7 @@ Software with native LAZ support
 * FME 2012 by `Safe Software <http://www.safe.com/>`_
 * Global Mapper 13.1 by `Blue Marble Geo <http://www.bluemarblegeo.com/>`_
 * QT Modeler 7.1.6 by `Applied Imagery <http://www.appliedimagery.com/>`_
+* Pointools (upcoming release) by `Bentley Systems <http://www.pointools.com/>`_
 * Voyager 1.3 by `Voyager GIS <http://www.voyagergis.com/>`_
 * LAStools by `rapidlasso - fast tools to catch reality <http://rapidlasso.com/>`_
 * OPALS by `TU Vienna <http://www.ipf.tuwien.ac.at/opals/>`_
