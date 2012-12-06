@@ -90,6 +90,16 @@ Software with native LAZ support
 
 Download LAZ data
 ------------------------------------------------------------------------------
+* `Puget Sound LiDAR Consortium <http://pugetsoundlidar.ess.washington.edu/lidardata/>`_
+
+  * 2009: `douglasco <http://delta.ess.washington.edu/lazfiles/pslc2009/douglasco/>`_, `snohoriver <http://delta.ess.washington.edu/lazfiles/pslc2009/snohoriver/>`_, `umpqua <http://delta.ess.washington.edu/lazfiles/pslc2009/umpqua/>`_, `wenas <http://delta.ess.washington.edu/lazfiles/pslc2009/wenas/>`_, `wenatchee <http://delta.ess.washington.edu/lazfiles/pslc2009/wenatchee/>`_
+
+  * 2011: `kittitas <http://delta.ess.washington.edu/lazfiles/pslc2011/kittitas/>`_, `quinault <http://delta.ess.washington.edu/lazfiles/pslc2011/quinault/>`_, `rattlesnake <http://delta.ess.washington.edu/lazfiles/pslc2011/rattlesnake/>`_
+
+  * 2012: `chehalis <http://pugetsoundlidar.ess.washington.edu/lidardata/restricted/las/pslc2012/chehalis/>`_, `hoh <http://pugetsoundlidar.ess.washington.edu/lidardata/restricted/las/pslc2012/hoh/>`_, `jefferson_clallam <http://pugetsoundlidar.ess.washington.edu/lidardata/restricted/las/pslc2012/jefferson_clallam/>`_, `quinault <http://pugetsoundlidar.ess.washington.edu/lidardata/restricted/las/pslc2012/usgs_quinault/>`_, `upper_naches <http://pugetsoundlidar.ess.washington.edu/lidardata/restricted/las/pslc2012/upper_naches/>`_, 
+
+http://pugetsoundlidar.ess.washington.edu/lidardata/restricted/las/pslc2012/usgs_quinault/
+
 * open LiDAR data strategy of the `National Land Survey of Finland <https://tiedostopalvelu.maanmittauslaitos.fi/tp/kartta?lang=en>`_
 * `Digital Coast LiDAR <http://www.csc.noaa.gov/digitalcoast/data/chartstopobathy/download>`_ by NOAA
 * Alaska LiDAR in the `Matanuska-Susitna Borough <http://matsu.gina.alaska.edu/LiDAR/Point_MacKenzie/Point_Cloud/Classified.laz/>`_
@@ -127,7 +137,6 @@ Download LAS data (yet to be laszipped)
 ------------------------------------------------------------------------------
 
 * `PAMAP - LiDAR data of Pennsylvania <ftp://pamap.pasda.psu.edu/pamap_lidar/>`_
-* `Puget Sound LiDAR Consortium <http://pugetsoundlidar.ess.washington.edu/lidardata/>`_
 * `Iowa LiDAR Mapping Project <http://geotree2.geog.uni.edu/IowaLidar/>`_
 * `Sacramento-San Joaquin Delta LiDAR <ftp://atlas.ca.gov/pub/delta-vision/lidar2009/>`_
 * `Illinois Height Modernization Project LiDAR <http://www.isgs.illinois.edu/nsdihome/webdocs/ilhmp/data.html>`_
