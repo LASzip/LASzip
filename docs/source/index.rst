@@ -9,8 +9,9 @@ Winner of Geospatial World Forum `2012 Technology Innovation Award <http://www.f
 Download
 ------------------------------------------------------------------------------
 
-Please note that `libLAS`_ links to the LASzip compression library while
-`LASlib`_ embeds the LASzip codebase.
+Note that the BSD-licensed `libLAS`_ links to the LGPL-licensed LASzip library
+whereas `LASlib`_ fully integrates and enhances the LASzip codebase which adds
+a small restriction (R) for certain US entities to the LGPL (see LICENSE.txt).
 
 Source
 ..............................................................................
@@ -59,14 +60,14 @@ BSD-licensed `libLAS`_ and the LGPL-licensed `LASlib`_ can take
 advantage of LASzip to read and write compressed data.
 
 LASzip is completely lossless. It compresses bulky LAS files into compact LAZ
-files that are only 10-20 percent of the original size, accurately preserving
+files that are only 7-20 percent of the original size, accurately preserving
 every single bit. For example, compressing and decompressing the LAS file 
 lidar.las with `laszip.exe`_ as shown below results in lidar_copy.las that
 is bit-identical to lidar.las. However, the small size of lidar.laz makes it
 much easier to store, copy, transmit, or archive large amounts of LIDAR.
 
-* laszip lidar.las lidar.laz
-* laszip lidar.laz lidar_copy.las
+* laszip -i lidar.las -o lidar.laz
+* laszip -i lidar.laz -o lidar_copy.las
 
 LASzip compression can be many times smaller and many times faster than
 generic compressors like `bz2`_, `gzip`_, and `rar`_ because it knows what
@@ -82,23 +83,25 @@ Software with native LAZ support
 * TopoDOT by `Certainty3D <http://www.certainty3d.com/products/topodot/>`_
 * FME 2012 by `Safe Software <http://www.safe.com/>`_
 * Global Mapper 13.1 by `Blue Marble Geo <http://www.bluemarblegeo.com/>`_
+* RiProcess by `RIEGL LMS GmbH<http://www.riegl.com/>`_
 * QT Modeler 7.1.6 by `Applied Imagery <http://www.appliedimagery.com/>`_
 * Pointools (upcoming release) by `Bentley Systems <http://www.pointools.com/>`_
 * Voyager 1.3 by `Voyager GIS <http://www.voyagergis.com/>`_
 * LAStools by `rapidlasso - fast tools to catch reality <http://rapidlasso.com/>`_
+* Scanopy by `imagination <http://www.imagination.at/>`_
 * OPALS by `TU Vienna <http://www.ipf.tuwien.ac.at/opals/>`_
 
 Download LAZ data
 ------------------------------------------------------------------------------
 * `Puget Sound LiDAR Consortium <http://pugetsoundlidar.ess.washington.edu/lidardata/>`_
 
+  * 2007: `sumpter <http://pugetsoundlidar.ess.washington.edu/lidardata/restricted/las/pslc2007/sumpter/>`_
+
   * 2009: `douglasco <http://delta.ess.washington.edu/lazfiles/pslc2009/douglasco/>`_, `snohoriver <http://delta.ess.washington.edu/lazfiles/pslc2009/snohoriver/>`_, `umpqua <http://delta.ess.washington.edu/lazfiles/pslc2009/umpqua/>`_, `wenas <http://delta.ess.washington.edu/lazfiles/pslc2009/wenas/>`_, `wenatchee <http://delta.ess.washington.edu/lazfiles/pslc2009/wenatchee/>`_
 
   * 2011: `kittitas <http://delta.ess.washington.edu/lazfiles/pslc2011/kittitas/>`_, `quinault <http://delta.ess.washington.edu/lazfiles/pslc2011/quinault/>`_, `rattlesnake <http://delta.ess.washington.edu/lazfiles/pslc2011/rattlesnake/>`_
 
   * 2012: `chehalis <http://pugetsoundlidar.ess.washington.edu/lidardata/restricted/las/pslc2012/chehalis/>`_, `hoh <http://pugetsoundlidar.ess.washington.edu/lidardata/restricted/las/pslc2012/hoh/>`_, `jefferson_clallam <http://pugetsoundlidar.ess.washington.edu/lidardata/restricted/las/pslc2012/jefferson_clallam/>`_, `quinault <http://pugetsoundlidar.ess.washington.edu/lidardata/restricted/las/pslc2012/usgs_quinault/>`_, `upper_naches <http://pugetsoundlidar.ess.washington.edu/lidardata/restricted/las/pslc2012/upper_naches/>`_, 
-
-http://pugetsoundlidar.ess.washington.edu/lidardata/restricted/las/pslc2012/usgs_quinault/
 
 * open LiDAR data strategy of the `National Land Survey of Finland <https://tiedostopalvelu.maanmittauslaitos.fi/tp/kartta?lang=en>`_
 * `Digital Coast LiDAR <http://www.csc.noaa.gov/digitalcoast/data/chartstopobathy/download>`_ by NOAA
