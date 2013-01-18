@@ -1,10 +1,10 @@
 .. _home:
 
 ******************************************************************************
-LASzip - lossless LAS compression
+LASzip - free and lossless LiDAR compression
 ******************************************************************************
 
-Winner of Geospatial World Forum `2012 Technology Innovation Award <http://www.facebook.com/photo.php?fbid=370334049695712>`_ in LiDAR Processing and 2nd place winner for `innovative product at INTERGEO 2012 <http://gispoint.de/wia.html>`_ 
+LASzip - a product of `rapidlasso GmbH <http://rapidlasso.com/>`_ - quickly turns bulky LAS files into compact LAZ files without information loss. Terabytes of LAZ data are now available for free download from various agencies making LASzip, winner of the 2012 Geospatial World Forum `Technology Innovation Award <http://www.facebook.com/photo.php?fbid=370334049695712>`_ in LiDAR Processing and 2nd place winner for `innovative product at INTERGEO 2012 <http://gispoint.de/wia.html>`_, the de-facto standard for LiDAR compression.
 
 Download
 ------------------------------------------------------------------------------
@@ -83,13 +83,14 @@ Software with native LAZ support
 * TopoDOT by `Certainty3D <http://www.certainty3d.com/products/topodot/>`_
 * FME 2012 by `Safe Software <http://www.safe.com/>`_
 * Global Mapper 13.1 by `Blue Marble Geo <http://www.bluemarblegeo.com/>`_
-* RiProcess by `RIEGL LMS GmbH<http://www.riegl.com/>`_
+* RiProcess by `RIEGL LMS GmbH <http://www.riegl.com/>`_
 * QT Modeler 7.1.6 by `Applied Imagery <http://www.appliedimagery.com/>`_
 * Pointools (upcoming release) by `Bentley Systems <http://www.pointools.com/>`_
 * Voyager 1.3 by `Voyager GIS <http://www.voyagergis.com/>`_
 * LAStools by `rapidlasso - fast tools to catch reality <http://rapidlasso.com/>`_
 * Scanopy by `imagination <http://www.imagination.at/>`_
 * OPALS by `TU Vienna <http://www.ipf.tuwien.ac.at/opals/>`_
+* CloudCompare by `Daniel Girardeau-Montaut <http://www.danielgm.net/cc/>`_
 
 Download LAZ data
 ------------------------------------------------------------------------------
