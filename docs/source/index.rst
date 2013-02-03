@@ -120,6 +120,8 @@ Download LAZ data
 
   * Twin Cities Metro: `block a c <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/metro/block_a_c/laz/>`_, `block b <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/metro/block_b/laz/>`_, `block d <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/metro/block_d/laz/>`_, `block e <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/metro/block_e/laz/>`_, `block f <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/metro/block_f/laz/>`_, `block g <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/metro/block_g/laz/>`_, `block h <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/metro/block_h/laz/>`_, `block dakota <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/metro/block_dakota/laz/>`_, `block maple grove <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/metro/block_maple_grove/laz/>`_, `block metro <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/metro/block_metro/laz/>`_
 
+  * Central Lakes: `block 1 <ftp://ftp.lmic.state.mn.us/pub/data/elevation/lidar/projects/central_lakes/block_1/laz/>`_
+
 * http://liblas.org/samples/
 * `Virginia LiDAR <http://www.wm.edu/as/cga/Data%20Services/VALIDAR/index.php>`_ of College of William and Mary: `Eleven Coastal Counties <http://gisfiles.wm.edu/files/lidar/a11county/LAZ/>`_, `Eastern Shore <http://gisfiles.wm.edu/files/lidar/ESLiDAR/LiDAR_ClassifiedPointCloud/>`_, `Shenandoah Valley <http://gisfiles.wm.edu/files/lidar/SV/laz/>`_
 * https://www.lidar-online.com/product-list.php
