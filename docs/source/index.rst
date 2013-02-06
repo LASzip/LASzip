@@ -4,7 +4,7 @@
 LASzip - free and lossless LiDAR compression
 ******************************************************************************
 
-LASzip - a product of `rapidlasso GmbH <http://rapidlasso.com/>`_ - quickly turns bulky LAS files into compact LAZ files without information loss. Terabytes of LAZ data are now available for free download from various agencies making LASzip, winner of the 2012 Geospatial World Forum `Technology Innovation Award <http://www.facebook.com/photo.php?fbid=370334049695712>`_ in LiDAR Processing and 2nd place winner for `innovative product at INTERGEO 2012 <http://gispoint.de/wia.html>`_, the de-facto standard for LiDAR compression.
+LASzip - a free product of `rapidlasso GmbH <http://rapidlasso.com/>`_ - quickly turns bulky LAS files into compact LAZ files without information loss. Terabytes of LAZ data are now available for free download from various agencies making LASzip, winner of the 2012 Geospatial World Forum `Technology Innovation Award <http://www.facebook.com/photo.php?fbid=370334049695712>`_ in LiDAR Processing and 2nd place winner for `innovative product at INTERGEO 2012 <http://gispoint.de/wia.html>`_, the de-facto standard for LiDAR compression.
 
 Download
 ------------------------------------------------------------------------------
@@ -145,12 +145,15 @@ Users of LASzip
 Download LAS data (yet to be laszipped)
 ------------------------------------------------------------------------------
 
+* `Spring 2011 Rhode Island Statewide LiDAR Data <http://www.edc.uri.edu/rigis/data/download/lidar/2011USGS/tiles.aspx/>`_
 * `PAMAP - LiDAR data of Pennsylvania <ftp://pamap.pasda.psu.edu/pamap_lidar/>`_
 * `Iowa LiDAR Mapping Project <http://geotree2.geog.uni.edu/IowaLidar/>`_
 * `Sacramento-San Joaquin Delta LiDAR <ftp://atlas.ca.gov/pub/delta-vision/lidar2009/>`_
 * `Illinois Height Modernization Project LiDAR <http://www.isgs.illinois.edu/nsdihome/webdocs/ilhmp/data.html>`_
+* `Northwest Florida Water Management District LiDAR <http://www.nwfwmdlidar.com/>`_
 * `Utah Salt Lake County LiDAR <http://mapserv.utah.gov/rasterindicies/lidar_raw.html>`_
 * Washington University in St. Louis: `Franklin <ftp://lidar.wustl.edu/from_WRC/Franklin/LAS_Files/>`_, `Jasper <ftp://lidar.wustl.edu/from_WRC/Jasper/Lidar_Photoscience/JasperCounty_Classified_LAS/>`_, `Washington Iron <ftp://lidar.wustl.edu/from_WRC/Washington_Iron/LAS_Files/>`_, `St. Francois <ftp://lidar.wustl.edu/from_WRC/St_Francois/LAS_Files/>`_, `Jefferson City (1) <ftp://lidar.wustl.edu/from_WRC/Cole_Callaway_Osage/08232010/JeffersonCity/Classified_LAS/>`_, `Jefferson City (2) <ftp://lidar.wustl.edu/from_WRC/Cole_Callaway_Osage/08272010/JeffersonCity/Classified_LAS/>`_, `Jefferson City (3) <ftp://lidar.wustl.edu/from_WRC/Cole_Callaway_Osage/09012010/JeffersonCity_Classified_LAS/>`_, `Jefferson Ste Genevieve <ftp://lidar.wustl.edu/from_WRC/Jefferson_Ste_Genevieve/LAS_Files/>`_, `USGS Drive <ftp://lidar.wustl.edu/USGS_Drive/BE_LIDAR/>`_, `Stone County MO <ftp://lidar.wustl.edu/Stone/Stone_County_MO_Classified_LAS_G10PD00579/>`_
+* Alaska LiDAR: `Caswell Lakes <http://matsu.gina.alaska.edu/LiDAR/Caswell_Lakes/Point_Cloud/Classified/>`_, `Core Area <http://matsu.gina.alaska.edu/LiDAR/Core_Area/Point_Cloud/Classified/>`_, `Matanuska <http://matsu.gina.alaska.edu/LiDAR/Matanuska/Point_Cloud/Classified/>`_, `North Susitna <http://matsu.gina.alaska.edu/LiDAR/North_Susitna/Point_Cloud/Classified/>`_, `Point MacKenzie <http://matsu.gina.alaska.edu/LiDAR/Point_MacKenzie/Point_Cloud/Classified/>`_, `Willow <http://matsu.gina.alaska.edu/LiDAR/Willow/Point_Cloud/Classified/>`_, `Talkeetna <http://matsu.gina.alaska.edu/LiDAR/Talkeetna/Point_Cloud/Classified/>`_
 * `MassGIS LiDAR Terrain Data <http://www.mass.gov/anf/research-and-tech/it-serv-and-support/application-serv/office-of-geographic-information-massgis/datalayers/lidar.html>`_
 * Spain: `Pais Vasco LiDAR <ftp://ftp.geo.euskadi.net/lidar/LIDAR_2008_ETRS89/LAS/>`_
 
