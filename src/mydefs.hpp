@@ -40,7 +40,7 @@ typedef unsigned int       U32;
 typedef unsigned short     U16;
 typedef unsigned char      U8;
 
-#if defined(_WIN32)            // 64 byte integer under Windows 
+#if defined(_WIN32) && ! defined (__MINGW32__) // 64 byte integer under Windows 
 typedef unsigned __int64   U64;
 typedef __int64            I64;
 #else                          // 64 byte integer elsewhere ... 
