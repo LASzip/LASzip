@@ -133,8 +133,10 @@ inline BOOL ByteStreamOutFile::isSeekable() const
 
 inline I64 ByteStreamOutFile::tell() const
 {
-#ifdef _WIN32
+#if defined _WIN32 && ! defined (__MINGW32__)
   return _ftelli64(file);
+#elif defined (__MINGW32__)
+  return (I64)ftello64(file);
 #else
   return (I64)ftello(file);
 #endif
@@ -142,8 +144,10 @@ inline I64 ByteStreamOutFile::tell() const
 
 inline BOOL ByteStreamOutFile::seek(I64 position)
 {
-#ifdef _WIN32
+#if defined _WIN32 && ! defined (__MINGW32__)
   return !(_fseeki64(file, position, SEEK_SET));
+#elif defined (__MINGW32__)
+  return !(fseeko64(file, (off_t)position, SEEK_SET));
 #else
   return !(fseeko(file, (off_t)position, SEEK_SET));
 #endif
@@ -151,8 +155,10 @@ inline BOOL ByteStreamOutFile::seek(I64 position)
 
 inline BOOL ByteStreamOutFile::seekEnd()
 {
-#ifdef _WIN32
+#if defined _WIN32 && ! defined (__MINGW32__)
   return !(_fseeki64(file, 0, SEEK_END));
+#elif defined (__MINGW32__)
+  return !(fseeko64(file, (off_t)0, SEEK_END));
 #else
   return !(fseeko(file, (off_t)0, SEEK_END));
 #endif
