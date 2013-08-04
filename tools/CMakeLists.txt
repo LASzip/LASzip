@@ -16,13 +16,11 @@ set(APPS_CPP_DEPENDENCIES
     ${LASZIP_LIB_NAME})
     
 
-#set(LASZIP laszip)
-#set(LASDIFF lasdiff)
 set(LASZIPPERTEST laszippertest)
 
 
 set(LASZIP_UTILITIES
-    ${LASZIP} ${LASDIFF} ${LASZIPPERTEST}
+    ${LASZIPPERTEST}
     )
     
 if(WIN32)
@@ -46,15 +44,6 @@ if(MSVC)
     endforeach()
 endif()
 
-if(LASZIP)
-    add_executable(${LASZIP} laszip.cpp)
-    target_link_libraries(${LASZIP} ${APPS_CPP_DEPENDENCIES} )
-endif()
-
-if(LASDIFF)
-    add_executable(${LASDIFF} lasdiff.cpp)
-    target_link_libraries(${LASDIFF} ${APPS_CPP_DEPENDENCIES} )
-endif()
 
 if(LASZIPPERTEST)
     add_executable(${LASZIPPERTEST} laszippertest.cpp)
