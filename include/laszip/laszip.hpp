@@ -9,12 +9,12 @@
     supported entropy coding scheme
 
   PROGRAMMERS:
-  
-    martin.isenburg@gmail.com
-  
+
+    martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
+
   COPYRIGHT:
 
-    (c) 2007-2011, Martin Isenburg, LASSO - tools to catch reality
+    (c) 2007-2013, martin isenburg, rapidlasso - tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -25,6 +25,7 @@
   
   CHANGE HISTORY:
   
+    29 July 2013 -- reorganized to create an easy-to-use LASzip DLL
     5 December 2011 -- learns the chunk table if it is missing (e.g. truncated LAZ)
     6 October 2011 -- large file support, ability to read with missing chunk table
     23 June 2011 -- turned on LASzip version 2.0 compressor with chunking 
@@ -55,7 +56,8 @@ typedef long long SIGNED_INT64;
 
 #define LASZIP_VERSION_MAJOR    2
 #define LASZIP_VERSION_MINOR    1
-#define LASZIP_VERSION_REVISION 0
+#define LASZIP_VERSION_REVISION 1
+#define LASZIP_VERSION_BUILD_DATE      130731
 
 #define LASZIP_COMPRESSOR_NONE              0
 #define LASZIP_COMPRESSOR_POINTWISE         1
