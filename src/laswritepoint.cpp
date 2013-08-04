@@ -9,11 +9,11 @@
   
   PROGRAMMERS:
 
-    martin.isenburg@gmail.com
+    martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
 
   COPYRIGHT:
 
-    (c) 2011, Martin Isenburg, LASSO - tools to catch reality
+    (c) 2007-2012, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -93,6 +93,7 @@ BOOL LASwritePoint::setup(const U32 num_items, const LASitem* items, const LASzi
 
   // always create the raw writers
   writers_raw = new LASwriteItem*[num_writers];
+  memset(writers_raw, 0, num_writers*sizeof(LASwriteItem*));
   for (i = 0; i < num_writers; i++)
   {
     switch (items[i].type)
@@ -145,6 +146,7 @@ BOOL LASwritePoint::setup(const U32 num_items, const LASitem* items, const LASzi
   if (enc)
   {
     writers_compressed = new LASwriteItem*[num_writers];
+    memset(writers_compressed, 0, num_writers*sizeof(LASwriteItem*));
     for (i = 0; i < num_writers; i++)
     {
       switch (items[i].type)

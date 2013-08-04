@@ -8,12 +8,12 @@
     Implementation of LASitemReadRaw for *all* items that compose a point.
 
   PROGRAMMERS:
-  
-    martin.isenburg@gmail.com
-  
+
+    martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
+
   COPYRIGHT:
 
-    (c) 2010-2011, Martin Isenburg, LASSO - tools to catch reality
+    (c) 2007-2012, martin isenburg, rapidlasso - tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -172,10 +172,13 @@ public:
   U8 user_data;
   U16 point_source_ID;
   // LAS 1.4 only
+  U8 extended_point_type : 2;
+  U8 extended_scanner_channel : 2;
+  U8 extended_classification_flags : 4;
   U8 extended_classification;
-  U8 extended_return_number;
-  U8 extended_number_of_returns_of_given_pulse;
-  U8 extended_scanner_channel;
+  U8 extended_return_number : 4;
+  U8 extended_number_of_returns_of_given_pulse : 4;
+  I16 extended_scan_angle;
   F64 gps_time;
 };
 
@@ -239,10 +242,12 @@ public:
     ((LAStempReadPoint10*)item)->scan_angle_rank = I8_CLAMP(I16_QUANTIZE(((LAStempReadPoint14*)buffer)->scan_angle*0.006f));
     ((LAStempReadPoint10*)item)->user_data = ((LAStempReadPoint14*)buffer)->user_data;
     ((LAStempReadPoint10*)item)->point_source_ID = ((LAStempReadPoint14*)buffer)->point_source_ID;
-    ((LAStempReadPoint10*)item)->extended_classification = (((LAStempReadPoint14*)buffer)->classification & 31);
+    ((LAStempReadPoint10*)item)->extended_scanner_channel = ((LAStempReadPoint14*)buffer)->scanner_channel;
+    ((LAStempReadPoint10*)item)->extended_classification_flags = ((LAStempReadPoint14*)buffer)->classification_flags & 8;
+    ((LAStempReadPoint10*)item)->extended_classification = ((LAStempReadPoint14*)buffer)->classification;
     ((LAStempReadPoint10*)item)->extended_return_number = ((LAStempReadPoint14*)buffer)->return_number;
     ((LAStempReadPoint10*)item)->extended_number_of_returns_of_given_pulse = ((LAStempReadPoint14*)buffer)->number_of_returns_of_given_pulse;
-    ((LAStempReadPoint10*)item)->extended_scanner_channel = ((LAStempReadPoint14*)buffer)->scanner_channel;
+    ((LAStempReadPoint10*)item)->extended_scan_angle = ((LAStempReadPoint14*)buffer)->scan_angle;
     ((LAStempReadPoint10*)item)->gps_time = *((F64*)&buffer[22]);
   }
 private:

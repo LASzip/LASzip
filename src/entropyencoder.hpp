@@ -4,14 +4,16 @@
   FILE:  entropyencoder.hpp
   
   CONTENTS:
+
+    Abstract base class for all entropy encoders.
       
   PROGRAMMERS:
-  
-    martin.isenburg@gmail.com
-  
+
+    martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
+
   COPYRIGHT:
 
-    (c) 2010-2011, Martin Isenburg, LASSO - tools to catch reality
+    (c) 2005-2012, martin isenburg, rapidlasso - tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software

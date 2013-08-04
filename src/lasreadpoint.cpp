@@ -9,11 +9,11 @@
   
   PROGRAMMERS:
 
-    martin.isenburg@gmail.com
+    martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
 
   COPYRIGHT:
 
-    (c) 2011, Martin Isenburg, LASSO - tools to catch reality
+    (c) 2007-2012, martin isenburg, rapidlasso - tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -498,11 +498,27 @@ BOOL LASreadPoint::read_chunk_table()
     // something went wrong while reading the chunk table
     if (chunk_totals) delete [] chunk_totals;
     chunk_totals = 0;
-    // fix as many additional chunk_starts as possible
-    U32 i;
-    for (i = 1; i < tabled_chunks; i++)
+    // did we not even read the number of chunks
+    if (number_chunks == U32_MAX)
     {
-      chunk_starts[i] += chunk_starts[i-1];
+      // then compressor was interrupted before getting a chance to write the chunk table
+      number_chunks = 256;
+      chunk_starts = (I64*)malloc(sizeof(I64)*number_chunks);
+      if (chunk_starts == 0)
+      {
+        return FALSE;
+      }
+      chunk_starts[0] = chunks_start;
+      tabled_chunks = 1;
+    }
+    else
+    {
+      // otherwise fix as many additional chunk_starts as possible
+      U32 i;
+      for (i = 1; i < tabled_chunks; i++)
+      {
+        chunk_starts[i] += chunk_starts[i-1];
+      }
     }
   }
   if (!instream->seek(chunks_start))

@@ -5,13 +5,15 @@
   
   CONTENTS:
       
+    Class for FILE*-based input streams with endian handling.
+
   PROGRAMMERS:
-  
-    martin.isenburg@gmail.com
-  
+
+    martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
+
   COPYRIGHT:
 
-    (c) 2010-2011, Martin Isenburg, LASSO - tools to catch reality
+    (c) 2007-2012, martin isenburg, rapidlasso - tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -143,13 +145,17 @@ inline I64 ByteStreamInFile::tell() const
 
 inline BOOL ByteStreamInFile::seek(const I64 position)
 {
+  if (tell() != position)
+  {
 #if defined _WIN32 && ! defined (__MINGW32__)
-  return !(_fseeki64(file, position, SEEK_SET));
+    return !(_fseeki64(file, position, SEEK_SET));
 #elif defined (__MINGW32__)
-  return !(fseeko64(file, (off_t)position, SEEK_SET));
+    return !(fseeko64(file, (off_t)position, SEEK_SET));
 #else
-  return !(fseeko(file, (off_t)position, SEEK_SET));
+    return !(fseeko(file, (off_t)position, SEEK_SET));
 #endif
+  }
+  return TRUE;
 }
 
 inline BOOL ByteStreamInFile::seekEnd(const I64 distance)

@@ -8,12 +8,12 @@
     Implementation of LASwriteItemRaw for *all* items that compose a point.
 
   PROGRAMMERS:
-  
-    martin.isenburg@gmail.com
-  
+
+    martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
+
   COPYRIGHT:
 
-    (c) 2010-2011, Martin Isenburg, LASSO - tools to catch reality
+    (c) 2007-2012, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -172,6 +172,14 @@ public:
   I8 scan_angle_rank;
   U8 user_data;
   U16 point_source_ID;
+  // LAS 1.4 only
+  U8 extended_point_type : 2;
+  U8 extended_scanner_channel : 2;
+  U8 extended_classification_flags : 4;
+  U8 extended_classification;
+  U8 extended_return_number : 4;
+  U8 extended_number_of_returns_of_given_pulse : 4;
+  I16 extended_scan_angle;
 };
 
 class LAStempWritePoint14
@@ -203,16 +211,30 @@ public:
     ((LAStempWritePoint14*)buffer)->y = ((LAStempWritePoint10*)item)->y;
     ((LAStempWritePoint14*)buffer)->z = ((LAStempWritePoint10*)item)->z;
     ((LAStempWritePoint14*)buffer)->intensity = ((LAStempWritePoint10*)item)->intensity;
-    ((LAStempWritePoint14*)buffer)->return_number = ((LAStempWritePoint10*)item)->return_number;
-    ((LAStempWritePoint14*)buffer)->number_of_returns_of_given_pulse = ((LAStempWritePoint10*)item)->number_of_returns_of_given_pulse;
-    ((LAStempWritePoint14*)buffer)->classification_flags = (((LAStempWritePoint10*)item)->classification >> 5);
-    ((LAStempWritePoint14*)buffer)->scanner_channel = 0;
     ((LAStempWritePoint14*)buffer)->scan_direction_flag = ((LAStempWritePoint10*)item)->scan_direction_flag;
     ((LAStempWritePoint14*)buffer)->edge_of_flight_line = ((LAStempWritePoint10*)item)->edge_of_flight_line;
     ((LAStempWritePoint14*)buffer)->classification = ((LAStempWritePoint10*)item)->classification & 31;
     ((LAStempWritePoint14*)buffer)->user_data = ((LAStempWritePoint10*)item)->user_data;
-    ((LAStempWritePoint14*)buffer)->scan_angle = I16_QUANTIZE(((LAStempWritePoint10*)item)->scan_angle_rank/0.006f);
     ((LAStempWritePoint14*)buffer)->point_source_ID = ((LAStempWritePoint10*)item)->point_source_ID;
+
+    if (((LAStempWritePoint10*)item)->extended_point_type)
+    {
+      ((LAStempWritePoint14*)buffer)->classification_flags = ((LAStempWritePoint10*)item)->extended_classification_flags | (((LAStempWritePoint10*)item)->classification >> 5);
+      if (((LAStempWritePoint10*)item)->extended_classification > 31) ((LAStempWritePoint14*)buffer)->classification = ((LAStempWritePoint10*)item)->extended_classification;
+      ((LAStempWritePoint14*)buffer)->scanner_channel = ((LAStempWritePoint10*)item)->extended_scanner_channel;
+      ((LAStempWritePoint14*)buffer)->return_number = ((LAStempWritePoint10*)item)->extended_return_number;
+      ((LAStempWritePoint14*)buffer)->number_of_returns_of_given_pulse = ((LAStempWritePoint10*)item)->extended_number_of_returns_of_given_pulse;
+      ((LAStempWritePoint14*)buffer)->scan_angle = ((LAStempWritePoint10*)item)->extended_scan_angle;
+    }
+    else
+    {
+      ((LAStempWritePoint14*)buffer)->classification_flags = (((LAStempWritePoint10*)item)->classification >> 5);
+      ((LAStempWritePoint14*)buffer)->scanner_channel = 0;
+      ((LAStempWritePoint14*)buffer)->return_number = ((LAStempWritePoint10*)item)->return_number;
+      ((LAStempWritePoint14*)buffer)->number_of_returns_of_given_pulse = ((LAStempWritePoint10*)item)->number_of_returns_of_given_pulse;
+      ((LAStempWritePoint14*)buffer)->scan_angle = I16_QUANTIZE(((LAStempWritePoint10*)item)->scan_angle_rank/0.006f);
+    }
+
     *((F64*)&buffer[22]) = *((F64*)&item[24]);
     return outstream->putBytes(buffer, 30);
   }

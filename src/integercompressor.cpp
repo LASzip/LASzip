@@ -9,11 +9,11 @@
 
   PROGRAMMERS:
 
-    martin.isenburg@gmail.com
+    martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
 
   COPYRIGHT:
 
-    (c) 2011, Martin Isenburg, LASSO - tools to catch reality
+    (c) 2005-2013, martin isenburg, rapidlasso - tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -324,6 +324,41 @@ I32 IntegerCompressor::decompress(I32 pred, U32 context)
   else if ((U32)(real) >= corr_range) real -= corr_range;
   return real;
 }
+
+/*
+static const char log_table256[256] = 
+{
+  -1, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
+   4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+   5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+   5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+   6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+   6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+   6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+   6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+   7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+   7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+   7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+   7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+   7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+   7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+   7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+   7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
+};
+
+unsigned int v; // 32-bit word to find the log of
+unsigned r;     // r will be lg(v)
+register unsigned int t, tt; // temporaries
+
+if (tt = v >> 16)
+{
+  r = (t = tt >> 8) ? 24 + LogTable256[t] : 16 + LogTable256[tt];
+}
+else 
+{
+  r = (t = v >> 8) ? 8 + LogTable256[t] : LogTable256[v];
+}
+*/
 
 void IntegerCompressor::writeCorrector(I32 c, EntropyModel* mBits)
 {

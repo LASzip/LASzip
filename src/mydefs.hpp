@@ -5,15 +5,15 @@
   
   CONTENTS:
 
-    Basic data type definitions to be robust across platforms.
+    Basic data type definitions and operations to be robust across platforms.
  
   PROGRAMMERS:
-  
-    martin.isenburg@gmail.com
-  
+
+    martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
+
   COPYRIGHT:
 
-    (c) 2005-2011, Martin Isenburg, LASSO - tools to catch reality
+    (c) 2005-2013, martin isenburg, rapidlasso - tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -32,6 +32,8 @@
 #ifndef MYDEFS_HPP
 #define MYDEFS_HPP
 
+typedef char               CHAR;
+
 typedef int                I32;
 typedef short              I16;
 typedef char               I8;
@@ -43,7 +45,7 @@ typedef unsigned char      U8;
 #if defined(_WIN32) && ! defined (__MINGW32__) // 64 byte integer under Windows 
 typedef unsigned __int64   U64;
 typedef __int64            I64;
-#else                          // 64 byte integer elsewhere ... 
+#else                                          // 64 byte integer elsewhere ... 
 typedef unsigned long long U64;
 typedef long long          I64;
 #endif
@@ -62,6 +64,9 @@ typedef union U64I64F64 { U64 u64; I64 i64; F64 f64; } U64I64F64;
 
 #define F32_MAX            +2.0e+37f
 #define F32_MIN            -2.0e+37f
+
+#define F64_MAX            +2.0e+307
+#define F64_MIN            -2.0e+307
 
 #define U8_MIN             ((U8)0x0)  // 0
 #define U8_MAX             ((U8)0xFF) // 255
@@ -102,6 +107,9 @@ typedef union U64I64F64 { U64 u64; I64 i64; F64 f64; } U64I64F64;
 #define I32_CLAMP(n)    (((n) <= I32_MIN) ? I32_MIN : (((n) >= I32_MAX) ? I32_MAX : ((I32)(n))))
 #define U32_CLAMP(n)    (((n) <= U32_MIN) ? U32_MIN : (((n) >= U32_MAX) ? U32_MAX : ((U32)(n))))
 
+#define I8_QUANTIZE(n) (((n) >= 0) ? (I8)((n)+0.5f) : (I8)((n)-0.5f))
+#define U8_QUANTIZE(n) (((n) >= 0) ? (U8)((n)+0.5f) : (U8)(0))
+
 #define I16_QUANTIZE(n) (((n) >= 0) ? (I16)((n)+0.5f) : (I16)((n)-0.5f))
 #define U16_QUANTIZE(n) (((n) >= 0) ? (U16)((n)+0.5f) : (U16)(0))
 
@@ -123,6 +131,9 @@ typedef union U64I64F64 { U64 u64; I64 i64; F64 f64; } U64I64F64;
 #define U8_FITS_IN_RANGE(n) (((n) >= U8_MIN) || ((n) <= U8_MAX) ? TRUE : FALSE)
 #define I16_FITS_IN_RANGE(n) (((n) >= I16_MIN) || ((n) <= I16_MAX) ? TRUE : FALSE)
 #define U16_FITS_IN_RANGE(n) (((n) >= U16_MIN) || ((n) <= U16_MAX) ? TRUE : FALSE)
+
+#define F32_IS_FINITE(n) ((F32_MIN < (n)) && ((n) < F32_MAX))
+#define F64_IS_FINITE(n) ((F64_MIN < (n)) && ((n) < F64_MAX))
 
 #define U32_ZERO_BIT_0(n) (((n)&(U32)0xFFFFFFFE))
 
