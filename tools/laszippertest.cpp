@@ -6,15 +6,16 @@
   CONTENTS  
   
     This tool reads and writes point data in the LAS 1.X format compressed
-    or uncompressed to test the laszipper and lasunzipper interfaces.
+    or uncompressed via the laszipper and lasunzipper interfaces that are
+    not (!) used by LASzip or LASlib but are the binding to libLAS.
 
   PROGRAMMERS:
 
-    martin.isenburg@gmail.com
+    martin.isenburg@gmail.com  -  http://rapidlasso.com
 
   COPYRIGHT:
 
-    (c) 2010-2011, Martin Isenburg, LASSO - tools to catch reality
+    (c) 2007-2013, martin isenburg, rapidlasso - tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
