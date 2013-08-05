@@ -90,3 +90,5 @@ tools/laszip.pc
 tools/laszip-config
 *.lax
 docs/build
+zippertest.log
+test.tmp
