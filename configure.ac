@@ -3,13 +3,13 @@ dnl
 dnl This is main autoconf bootstrap script of libLAS project.
 dnl
 m4_define([laszip_version_major], [2])
-m4_define([laszip_version_minor], [1])
-m4_define([laszip_version_micro], [1])
+m4_define([laszip_version_minor], [2])
+m4_define([laszip_version_micro], [0])
 m4_define([laszip_version],
           [laszip_version_major.laszip_version_minor.laszip_version_micro])
 
 AC_PREREQ([2.59])
-AC_INIT([laszip], [laszip_version], [hobu.inc@gmail.com],[laszip-src])
+AC_INIT([laszip], [laszip_version], [howard@hobu.co],[laszip-src])
 AC_CANONICAL_BUILD
 
 RELEASE_VERSION=laszip_version
