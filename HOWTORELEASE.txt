@@ -74,7 +74,8 @@ Release Process
 
   ::
       
-      hg tag 1.0.0b1
+      git tag 1.0.0b1
+      git push --tags
       
 9) Write the release notes.  Place a copy of the release notes on the release 
    page you created as well as send an email to liblas-devel announcing the 
