@@ -20,6 +20,20 @@ a small restriction (R) for certain US entities to the LGPL (see LICENSE.txt).
 Source
 ..............................................................................
 
+
+* **2013-08-05** 
+
+  - `laszip-2.2.0.tar.gz <https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-src-2.2.0.tar.gz>`_ 
+    `(md5) <https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-src-2.2.0.tar.gz.md5>`__ 
+
+  - `laszip-win32-msvc2009.zip <https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-win32-msvc2009.zip>`_ 
+    `(md5) <https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-win32-msvc2009.zip.md5>`__
+
+
+Past Release(s)
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 * **2012-01-04** 
 
   - `laszip-2.1.0.tar.gz <http://download.osgeo.org/laszip/laszip-2.1.0.tar.gz>`_ 
