@@ -127,10 +127,10 @@ typedef union U64I64F64 { U64 u64; I64 i64; F64 f64; } U64I64F64;
 #define I32_CEIL(n) ((((I32)(n)) < (n)) ? (((I32)(n))+1) : ((I32)(n)))
 #define I64_CEIL(n) ((((I64)(n)) < (n)) ? (((I64)(n))+1) : ((I64)(n)))
 
-#define I8_FITS_IN_RANGE(n) (((n) >= I8_MIN) || ((n) <= I8_MAX) ? TRUE : FALSE)
-#define U8_FITS_IN_RANGE(n) (((n) >= U8_MIN) || ((n) <= U8_MAX) ? TRUE : FALSE)
-#define I16_FITS_IN_RANGE(n) (((n) >= I16_MIN) || ((n) <= I16_MAX) ? TRUE : FALSE)
-#define U16_FITS_IN_RANGE(n) (((n) >= U16_MIN) || ((n) <= U16_MAX) ? TRUE : FALSE)
+#define I8_FITS_IN_RANGE(n) (((n) >= I8_MIN) && ((n) <= I8_MAX) ? TRUE : FALSE)
+#define U8_FITS_IN_RANGE(n) (((n) >= U8_MIN) && ((n) <= U8_MAX) ? TRUE : FALSE)
+#define I16_FITS_IN_RANGE(n) (((n) >= I16_MIN) && ((n) <= I16_MAX) ? TRUE : FALSE)
+#define U16_FITS_IN_RANGE(n) (((n) >= U16_MIN) && ((n) <= U16_MAX) ? TRUE : FALSE)
 
 #define F32_IS_FINITE(n) ((F32_MIN < (n)) && ((n) < F32_MAX))
 #define F64_IS_FINITE(n) ((F64_MIN < (n)) && ((n) < F64_MAX))

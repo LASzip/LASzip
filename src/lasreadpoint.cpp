@@ -566,7 +566,7 @@ LASreadPoint::~LASreadPoint()
   }
 
   if (chunk_totals) delete [] chunk_totals;
-  if (chunk_starts) delete [] chunk_starts;
+  if (chunk_starts) free(chunk_starts);
 
   if (seek_point)
   {
