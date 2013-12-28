@@ -98,21 +98,24 @@ makes it easy to add native LAZ support to your own software package.
 
 Software with native LAZ support
 ------------------------------------------------------------------------------
-* FME (2012 and up) by `Safe Software <http://www.safe.com/>`_
-* LAStools by `rapidlasso - fast tools to catch reality <http://rapidlasso.com/>`_
-* Global Mapper (13.1 and up) by `Blue Marble Geo <http://www.bluemarblegeo.com/>`_
-* RiProcess by `RIEGL LMS GmbH <http://www.riegl.com/>`_
+
 * QT Modeler (7.1.6 and up) by `Applied Imagery <http://www.appliedimagery.com/>`_
+* FUSION (3.40 and up) by `Bob McGaughey of the USDA <http://forsys.cfr.washington.edu/fusion/fusionlatest.html/>`_
+* Global Mapper (13.1 and up) by `Blue Marble Geo <http://www.bluemarblegeo.com/>`_
+* FME (2012 and up) by `Safe Software <http://www.safe.com/>`_
+* TopoDOT by `Certainty3D <http://www.certainty3d.com/products/topodot/>`_
 * Pointools by `Bentley Systems <http://www.pointools.com/>`_
+* Pix4uav by `Pix4D <http://www.pix4d.com/>`_
+* LAStools by `rapidlasso - fast tools to catch reality <http://rapidlasso.com/>`_
+* RiProcess by `RIEGL LMS GmbH <http://www.riegl.com/>`_
 * Gexcel R3 by `Gexcel <http://www.gexcel.it/en/software/>`_
 * Voyager (1.3 and up) by `Voyager GIS <http://www.voyagergis.com/>`_
-* TopoDOT by `Certainty3D <http://www.certainty3d.com/products/topodot/>`_
 * Scanopy by `imagination <http://www.imagination.at/>`_
 * ScanLook by `LiDAR USA <http://www.lidarusa.com/>`_
 * OPALS by `TU Vienna <http://www.ipf.tuwien.ac.at/opals/>`_
+* ReportGen (2.9.0 and up), by `PDF3D <http://pdf3d.com/news/PDF3D_LiDAR_PressRelease_20dec2013.php>`_
 * CloudCompare by `Daniel Girardeau-Montaut <http://www.danielgm.net/cc/>`_
 * OrbitGIS by `Orbit <http://www.orbitgis.com/>`_
-* Pix4uav by `Pix4D <http://www.pix4d.com/>`_
 * LiS by `LASERDATA <http://www.laserdata.at/>`_
 * Geoverse by `euclideon <http://www.euclideon.com/>`_
 * PointCloudViz by `mirage <http://www.mirage-tech.com/>`_
