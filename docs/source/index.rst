@@ -102,6 +102,7 @@ Software with native LAZ support
 * QT Modeler (7.1.6 and up) by `Applied Imagery <http://www.appliedimagery.com/>`_
 * FUSION (3.40 and up) by `Bob McGaughey of the USDA <http://forsys.cfr.washington.edu/fusion/fusionlatest.html/>`_
 * Global Mapper (13.1 and up) by `Blue Marble Geo <http://www.bluemarblegeo.com/>`_
+* OCAD (11.4.0 and up) by `OCAD Inc. <http://ocad.com/blog/2013/11/ocad-11-4-0-supports-laz-files/>`_
 * FME (2012 and up) by `Safe Software <http://www.safe.com/>`_
 * TopoDOT by `Certainty3D <http://www.certainty3d.com/products/topodot/>`_
 * Pointools by `Bentley Systems <http://www.pointools.com/>`_
