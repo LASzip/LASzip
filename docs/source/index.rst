@@ -109,6 +109,7 @@ Software with native LAZ support
 * Pix4uav by `Pix4D <http://www.pix4d.com/>`_
 * LAStools by `rapidlasso - fast tools to catch reality <http://rapidlasso.com/>`_
 * RiProcess by `RIEGL LMS GmbH <http://www.riegl.com/>`_
+* ZEB1 by `3D Laser Mapping <http://www.3dlasermapping.com/index.php/products/handheld-mapping>`_
 * Gexcel R3 by `Gexcel <http://www.gexcel.it/en/software/>`_
 * Voyager (1.3 and up) by `Voyager GIS <http://www.voyagergis.com/>`_
 * Scanopy by `imagination <http://www.imagination.at/>`_
