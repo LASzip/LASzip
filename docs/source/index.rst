@@ -102,6 +102,7 @@ Software with native LAZ support
 * QT Modeler (7.1.6 and up) by `Applied Imagery <http://www.appliedimagery.com/>`_
 * FUSION (3.40 and up) by `Bob McGaughey of the USDA <http://forsys.cfr.washington.edu/fusion/fusionlatest.html/>`_
 * Global Mapper (13.1 and up) by `Blue Marble Geo <http://www.bluemarblegeo.com/>`_
+* ENVI LiDAR (5.1 and up) by `Exelis VIS <http://www.exelisvis.com/ProductsServices/ENVI/ENVILiDAR.aspx>`_
 * OCAD (11.4.0 and up) by `OCAD Inc. <http://ocad.com/blog/2013/11/ocad-11-4-0-supports-laz-files/>`_
 * FME (2012 and up) by `Safe Software <http://www.safe.com/>`_
 * TopoDOT by `Certainty3D <http://www.certainty3d.com/products/topodot/>`_
@@ -115,6 +116,7 @@ Software with native LAZ support
 * Voyager (1.3 and up) by `Voyager GIS <http://www.voyagergis.com/>`_
 * Scanopy by `imagination <http://www.imagination.at/>`_
 * ScanLook by `LiDAR USA <http://www.lidarusa.com/>`_
+* GRASS GIS (7.0 and up) by `Open Source Geospatial Foundation (OSGeo) <http://grass.osgeo.org/>`_
 * OPALS by `TU Vienna <http://www.ipf.tuwien.ac.at/opals/>`_
 * ReportGen (2.9.0 and up), by `PDF3D <http://pdf3d.com/news/PDF3D_LiDAR_PressRelease_20dec2013.php>`_
 * CloudCompare by `Daniel Girardeau-Montaut <http://www.danielgm.net/cc/>`_
