@@ -121,6 +121,7 @@ Software with native LAZ support
 * ReportGen (2.9.0 and up), by `PDF3D <http://pdf3d.com/news/PDF3D_LiDAR_PressRelease_20dec2013.php>`_
 * CloudCompare by `Daniel Girardeau-Montaut <http://www.danielgm.net/cc/>`_
 * OrbitGIS by `Orbit <http://www.orbitgis.com/>`_
+* K2Vi by `AAM Group <http://www.aamgroup.com/services-and-technology/3d-gis>`_
 * LiS by `LASERDATA <http://www.laserdata.at/>`_
 * Geoverse by `euclideon <http://www.euclideon.com/>`_
 * PointCloudViz by `mirage <http://www.mirage-tech.com/>`_
