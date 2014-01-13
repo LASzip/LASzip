@@ -13,8 +13,8 @@ Download
 The LPGP-licensed LASzip library is easiest integrated via the DLL that is in
 the LASzip subdirectory of the `LAStools`_ distribtion. Other options are to
 link LASzip via the BSD-licensed `libLAS`_ library or to work with the `LASlib`_
-library which fully integrates and enhances the LASzip codebase but also adds
-a small restriction (R) for certain US entities to the LGPL (see LICENSE.txt).
+library which fully integrates and enhances the LASzip codebase with spatial
+indexing, filters, transforms, geo-referencing, ... of LAS and LAZ files.
 
 
 Source
