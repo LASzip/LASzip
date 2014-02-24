@@ -46,7 +46,8 @@ cmake_force_cxx_compiler(       ${CMAKE_CXX_COMPILER} Clang )
 
 
 
-# set( CMAKE_C_FLAGS "-U__STRICT_ANSI__" CACHE STRING "" )
+set( CMAKE_C_FLAGS " --pnacl-exceptions=sjlj " CACHE STRING "" )
+set( CMAKE_CXX_FLAGS " --pnacl-exceptions=sjlj " CACHE STRING "" )
 # set( CMAKE_CXX_FLAGS "-U__STRICT_ANSI__" CACHE STRING "" )
 # set( CMAKE_C_FLAGS_RELEASE "-O4 -ffast-math" CACHE STRING "" )
 # set( CMAKE_CXX_FLAGS_RELEASE "-O4 -ffast-math" CACHE STRING "" )

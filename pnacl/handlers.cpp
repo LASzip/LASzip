@@ -3,7 +3,7 @@
  * found in the LICENSE file. */
 
 #include "handlers.h"
-
+#include <fstream>
 #include <arpa/inet.h>
 #include <assert.h>
 #include <errno.h>
@@ -14,12 +14,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <iostream>
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 
 #include "nacl_io/osdirent.h"
+#include <laszip/laszip.hpp>    
+#include <laszip/lasunzipper.hpp>
+#include <laszip/laszipper.hpp>
 
 #include "hello.h"
 
@@ -191,31 +195,57 @@ static DIR* GetDirFromIndexString(const char* s, int* dir_index) {
 int HandleFopen(int num_params, char** params, char** output) {
   FILE* file;
   int file_index;
-  const char* filename;
-  const char* mode;
+  
+  LASzip zip;
+LASunzipper* unzipper = new LASunzipper();
+      std::string filename("/http/test.laz");
+      // std::ifstream f(filename.c_str(), std::ios::in|std::ios::binary);
 
-  if (num_params != 2) {
-    *output = PrintfToNewString("fopen takes 2 parameters.");
-    return 1;
-  }
+        FILE* fp = fopen(filename.c_str(), "w");
+        if (!fp)
+        {
+            *output = PrintfToNewString("Unable to open filename %s", filename.c_str());
+            return 3;
+        }
+        // fseek(fp, 0L, SEEK_END);
+        // int len = ftell(fp);
+        // fseek(fp, 0L, SEEK_SET);
+        // std::ifstream f(filename.c_str(), std::ios::in|std::ios::binary);
+        // f.seekg(std::ios::end);
+        // int len = f.tellg();
+        // std::cout << "file length is: " << len << std::endl;
+            
+        bool stat = unzipper->open(fp, &zip);
+        std::cout << "opened laszip: " << stat << std::endl;
+        const char *err_msg = unzipper->get_error();
+        if (err_msg)
+            std::cout << "error msg: " << unzipper->get_error() << std::endl;
+        else
+            std::cout << "opened zip file ok!" << std::endl;
+      // bool stat = unzipper->open(f, &zip);
 
-  filename = params[0];
-  mode = params[1];
+  // if (num_params != 2) {
+  //   *output = PrintfToNewString("fopen takes 2 parameters.");
+  //   return 1;
+  // }
+  // 
+  // filename = params[0];
+  // mode = params[1];
+  // 
+  // file = fopen(filename, mode);
+  // if (!file) {
+  //   *output = PrintfToNewString("fopen returned a NULL FILE*.");
+  //   return 2;
+  // }
+  // 
+  // file_index = AddFileToMap(file);
+  // if (file_index == -1) {
+  //   *output = PrintfToNewString(
+  //       "Example only allows %d open file handles.", MAX_OPEN_FILES);
+  //   return 3;
+  // }
 
-  file = fopen(filename, mode);
-  if (!file) {
-    *output = PrintfToNewString("fopen returned a NULL FILE*.");
-    return 2;
-  }
-
-  file_index = AddFileToMap(file);
-  if (file_index == -1) {
-    *output = PrintfToNewString(
-        "Example only allows %d open file handles.", MAX_OPEN_FILES);
-    return 3;
-  }
-
-  *output = PrintfToNewString("fopen\1%s\1%d", filename, file_index);
+  *output = PrintfToNewString("fopen\1%s\1%d", filename.c_str(), file_index);
   return 0;
 }
 
@@ -931,7 +961,7 @@ int HandleRecv(int num_params, char** params, char** output) {
     return 1;
   }
 
-  char* buffer = alloca(buffersize);
+  char* buffer = (char*)alloca(buffersize);
   memset(buffer, 0, buffersize);
   int result = recv(sock, buffer, buffersize, 0);
   if (result <= 0) {
