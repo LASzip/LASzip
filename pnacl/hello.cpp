@@ -12,6 +12,9 @@
 #include <sys/mount.h>
 #include <pthread.h>
 
+#include <iostream>
+#include <fstream>
+
 #include "ppapi/c/pp_errors.h"
 #include "ppapi/c/pp_module.h"
 #include "ppapi/c/ppb.h"
@@ -25,6 +28,10 @@
 
 #include "handlers.h"
 #include "queue.h"
+
+#include <laszip/laszip.hpp>    
+#include <laszip/lasunzipper.hpp>
+#include <laszip/laszipper.hpp>
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
@@ -245,6 +252,70 @@ static void HandleMessage(char* message) {
   char* output = NULL;
   int result;
   HandleFunc function;
+
+  FILE* file;
+  int file_index;
+  int point_size(0);
+  
+  LASzip zip;
+LASunzipper* unzipper = new LASunzipper();
+      std::string filename("/http/test.laz");
+      // std::ifstream f(filename.c_str(), std::ios::in|std::ios::binary);
+
+        FILE* fp = fopen(filename.c_str(), "r");
+        if (!fp)
+        {
+                    std::cout << "no file opened: " << filename << std::endl;
+            // *output = PrintfToNewString("Unable to open filename %s", filename.c_str());
+            // return 3;
+        }
+        // fseek(fp, 0L, SEEK_END);
+        // int len = ftell(fp);
+        // fseek(fp, 0L, SEEK_SET);
+        // std::ifstream f(filename.c_str(), std::ios::in|std::ios::binary);
+        // f.seekg(std::ios::end);
+        // int len = f.tellg();
+        // std::cout << "file length is: " << len << std::endl;
+        
+        std::cout << "current thread id before open: " << pthread_self() << std::endl;
+        bool stat = unzipper->open(fp, &zip);
+        std::cout << "opened laszip: " << stat << std::endl;
+        const char *err_msg = unzipper->get_error();
+        if (err_msg)
+            std::cout << "error msg: " << unzipper->get_error() << std::endl;
+        else
+            std::cout << "opened zip file ok!" << std::endl;
+
+    unsigned char** point;
+    unsigned int point_offset(0);
+    point = new unsigned char*[zip.num_items];
+       
+    for (unsigned i = 0; i < zip.num_items; i++)
+    {
+        point_size += zip.items[i].size;
+    }
+
+    unsigned char* bytes = new uint8_t[ point_size ];
+
+    for (unsigned i = 0; i < zip.num_items; i++)
+    {
+        point[i] = &(bytes[point_offset]);
+        point_offset += zip.items[i].size;
+    }
+    
+    bool ok = unzipper->read(point);
+    if (!ok)
+    {
+
+        std::cout <<unzipper->get_error()<< std::endl;
+    }    
+
+    int32_t x(static_cast<int32_t>(bytes[0]));
+    int32_t y(static_cast<int32_t>(bytes[4]));
+    int32_t z(static_cast<int32_t>(bytes[8]));
+    std::cout << "x: " << x << std::endl; 
+    std::cout << "y: " << y << std::endl; 
+    std::cout << "z: " << z << std::endl; 
 
   num_params = ParseMessage(message, &function_name, &params[0], MAX_PARAMS);
 

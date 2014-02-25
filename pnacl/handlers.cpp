@@ -195,33 +195,33 @@ static DIR* GetDirFromIndexString(const char* s, int* dir_index) {
 int HandleFopen(int num_params, char** params, char** output) {
   FILE* file;
   int file_index;
-  
-  LASzip zip;
-LASunzipper* unzipper = new LASunzipper();
-      std::string filename("/http/test.laz");
-      // std::ifstream f(filename.c_str(), std::ios::in|std::ios::binary);
-
-        FILE* fp = fopen(filename.c_str(), "w");
-        if (!fp)
-        {
-            *output = PrintfToNewString("Unable to open filename %s", filename.c_str());
-            return 3;
-        }
-        // fseek(fp, 0L, SEEK_END);
-        // int len = ftell(fp);
-        // fseek(fp, 0L, SEEK_SET);
-        // std::ifstream f(filename.c_str(), std::ios::in|std::ios::binary);
-        // f.seekg(std::ios::end);
-        // int len = f.tellg();
-        // std::cout << "file length is: " << len << std::endl;
-            
-        bool stat = unzipper->open(fp, &zip);
-        std::cout << "opened laszip: " << stat << std::endl;
-        const char *err_msg = unzipper->get_error();
-        if (err_msg)
-            std::cout << "error msg: " << unzipper->get_error() << std::endl;
-        else
-            std::cout << "opened zip file ok!" << std::endl;
+  // 
+//   LASzip zip;
+// LASunzipper* unzipper = new LASunzipper();
+//       std::string filename("/http/test.laz");
+//       // std::ifstream f(filename.c_str(), std::ios::in|std::ios::binary);
+// 
+//         FILE* fp = fopen(filename.c_str(), "w");
+//         if (!fp)
+//         {
+//             *output = PrintfToNewString("Unable to open filename %s", filename.c_str());
+//             return 3;
+//         }
+//         // fseek(fp, 0L, SEEK_END);
+//         // int len = ftell(fp);
+//         // fseek(fp, 0L, SEEK_SET);
+//         // std::ifstream f(filename.c_str(), std::ios::in|std::ios::binary);
+//         // f.seekg(std::ios::end);
+//         // int len = f.tellg();
+//         // std::cout << "file length is: " << len << std::endl;
+//             
+//         bool stat = unzipper->open(fp, &zip);
+//         std::cout << "opened laszip: " << stat << std::endl;
+//         const char *err_msg = unzipper->get_error();
+//         if (err_msg)
+//             std::cout << "error msg: " << unzipper->get_error() << std::endl;
+//         else
+//             std::cout << "opened zip file ok!" << std::endl;
       // bool stat = unzipper->open(f, &zip);
 
   // if (num_params != 2) {
@@ -245,7 +245,7 @@ LASunzipper* unzipper = new LASunzipper();
   //   return 3;
   // }
 
-  *output = PrintfToNewString("fopen\1%s\1%d", filename.c_str(), file_index);
+  // *output = PrintfToNewString("fopen\1%s\1%d", filename.c_str(), file_index);
   return 0;
 }
 
