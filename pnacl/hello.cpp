@@ -9,11 +9,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <sys/mount.h>
 #include <pthread.h>
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <boost/algorithm/string.hpp>
 
 #include "ppapi/c/pp_errors.h"
 #include "ppapi/c/pp_module.h"
@@ -26,59 +31,169 @@
 #include "ppapi/c/ppp_messaging.h"
 #include "nacl_io/nacl_io.h"
 
-#include "handlers.h"
 #include "queue.h"
 
 #include <laszip/laszip.hpp>    
 #include <laszip/lasunzipper.hpp>
 #include <laszip/laszipper.hpp>
 
-#define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
-#if defined(WIN32)
-#define va_copy(d, s) ((d) = (s))
-#endif
+template<class T>
+static inline void read_array_field(uint8_t*& src, T* dest, std::size_t count)
+{
+    std::cout << "read_array_field: " << count << " bytes" << std::endl;
+    memcpy((uint8_t*)dest, (uint8_t*)(T*)src, sizeof(T)*count);
+    std::cout << "copied: " << count << " bytes" << std::endl;
+    src += sizeof(T) * count;
+    return;
+}
 
-typedef struct {
-  const char* name;
-  HandleFunc function;
-} FuncNameMapping;
+template <typename T>
+static inline size_t read_n(T& dest, FILE* src, size_t const& num)
+{
+    return  fread(dest, 1, num, src);
+}
+
+template<class T>
+static inline T read_field(uint8_t*& src)
+{
+    std::cout << "read_field " << std::endl;
+    T tmp = *(T*)(void*)src;
+    src += sizeof(T);
+    return tmp;
+}
+
+
+
+
+class VLR
+{
+public:
+    uint16_t reserved;
+    std::string userId;
+    uint16_t recordId;
+    uint16_t size;
+    std::string description;
+    uint8_t* data;
+    enum
+    {
+        eHeaderSize = 54,
+        eUserIdSize = 16,
+        eDescriptionSize = 32
+    };
+
+    
+    VLR()
+        : reserved(0)
+        , userId("")
+        , recordId(0)
+        , size(0)
+        , description("")
+        , data(0)
+    {}
+    ~VLR()
+    {
+        delete data;
+    }
+    void read(FILE* fp);
+};
+
+void VLR::read(FILE* fp)
+{
+    // assumes the stream is already positioned to the beginning
+
+    {
+        uint8_t* buf1 = new uint8_t[eHeaderSize];
+        size_t numRead = read_n(buf1, fp, eHeaderSize);
+        if (numRead != eHeaderSize)
+        {
+            std::cout << " read size was invalid, not " << eHeaderSize << std::endl;
+        }
+        uint8_t* p1 = buf1;
+
+        reserved = read_field<uint16_t>(p1);
+        
+        std::cout << "reserved: " << reserved << std::endl;
+        
+        uint8_t userId_data[eUserIdSize];
+        read_array_field(p1, userId_data, eUserIdSize);
+        userId = std::string((const char*)&userId_data);
+        // userId = VariableLengthRecord::bytes2string(userId_data, VariableLengthRecord::eUserIdSize);
+
+        recordId = read_field<uint16_t>(p1);
+        size = read_field<uint16_t>(p1);
+        
+        std::cout << "recordId: " << recordId << std::endl;
+        std::cout << "size: " << size << std::endl;
+        
+        uint8_t description_data[eDescriptionSize];
+        read_array_field(p1, description_data, eDescriptionSize);
+        
+        description = std::string(  (const char*)&description_data);
+        // description = VariableLengthRecord::bytes2string(description_data, VariableLengthRecord::eDescriptionSize);
+
+        delete[] buf1;
+    }
+
+    data = new uint8_t[size];
+    {
+        read_n(data, fp, size);
+    }
+    
+    std::cout << "read VLR data" << std::endl;
+    return;
+}
+
+
+std::vector<VLR*> readVLRs(FILE* fp, int count)
+{
+    std::vector<VLR*> output;
+    
+    for (int i = 0; i < count; ++i)
+    {
+        std::cout << "Reading vlr #:" << i << std::endl;
+        VLR* vlr = new VLR;
+        vlr->read(fp);
+        output.push_back(vlr);
+    }
+    return output;
+}
+
+VLR* getLASzipVLR(std::vector<VLR*> const& vlrs)
+{
+    std::string userId("laszip encoded");
+    uint16_t recordId(22204);
+    
+    for(size_t i = 0; i < vlrs.size(); ++i)
+    {
+        VLR* vlr = vlrs[i];
+        std::string const& uid = vlr->userId;
+        uint16_t rid = vlr->recordId;
+        
+        std::cout << "VLR recordId: " << rid << std::endl;
+        std::cout << "VLR userid: '" << uid <<"'"<< std::endl;
+        std::cout << "uid size" << uid.size() << std::endl;
+        
+        std::cout << "uid equal: " << boost::iequals(uid, userId) << std::endl;
+        std::cout << "rid equal: " << (rid == recordId) << std::endl;
+        
+        if (boost::iequals(uid,userId) && rid == recordId)
+            return vlr;
+    }
+    return 0;
+}
+
 
 static PP_Instance g_instance = 0;
 static PPB_GetInterface get_browser_interface = NULL;
 static PPB_Messaging* ppb_messaging_interface = NULL;
 static PPB_Var* ppb_var_interface = NULL;
 
-static FuncNameMapping g_function_map[] = {
-  {"fopen", HandleFopen},
-  {"fwrite", HandleFwrite},
-  {"fread", HandleFread},
-  {"fseek", HandleFseek},
-  {"fclose", HandleFclose},
-  {"stat", HandleStat},
-  {"opendir", HandleOpendir},
-  {"readdir", HandleReaddir},
-  {"closedir", HandleClosedir},
-  {"mkdir", HandleMkdir},
-  {"rmdir", HandleRmdir},
-  {"chdir", HandleChdir},
-  {"getcwd", HandleGetcwd},
-  {"gethostbyname", HandleGethostbyname},
-  {"connect", HandleConnect},
-  {"send", HandleSend},
-  {"recv", HandleRecv},
-  {"close", HandleClose},
-  {NULL, NULL},
-};
+
 
 /** A handle to the thread the handles messages. */
 static pthread_t g_handle_message_thread;
 
-/**
- * Create a new PP_Var from a C string.
- * @param[in] str The string to convert.
- * @return A new PP_Var with the contents of |str|.
- */
 struct PP_Var CStrToVar(const char* str) {
   if (ppb_var_interface != NULL) {
     return ppb_var_interface->VarFromUtf8(str, strlen(str));
@@ -86,81 +201,12 @@ struct PP_Var CStrToVar(const char* str) {
   return PP_MakeUndefined();
 }
 
-/**
- * Printf to a newly allocated C string.
- * @param[in] format A printf format string.
- * @param[in] args The printf arguments.
- * @return The newly constructed string. Caller takes ownership. */
-char* VprintfToNewString(const char* format, va_list args) {
-  va_list args_copy;
-  int length;
-  char* buffer;
-  int result;
-
-  va_copy(args_copy, args);
-  length = vsnprintf(NULL, 0, format, args);
-  buffer = (char*)malloc(length + 1); /* +1 for NULL-terminator. */
-  result = vsnprintf(&buffer[0], length + 1, format, args_copy);
-  if (result != length) {
-    assert(0);
-    return NULL;
-  }
-  return buffer;
-}
-
-/**
- * Printf to a newly allocated C string.
- * @param[in] format A print format string.
- * @param[in] ... The printf arguments.
- * @return The newly constructed string. Caller takes ownership.
- */
-char* PrintfToNewString(const char* format, ...) {
-  va_list args;
-  char* result;
-  va_start(args, format);
-  result = VprintfToNewString(format, args);
-  va_end(args);
-  return result;
-}
-
-/**
- * Printf to a new PP_Var.
- * @param[in] format A print format string.
- * @param[in] ... The printf arguments.
- * @return A new PP_Var.
- */
-struct PP_Var PrintfToVar(const char* format, ...) {
-  if (ppb_var_interface != NULL) {
-    char* string;
-    va_list args;
-    struct PP_Var var;
-
-    va_start(args, format);
-    string = VprintfToNewString(format, args);
-    va_end(args);
-
-    var = ppb_var_interface->VarFromUtf8(string, strlen(string));
-    free(string);
-
-    return var;
-  }
-
-  return PP_MakeUndefined();
-}
-
-/**
- * Convert a PP_Var to a C string, given a buffer.
- * @param[in] var The PP_Var to convert.
- * @param[out] buffer The buffer to write to.
- * @param[in] length The length of |buffer|.
- * @return The number of characters written.
- */
 uint32_t VarToCStr(struct PP_Var var, char* buffer, uint32_t length) {
   if (ppb_var_interface != NULL) {
     uint32_t var_length;
     const char* str = ppb_var_interface->VarToUtf8(var, &var_length);
     /* str is NOT NULL-terminated. Copy using memcpy. */
-    uint32_t min_length = MIN(var_length, length - 1);
+    uint32_t min_length = std::min(var_length, length - 1);
     memcpy(buffer, str, min_length);
     buffer[min_length] = 0;
 
@@ -170,91 +216,17 @@ uint32_t VarToCStr(struct PP_Var var, char* buffer, uint32_t length) {
   return 0;
 }
 
-/**
- * Given a message from JavaScript, parse it for functions and parameters.
- *
- * The format of the message is:
- *   function, param1, param2, param3, etc.
- * where each element is separated by the \1 character.
- *
- * e.g.
- *   "function\1first parameter\1second parameter"
- *
- * How to use:
- *   char* function;
- *   char* params[4];
- *   int num_params = ParseMessage(msg, &function, &params, 4);
- *
- * @param[in, out] message The message to parse. This string is modified
- *     in-place.
- * @param[out] out_function The function name.
- * @param[out] out_params An array of strings, one for each parameter parsed.
- * @param[in] max_params The maximum number of parameters to parse.
- * @return The number of parameters parsed.
- */
-static size_t ParseMessage(char* message,
-                           char** out_function,
-                           char** out_params,
-                           size_t max_params) {
-  char* separator;
-  char* param_start;
-  size_t num_params = 0;
-
-  /* Parse the message: function\1param1\1param2\1param3,... */
-  *out_function = &message[0];
-
-  separator = strchr(message, 1);
-  if (!separator) {
-    return num_params;
-  }
-
-  *separator = 0; /* NULL-terminate function. */
-
-  while (separator && num_params < max_params) {
-    param_start = separator + 1;
-    separator = strchr(param_start, 1);
-    if (separator) {
-      *separator = 0;
-      out_params[num_params++] = param_start;
-    }
-  }
-
-  out_params[num_params++] = param_start;
-
-  return num_params;
+double applyScaling(const int32_t& v, const double& scale, const double& offset)
+{
+    return static_cast<double>(v) * scale + offset;
 }
-
-/**
- * Given a function name, look up its handler function.
- * @param[in] function_name The function name to look up.
- * @return The handler function mapped to |function_name|.
- */
-static HandleFunc GetFunctionByName(const char* function_name) {
-  FuncNameMapping* map_iter = g_function_map;
-  for (; map_iter->name; ++map_iter) {
-    if (strcmp(map_iter->name, function_name) == 0) {
-      return map_iter->function;
-    }
-  }
-
-  return NULL;
-}
-
 /**
  * Handle as message from JavaScript on the worker thread.
  *
  * @param[in] message The message to parse and handle.
  */
 static void HandleMessage(char* message) {
-  char* function_name;
-  char* params[MAX_PARAMS];
-  size_t num_params;
-  char* output = NULL;
-  int result;
-  HandleFunc function;
 
-  FILE* file;
-  int file_index;
   int point_size(0);
   
   LASzip zip;
@@ -269,6 +241,29 @@ LASunzipper* unzipper = new LASunzipper();
             // *output = PrintfToNewString("Unable to open filename %s", filename.c_str());
             // return 3;
         }
+        uint32_t data_offset(0);
+        fseek(fp, 32*3, SEEK_SET);
+        size_t result = fread(&data_offset, 4, 1, fp);
+        std::cout << "data offset: " << data_offset << std::endl;
+        
+        uint32_t vlr_count(0);
+        fseek(fp, 32*3+4, SEEK_SET);
+        result = fread(&vlr_count, 4, 1, fp);
+        std::cout << "vlr count: " << vlr_count << std::endl;
+        
+        uint16_t header_size(0);
+        fseek(fp, 32*3-2, SEEK_SET);
+        result = fread(&header_size, 2, 1, fp);
+        std::cout << "header size: " << header_size << std::endl;
+
+        fseek(fp, header_size, SEEK_SET);
+        std::vector<VLR*> vlrs = readVLRs(fp, vlr_count);
+        VLR* zvlr = getLASzipVLR(vlrs);
+        
+        if (!zvlr)
+            std::cout << "No zip VLR was found!" << std::endl;
+        
+        fseek(fp, data_offset, SEEK_SET);
         // fseek(fp, 0L, SEEK_END);
         // int len = ftell(fp);
         // fseek(fp, 0L, SEEK_SET);
@@ -276,23 +271,38 @@ LASunzipper* unzipper = new LASunzipper();
         // f.seekg(std::ios::end);
         // int len = f.tellg();
         // std::cout << "file length is: " << len << std::endl;
+
+        
+        bool stat = zip.unpack(&(zvlr->data[0]), zvlr->size);
+        if (!stat)
+        {
+            std::cout << "Unable to unpack LASzip VLR!" << std::endl;
+            std::cout << "error msg: " << unzipper->get_error() << std::endl;            
+        }
         
         std::cout << "current thread id before open: " << pthread_self() << std::endl;
-        bool stat = unzipper->open(fp, &zip);
-        std::cout << "opened laszip: " << stat << std::endl;
-        const char *err_msg = unzipper->get_error();
-        if (err_msg)
+        stat = unzipper->open(fp, &zip);
+        
+        if (!stat)
+        {
+            std::cout << "Unable to open zip file!" << std::endl;
             std::cout << "error msg: " << unzipper->get_error() << std::endl;
-        else
-            std::cout << "opened zip file ok!" << std::endl;
+        }
+        std::cout << "opened laszip: " << stat << std::endl;
+
+        
+        std::cout << "opened zip file ok!" << std::endl;
 
     unsigned char** point;
     unsigned int point_offset(0);
     point = new unsigned char*[zip.num_items];
-       
+
+    std::ostringstream oss;
+    std::cout << "num_items: " << zip.num_items << std::endl;
     for (unsigned i = 0; i < zip.num_items; i++)
     {
         point_size += zip.items[i].size;
+        oss << " Item name: " << zip.items[i].get_name() << " size: " << zip.items[i].size << std::endl;
     }
 
     unsigned char* bytes = new uint8_t[ point_size ];
@@ -308,50 +318,54 @@ LASunzipper* unzipper = new LASunzipper();
     {
 
         std::cout <<unzipper->get_error()<< std::endl;
-    }    
+    }
+    
+    double offset[3] = {0.0};
+    double scale[3] = {0.0};
+    
+    size_t start = 32*3 + 35;
+    fseek(fp, start, SEEK_SET);
+    
 
-    int32_t x(static_cast<int32_t>(bytes[0]));
-    int32_t y(static_cast<int32_t>(bytes[4]));
-    int32_t z(static_cast<int32_t>(bytes[8]));
-    std::cout << "x: " << x << std::endl; 
-    std::cout << "y: " << y << std::endl; 
-    std::cout << "z: " << z << std::endl; 
-
-  num_params = ParseMessage(message, &function_name, &params[0], MAX_PARAMS);
-
-  function = GetFunctionByName(function_name);
-  if (!function) {
-    /* Function name wasn't found. Error. */
-    ppb_messaging_interface->PostMessage(
-        g_instance,
-        PrintfToVar("Error: Unknown function \"%s\"", function_name));
-    return;
-  }
-
-  /* Function name was found, call it. */
-  result = (*function)(num_params, &params[0], &output);
-  if (result != 0) {
-    /* Error. */
-    struct PP_Var var;
-    if (output != NULL) {
-      var = PrintfToVar("Error: \"%s\" failed: %d: %s.", function_name,
-                        result, output);
-      free(output);
-    } else {
-      var = PrintfToVar(
-          "Error: \"%s\" failed: %d.", function_name, result);
+    result = fread(&scale, 8, 3, fp );
+    if (result != 3)
+    {
+        std::cout << "unable to read scale information!" << std::endl;
     }
 
-    /* Post the error to JavaScript, so the user can see it. */
-    ppb_messaging_interface->PostMessage(g_instance, var);
-    return;
-  }
+    result = fread(&offset, 8, 3, fp );
+    if (result != 3)
+    {
+        std::cout << "unable to read offset information!" << std::endl;
+    }
+    
+    int32_t x = *(int32_t*)&bytes[0];
+    int32_t y = *(int32_t*)&bytes[4];
+    int32_t z = *(int32_t*)&bytes[8];
+    
+    double xs = applyScaling(x, scale[0], offset[0]);
+    double ys = applyScaling(y, scale[1], offset[1]);
+    double zs = applyScaling(z, scale[2], offset[2]);
 
-  if (output != NULL) {
+
+    oss << "scale[0]: " << scale[0] <<std::endl;
+    oss << "scale[1]: " << scale[1] <<std::endl;
+    oss << "scale[2]: " << scale[2] <<std::endl;
+    oss << "offset[0]: " << offset[0] <<std::endl;
+    oss << "offset[1]: " << offset[1] <<std::endl;
+    oss << "offset[2]: " << offset[2] <<std::endl;
+
+    oss << "x: " << x << std::endl; 
+    oss  << "y: " << y << std::endl; 
+    oss  << "z: " << z << std::endl; 
+
+    oss << "x: " << xs << std::endl; 
+    oss  << "y: " << ys << std::endl; 
+    oss  << "z: " << zs << std::endl; 
+
     /* Function returned an output string. Send it to JavaScript. */
-    ppb_messaging_interface->PostMessage(g_instance, CStrToVar(output));
-    free(output);
-  }
+    ppb_messaging_interface->PostMessage(g_instance, CStrToVar(oss.str().c_str()));
+
 }
 
 /**
@@ -417,9 +431,9 @@ static void Messaging_HandleMessage(PP_Instance instance,
   VarToCStr(message, &buffer[0], 1024);
   if (!EnqueueMessage(strdup(buffer))) {
     struct PP_Var var;
-    var = PrintfToVar(
-        "Warning: dropped message \"%s\" because the queue was full.", message);
-    ppb_messaging_interface->PostMessage(g_instance, var);
+    // var = PrintfToVar(
+    //     "Warning: dropped message \"%s\" because the queue was full.", message);
+    // ppb_messaging_interface->PostMessage(g_instance, var);
   }
 }
 
