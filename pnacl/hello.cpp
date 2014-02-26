@@ -41,9 +41,7 @@
 template<class T>
 static inline void read_array_field(uint8_t*& src, T* dest, std::size_t count)
 {
-    std::cout << "read_array_field: " << count << " bytes" << std::endl;
     memcpy((uint8_t*)dest, (uint8_t*)(T*)src, sizeof(T)*count);
-    std::cout << "copied: " << count << " bytes" << std::endl;
     src += sizeof(T) * count;
     return;
 }
@@ -57,7 +55,6 @@ static inline size_t read_n(T& dest, FILE* src, size_t const& num)
 template<class T>
 static inline T read_field(uint8_t*& src)
 {
-    std::cout << "read_field " << std::endl;
     T tmp = *(T*)(void*)src;
     src += sizeof(T);
     return tmp;
@@ -107,7 +104,8 @@ void VLR::read(FILE* fp)
         size_t numRead = read_n(buf1, fp, eHeaderSize);
         if (numRead != eHeaderSize)
         {
-            std::cout << " read size was invalid, not " << eHeaderSize << std::endl;
+            std::ostringstream oss;
+            oss << " read size was invalid, not " << eHeaderSize << std::endl;
         }
         uint8_t* p1 = buf1;
 
@@ -177,7 +175,7 @@ VLR* getLASzipVLR(std::vector<VLR*> const& vlrs)
         std::cout << "uid equal: " << boost::iequals(uid, userId) << std::endl;
         std::cout << "rid equal: " << (rid == recordId) << std::endl;
         
-        if (boost::iequals(uid,userId) && rid == recordId)
+        if (boost::iequals(uid, userId) && rid == recordId)
             return vlr;
     }
     return 0;
@@ -225,6 +223,12 @@ double applyScaling(const int32_t& v, const double& scale, const double& offset)
  *
  * @param[in] message The message to parse and handle.
  */
+
+static void PostError(std::string const& message)
+{
+    ppb_messaging_interface->PostMessage(g_instance, CStrToVar(message.c_str()));
+}
+
 static void HandleMessage(char* message) {
 
   int point_size(0);
@@ -234,75 +238,90 @@ LASunzipper* unzipper = new LASunzipper();
       std::string filename("/http/test.laz");
       // std::ifstream f(filename.c_str(), std::ios::in|std::ios::binary);
 
+    std::ostringstream errors;
         FILE* fp = fopen(filename.c_str(), "r");
         if (!fp)
         {
-                    std::cout << "no file opened: " << filename << std::endl;
-            // *output = PrintfToNewString("Unable to open filename %s", filename.c_str());
-            // return 3;
+            errors <<  "Unable to open file: '" << filename << "'" << std::endl;
+            PostError(errors.str());
         }
+        
+        uint32_t point_count(0);
+        fseek(fp, 32*3 + 11, SEEK_SET);
+        size_t result = fread(&point_count, 4, 1, fp);
+        if (result != 1)
+        {
+            errors << "unable to read point count of size 1, got " << result;
+            PostError(errors.str());
+        }
+        
+                
         uint32_t data_offset(0);
         fseek(fp, 32*3, SEEK_SET);
-        size_t result = fread(&data_offset, 4, 1, fp);
-        std::cout << "data offset: " << data_offset << std::endl;
+        result = fread(&data_offset, 4, 1, fp);
+        if (result != 1)
+        {
+            errors << "unable to read data offset of size 1, got " << result;
+            PostError(errors.str());
+        }
         
         uint32_t vlr_count(0);
         fseek(fp, 32*3+4, SEEK_SET);
         result = fread(&vlr_count, 4, 1, fp);
-        std::cout << "vlr count: " << vlr_count << std::endl;
+        if (result != 1)
+        {
+            errors << "unable to vlr count of size 1, got " << result;
+            PostError(errors.str());
+        }
+        
         
         uint16_t header_size(0);
         fseek(fp, 32*3-2, SEEK_SET);
         result = fread(&header_size, 2, 1, fp);
-        std::cout << "header size: " << header_size << std::endl;
+        if (result != 1)
+        {
+            errors << "unable to header size of size 1, got " << result;
+            PostError(errors.str());
+        }
+        
 
         fseek(fp, header_size, SEEK_SET);
         std::vector<VLR*> vlrs = readVLRs(fp, vlr_count);
         VLR* zvlr = getLASzipVLR(vlrs);
         
         if (!zvlr)
-            std::cout << "No zip VLR was found!" << std::endl;
+        {
+            errors << "No LASzip VLRs were found in this file! " << result;
+            PostError(errors.str());
+        }
         
         fseek(fp, data_offset, SEEK_SET);
-        // fseek(fp, 0L, SEEK_END);
-        // int len = ftell(fp);
-        // fseek(fp, 0L, SEEK_SET);
-        // std::ifstream f(filename.c_str(), std::ios::in|std::ios::binary);
-        // f.seekg(std::ios::end);
-        // int len = f.tellg();
-        // std::cout << "file length is: " << len << std::endl;
 
         
         bool stat = zip.unpack(&(zvlr->data[0]), zvlr->size);
         if (!stat)
         {
-            std::cout << "Unable to unpack LASzip VLR!" << std::endl;
-            std::cout << "error msg: " << unzipper->get_error() << std::endl;            
+            errors << "Unable to unpack LASzip VLR!" << std::endl;
+            errors << "error msg: " << unzipper->get_error() << std::endl;            
+            PostError(errors.str());
         }
         
-        std::cout << "current thread id before open: " << pthread_self() << std::endl;
         stat = unzipper->open(fp, &zip);
-        
         if (!stat)
-        {
-            std::cout << "Unable to open zip file!" << std::endl;
-            std::cout << "error msg: " << unzipper->get_error() << std::endl;
+        {       
+            errors << "Unable to open zip file!" << std::endl;
+            errors << "error msg: " << unzipper->get_error() << std::endl;            
+            PostError(errors.str());
         }
-        std::cout << "opened laszip: " << stat << std::endl;
-
-        
-        std::cout << "opened zip file ok!" << std::endl;
 
     unsigned char** point;
     unsigned int point_offset(0);
     point = new unsigned char*[zip.num_items];
 
     std::ostringstream oss;
-    std::cout << "num_items: " << zip.num_items << std::endl;
     for (unsigned i = 0; i < zip.num_items; i++)
     {
         point_size += zip.items[i].size;
-        oss << " Item name: " << zip.items[i].get_name() << " size: " << zip.items[i].size << std::endl;
     }
 
     unsigned char* bytes = new uint8_t[ point_size ];
@@ -315,9 +334,10 @@ LASunzipper* unzipper = new LASunzipper();
     
     bool ok = unzipper->read(point);
     if (!ok)
-    {
-
-        std::cout <<unzipper->get_error()<< std::endl;
+    {     
+        errors << "Unable to read point!" << std::endl;
+        errors << "error msg: " << unzipper->get_error() << std::endl;            
+        PostError(errors.str());
     }
     
     double offset[3] = {0.0};
@@ -329,14 +349,16 @@ LASunzipper* unzipper = new LASunzipper();
 
     result = fread(&scale, 8, 3, fp );
     if (result != 3)
-    {
-        std::cout << "unable to read scale information!" << std::endl;
+    {       
+        errors << "unable to read scale information!" << std::endl;
+        PostError(errors.str());
     }
 
     result = fread(&offset, 8, 3, fp );
     if (result != 3)
-    {
-        std::cout << "unable to read offset information!" << std::endl;
+    {      
+        errors << "unable to read offset information!" << std::endl;
+        PostError(errors.str());
     }
     
     int32_t x = *(int32_t*)&bytes[0];
