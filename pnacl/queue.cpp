@@ -27,7 +27,7 @@ static pthread_cond_t g_queue_not_empty_cond;
  *   all elements in the g_queue are valid.
  * If g_queue_start == g_queue_end, and g_queue_size == 0:
  *   No elements are valid. */
-static char* g_queue[MAX_QUEUE_SIZE];
+static pp::Var g_queue[MAX_QUEUE_SIZE];
 
 /** The index of the head of the queue. */
 static int g_queue_start = 0;
@@ -63,14 +63,13 @@ void InitializeMessageQueue() {
  * NOTE: this function assumes g_queue_mutex is _NOT_ held.
  * @param[in] message The message to enqueue.
  * @return non-zero if the message was added to the queue. */
-int EnqueueMessage(char* message) {
+int EnqueueMessage(const pp::Var& message) {
   pthread_mutex_lock(&g_queue_mutex);
 
   /* We shouldn't block the main thread waiting for the queue to not be full,
    * so just drop the message. */
   if (IsQueueFull()) {
     pthread_mutex_unlock(&g_queue_mutex);
-    free(message);
     return 0;
   }
 
@@ -92,8 +91,7 @@ int EnqueueMessage(char* message) {
  *
  * NOTE: this function assumes g_queue_mutex is _NOT_ held.
  * @return The message at the head of the queue. */
-char* DequeueMessage() {
-  char* message = NULL;
+pp::Var DequeueMessage() {
 
   pthread_mutex_lock(&g_queue_mutex);
 
@@ -101,7 +99,7 @@ char* DequeueMessage() {
     pthread_cond_wait(&g_queue_not_empty_cond, &g_queue_mutex);
   }
 
-  message = g_queue[g_queue_start];
+  pp::Var message = g_queue[g_queue_start];
   g_queue_start = (g_queue_start + 1) % MAX_QUEUE_SIZE;
   g_queue_size--;
 
