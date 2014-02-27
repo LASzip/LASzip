@@ -43,6 +43,7 @@
 #include <ppapi/cpp/module.h>
 #include <ppapi/cpp/var.h>
 #include <ppapi/cpp/var_dictionary.h>
+#include <ppapi/cpp/var_array_buffer.h>
 
 
 #include "nacl_io/nacl_io.h"
@@ -213,6 +214,8 @@ public:
     uint32_t vlr_count;
     uint16_t header_size;
     uint32_t data_offset;
+    uint8_t point_format_id;
+    uint16_t point_record_length;
     double scale[3];
     double offset[3];
     double maxs[3];
@@ -223,6 +226,8 @@ public:
         , vlr_count (0)
         , header_size(0)
         , data_offset(0)
+        , point_format_id(0)
+        , point_record_length(0)
     {
         for (int i = 0; i < 3; ++i)
         {
@@ -244,6 +249,8 @@ public:
         output.Set("vlr_count", pp::Var(int32_t(vlr_count)));
         output.Set("header_size", pp::Var(int32_t(header_size)));
         output.Set("data_offset", pp::Var(int32_t(data_offset)));
+        output.Set("point_format_id", pp::Var(int32_t(point_format_id)));
+        output.Set("point_record_length", pp::Var(int32_t(point_record_length)));
         for (int i=0; i < 3; ++i)
         {
             scales.Set(i, scale[i]);
@@ -277,6 +284,10 @@ class LASzipInstance : public pp::Instance {
       , message_thread_(NULL)
       , bCreatedFS_(false)
       , fp_(0)
+      , bDidReadHeader_(false)
+      , pointIndex_(0)
+      , point_(0)
+      , bytes_(0)
   {
 
 
@@ -416,6 +427,41 @@ class LASzipInstance : public pp::Instance {
             return false;
         }
 
+        fseek(fp_, 32*3 + 8, SEEK_SET);
+        result = fread(&header.point_format_id, 1, 1, fp_);
+        if (result != 1)
+        {
+            errors << "unable to header point_format_id of size 1, got " << result;
+            PostError(errors.str());
+            return false;
+        }
+
+        uint8_t compression_bit_7 = (header.point_format_id & 0x80) >> 7;
+        uint8_t compression_bit_6 = (header.point_format_id & 0x40) >> 6;
+        
+        if (!compression_bit_7 && !compression_bit_6 )
+        {
+            errors << "This file is not a LASzip file. Is it uncompressed LAS? ";
+            PostError(errors.str());
+            return false;
+        }
+        if (compression_bit_7 && compression_bit_6)
+        {
+            errors << "This is LASzip, but it was compressed by an ancient compressor version that is not open source ";
+            PostError(errors.str());
+            return false;            
+        }
+        header.point_format_id = header.point_format_id &= 0x3f;
+
+        fseek(fp_, 32*3 + 8+1, SEEK_SET);
+        result = fread(&header.point_record_length, 2, 1, fp_);
+        if (result != 1)
+        {
+            errors << "unable to header point_record_length of size 1, got " << result;
+            PostError(errors.str());
+            return false;
+        }        
+
 
         size_t start = 32*3 + 35;
         fseek(fp_, start, SEEK_SET);
@@ -481,9 +527,62 @@ class LASzipInstance : public pp::Instance {
             PostError(errors.str());
             return false;
         }
+
+
+        fseek(fp_, header_.header_size, SEEK_SET);
+        std::vector<VLR*> vlrs = readVLRs(fp_, header_.vlr_count);
+        VLR* zvlr = getLASzipVLR(vlrs);
+    
+        if (!zvlr)
+        {
+            errors << "No LASzip VLRs were found in this file! ";
+            PostError(errors.str());
+            return false;
+        }
+        bool stat = zip_.unpack(&(zvlr->data[0]), zvlr->size);
+        if (!stat)
+        {
+            errors << "Unable to unpack LASzip VLR!" << std::endl;
+            errors << "error msg: " << unzipper_.get_error() << std::endl;            
+            PostError(errors.str());
+            return false;
+        }
+    
+        fseek(fp_, header_.data_offset, SEEK_SET);
+        stat = unzipper_.open(fp_, &zip_);
+        if (!stat)
+        {       
+            errors << "Unable to open zip file!" << std::endl;
+            errors << "error msg: " << unzipper_.get_error() << std::endl;            
+            PostError(errors.str());
+            return false;
+        }
         
-        
+        unsigned int point_offset(0);
+        point_ = new unsigned char*[zip_.num_items];
+        uint32_t point_size(0);
+        for (unsigned i = 0; i < zip_.num_items; i++)
+        {
+            point_size += zip_.items[i].size;
+        }
+
+        bytes_ = new uint8_t[ point_size ];
+
+        for (unsigned i = 0; i < zip_.num_items; i++)
+        {
+            point_[i] = &(bytes_[point_offset]);
+            point_offset += zip_.items[i].size;
+        }
+                
         return true;
+    }
+    
+    pp::Var status(bool bStatus, std::string const& message)
+    {
+        pp::VarDictionary dict;
+        dict.Set("status", bStatus);
+        dict.Set("message", message);
+        return pp::Var(dict);
     }
   virtual void dosomething(const pp::Var& var_message) 
   {
@@ -494,6 +593,7 @@ class LASzipInstance : public pp::Instance {
       
       pp::VarDictionary dict;
       pp::Var command_name;
+      
       if (var_message.is_dictionary())
       {
           dict = pp::VarDictionary(var_message);
@@ -513,7 +613,13 @@ class LASzipInstance : public pp::Instance {
       {
           bool opened = open(var_message);
           if (!opened)
+          {
+              PostMessage(status(false, "Unable to open file"));
               return;
+          }
+          PostMessage(status(true, "File opened successfully"));
+          return; // open has set any errors          
+          
       }
 
       if (boost::iequals(command_name.AsString(), "getheader"))
@@ -523,8 +629,8 @@ class LASzipInstance : public pp::Instance {
               PostError("No file is open!");
               return;
           }
-          bool bDidReadHeader = readHeader(header_);
-          if (!bDidReadHeader)
+          bDidReadHeader_ = readHeader(header_);
+          if (!bDidReadHeader_)
           {
               PostError("Header read failed!");
               return;
@@ -533,101 +639,113 @@ class LASzipInstance : public pp::Instance {
           return;
 
       }
-        std::ostringstream errors;
+        // std::ostringstream errors;
+
+      if (boost::iequals(command_name.AsString(), "read"))
+      {
+          if (!fp_)
+          {
+              PostError("No file is open!");
+              return;
+          }
+          if (!bDidReadHeader_)
+          {
+              PostError("No header has been fetched!");
+              return;
+          }
+          uint32_t count(header_.point_count);
+          if (!dict.HasKey("buffer"))
+          {
+              PostError("No 'buffer' ArrayBuffer object was given!");
+              return;
+          }
+          pp::Var buffer = dict.Get("buffer");
+          if (!buffer.is_array_buffer())
+          {
+              PostError("'buffer' is not an ArrayBuffer object!");
+              return;
+          }
+          
+          uint32_t num_left = header_.point_count - pointIndex_;
+          pp::VarArrayBuffer buf(buffer);
+          if (buf.ByteLength() < num_left*header_.point_record_length != 0)
+          {
+              std::ostringstream error;
+              error << "'buffer'::ByteLength() < num_left*header_.point_record_length!"
+                  << " buf.ByteLength(): " << buf.ByteLength() 
+                      << " and num_left*header_.point_record_length: " << num_left*header_.point_record_length;
+              PostError(error.str());
+          }
+          
+          unsigned char* data = static_cast<unsigned char*>(buf.Map());
+          
+          for (int i = pointIndex_; i < header_.point_count; ++i)
+          {
+              // fills in bytes_
+                bool ok = unzipper_.read(point_);
+                if (!ok)
+                {
+                      std::ostringstream error;
+                    error << "Unable to read point at index " << i << std::endl;
+                    error << "error msg: " << unzipper_.get_error() << std::endl;            
+                    PostError(error.str());
+                    return;
+                }
+                std::copy(bytes_, bytes_ + header_.point_record_length, data);
+                data += header_.point_record_length;
+                
+          }
+          PostMessage(status(true, "Done reading data"));
+          return;
+
+      }
 
         
 
-            fseek(fp_, header_.header_size, SEEK_SET);
-            std::vector<VLR*> vlrs = readVLRs(fp_, header_.vlr_count);
-            VLR* zvlr = getLASzipVLR(vlrs);
-        
-            if (!zvlr)
-            {
-                errors << "No LASzip VLRs were found in this file! ";
-                PostError(errors.str());
-                return;
-            }
-        
-            fseek(fp_, header_.data_offset, SEEK_SET);
-
-        
-            bool stat = zip_.unpack(&(zvlr->data[0]), zvlr->size);
-            if (!stat)
-            {
-                errors << "Unable to unpack LASzip VLR!" << std::endl;
-                errors << "error msg: " << unzipper_.get_error() << std::endl;            
-                PostError(errors.str());
-                return;
-            }
-        
-            stat = unzipper_.open(fp_, &zip_);
-            if (!stat)
-            {       
-                errors << "Unable to open zip file!" << std::endl;
-                errors << "error msg: " << unzipper_.get_error() << std::endl;            
-                PostError(errors.str());
-                return;
-            }
-
-        unsigned char** point;
-        unsigned int point_offset(0);
-        point = new unsigned char*[zip_.num_items];
-
-        std::ostringstream oss;
-        for (unsigned i = 0; i < zip_.num_items; i++)
-        {
-            point_size += zip_.items[i].size;
-        }
-
-        unsigned char* bytes = new uint8_t[ point_size ];
-
-        for (unsigned i = 0; i < zip_.num_items; i++)
-        {
-            point[i] = &(bytes[point_offset]);
-            point_offset += zip_.items[i].size;
-        }
+        // unsigned char** point;
+ 
     
-        bool ok = unzipper_.read(point);
-        if (!ok)
-        {     
-            errors << "Unable to read point!" << std::endl;
-            errors << "error msg: " << unzipper_.get_error() << std::endl;            
-            PostError(errors.str());
-            return;
-        }
-    
+        // bool ok = unzipper_.read(point_);
+        // if (!ok)
+        // {     
+        //     errors << "Unable to read point!" << std::endl;
+        //     errors << "error msg: " << unzipper_.get_error() << std::endl;            
+        //     PostError(errors.str());
+        //     return;
+        // }
+        //     
 
     
-        int32_t x = *(int32_t*)&bytes[0];
-        int32_t y = *(int32_t*)&bytes[4];
-        int32_t z = *(int32_t*)&bytes[8];
-    
-        double xs = applyScaling(x, header_.scale[0], header_.offset[0]);
-        double ys = applyScaling(y, header_.scale[1], header_.offset[1]);
-        double zs = applyScaling(z, header_.scale[2], header_.offset[2]);
-
-
-        oss << "scale[0]: " << header_.scale[0] <<std::endl;
-        oss << "scale[1]: " << header_.scale[1] <<std::endl;
-        oss << "scale[2]: " << header_.scale[2] <<std::endl;
-        oss << "offset[0]: " << header_.offset[0] <<std::endl;
-        oss << "offset[1]: " << header_.offset[1] <<std::endl;
-        oss << "offset[2]: " << header_.offset[2] <<std::endl;
-        oss << "min[0]: " << header_.mins[0] <<std::endl;
-        oss << "min[1]: " << header_.mins[1] <<std::endl;
-        oss << "min[2]: " << header_.mins[2] <<std::endl;
-        oss << "max[0]: " << header_.maxs[0] <<std::endl;
-        oss << "max[1]: " << header_.maxs[1] <<std::endl;
-        oss << "max[2]: " << header_.maxs[2] <<std::endl;
-
-        oss << "x: " << x << std::endl; 
-        oss  << "y: " << y << std::endl; 
-        oss  << "z: " << z << std::endl; 
-
-        oss << "x: " << xs << std::endl; 
-        oss  << "y: " << ys << std::endl; 
-        oss  << "z: " << zs << std::endl; 
-        PostMessage(header_.AsVar());
+        // int32_t x = *(int32_t*)&bytes_[0];
+        // int32_t y = *(int32_t*)&bytes_[4];
+        // int32_t z = *(int32_t*)&bytes_[8];
+        //     
+        // double xs = applyScaling(x, header_.scale[0], header_.offset[0]);
+        // double ys = applyScaling(y, header_.scale[1], header_.offset[1]);
+        // double zs = applyScaling(z, header_.scale[2], header_.offset[2]);
+        // 
+        // std::ostringstream oss;
+        // oss << "scale[0]: " << header_.scale[0] <<std::endl;
+        // oss << "scale[1]: " << header_.scale[1] <<std::endl;
+        // oss << "scale[2]: " << header_.scale[2] <<std::endl;
+        // oss << "offset[0]: " << header_.offset[0] <<std::endl;
+        // oss << "offset[1]: " << header_.offset[1] <<std::endl;
+        // oss << "offset[2]: " << header_.offset[2] <<std::endl;
+        // oss << "min[0]: " << header_.mins[0] <<std::endl;
+        // oss << "min[1]: " << header_.mins[1] <<std::endl;
+        // oss << "min[2]: " << header_.mins[2] <<std::endl;
+        // oss << "max[0]: " << header_.maxs[0] <<std::endl;
+        // oss << "max[1]: " << header_.maxs[1] <<std::endl;
+        // oss << "max[2]: " << header_.maxs[2] <<std::endl;
+        // 
+        // oss << "x: " << x << std::endl; 
+        // oss  << "y: " << y << std::endl; 
+        // oss  << "z: " << z << std::endl; 
+        // 
+        // oss << "x: " << xs << std::endl; 
+        // oss  << "y: " << ys << std::endl; 
+        // oss  << "z: " << zs << std::endl; 
+        // PostMessage(header_.AsVar());
 
 
   }
@@ -647,6 +765,10 @@ class LASzipInstance : public pp::Instance {
   LASunzipper unzipper_;
   FILE* fp_;
   LASHeader header_;
+  bool bDidReadHeader_;
+  uint32_t pointIndex_;
+  unsigned char** point_;
+  unsigned char* bytes_;
 };
 
 /// The Module class.  The browser calls the CreateInstance() method to create

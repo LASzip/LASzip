@@ -87,6 +87,13 @@ function getheader(e) {
   nacl_module.postMessage(command);
 }
 
+function readData(e) {
+    var buffer = new ArrayBuffer(1065*34);
+  var command = {'command': 'read', 'buffer': buffer}  
+  nacl_module.postMessage(command);
+}
+
+
 
 
 function fopenResult(filename, filehandle) {
