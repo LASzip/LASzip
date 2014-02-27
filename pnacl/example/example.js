@@ -75,9 +75,11 @@ function onRadioClicked(e) {
 var filehandle_map = {};
 var dirhandle_map = {};
 
-function fopen(e) {
-  var filename = document.getElementById('fopenFilename').value;
-  var command = {'command': 'open', "filename":filename}  
+function fopen(e, fname) {
+  
+  
+  var command = {'command': 'open', "target":fname, "buffer":e} ;
+   
   nacl_module.postMessage(command);
 }
 
@@ -131,4 +133,22 @@ function handleMessage(message_event) {
   var msg = message_event.data;
 
   common.logMessage("From module: " + msg);
+}
+
+$(function() {
+    console.log("Document loaded");
+    $("#fopenFilename").on("change", function() {
+        var file = $("#fopenFilename").get(0).files[0];
+        var fr = new FileReader();
+        fr.onload = function(e) {
+            var ab = e.target.result;
+            console.log(ab, ab.byteLength);
+            fopen(ab, file.name);
+        }
+        fr.readAsArrayBuffer(file);
+    });
+})
+
+document.onload = function(e) {
+    
 }

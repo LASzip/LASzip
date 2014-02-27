@@ -308,8 +308,9 @@ class LASzipInstance : public pp::Instance {
 
 
       printf( "createFS thread id '%p'\n", pthread_self());          
-
-      int res = mount("", "/web", "httpfs", 0, "");
+      umount("/");
+      int res = mount("", "/", "memfs", 0, "");
+      // int res = mount("", "/web", "httpfs", 0, "");
       if (res)
       {
           std::cout << "unable to mount httpfs file system!" << std::endl;
@@ -357,14 +358,14 @@ class LASzipInstance : public pp::Instance {
     {
         pp::VarDictionary dict(message);
         
-        if (!dict.HasKey("filename"))
+        if (!dict.HasKey("target"))
         {
             std::ostringstream errors;
-            errors <<  "No 'filename' member given to 'open' message";
+            errors <<  "No 'target' member given to 'open' message";
             PostError(errors.str());
             return false;
         }
-        pp::Var fname = dict.Get("filename");
+        pp::Var fname = dict.Get("target");
         if (!fname.is_string()) 
         {
             std::ostringstream errors;
@@ -372,18 +373,49 @@ class LASzipInstance : public pp::Instance {
             PostError(errors.str());
             return false;
         }
-        std::string filename = fname.AsString();
-        
-        fp_ = fopen(filename.c_str(), "r");
-        if (!fp_)
+        std::string filename ="/"+ fname.AsString();
+        std::cout << "saving file as " << filename << std::endl;
+        FILE* fp = fopen(filename.c_str(), "w");
+        if (!fp)
         {
             std::ostringstream errors;
-            errors <<  "Unable to open file: '" 
+            errors <<  "Unable to open to write data: '" 
                    << filename << "' "
                    << strerror(errno);
             PostError(errors.str());
             return false;
         }
+        pp::Var buffer = dict.Get("buffer");
+        if (!buffer.is_array_buffer())
+        {
+            PostError("'buffer' is not an ArrayBuffer object!");
+            return false;
+        }
+        pp::VarArrayBuffer buf(buffer);
+        
+        unsigned char* data = static_cast<unsigned char*>(buf.Map());
+        
+        size_t amt = fwrite(data, 1, buf.ByteLength(), fp);
+        if (amt != buf.ByteLength())
+        {
+            PostError("We weren't able to write entire file to memory!");
+            return false;
+        }
+        
+        fflush(fp);
+        fclose(fp);
+
+        fp_ = fopen(filename.c_str(), "r");
+        if (!fp_)
+        {
+            std::ostringstream errors;
+            errors <<  "Unable to open to read memory data: '" 
+                   << filename << "' "
+                   << strerror(errno);
+            PostError(errors.str());
+            return false;
+        }  
+        
         return true;
     }
     
@@ -699,7 +731,9 @@ class LASzipInstance : public pp::Instance {
           return;
 
       }
-
+      
+      PostError("Command not found");
+      return;
         
 
         // unsigned char** point;
