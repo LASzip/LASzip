@@ -17,7 +17,7 @@ link_directories( $ENV{NACL_ROOT}/toolchain/mac_pnacl/usr/lib )
 
 link_directories( $ENV{NACL_ROOT}/lib/pnacl/Debug )
 target_link_libraries(  ${PNACL_PROGRAM} 
-                         ppapi_cpp ppapi_simple ppapi_stub pthread nacl_io )
+                         ppapi_cpp ppapi_simple ppapi_stub pthread nacl_io jsoncpp)
 
 
 

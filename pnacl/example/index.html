@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<!--
+Copyright (c) 2012 The Chromium Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
+-->
+<head>
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="-1">
+  <title>NaCl IO Demo</title>
+  <script type="text/javascript" src="common.js"></script>
+  <script type="text/javascript" src="example.js"></script>
+</head>
+<body data-custom-load="true" data-name="pnacl_test" data-tools="" data-configs="" data-path="">
+  <h1>NaCl IO Demo</h1>
+  <h2>Status: <code id="statusField">NO-STATUS</code></h2>
+
+
+  <div class="function" id="fopen">
+    <span>
+      Filename:
+      <input type="text" id="fopenFilename" value="/web/test.laz">
+      <button>fopen</button>
+    </span>
+  </div>
+  <div class="function" id="getheader">
+    <span>
+      GetHeader
+      <button>header</button>
+    </span>
+  </div>
+
+
+  <hr>
+  <p><b>Log:</b></p>
+  <pre id="log" style="font-weight: bold"></pre>
+  <!-- The NaCl plugin will be embedded inside the element with id "listener".
+      See common.js.-->
+  <div id="listener"></div>
+</body>
+</html>

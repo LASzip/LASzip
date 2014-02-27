@@ -42,10 +42,14 @@
 #include <ppapi/cpp/instance.h>
 #include <ppapi/cpp/module.h>
 #include <ppapi/cpp/var.h>
+#include <ppapi/cpp/var_dictionary.h>
+
 
 #include "nacl_io/nacl_io.h"
 
 #include "json/json.h"
+#include "json/reader.h"
+#include "json/writer.h"
 #include "queue.h"
 
 
@@ -202,6 +206,59 @@ double applyScaling(const int32_t& v, const double& scale, const double& offset)
     return static_cast<double>(v) * scale + offset;
 }
 
+class LASHeader
+{
+public:
+    uint32_t point_count;
+    uint32_t vlr_count;
+    uint16_t header_size;
+    uint32_t data_offset;
+    double scale[3];
+    double offset[3];
+    double maxs[3];
+    double mins[3];
+
+    LASHeader()
+        : point_count (0)
+        , vlr_count (0)
+        , header_size(0)
+        , data_offset(0)
+    {
+        for (int i = 0; i < 3; ++i)
+        {
+            scale[i] = 0.0;
+            offset[i] = 0.0;
+            mins[i] = 0.0;
+            maxs[i] = 0.0;
+        }
+    }
+    
+    pp::Var AsVar() const
+    {
+        pp::VarDictionary output;
+        pp::VarArray scales;
+        pp::VarArray offsets;
+        pp::VarArray maximums;
+        pp::VarArray minimums;
+        output.Set("point_count", pp::Var(int32_t(point_count)));
+        output.Set("vlr_count", pp::Var(int32_t(vlr_count)));
+        output.Set("header_size", pp::Var(int32_t(header_size)));
+        output.Set("data_offset", pp::Var(int32_t(data_offset)));
+        for (int i=0; i < 3; ++i)
+        {
+            scales.Set(i, scale[i]);
+            offsets.Set(i, offset[i]);
+            maximums.Set(i, maxs[i]);
+            minimums.Set(i, mins[i]);
+        }
+        output.Set("mins", minimums);
+        output.Set("maxs", maximums);
+        output.Set("offsets", offsets);
+        output.Set("scales", scales);
+        
+        return pp::Var(output);
+    }
+};
 /// The Instance class.  One of these exists for each instance of your NaCl
 /// module on the web page.  The browser will ask the Module object to create
 /// a new Instance for each occurrence of the <embed> tag that has these
@@ -217,8 +274,9 @@ class LASzipInstance : public pp::Instance {
   /// @param[in] instance the handle to the browser-side plugin instance.
   explicit LASzipInstance(PP_Instance instance) 
       : pp::Instance(instance)
-      , m_message_thread(NULL)
-      , bCreatedFS(false)
+      , message_thread_(NULL)
+      , bCreatedFS_(false)
+      , fp_(0)
   {
 
 
@@ -227,8 +285,8 @@ class LASzipInstance : public pp::Instance {
   virtual ~LASzipInstance() 
   {
       std::cout << "~LASzipInstance ... " << std::endl;
-      if (m_message_thread)
-       (void) pthread_join(m_message_thread, NULL);
+      if (message_thread_)
+       (void) pthread_join(message_thread_, NULL);
   }
 
   // Initialize the module, staring a worker thread to load the shared object.
@@ -239,24 +297,17 @@ class LASzipInstance : public pp::Instance {
 
 
       printf( "createFS thread id '%p'\n", pthread_self());          
-      umount("/");
-      mount("", "/", "memfs", 0, "");
-      
-      mount("",                                       /* source */
-            "/persistent",                            /* target */
-            "html5fs",                                /* filesystemtype */
-            0,                                        /* mountflags */
-            "type=PERSISTENT,expected_size=1048576"); /* data */
 
       int res = mount("", "/web", "httpfs", 0, "");
       if (res)
       {
           std::cout << "unable to mount httpfs file system!" << std::endl;
+          bCreatedFS_ = true; 
           return false;
       }
       std::cout << "mount res: " << res << std::endl;
-      bCreatedFS = true; 
-      if (pthread_create( &m_message_thread, 
+
+      if (pthread_create( &message_thread_, 
                       NULL, 
                       &LASzipInstance::HandleMessageThread, 
                       this))
@@ -274,179 +325,300 @@ class LASzipInstance : public pp::Instance {
   /// @param[in] var_message The message posted by the browser.
   virtual void HandleMessage(const pp::Var& var_message) 
   {
-      std::string filename = var_message.AsString();
-
       EnqueueMessage(var_message);
       std::cout << "HandleMessage... " << std::endl;
       int point_size(0);
       printf( "handler thread id '%p'\n", pthread_self());                    
-     
-
-
+ 
   }
+  
+  
+  void PostError(std::string const& message)
+  {
+      Json::Value value(Json::objectValue);
+      value["error"] = true;
+      value["message"] = message;
+      Json::FastWriter writer;
+      PostMessage(writer.write(value));
+  }
+  
+    bool open(const pp::Var& message)
+    {
+        pp::VarDictionary dict(message);
+        
+        if (!dict.HasKey("filename"))
+        {
+            std::ostringstream errors;
+            errors <<  "No 'filename' member given to 'open' message";
+            PostError(errors.str());
+            return false;
+        }
+        pp::Var fname = dict.Get("filename");
+        if (!fname.is_string()) 
+        {
+            std::ostringstream errors;
+            errors <<  "'filename' member is not a string";
+            PostError(errors.str());
+            return false;
+        }
+        std::string filename = fname.AsString();
+        
+        fp_ = fopen(filename.c_str(), "r");
+        if (!fp_)
+        {
+            std::ostringstream errors;
+            errors <<  "Unable to open file: '" 
+                   << filename << "' "
+                   << strerror(errno);
+            PostError(errors.str());
+            return false;
+        }
+        return true;
+    }
+    
+    bool readHeader(LASHeader& header)
+    {
+        std::ostringstream errors;        
+        fseek(fp_, 32*3 + 11, SEEK_SET);
+        size_t result = fread(&header.point_count, 4, 1, fp_);
+        if (result != 1)
+        {
+            errors << "unable to read point count of size 1, got " << result;
+            PostError(errors.str());
+            return false;
+        }
+    
+        fseek(fp_, 32*3, SEEK_SET);
+        result = fread(&header.data_offset, 4, 1, fp_);
+        if (result != 1)
+        {
+            errors << "unable to read data offset of size 1, got " << result;
+            PostError(errors.str());
+            return false;
+        }
 
+        fseek(fp_, 32*3+4, SEEK_SET);
+        result = fread(&header.vlr_count, 4, 1, fp_);
+        if (result != 1)
+        {
+            errors << "unable to vlr count of size 1, got " << result;
+            PostError(errors.str());
+            return false;
+        }
+    
+
+        fseek(fp_, 32*3-2, SEEK_SET);
+        result = fread(&header.header_size, 2, 1, fp_);
+        if (result != 1)
+        {
+            errors << "unable to header size of size 1, got " << result;
+            PostError(errors.str());
+            return false;
+        }
+
+
+        size_t start = 32*3 + 35;
+        fseek(fp_, start, SEEK_SET);
+    
+
+        result = fread(&header.scale, 8, 3, fp_ );
+        if (result != 3)
+        {       
+            errors << "unable to read scale information!" << std::endl;
+            PostError(errors.str());
+            return false;
+        }
+        
+
+        result = fread(&header.offset, 8, 3, fp_ );
+        if (result != 3)
+        {      
+            errors << "unable to read offset information!" << std::endl;
+            PostError(errors.str());
+            return false;
+        }
+        
+        result = fread(&header.maxs[0], 8, 1, fp_ );
+        if (result != 1)
+        {      
+            errors << "unable to read minx information!" << std::endl;
+            PostError(errors.str());
+            return false;
+        }
+        result = fread(&header.mins[0], 8, 1, fp_ );
+        if (result != 1)
+        {      
+            errors << "unable to read minx information!" << std::endl;
+            PostError(errors.str());
+            return false;
+        }
+        result = fread(&header.maxs[1], 8, 1, fp_ );
+        if (result != 1)
+        {      
+            errors << "unable to read maxy information!" << std::endl;
+            PostError(errors.str());
+            return false;
+        }
+        result = fread(&header.mins[1], 8, 1, fp_ );
+        if (result != 1)
+        {      
+            errors << "unable to read miny information!" << std::endl;
+            PostError(errors.str());
+            return false;
+        }
+
+        result = fread(&header.maxs[2], 8, 1, fp_ );
+        if (result != 1)
+        {      
+            errors << "unable to read maxz information!" << std::endl;
+            PostError(errors.str());
+            return false;
+        }
+        result = fread(&header.mins[2], 8, 1, fp_ );
+        if (result != 1)
+        {      
+            errors << "unable to read minz information!" << std::endl;
+            PostError(errors.str());
+            return false;
+        }
+        
+        
+        return true;
+    }
   virtual void dosomething(const pp::Var& var_message) 
   {
 
       std::cout << "HandleMessage... " << std::endl;
       int point_size(0);
       printf( "handler thread id '%p'\n", pthread_self());                    
-  
-      LASzip zip;
-    LASunzipper* unzipper = new LASunzipper();
-        std::string filename = var_message.AsString();
-          // std::string filename("test.laz");
-          // std::ifstream f(filename.c_str(), std::ios::in|std::ios::binary);
+      
+      pp::VarDictionary dict;
+      pp::Var command_name;
+      if (var_message.is_dictionary())
+      {
+          dict = pp::VarDictionary(var_message);
+          if (!dict.HasKey("command"))
+          {
+              PostError("message JSON provided no 'command' member!");
+              return;              
+          }
+          command_name = dict.Get("command");      
+      } else
+      {
+          PostError("No dictionary object was provided!");
+          return;          
+      }
 
+      if (boost::iequals(command_name.AsString(), "open"))
+      {
+          bool opened = open(var_message);
+          if (!opened)
+              return;
+      }
+
+      if (boost::iequals(command_name.AsString(), "getheader"))
+      {
+          if (!fp_)
+          {
+              PostError("No file is open!");
+              return;
+          }
+          bool bDidReadHeader = readHeader(header_);
+          if (!bDidReadHeader)
+          {
+              PostError("Header read failed!");
+              return;
+          }
+          PostMessage(header_.AsVar());
+          return;
+
+      }
         std::ostringstream errors;
-            FILE* fp = fopen(filename.c_str(), "r");
-            if (!fp)
-            {
-                errors <<  "Unable to open file: '" << filename << "' " <<  strerror(errno) <<std::endl;
-                PostMessage(errors.str());
-                return;
-            }
-        
-            uint32_t point_count(0);
-            fseek(fp, 32*3 + 11, SEEK_SET);
-            size_t result = fread(&point_count, 4, 1, fp);
-            if (result != 1)
-            {
-                errors << "unable to read point count of size 1, got " << result;
-                PostMessage(errors.str());
-                return;
-            }
-        
-                
-            uint32_t data_offset(0);
-            fseek(fp, 32*3, SEEK_SET);
-            result = fread(&data_offset, 4, 1, fp);
-            if (result != 1)
-            {
-                errors << "unable to read data offset of size 1, got " << result;
-                PostMessage(errors.str());
-                return;
-            }
-        
-            uint32_t vlr_count(0);
-            fseek(fp, 32*3+4, SEEK_SET);
-            result = fread(&vlr_count, 4, 1, fp);
-            if (result != 1)
-            {
-                errors << "unable to vlr count of size 1, got " << result;
-                PostMessage(errors.str());
-                return;                
-            }
-        
-        
-            uint16_t header_size(0);
-            fseek(fp, 32*3-2, SEEK_SET);
-            result = fread(&header_size, 2, 1, fp);
-            if (result != 1)
-            {
-                errors << "unable to header size of size 1, got " << result;
-                PostMessage(errors.str());
-                return;
-            }
+
         
 
-            fseek(fp, header_size, SEEK_SET);
-            std::vector<VLR*> vlrs = readVLRs(fp, vlr_count);
+            fseek(fp_, header_.header_size, SEEK_SET);
+            std::vector<VLR*> vlrs = readVLRs(fp_, header_.vlr_count);
             VLR* zvlr = getLASzipVLR(vlrs);
         
             if (!zvlr)
             {
-                errors << "No LASzip VLRs were found in this file! " << result;
-                PostMessage(errors.str());
+                errors << "No LASzip VLRs were found in this file! ";
+                PostError(errors.str());
                 return;
             }
         
-            fseek(fp, data_offset, SEEK_SET);
+            fseek(fp_, header_.data_offset, SEEK_SET);
 
         
-            bool stat = zip.unpack(&(zvlr->data[0]), zvlr->size);
+            bool stat = zip_.unpack(&(zvlr->data[0]), zvlr->size);
             if (!stat)
             {
                 errors << "Unable to unpack LASzip VLR!" << std::endl;
-                errors << "error msg: " << unzipper->get_error() << std::endl;            
-                PostMessage(errors.str());
+                errors << "error msg: " << unzipper_.get_error() << std::endl;            
+                PostError(errors.str());
                 return;
             }
         
-            stat = unzipper->open(fp, &zip);
+            stat = unzipper_.open(fp_, &zip_);
             if (!stat)
             {       
                 errors << "Unable to open zip file!" << std::endl;
-                errors << "error msg: " << unzipper->get_error() << std::endl;            
-                PostMessage(errors.str());
+                errors << "error msg: " << unzipper_.get_error() << std::endl;            
+                PostError(errors.str());
                 return;
             }
 
         unsigned char** point;
         unsigned int point_offset(0);
-        point = new unsigned char*[zip.num_items];
+        point = new unsigned char*[zip_.num_items];
 
         std::ostringstream oss;
-        for (unsigned i = 0; i < zip.num_items; i++)
+        for (unsigned i = 0; i < zip_.num_items; i++)
         {
-            point_size += zip.items[i].size;
+            point_size += zip_.items[i].size;
         }
 
         unsigned char* bytes = new uint8_t[ point_size ];
 
-        for (unsigned i = 0; i < zip.num_items; i++)
+        for (unsigned i = 0; i < zip_.num_items; i++)
         {
             point[i] = &(bytes[point_offset]);
-            point_offset += zip.items[i].size;
+            point_offset += zip_.items[i].size;
         }
     
-        bool ok = unzipper->read(point);
+        bool ok = unzipper_.read(point);
         if (!ok)
         {     
             errors << "Unable to read point!" << std::endl;
-            errors << "error msg: " << unzipper->get_error() << std::endl;            
-            PostMessage(errors.str());
+            errors << "error msg: " << unzipper_.get_error() << std::endl;            
+            PostError(errors.str());
             return;
         }
-    
-        double offset[3] = {0.0};
-        double scale[3] = {0.0};
-    
-        size_t start = 32*3 + 35;
-        fseek(fp, start, SEEK_SET);
     
 
-        result = fread(&scale, 8, 3, fp );
-        if (result != 3)
-        {       
-            errors << "unable to read scale information!" << std::endl;
-            PostMessage(errors.str());
-            return;
-        }
-
-        result = fread(&offset, 8, 3, fp );
-        if (result != 3)
-        {      
-            errors << "unable to read offset information!" << std::endl;
-            PostMessage(errors.str());
-            return;
-        }
     
         int32_t x = *(int32_t*)&bytes[0];
         int32_t y = *(int32_t*)&bytes[4];
         int32_t z = *(int32_t*)&bytes[8];
     
-        double xs = applyScaling(x, scale[0], offset[0]);
-        double ys = applyScaling(y, scale[1], offset[1]);
-        double zs = applyScaling(z, scale[2], offset[2]);
+        double xs = applyScaling(x, header_.scale[0], header_.offset[0]);
+        double ys = applyScaling(y, header_.scale[1], header_.offset[1]);
+        double zs = applyScaling(z, header_.scale[2], header_.offset[2]);
 
 
-        oss << "scale[0]: " << scale[0] <<std::endl;
-        oss << "scale[1]: " << scale[1] <<std::endl;
-        oss << "scale[2]: " << scale[2] <<std::endl;
-        oss << "offset[0]: " << offset[0] <<std::endl;
-        oss << "offset[1]: " << offset[1] <<std::endl;
-        oss << "offset[2]: " << offset[2] <<std::endl;
+        oss << "scale[0]: " << header_.scale[0] <<std::endl;
+        oss << "scale[1]: " << header_.scale[1] <<std::endl;
+        oss << "scale[2]: " << header_.scale[2] <<std::endl;
+        oss << "offset[0]: " << header_.offset[0] <<std::endl;
+        oss << "offset[1]: " << header_.offset[1] <<std::endl;
+        oss << "offset[2]: " << header_.offset[2] <<std::endl;
+        oss << "min[0]: " << header_.mins[0] <<std::endl;
+        oss << "min[1]: " << header_.mins[1] <<std::endl;
+        oss << "min[2]: " << header_.mins[2] <<std::endl;
+        oss << "max[0]: " << header_.maxs[0] <<std::endl;
+        oss << "max[1]: " << header_.maxs[1] <<std::endl;
+        oss << "max[2]: " << header_.maxs[2] <<std::endl;
 
         oss << "x: " << x << std::endl; 
         oss  << "y: " << y << std::endl; 
@@ -455,7 +627,7 @@ class LASzipInstance : public pp::Instance {
         oss << "x: " << xs << std::endl; 
         oss  << "y: " << ys << std::endl; 
         oss  << "z: " << zs << std::endl; 
-        PostMessage(oss.str());
+        PostMessage(header_.AsVar());
 
 
   }
@@ -469,8 +641,12 @@ class LASzipInstance : public pp::Instance {
     }
   }
   
-  pthread_t m_message_thread;
-  bool bCreatedFS;
+  pthread_t message_thread_;
+  bool bCreatedFS_;
+  LASzip zip_;
+  LASunzipper unzipper_;
+  FILE* fp_;
+  LASHeader header_;
 };
 
 /// The Module class.  The browser calls the CreateInstance() method to create
