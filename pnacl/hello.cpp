@@ -346,24 +346,41 @@ class LASzipInstance : public pp::Instance {
   }
   
   
-  void PostError(std::string const& message)
+  void PostError( std::string const& method,
+                  std::string const& message, 
+                  std::string const& id)
   {
-      Json::Value value(Json::objectValue);
-      value["error"] = true;
-      value["message"] = message;
-      Json::FastWriter writer;
-      PostMessage(writer.write(value));
+      pp::VarDictionary dict;
+      dict.Set("error", true);
+      dict.Set("method", method);
+      dict.Set("message", message);
+      dict.Set("id", id);
+      PostMessage(dict);
   }
+
+  void PostSuccess( std::string const& method,
+                    pp::Var message, 
+                    std::string const& id)
+  {
+      pp::VarDictionary dict;
+      dict.Set("error", false);
+      dict.Set("method", method);
+      dict.Set("message", message);
+      dict.Set("id", id);
+      PostMessage(dict);
+  }
+
   
     bool open(const pp::Var& message)
     {
-        pp::VarDictionary dict(message);
+        pp::VarDictionary dict = pp::VarDictionary(message);
+        std::string id = dict.Get("id").AsString();
         
         if (!dict.HasKey("target"))
         {
             std::ostringstream errors;
             errors <<  "No 'target' member given to 'open' message";
-            PostError(errors.str());
+            PostError("open", errors.str(), id);
             return false;
         }
         pp::Var fname = dict.Get("target");
@@ -371,7 +388,7 @@ class LASzipInstance : public pp::Instance {
         {
             std::ostringstream errors;
             errors <<  "'filename' member is not a string";
-            PostError(errors.str());
+            PostError("open", errors.str(), id);
             return false;
         }
         std::string filename ="/"+ fname.AsString();
@@ -383,13 +400,13 @@ class LASzipInstance : public pp::Instance {
             errors <<  "Unable to open to write data: '" 
                    << filename << "' "
                    << strerror(errno);
-            PostError(errors.str());
+            PostError("open", errors.str(), id);
             return false;
         }
         pp::Var buffer = dict.Get("buffer");
         if (!buffer.is_array_buffer())
         {
-            PostError("'buffer' is not an ArrayBuffer object!");
+            PostError("open", "'buffer' is not an ArrayBuffer object!", id);
             return false;
         }
         pp::VarArrayBuffer buf(buffer);
@@ -399,7 +416,7 @@ class LASzipInstance : public pp::Instance {
         size_t amt = fwrite(data, 1, buf.ByteLength(), fp);
         if (amt != buf.ByteLength())
         {
-            PostError("We weren't able to write entire file to memory!");
+            PostError("open", "We weren't able to write entire file to memory!", id);
             return false;
         }
         
@@ -413,22 +430,53 @@ class LASzipInstance : public pp::Instance {
             errors <<  "Unable to open to read memory data: '" 
                    << filename << "' "
                    << strerror(errno);
-            PostError(errors.str());
+            PostError("open", errors.str(), id);
             return false;
-        }  
+        }
         
+        char magic[4] = {'\0'};
+        int numRead = fread(&magic, 1, 4, fp_);
+        if (numRead != 4)
+        {
+            std::ostringstream errors;
+            errors <<  "Unable to open to read memory data: '" 
+                   << filename << "' "
+                   << strerror(errno);
+            PostError("open", errors.str(), id);
+            return false;
+        }
+        if (magic[0] != 'L' &&
+            magic[1] != 'A' &&
+            magic[2] != 'S' &&
+            magic[3] != 'F'
+            )
+        {
+            std::ostringstream errors;
+            errors <<  "File '" 
+                   << filename << "' "
+                   << "is not recognized as an LAS/LAZ file";
+            PostError("open", errors.str(), id);
+            return false;
+        }
+        
+        fseek(fp_, 0, SEEK_SET);
+
         return true;
     }
     
-    bool readHeader(LASHeader& header)
+    bool readHeader(LASHeader& header, pp::Var message)
     {
+
+        pp::VarDictionary dict = pp::VarDictionary(message);
+        std::string id = dict.Get("id").AsString();
+
         std::ostringstream errors;        
         fseek(fp_, 32*3 + 11, SEEK_SET);
         size_t result = fread(&header.point_count, 4, 1, fp_);
         if (result != 1)
         {
             errors << "unable to read point count of size 1, got " << result;
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }
     
@@ -437,7 +485,7 @@ class LASzipInstance : public pp::Instance {
         if (result != 1)
         {
             errors << "unable to read data offset of size 1, got " << result;
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }
 
@@ -446,7 +494,7 @@ class LASzipInstance : public pp::Instance {
         if (result != 1)
         {
             errors << "unable to vlr count of size 1, got " << result;
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }
     
@@ -456,7 +504,7 @@ class LASzipInstance : public pp::Instance {
         if (result != 1)
         {
             errors << "unable to header size of size 1, got " << result;
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }
 
@@ -465,7 +513,7 @@ class LASzipInstance : public pp::Instance {
         if (result != 1)
         {
             errors << "unable to header point_format_id of size 1, got " << result;
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }
 
@@ -475,13 +523,13 @@ class LASzipInstance : public pp::Instance {
         if (!compression_bit_7 && !compression_bit_6 )
         {
             errors << "This file is not a LASzip file. Is it uncompressed LAS? ";
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }
         if (compression_bit_7 && compression_bit_6)
         {
             errors << "This is LASzip, but it was compressed by an ancient compressor version that is not open source ";
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;            
         }
         header.point_format_id = header.point_format_id &= 0x3f;
@@ -491,7 +539,7 @@ class LASzipInstance : public pp::Instance {
         if (result != 1)
         {
             errors << "unable to header point_record_length of size 1, got " << result;
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }        
 
@@ -504,7 +552,7 @@ class LASzipInstance : public pp::Instance {
         if (result != 3)
         {       
             errors << "unable to read scale information!" << std::endl;
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }
         
@@ -513,7 +561,7 @@ class LASzipInstance : public pp::Instance {
         if (result != 3)
         {      
             errors << "unable to read offset information!" << std::endl;
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }
         
@@ -521,28 +569,28 @@ class LASzipInstance : public pp::Instance {
         if (result != 1)
         {      
             errors << "unable to read minx information!" << std::endl;
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }
         result = fread(&header.mins[0], 8, 1, fp_ );
         if (result != 1)
         {      
             errors << "unable to read minx information!" << std::endl;
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }
         result = fread(&header.maxs[1], 8, 1, fp_ );
         if (result != 1)
         {      
             errors << "unable to read maxy information!" << std::endl;
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }
         result = fread(&header.mins[1], 8, 1, fp_ );
         if (result != 1)
         {      
             errors << "unable to read miny information!" << std::endl;
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }
 
@@ -550,14 +598,14 @@ class LASzipInstance : public pp::Instance {
         if (result != 1)
         {      
             errors << "unable to read maxz information!" << std::endl;
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }
         result = fread(&header.mins[2], 8, 1, fp_ );
         if (result != 1)
         {      
             errors << "unable to read minz information!" << std::endl;
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }
 
@@ -569,7 +617,7 @@ class LASzipInstance : public pp::Instance {
         if (!zvlr)
         {
             errors << "No LASzip VLRs were found in this file! ";
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }
         bool stat = zip_.unpack(&(zvlr->data[0]), zvlr->size);
@@ -577,7 +625,7 @@ class LASzipInstance : public pp::Instance {
         {
             errors << "Unable to unpack LASzip VLR!" << std::endl;
             errors << "error msg: " << unzipper_.get_error() << std::endl;            
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }
     
@@ -587,7 +635,7 @@ class LASzipInstance : public pp::Instance {
         {       
             errors << "Unable to open zip file!" << std::endl;
             errors << "error msg: " << unzipper_.get_error() << std::endl;            
-            PostError(errors.str());
+            PostError("readHeader", errors.str(), id);
             return false;
         }
         
@@ -610,13 +658,7 @@ class LASzipInstance : public pp::Instance {
         return true;
     }
     
-    pp::Var status(bool bStatus, std::string const& message)
-    {
-        pp::VarDictionary dict;
-        dict.Set("status", bStatus);
-        dict.Set("message", message);
-        return pp::Var(dict);
-    }
+
   virtual void dosomething(const pp::Var& var_message) 
   {
 
@@ -632,25 +674,40 @@ class LASzipInstance : public pp::Instance {
           dict = pp::VarDictionary(var_message);
           if (!dict.HasKey("command"))
           {
-              PostError("message JSON provided no 'command' member!");
-              return;              
+              PostError("broker", "message JSON provided no 'command' member!", "null");
+              return;
           }
           command_name = dict.Get("command");      
       } else
       {
-          PostError("No dictionary object was provided!");
+          PostError("broker", "No dictionary object was provided!", "null");
           return;          
       }
 
+
+      if (!dict.HasKey("id"))
+      {
+          PostError("broker", "message JSON provided no 'id' member!", "null");
+          return;          
+      }
+      
+      if (!dict.Get("id").is_string())
+      {
+          PostError("broker", "'id' member is not a string!", "null");
+          return;          
+      }
+      
+      std::string id = dict.Get("id").AsString();
+      
       if (boost::iequals(command_name.AsString(), "open"))
       {
           bool opened = open(var_message);
           if (!opened)
           {
-              PostMessage(status(false, "Unable to open file"));
+              PostError("open","Unable to open file", id);
               return;
           }
-          PostMessage(status(true, "File opened successfully"));
+          PostSuccess("open", "File opened successfully", id);
           return; // open has set any errors          
           
       }
@@ -659,16 +716,16 @@ class LASzipInstance : public pp::Instance {
       {
           if (!fp_)
           {
-              PostError("No file is open!");
+              PostError("broker", "No file is open!", id);
               return;
           }
-          bDidReadHeader_ = readHeader(header_);
+          bDidReadHeader_ = readHeader(header_, var_message);
           if (!bDidReadHeader_)
           {
-              PostError("Header read failed!");
+              PostError("getheader", "Header read failed!", id);
               return;
           }
-          PostMessage(header_.AsVar());
+          PostSuccess("getheader", header_.AsVar(), id);
           return;
 
       }
@@ -678,12 +735,12 @@ class LASzipInstance : public pp::Instance {
       {
           if (!fp_)
           {
-              PostError("No file is open!");
+              PostError("read", "No file is open!", id);
               return;
           }
           if (!bDidReadHeader_)
           {
-              PostError("No header has been fetched!");
+              PostError("read", "No header has been fetched!", id);
               return;
           }
           uint32_t count(header_.point_count);
@@ -692,36 +749,112 @@ class LASzipInstance : public pp::Instance {
               pp::Var cnt = dict.Get("count");
               if (!cnt.is_int())
               {
-                  PostError("'count' is not an integer object!");
+                  PostError("read", "'count' is not an integer object!", id);
                   return;
               }
               count = cnt.AsInt();
               // std::cout << "Fetched count as " << count << std::endl;
 
           }
+#define MAX_POINT_COUNT 2000000     
+          if (count > MAX_POINT_COUNT)
+          {
+              std::ostringstream errors;
+              errors << "'count' is too large, choose a smaller value";
+              PostError("read", errors.str(), id);
+              return;              
+          }
+          
+          uint32_t skip(0);
+          if (dict.HasKey("skip"))
+          {
+              pp::Var skip = dict.Get("skip");
+              if (!skip.is_int())
+              {
+                  PostError("read", "'skip' is not an integer object!", id);
+                  return;
+              }
+              skip = skip.AsInt();
+          }
+
+          uint32_t start(0);
+          if (dict.HasKey("start"))
+          {
+              pp::Var start = dict.Get("start");
+              if (!start.is_int())
+              {
+                  PostError("read", "'start' is not an integer object!", id);
+                  return;
+              }
+              start = start.AsInt();
+          }
           
           uint64_t num_left = (uint64_t)header_.point_count - (uint64_t)pointIndex_;
           
           uint64_t total_bytes = (uint64_t)count * (uint64_t)header_.point_record_length;
           
+          std::cout << "Getting ready to alloc buffer" << std::endl;
           if (!buffer_)
           {
-              buffer_ = new pp::VarArrayBuffer(total_bytes);
+              try
+              {
+                  buffer_ = new pp::VarArrayBuffer(total_bytes);                  
+              } catch (...)
+              {
+                std::ostringstream error;
+                error << "Unable to allocate buffer of size " << total_bytes
+                      << " to read " << count << " points. please try a smaller buffer size" << std::endl;   
+                PostError("read", error.str(), id);
+                return;               
+              }
               // std::cout << "making new VarArrayBuffer of size" << total_bytes << std::endl;              
           }
-          
+
+          std::cout << "allocated buffer" << std::endl;          
           if (buffer_->ByteLength() < total_bytes)
           {
               delete buffer_;
-              buffer_ = new pp::VarArrayBuffer(total_bytes);
+              try
+              {
+                  buffer_ = new pp::VarArrayBuffer(total_bytes);                  
+              } catch (std::bad_alloc&)
+              {
+                std::ostringstream error;
+                error << "Unable to allocate buffer of size " << total_bytes
+                      << " to read " << count << " points. please try a smaller buffer size" << std::endl;   
+                PostError("read", error.str(), id);       
+                return;           
+              }
               // std::cout << "buffer was wrong size " << buffer_->ByteLength() << ", making new VarArrayBuffer of size" << total_bytes << std::endl;
           }
+
+          std::cout << "mapping buffer" << std::endl; 
+          unsigned char* array_start;
+          try
+          {
+              array_start = static_cast<unsigned char*>(buffer_->Map());                  
+          } catch (std::bad_alloc&)
+          {
+            std::ostringstream error;
+            error << "Unable to allocate Map of size " << total_bytes
+                  << " to read " << count << " points. please try a smaller buffer size" << std::endl;   
+            PostError("read", error.str(), id);
+            return;                
+          }
           
-          unsigned char* start = static_cast<unsigned char*>(buffer_->Map());
-          unsigned char* data = start;
-          
+          std::cout << "mapped buffer" << std::endl;
+          unsigned char* data = array_start;
+
           for (int i = 0; i < count; ++i)
           {
+              bool bDoSkip(false);
+              if (start)
+              {
+                  if (i < start)
+                      bDoSkip = true;
+                  else
+                      start = 0; // done sliding forward
+              }
               // fills in bytes_
                 bool ok = unzipper_.read(point_);
                 if (!ok)
@@ -729,20 +862,57 @@ class LASzipInstance : public pp::Instance {
                       std::ostringstream error;
                     error << "Unable to read point at index " << i << std::endl;
                     error << "error msg: " << unzipper_.get_error() << std::endl;            
-                    PostError(error.str());
+                    PostError("read", error.str(), id);
                     return;
                 }
-                std::copy(bytes_, bytes_ + header_.point_record_length, data);
+                if (pointIndex_ % skip == 0 && skip != 0)
+                    bDoSkip = true;
+
+                if (!bDoSkip) // if skip is 0, just copy all the time
+                    std::copy(bytes_, bytes_ + header_.point_record_length, data);
+                
                 data += header_.point_record_length;
                 pointIndex_++;
                 
           }
-
+          
+          std::cout << "done reading" << std::endl;
           pp::VarDictionary dict;
           dict.Set("status", true);
           dict.Set("message", "Done reading data");
-          dict.Set("buffer", *buffer_);
-          PostMessage(dict);
+          try
+          {
+              dict.Set("buffer", *buffer_);
+          } catch (std::bad_alloc&)
+          {
+            std::ostringstream error;
+            error << "Unable to return ArrayBuffer of size " << total_bytes
+                  << " to read " << count << " points. please try a smaller buffer size" << std::endl;   
+            PostError("read", error.str(), id);
+            return;                  
+          }
+
+          // PostSuccess("read", dict, id);
+          dict.Set("error", false);
+          dict.Set("method", "read");
+          dict.Set("id", id);  
+
+          try
+          {
+                        std::cout << "Posting message" << std::endl;
+              PostMessage(dict);
+              std::cout << "Posted message" << std::endl;
+          } catch (std::bad_alloc&)
+          {
+            std::ostringstream error;
+            error << "Unable to post ArrayBuffer of size " << total_bytes
+                  << " to read " << count << " points. please try a smaller buffer size" << std::endl;   
+            PostError("read", error.str(), id);
+            return;                  
+          }
+                            
+          
+          std::cout << "posted message" << std::endl;
           return;
                     
         // int32_t x = *(int32_t*)&start[0];
@@ -782,7 +952,7 @@ class LASzipInstance : public pp::Instance {
 
       }
       
-      PostError("Command not found");
+      PostError("broker", "Command not found", id);
       return;
         
 

@@ -78,14 +78,14 @@ var dirhandle_map = {};
 function fopen(e, fname) {
   
   
-  var command = {'command': 'open', "target":fname, "buffer":e} ;
+  var command = {'command': 'open', "target":fname, "buffer":e, "id": "hobu"} ;
    
   nacl_module.postMessage(command);
 }
 
 
 function getheader(e) {
-  var command = {'command': 'getheader'}  
+  var command = {'command': 'getheader', "id":'hobu'}  
   nacl_module.postMessage(command);
 }
 
@@ -97,7 +97,7 @@ function readData(e) {
     
     
     
-  var command = {'command': 'read', 'count': 200000}  
+  var command = {'command': 'read', 'count': 2000000, "id":"hobu", 'skip':4, 'start': 1}  
   nacl_module.postMessage(command);
 }
 
