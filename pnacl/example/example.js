@@ -90,7 +90,9 @@ function getheader(e) {
 }
 
 function readData(e) {
-    var buffer = new ArrayBuffer(1065*34);
+    // var buffer = new ArrayBuffer(1065*34);
+    var buffer = new ArrayBuffer(416627466);
+    
   var command = {'command': 'read', 'buffer': buffer}  
   nacl_module.postMessage(command);
 }

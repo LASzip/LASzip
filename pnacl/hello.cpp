@@ -709,7 +709,8 @@ class LASzipInstance : public pp::Instance {
               PostError(error.str());
           }
           
-          unsigned char* data = static_cast<unsigned char*>(buf.Map());
+          unsigned char* start = static_cast<unsigned char*>(buf.Map());
+          unsigned char* data = start;
           
           for (int i = pointIndex_; i < header_.point_count; ++i)
           {
@@ -725,10 +726,52 @@ class LASzipInstance : public pp::Instance {
                 }
                 std::copy(bytes_, bytes_ + header_.point_record_length, data);
                 data += header_.point_record_length;
+                pointIndex_ = i;
                 
           }
-          PostMessage(status(true, "Done reading data"));
+          buf.Unmap();
+          
+          pp::VarDictionary dict;
+          dict.Set("status", true);
+          dict.Set("message", "Done reading data");
+          dict.Set("buffer", buf);
+          PostMessage(dict);
           return;
+                    
+        // int32_t x = *(int32_t*)&start[0];
+        // int32_t y = *(int32_t*)&start[4];
+        // int32_t z = *(int32_t*)&start[8];
+        //     
+        // double xs = applyScaling(x, header_.scale[0], header_.offset[0]);
+        // double ys = applyScaling(y, header_.scale[1], header_.offset[1]);
+        // double zs = applyScaling(z, header_.scale[2], header_.offset[2]);
+        // 
+        // std::ostringstream oss;
+        // oss << "scale[0]: " << header_.scale[0] <<std::endl;
+        // oss << "scale[1]: " << header_.scale[1] <<std::endl;
+        // oss << "scale[2]: " << header_.scale[2] <<std::endl;
+        // oss << "offset[0]: " << header_.offset[0] <<std::endl;
+        // oss << "offset[1]: " << header_.offset[1] <<std::endl;
+        // oss << "offset[2]: " << header_.offset[2] <<std::endl;
+        // oss << "min[0]: " << header_.mins[0] <<std::endl;
+        // oss << "min[1]: " << header_.mins[1] <<std::endl;
+        // oss << "min[2]: " << header_.mins[2] <<std::endl;
+        // oss << "max[0]: " << header_.maxs[0] <<std::endl;
+        // oss << "max[1]: " << header_.maxs[1] <<std::endl;
+        // oss << "max[2]: " << header_.maxs[2] <<std::endl;
+        // 
+        // oss << "x: " << x << std::endl; 
+        // oss  << "y: " << y << std::endl; 
+        // oss  << "z: " << z << std::endl; 
+        // 
+        // oss << "x: " << xs << std::endl; 
+        // oss  << "y: " << ys << std::endl; 
+        // oss  << "z: " << zs << std::endl; 
+        // PostMessage(oss.str());
+        // PostMessage(header_.AsVar());
+          
+          // PostMessage(status(true, "Done reading data"));
+          // return;
 
       }
       
