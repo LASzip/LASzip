@@ -1,5 +1,5 @@
 
-set(PNACL_PROGRAM pnacl_test.pexe)
+set(PNACL_PROGRAM plasio_laszip.pexe)
 
 include_directories(
     .

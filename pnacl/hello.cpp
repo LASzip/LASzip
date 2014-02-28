@@ -359,12 +359,14 @@ class LASzipInstance : public pp::Instance {
   }
 
   void PostSuccess( std::string const& method,
-                    pp::Var message, 
-                    std::string const& id)
+                    pp::Var result, 
+                    std::string const& id,
+                    std::string const& message)
   {
       pp::VarDictionary dict;
       dict.Set("error", false);
       dict.Set("method", method);
+      dict.Set("result", result);
       dict.Set("message", message);
       dict.Set("id", id);
       PostMessage(dict);
@@ -639,7 +641,7 @@ class LASzipInstance : public pp::Instance {
             return false;
         }
         
-        unsigned int point_offset(0);
+        unsigned int point_offset(0); 
         point_ = new unsigned char*[zip_.num_items];
         uint32_t point_size(0);
         for (unsigned i = 0; i < zip_.num_items; i++)
@@ -707,8 +709,33 @@ class LASzipInstance : public pp::Instance {
               PostError("open","Unable to open file", id);
               return;
           }
-          PostSuccess("open", "File opened successfully", id);
+          PostSuccess("open", pp::Var(pp::Var::Null()), id, "File opened successfully");
           return; // open has set any errors          
+          
+      }
+
+      if (boost::iequals(command_name.AsString(), "close"))
+      {
+          if (!fclose(fp_))
+          {
+              PostError("close","Unable to close file", id);
+              return;
+          }
+          header_ = LASHeader();
+          for (int i = 0; i < zip_.num_items; ++i)
+          {
+              delete point_[i];
+          }
+          zip_ = LASzip();
+          unzipper_ = LASunzipper();
+          fp_ = NULL;
+          bDidReadHeader_ = 0;
+          pointIndex_ = 0;
+          delete[] point_; point_ = 0;
+          delete[] bytes_; bytes_ = 0;
+          delete buffer_; buffer_ = 0;          
+          PostSuccess("close", pp::Var(pp::Var::Null()), id, "File closed successfully");
+          return; // close has set any errors          
           
       }
 
@@ -725,7 +752,7 @@ class LASzipInstance : public pp::Instance {
               PostError("getheader", "Header read failed!", id);
               return;
           }
-          PostSuccess("getheader", header_.AsVar(), id);
+          PostSuccess("getheader", header_.AsVar(), id, "Header read successful");
           return;
 
       }
@@ -743,6 +770,12 @@ class LASzipInstance : public pp::Instance {
               PostError("read", "No header has been fetched!", id);
               return;
           }
+          if (pointIndex_ == header_.point_count)
+          {
+              PostError("read", "All done reading. 'close' and 'open' the file again", id);
+              return;
+          }
+          
           uint32_t count(header_.point_count);
           if (dict.HasKey("count"))
           {
@@ -793,7 +826,7 @@ class LASzipInstance : public pp::Instance {
           
           uint64_t total_bytes = (uint64_t)count * (uint64_t)header_.point_record_length;
           
-          std::cout << "Getting ready to alloc buffer" << std::endl;
+
           if (!buffer_)
           {
               try
@@ -844,7 +877,8 @@ class LASzipInstance : public pp::Instance {
           
           std::cout << "mapped buffer" << std::endl;
           unsigned char* data = array_start;
-
+          uint32_t howManyRead(0);
+          bool bHasMoreData(true);
           for (int i = 0; i < count; ++i)
           {
               bool bDoSkip(false);
@@ -869,20 +903,29 @@ class LASzipInstance : public pp::Instance {
                     bDoSkip = true;
 
                 if (!bDoSkip) // if skip is 0, just copy all the time
+                {
                     std::copy(bytes_, bytes_ + header_.point_record_length, data);
+                    howManyRead++;
+                }
                 
                 data += header_.point_record_length;
                 pointIndex_++;
+                if (pointIndex_  == header_.point_count)
+                {
+                    bHasMoreData = false;
+                    break;
+                }
                 
           }
           
           std::cout << "done reading" << std::endl;
           pp::VarDictionary dict;
           dict.Set("status", true);
+          dict.Set("hasMoreData", bHasMoreData);
           dict.Set("message", "Done reading data");
           try
           {
-              dict.Set("buffer", *buffer_);
+              dict.Set("result", *buffer_);
           } catch (std::bad_alloc&)
           {
             std::ostringstream error;
@@ -896,6 +939,7 @@ class LASzipInstance : public pp::Instance {
           dict.Set("error", false);
           dict.Set("method", "read");
           dict.Set("id", id);  
+          dict.Set("count", (int32_t)howManyRead);
 
           try
           {

@@ -97,7 +97,7 @@ function readData(e) {
     
     
     
-  var command = {'command': 'read', 'count': 2000000, "id":"hobu", 'skip':4, 'start': 1}  
+  var command = {'command': 'read', 'count': 500, "id":"hobu", 'skip':4, 'start': 1}  
   nacl_module.postMessage(command);
 }
 
