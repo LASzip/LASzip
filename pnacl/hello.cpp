@@ -288,6 +288,7 @@ class LASzipInstance : public pp::Instance {
       , pointIndex_(0)
       , point_(0)
       , bytes_(0)
+      , buffer_(0)
   {
 
 
@@ -686,33 +687,40 @@ class LASzipInstance : public pp::Instance {
               return;
           }
           uint32_t count(header_.point_count);
-          if (!dict.HasKey("buffer"))
+          if (dict.HasKey("count"))
           {
-              PostError("No 'buffer' ArrayBuffer object was given!");
-              return;
-          }
-          pp::Var buffer = dict.Get("buffer");
-          if (!buffer.is_array_buffer())
-          {
-              PostError("'buffer' is not an ArrayBuffer object!");
-              return;
-          }
-          
-          uint32_t num_left = header_.point_count - pointIndex_;
-          pp::VarArrayBuffer buf(buffer);
-          if (buf.ByteLength() < num_left*header_.point_record_length != 0)
-          {
-              std::ostringstream error;
-              error << "'buffer'::ByteLength() < num_left*header_.point_record_length!"
-                  << " buf.ByteLength(): " << buf.ByteLength() 
-                      << " and num_left*header_.point_record_length: " << num_left*header_.point_record_length;
-              PostError(error.str());
+              pp::Var cnt = dict.Get("count");
+              if (!cnt.is_int())
+              {
+                  PostError("'count' is not an integer object!");
+                  return;
+              }
+              count = cnt.AsInt();
+              // std::cout << "Fetched count as " << count << std::endl;
+
           }
           
-          unsigned char* start = static_cast<unsigned char*>(buf.Map());
+          uint64_t num_left = (uint64_t)header_.point_count - (uint64_t)pointIndex_;
+          
+          uint64_t total_bytes = (uint64_t)count * (uint64_t)header_.point_record_length;
+          
+          if (!buffer_)
+          {
+              buffer_ = new pp::VarArrayBuffer(total_bytes);
+              // std::cout << "making new VarArrayBuffer of size" << total_bytes << std::endl;              
+          }
+          
+          if (buffer_->ByteLength() < total_bytes)
+          {
+              delete buffer_;
+              buffer_ = new pp::VarArrayBuffer(total_bytes);
+              // std::cout << "buffer was wrong size " << buffer_->ByteLength() << ", making new VarArrayBuffer of size" << total_bytes << std::endl;
+          }
+          
+          unsigned char* start = static_cast<unsigned char*>(buffer_->Map());
           unsigned char* data = start;
           
-          for (int i = pointIndex_; i < header_.point_count; ++i)
+          for (int i = 0; i < count; ++i)
           {
               // fills in bytes_
                 bool ok = unzipper_.read(point_);
@@ -726,15 +734,14 @@ class LASzipInstance : public pp::Instance {
                 }
                 std::copy(bytes_, bytes_ + header_.point_record_length, data);
                 data += header_.point_record_length;
-                pointIndex_ = i;
+                pointIndex_++;
                 
           }
-          buf.Unmap();
-          
+
           pp::VarDictionary dict;
           dict.Set("status", true);
           dict.Set("message", "Done reading data");
-          dict.Set("buffer", buf);
+          dict.Set("buffer", *buffer_);
           PostMessage(dict);
           return;
                     
@@ -846,6 +853,7 @@ class LASzipInstance : public pp::Instance {
   uint32_t pointIndex_;
   unsigned char** point_;
   unsigned char* bytes_;
+  pp::VarArrayBuffer* buffer_;
 };
 
 /// The Module class.  The browser calls the CreateInstance() method to create

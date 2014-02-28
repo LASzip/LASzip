@@ -91,9 +91,13 @@ function getheader(e) {
 
 function readData(e) {
     // var buffer = new ArrayBuffer(1065*34);
-    var buffer = new ArrayBuffer(416627466);
+    // var buffer = new ArrayBuffer(416627466);
+    // var buffer = new ArrayBuffer(4240553288); // 421196726
+    // var buffer = new ArrayBuffer(421196726);
     
-  var command = {'command': 'read', 'buffer': buffer}  
+    
+    
+  var command = {'command': 'read', 'count': 200000}  
   nacl_module.postMessage(command);
 }
 
