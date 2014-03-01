@@ -132,7 +132,7 @@ void VLR::read(FILE* fp)
 
         reserved = read_field<uint16_t>(p1);
         
-        std::cout << "reserved: " << reserved << std::endl;
+        // std::cout << "reserved: " << reserved << std::endl;
         
         uint8_t userId_data[eUserIdSize];
         read_array_field(p1, userId_data, eUserIdSize);
@@ -142,8 +142,8 @@ void VLR::read(FILE* fp)
         recordId = read_field<uint16_t>(p1);
         size = read_field<uint16_t>(p1);
         
-        std::cout << "recordId: " << recordId << std::endl;
-        std::cout << "size: " << size << std::endl;
+        // std::cout << "recordId: " << recordId << std::endl;
+        // std::cout << "size: " << size << std::endl;
         
         uint8_t description_data[eDescriptionSize];
         read_array_field(p1, description_data, eDescriptionSize);
@@ -159,7 +159,7 @@ void VLR::read(FILE* fp)
         read_n(data, fp, size);
     }
     
-    std::cout << "read VLR data" << std::endl;
+    // std::cout << "read VLR data" << std::endl;
     return;
 }
 
@@ -170,7 +170,7 @@ std::vector<VLR*> readVLRs(FILE* fp, int count)
     
     for (int i = 0; i < count; ++i)
     {
-        std::cout << "Reading vlr #:" << i << std::endl;
+        // std::cout << "Reading vlr #:" << i << std::endl;
         VLR* vlr = new VLR;
         vlr->read(fp);
         output.push_back(vlr);
@@ -188,13 +188,13 @@ VLR* getLASzipVLR(std::vector<VLR*> const& vlrs)
         VLR* vlr = vlrs[i];
         std::string const& uid = vlr->userId;
         uint16_t rid = vlr->recordId;
-        
-        std::cout << "VLR recordId: " << rid << std::endl;
-        std::cout << "VLR userid: '" << uid <<"'"<< std::endl;
-        std::cout << "uid size" << uid.size() << std::endl;
-        
-        std::cout << "uid equal: " << boost::iequals(uid, userId) << std::endl;
-        std::cout << "rid equal: " << (rid == recordId) << std::endl;
+        // 
+        // std::cout << "VLR recordId: " << rid << std::endl;
+        // std::cout << "VLR userid: '" << uid <<"'"<< std::endl;
+        // std::cout << "uid size" << uid.size() << std::endl;
+        // 
+        // std::cout << "uid equal: " << boost::iequals(uid, userId) << std::endl;
+        // std::cout << "rid equal: " << (rid == recordId) << std::endl;
         
         if (boost::iequals(uid, userId) && rid == recordId)
             return vlr;
@@ -301,31 +301,42 @@ class LASzipInstance : public pp::Instance {
        (void) pthread_join(message_thread_, NULL);
   }
 
+  void PostError( std::string const& method,
+                  std::string const& message, 
+                  std::string const& id)
+  {
+      pp::VarDictionary dict;
+      dict.Set("error", true);
+      dict.Set("method", method);
+      dict.Set("message", message);
+      dict.Set("id", id);
+      PostMessage(dict);
+  }
   // Initialize the module, staring a worker thread to load the shared object.
   virtual bool Init(uint32_t argc, const char* argn[], const char* argv[]) {
       nacl_io_init_ppapi( pp_instance(), 
                           pp::Module::Get()->get_browser_interface());
-      printf( "Constructor thread id '%p'\n", pthread_self());                    
+      // printf( "Constructor thread id '%p'\n", pthread_self());                    
 
 
-      printf( "createFS thread id '%p'\n", pthread_self());          
+      // printf( "createFS thread id '%p'\n", pthread_self());          
       umount("/");
       int res = mount("", "/", "memfs", 0, "");
       // int res = mount("", "/web", "httpfs", 0, "");
       if (res)
       {
-          std::cout << "unable to mount httpfs file system!" << std::endl;
+          // std::cout << "unable to mount httpfs file system!" << std::endl;
           bCreatedFS_ = true; 
           return false;
       }
-      std::cout << "mount res: " << res << std::endl;
+      // std::cout << "mount res: " << res << std::endl;
 
       if (pthread_create( &message_thread_, 
                       NULL, 
                       &LASzipInstance::HandleMessageThread, 
                       this))
       {
-          std::cout << "thread creation failed!" << std::endl;
+          PostError("Init", "Unable to initialize thread!", "null");
           return false;
       }
       InitializeMessageQueue();
@@ -339,24 +350,14 @@ class LASzipInstance : public pp::Instance {
   virtual void HandleMessage(const pp::Var& var_message) 
   {
       EnqueueMessage(var_message);
-      std::cout << "HandleMessage... " << std::endl;
+      // std::cout << "HandleMessage... " << std::endl;
       int point_size(0);
-      printf( "handler thread id '%p'\n", pthread_self());                    
+      // printf( "handler thread id '%p'\n", pthread_self());                    
  
   }
   
   
-  void PostError( std::string const& method,
-                  std::string const& message, 
-                  std::string const& id)
-  {
-      pp::VarDictionary dict;
-      dict.Set("error", true);
-      dict.Set("method", method);
-      dict.Set("message", message);
-      dict.Set("id", id);
-      PostMessage(dict);
-  }
+
 
   void PostSuccess( std::string const& method,
                     pp::Var result, 
@@ -664,9 +665,9 @@ class LASzipInstance : public pp::Instance {
   virtual void dosomething(const pp::Var& var_message) 
   {
 
-      std::cout << "HandleMessage... " << std::endl;
+      // std::cout << "HandleMessage... " << std::endl;
       int point_size(0);
-      printf( "handler thread id '%p'\n", pthread_self());                    
+      // printf( "handler thread id '%p'\n", pthread_self());                    
       
       pp::VarDictionary dict;
       pp::Var command_name;
@@ -801,25 +802,25 @@ class LASzipInstance : public pp::Instance {
           uint32_t skip(0);
           if (dict.HasKey("skip"))
           {
-              pp::Var skip = dict.Get("skip");
-              if (!skip.is_int())
+              pp::Var s = dict.Get("skip");
+              if (!s.is_int())
               {
                   PostError("read", "'skip' is not an integer object!", id);
                   return;
               }
-              skip = skip.AsInt();
+              skip = s.AsInt();
           }
 
           uint32_t start(0);
           if (dict.HasKey("start"))
           {
-              pp::Var start = dict.Get("start");
-              if (!start.is_int())
+              pp::Var st = dict.Get("start");
+              if (!st.is_int())
               {
                   PostError("read", "'start' is not an integer object!", id);
                   return;
               }
-              start = start.AsInt();
+              start = st.AsInt();
           }
           
           uint64_t num_left = (uint64_t)header_.point_count - (uint64_t)pointIndex_;
@@ -843,7 +844,7 @@ class LASzipInstance : public pp::Instance {
               // std::cout << "making new VarArrayBuffer of size" << total_bytes << std::endl;              
           }
 
-          std::cout << "allocated buffer" << std::endl;          
+          // std::cout << "allocated buffer" << std::endl;          
           if (buffer_->ByteLength() < total_bytes)
           {
               delete buffer_;
@@ -861,7 +862,7 @@ class LASzipInstance : public pp::Instance {
               // std::cout << "buffer was wrong size " << buffer_->ByteLength() << ", making new VarArrayBuffer of size" << total_bytes << std::endl;
           }
 
-          std::cout << "mapping buffer" << std::endl; 
+          // std::cout << "mapping buffer" << std::endl; 
           unsigned char* array_start;
           try
           {
@@ -875,20 +876,18 @@ class LASzipInstance : public pp::Instance {
             return;                
           }
           
-          std::cout << "mapped buffer" << std::endl;
+          // std::cout << "skip value: " << skip << std::endl;
+          // std::cout << "start value: " << start << std::endl;
           unsigned char* data = array_start;
+          uint32_t howManyToRead(count);
           uint32_t howManyRead(0);
           bool bHasMoreData(true);
-          for (int i = 0; i < count; ++i)
+          int i(0);
+          while ( howManyRead != howManyToRead)
+          // for (int i = howManyToRead; i != 0; --i)
           {
-              bool bDoSkip(false);
-              if (start)
-              {
-                  if (i < start)
-                      bDoSkip = true;
-                  else
-                      start = 0; // done sliding forward
-              }
+              bool bDoKeep(false);
+
               // fills in bytes_
                 bool ok = unzipper_.read(point_);
                 if (!ok)
@@ -899,26 +898,53 @@ class LASzipInstance : public pp::Instance {
                     PostError("read", error.str(), id);
                     return;
                 }
-                if (pointIndex_ % skip == 0 && skip != 0)
-                    bDoSkip = true;
-
-                if (!bDoSkip) // if skip is 0, just copy all the time
+                
+                if (skip != 0)
                 {
-                    std::copy(bytes_, bytes_ + header_.point_record_length, data);
-                    howManyRead++;
+                    if ((skip != 0) &&
+                        ((pointIndex_ + start) % skip == 0) )
+                    {
+                        bDoKeep = true;
+                        // std::cout << "keeping " << i <<"th point" << std::endl;
+                    } else
+                    {
+                        // std::cout << "skipping " << i << "th point" << std::endl;
+                    }
+                } else
+                {
+                    // No skip or start is set, we copy it all
+                    bDoKeep = true;
                 }
                 
-                data += header_.point_record_length;
+                if (start != 0)
+                {
+                    if (pointIndex_ < start)
+                    {
+                        bDoKeep = false;
+                        // std::cout << "reskipping " << i << "th point" << std::endl;
+                    }
+                }
+                if (bDoKeep) // if skip is 0, just copy all the time
+                {
+                    std::copy(bytes_, bytes_ + header_.point_record_length, data);
+                    data += header_.point_record_length;
+                    howManyRead++;
+                    // std::cout << "keeping " << i <<"th point" << std::endl;
+
+                }
+                
+
                 pointIndex_++;
                 if (pointIndex_  == header_.point_count)
                 {
                     bHasMoreData = false;
                     break;
                 }
+                i += 1;
                 
           }
           
-          std::cout << "done reading" << std::endl;
+          // std::cout << "done reading" << std::endl;
           pp::VarDictionary dict;
           dict.Set("status", true);
           dict.Set("hasMoreData", bHasMoreData);
@@ -940,12 +966,13 @@ class LASzipInstance : public pp::Instance {
           dict.Set("method", "read");
           dict.Set("id", id);  
           dict.Set("count", (int32_t)howManyRead);
-
+          dict.Set("skip", (int32_t)skip);
+          dict.Set("start",  (int32_t)start);
           try
           {
-                        std::cout << "Posting message" << std::endl;
+                        // std::cout << "Posting message" << std::endl;
               PostMessage(dict);
-              std::cout << "Posted message" << std::endl;
+              // std::cout << "Posted message" << std::endl;
           } catch (std::bad_alloc&)
           {
             std::ostringstream error;
@@ -956,7 +983,7 @@ class LASzipInstance : public pp::Instance {
           }
                             
           
-          std::cout << "posted message" << std::endl;
+          // std::cout << "posted message" << std::endl;
           return;
                     
         // int32_t x = *(int32_t*)&start[0];
@@ -1049,10 +1076,10 @@ class LASzipInstance : public pp::Instance {
   }
 
   static void* HandleMessageThread(void* This) {
-      std::cout << "HandleMessageThread..." << std::endl;
+      // std::cout << "HandleMessageThread..." << std::endl;
     while (1) {
       pp::Var message = DequeueMessage();
-      std::cout << "DequeueMessage..." << std::endl;      
+      // std::cout << "DequeueMessage..." << std::endl;      
       ((LASzipInstance*)This)->dosomething(message);
     }
   }
