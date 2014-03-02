@@ -51,8 +51,9 @@ Binaries
     binaries through `OSGeo4W`_ also link LASzip.
 
   - For explicit compression (decompression) of LAS (LAZ) files a Windows
-    binary `laszip.exe`_ is available, as well as source code, examples,
-    and makefiles to build your own `LASzip`_ on Windows, Linux, or MacOS.
+    binary `laszip.exe`_ is available (command-line only `laszip-cli.exe`_),
+    as well as source code, examples, and makefiles to build your
+    own `LASzip`_ on Windows, Linux, or MacOS.
 
 
 Documentation
@@ -80,7 +81,7 @@ and write compressed data.
 LASzip is completely lossless. It compresses bulky LAS files into compact LAZ
 files that are only 7-20 percent of the original size, accurately preserving
 every single bit. For example, compressing and decompressing the LAS file 
-lidar.las with `laszip.exe`_ as shown below results in lidar_copy.las that
+lidar.las with `laszip.exe`_ (command-line only `laszip-cli.exe`_) as shown below results in lidar_copy.las that
 is bit-identical to lidar.las. However, the small size of lidar.laz makes it
 much easier to store, copy, transmit, or archive large amounts of LIDAR.
 
@@ -214,5 +215,6 @@ Download LAS data (yet to be laszipped)
 .. _`LASlib`: http://lastools.org/download/laslib.zip
 .. _`LASzip`: http://lastools.org/download/laszip.zip
 .. _`laszip.exe`: http://lastools.org/download/laszip.exe
+.. _`laszip-cli.exe`: http://lastools.org/download/laszip-cli.exe
 .. _`paper`: http://lastools.org/download/laszip.pdf
 .. _`video`: http://www.youtube.com/watch?v=A0s0fVktj6U
