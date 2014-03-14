@@ -642,6 +642,10 @@ class LASzipInstance : public pp::Instance {
             return false;
         }
         
+        for (int i = 0; i < vlrs.size(); ++i)
+        {
+            delete vlrs[i];
+        }
         unsigned int point_offset(0); 
         point_ = new unsigned char*[zip_.num_items];
         uint32_t point_size(0);
@@ -717,23 +721,28 @@ class LASzipInstance : public pp::Instance {
 
       if (boost::iequals(command_name.AsString(), "close"))
       {
-          if (!fclose(fp_))
+          int res = fclose(fp_);
+          if (res)
           {
-              PostError("close","Unable to close file", id);
+              std::ostringstream errors;
+              errors << "fclose returned message " << res << " error: '" << strerror(errno) <<"'";
+              PostError("close", errors.str(), id);
               return;
           }
           header_ = LASHeader();
-          for (int i = 0; i < zip_.num_items; ++i)
-          {
-              delete point_[i];
-          }
+
           zip_ = LASzip();
           unzipper_ = LASunzipper();
           fp_ = NULL;
           bDidReadHeader_ = 0;
           pointIndex_ = 0;
+
+          
           delete[] point_; point_ = 0;
+
           delete[] bytes_; bytes_ = 0;
+
+
           delete buffer_; buffer_ = 0;          
           PostSuccess("close", pp::Var(pp::Var::Null()), id, "File closed successfully");
           return; // close has set any errors          

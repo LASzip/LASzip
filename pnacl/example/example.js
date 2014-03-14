@@ -101,6 +101,13 @@ function readData(e) {
   nacl_module.postMessage(command);
 }
 
+function fclose(e) {
+    
+  var command = {'command': 'close', "id":"hobu"}  
+  nacl_module.postMessage(command);
+}
+
+
 
 
 
