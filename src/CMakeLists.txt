@@ -81,6 +81,10 @@ else()
     add_library(${LASZIP_LIB_NAME} SHARED ${LASZIP_SOURCES})
 endif()
 
+if (EMSCRIPTEN)
+    SET_TARGET_PROPERTIES(${LASZIP_LIB_NAME} PROPERTIES SUFFIX .o)
+endif()
+
 set_target_properties(${LASZIP_LIB_NAME}
   PROPERTIES SOVERSION "${LASZIP_LIB_SOVERSION}" )
       

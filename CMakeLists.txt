@@ -48,7 +48,7 @@ if(NOT MSVC_IDE)
 endif()
 
 # TODO: Still testing the output paths --mloskot
-set(LASZIP_BUILD_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/${CMAKE_BUILD_TYPE})
+set(LASZIP_BUILD_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/)
 
 # Output directory in which to build RUNTIME target files.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${LASZIP_BUILD_OUTPUT_DIRECTORY})
@@ -120,8 +120,12 @@ set(LASZIP_INCLUDE_DIR ${LASZIP_INCLUDE_SUBDIR})
 
 add_subdirectory(src)
 
-add_subdirectory(tools)
 
+if (DEFINED ENV{NACL_ROOT})
+    add_subdirectory(pnacl)
+else()
+    add_subdirectory(tools)
+endif()
 
 # Version information
 SET(CPACK_PACKAGE_VERSION_MAJOR ${LASZIP_VERSION_MAJOR})

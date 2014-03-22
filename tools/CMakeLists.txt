@@ -48,6 +48,9 @@ endif()
 if(LASZIPPERTEST)
     add_executable(${LASZIPPERTEST} laszippertest.cpp)
     target_link_libraries(${LASZIPPERTEST} ${APPS_CPP_DEPENDENCIES} )
+    if (EMSCRIPTEN)
+        SET_TARGET_PROPERTIES(${LASZIPPERTEST} PROPERTIES SUFFIX .js)
+    endif()
 endif()
 
 
