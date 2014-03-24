@@ -17,6 +17,7 @@ set(LASZIP_HPP
   arithmeticencoder.hpp
   arithmeticmodel.hpp
   bytestreamin.hpp
+  bytestreamin_array.hpp
   bytestreamin_file.hpp
   bytestreamin_istream.hpp
   bytestreamout.hpp
