@@ -1,28 +1,10 @@
-// Copyright (c) 2013 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// (c) 2014, Howard Butler, howard@hobu.co 
+// This code is LGPL2.1 with static linking exception.
 
-/// @file hello_tutorial.cc
-/// This example demonstrates loading, running and scripting a very simple NaCl
-/// module.  To load the NaCl module, the browser first looks for the
-/// CreateModule() factory method (at the end of this file).  It calls
-/// CreateModule() once to load the module code.  After the code is loaded,
-/// CreateModule() is not called again.
-///
-/// Once the code is loaded, the browser calls the CreateInstance()
-/// method on the object returned by CreateModule().  It calls CreateInstance()
-/// each time it encounters an <embed> tag that references your NaCl module.
-///
-/// The browser can talk to your NaCl module via the postMessage() Javascript
-/// function.  When you call postMessage() on your NaCl module from the browser,
-/// this becomes a call to the HandleMessage() method of your pp::Instance
-/// subclass.  You can send messages back to the browser by calling the
-/// PostMessage() method on your pp::Instance.  Note that these two methods
-/// (postMessage() in Javascript and PostMessage() in C++) are asynchronous.
-/// This means they return immediately - there is no waiting for the message
-/// to be handled.  This has implications in your program design, particularly
-/// when mutating property values that are exposed to both the browser and the
-/// NaCl module.
+// Portions Copyright (c) 2013 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+
+
 
 #include <assert.h>
 #include <stdio.h>
@@ -46,12 +28,10 @@
 #include <ppapi/cpp/var_array_buffer.h>
 
 
-#include "nacl_io/nacl_io.h"
+#include <nacl_io/nacl_io.h>
 
-#include "json/json.h"
-#include "json/reader.h"
-#include "json/writer.h"
-#include "queue.h"
+#include "queue.hpp"
+#include "vlr.hpp"
 
 
 #include <laszip/laszip.hpp>    
@@ -59,109 +39,8 @@
 #include <laszip/laszipper.hpp>
 
 
-template<class T>
-static inline void read_array_field(uint8_t*& src, T* dest, std::size_t count)
-{
-    memcpy((uint8_t*)dest, (uint8_t*)(T*)src, sizeof(T)*count);
-    src += sizeof(T) * count;
-    return;
-}
-
-template <typename T>
-static inline size_t read_n(T& dest, FILE* src, size_t const& num)
-{
-    return  fread(dest, 1, num, src);
-}
-
-template<class T>
-static inline T read_field(uint8_t*& src)
-{
-    T tmp = *(T*)(void*)src;
-    src += sizeof(T);
-    return tmp;
-}
 
 
-
-
-class VLR
-{
-public:
-    uint16_t reserved;
-    std::string userId;
-    uint16_t recordId;
-    uint16_t size;
-    std::string description;
-    uint8_t* data;
-    enum
-    {
-        eHeaderSize = 54,
-        eUserIdSize = 16,
-        eDescriptionSize = 32
-    };
-
-    
-    VLR()
-        : reserved(0)
-        , userId("")
-        , recordId(0)
-        , size(0)
-        , description("")
-        , data(0)
-    {}
-    ~VLR()
-    {
-        delete data;
-    }
-    void read(FILE* fp);
-};
-
-void VLR::read(FILE* fp)
-{
-    // assumes the stream is already positioned to the beginning
-
-    {
-        uint8_t* buf1 = new uint8_t[eHeaderSize];
-        size_t numRead = read_n(buf1, fp, eHeaderSize);
-        if (numRead != eHeaderSize)
-        {
-            std::ostringstream oss;
-            oss << " read size was invalid, not " << eHeaderSize << std::endl;
-        }
-        uint8_t* p1 = buf1;
-
-        reserved = read_field<uint16_t>(p1);
-        
-        // std::cout << "reserved: " << reserved << std::endl;
-        
-        uint8_t userId_data[eUserIdSize];
-        read_array_field(p1, userId_data, eUserIdSize);
-        userId = std::string((const char*)&userId_data);
-        // userId = VariableLengthRecord::bytes2string(userId_data, VariableLengthRecord::eUserIdSize);
-
-        recordId = read_field<uint16_t>(p1);
-        size = read_field<uint16_t>(p1);
-        
-        // std::cout << "recordId: " << recordId << std::endl;
-        // std::cout << "size: " << size << std::endl;
-        
-        uint8_t description_data[eDescriptionSize];
-        read_array_field(p1, description_data, eDescriptionSize);
-        
-        description = std::string(  (const char*)&description_data);
-        // description = VariableLengthRecord::bytes2string(description_data, VariableLengthRecord::eDescriptionSize);
-
-        delete[] buf1;
-    }
-
-    data = new uint8_t[size];
-    {
-        read_n(data, fp, size);
-    }
-    
-    // std::cout << "read VLR data" << std::endl;
-    return;
-}
 
 
 std::vector<VLR*> readVLRs(FILE* fp, int count)

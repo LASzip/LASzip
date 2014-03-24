@@ -3,7 +3,7 @@
  * found in the LICENSE file.
  */
 
-#include "queue.h"
+#include "queue.hpp"
 
 #include <pthread.h>
 #include <stdlib.h>

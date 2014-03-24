@@ -8,7 +8,7 @@ include_directories(
 $ENV{NACL_ROOT}/include/pnacl)
 
 
-add_executable(${PNACL_PROGRAM}   queue.cpp hello.cpp)
+add_executable(${PNACL_PROGRAM}   queue.cpp module.cpp)
 target_link_libraries(${PNACL_PROGRAM} laszip )
 
 link_directories( $ENV{NACL_ROOT}/toolchain/mac_pnacl/usr/lib )
