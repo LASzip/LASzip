@@ -32,7 +32,7 @@
 #define LASZIP_DYN_LINK
 #define LASZIP_SOURCE
 
-#include "laszip_dll.h"
+#include "../dll/laszip_dll.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -719,7 +719,7 @@ laszip_set_point(
         }
         else
         {
-          sprintf(laszip_dll->error, "target point has %d extra bytes but source point has %d", laszip_dll->point.num_extra_bytes == point->num_extra_bytes);
+          sprintf(laszip_dll->error, "target point has %d extra bytes but source point has %d", laszip_dll->point.num_extra_bytes, point->num_extra_bytes);
           return 1;
         }
       }

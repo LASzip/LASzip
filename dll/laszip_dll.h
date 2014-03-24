@@ -62,11 +62,25 @@ typedef int                laszip_BOOL;
 typedef unsigned char      laszip_U8;
 typedef unsigned short     laszip_U16;
 typedef unsigned int       laszip_U32;
+
+#if defined(_MSC_VER) && (_MSC_VER < 1300)
+#define LZ_WIN32_VC6
 typedef unsigned __int64   laszip_U64;
+#else
+typedef unsigned long long laszip_U64;
+#endif
+
 typedef char               laszip_I8;
 typedef short              laszip_I16;
 typedef int                laszip_I32;
+
+#if defined(_MSC_VER) && (_MSC_VER < 1300)
+#define LZ_WIN32_VC6
 typedef __int64            laszip_I64;
+#else
+typedef long long laszip_I64;
+#endif
+
 typedef char               laszip_CHAR;
 typedef float              laszip_F32;
 typedef double             laszip_F64;

@@ -54,6 +54,7 @@ set(LASZIP_CPP
     laswritepoint.cpp
     laszip.cpp
     laszipper.cpp
+    laszip_dll.cpp
 )
 
 set(LASZIP_SOURCES
