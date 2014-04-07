@@ -54,9 +54,12 @@ set(LASZIP_CPP
     laswritepoint.cpp
     laszip.cpp
     laszipper.cpp
-    laszip_dll.cpp
+
 )
 
+if (WIN32)
+    list (APPEND LASZIP_CPP     laszip_dll.cpp)
+endif()
 set(LASZIP_SOURCES
   ${LASZIP_HPP}
   ${LASZIP_CPP}
