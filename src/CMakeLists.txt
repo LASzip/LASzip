@@ -77,7 +77,7 @@ source_group("Header Files" FILES ${LASZIP_HPP})
 source_group("Source Files" FILES ${LASZIP_CPP})
 
 # Standard include directory of laszip library
-include_directories(../include ../include/laszip .)
+include_directories(../include ../include/laszip ../dll .)
 
 
 if(BUILD_STATIC)
