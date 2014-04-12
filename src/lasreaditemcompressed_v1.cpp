@@ -30,7 +30,7 @@
 */
 
 #include "lasreaditemcompressed_v1.hpp"
-#include "laswavepacket.hpp"
+#include "laszip_common_v1.hpp"
 
 #include <assert.h>
 #include <string.h>
@@ -489,8 +489,8 @@ inline void LASreadItemCompressed_WAVEPACKET13_v1::read(U8* item)
   item[0] = (U8)(dec->decodeSymbol(m_packet_index));
   item++;
 
-  LASwavepacket13 this_item_m = LASwavepacket13::make(item);
-  LASwavepacket13 last_item_m = LASwavepacket13::make(last_item);
+  LASwavepacket13 this_item_m;
+  LASwavepacket13 last_item_m = LASwavepacket13::unpack(last_item);
 
   sym_last_offset_diff = dec->decodeSymbol(m_offset_diff[sym_last_offset_diff]);
 
@@ -519,7 +519,7 @@ inline void LASreadItemCompressed_WAVEPACKET13_v1::read(U8* item)
   this_item_m.y.i32 = ic_xyz->decompress(last_item_m.y.i32, 1);
   this_item_m.z.i32 = ic_xyz->decompress(last_item_m.z.i32, 2);
 
-  this_item_m.lay(item);
+  this_item_m.pack(item);
 
   memcpy(last_item, item, 28);
 }

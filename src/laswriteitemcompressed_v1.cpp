@@ -30,7 +30,7 @@
 */
 
 #include "laswriteitemcompressed_v1.hpp"
-#include "laswavepacket.hpp"
+#include "laszip_common_v1.hpp"
 
 #include <assert.h>
 #include <string.h>
@@ -539,8 +539,8 @@ inline BOOL LASwriteItemCompressed_WAVEPACKET13_v1::write(const U8* item)
   enc->encodeSymbol(m_packet_index, (U32)(item[0]));
   item++;
 
-  LASwavepacket13 this_item_m = LASwavepacket13::make(item);
-  LASwavepacket13 last_item_m = LASwavepacket13::make(last_item);
+  LASwavepacket13 this_item_m = LASwavepacket13::unpack(item);
+  LASwavepacket13 last_item_m = LASwavepacket13::unpack(last_item);
 
   // calculate the difference between the two offsets
   I64 curr_diff_64 = this_item_m.offset - last_item_m.offset;

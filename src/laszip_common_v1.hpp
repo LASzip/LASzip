@@ -1,11 +1,12 @@
 /*
 ===============================================================================
 
-  FILE:  laswavepacket.hpp
+  FILE:  laszip_common_v1.hpp
   
   CONTENTS:
   
-    LASwavepacketXX classes for easy reuse among compressor/decompressor.
+    Common defines and functionalities for version 1 of LASitemReadCompressed
+    and LASitemwriteCompressed.
 
   PROGRAMMERS:
 
@@ -25,13 +26,13 @@
   
   CHANGE HISTORY:
   
-      10 April 2014 - Refactor LASwavepacket and add other functions to it.
+      10 April 2014 - Refactor LASwavepacket13 and add other functions to it.
   
 ===============================================================================
 */
 
-#ifndef LAS_WAVEPACKET_HPP
-#define LAS_WAVEPACKET_HPP
+#ifndef LASZIP_COMMON_V1_HPP
+#define LASZIP_COMMON_V1_HPP
 
 #include "mydefs.hpp"
 
@@ -44,7 +45,7 @@ struct LASwavepacket13
   U32I32F32 y;
   U32I32F32 z;
 
-  static inline LASwavepacket13 make(const U8* item) {
+  static inline LASwavepacket13 unpack(const U8* item) {
     // Make a lAS wavepacket out of raw memory
     LASwavepacket13 r;
 
@@ -59,9 +60,8 @@ struct LASwavepacket13
     return r;
   }
   
-  void inline lay(U8 *item) {
+  void inline pack(U8 *item) {
     // layout this packet into given memory
-    //
     layU32((U32)(offset & 0xFFFFFFFF), item);
     layU32((U32)(offset >> 32), item+4);
 
@@ -96,6 +96,6 @@ private:
   }
 };
 
-#endif // LAS_WAVEPACKET_HPP
+#endif // LASZIP_COMMON_V1_HPP
 
-// vim: ts=2:sw=2:expandtabs
+// vim: set ts=2 sw=2 expandtabs
