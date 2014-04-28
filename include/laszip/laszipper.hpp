@@ -44,7 +44,6 @@
 #else
 #include <istream>
 #include <fstream>
-using namespace std;
 #endif
 
 class ByteStreamOut;
@@ -54,7 +53,7 @@ class LASZIP_DLL LASzipper
 {
 public:
   bool open(FILE* outfile, const LASzip* laszip);
-  bool open(ostream& outstream, const LASzip* laszip);
+  bool open(std::ostream& outstream, const LASzip* laszip);
 
   bool write(const unsigned char* const * point);
   bool chunk();
