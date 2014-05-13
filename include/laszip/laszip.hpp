@@ -40,6 +40,7 @@
 #ifndef LASZIP_HPP
 #define LASZIP_HPP
 
+
 #if defined(_MSC_VER) && (_MSC_VER < 1300)
 #define LZ_WIN32_VC6
 typedef __int64   SIGNED_INT64;
@@ -74,8 +75,7 @@ typedef long long SIGNED_INT64;
 
 #define LASZIP_CHUNK_SIZE_DEFAULT           50000
 
-//#include "laszipexport.hpp"
-#define LASZIP_DLL
+#include "laszipexport.hpp"
 
 class LASZIP_DLL LASitem
 {
