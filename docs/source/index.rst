@@ -101,6 +101,7 @@ Software with native LAZ support
 ------------------------------------------------------------------------------
 
 * QT Modeler (7.1.6 and up) by `Applied Imagery <http://www.appliedimagery.com/>`_
+* ERDAS IMAGINE (14.1 and up) by `Hexagon Geospatial <http://www.hexagongeospatial.com/products/ERDAS-IMAGINE/Details.aspx>`_
 * FUSION (3.40 and up) by `Bob McGaughey of the USDA <http://forsys.cfr.washington.edu/fusion/fusionlatest.html/>`_
 * Global Mapper (13.1 and up) by `Blue Marble Geo <http://www.bluemarblegeo.com/>`_
 * ENVI LiDAR (5.1 and up) by `Exelis VIS <http://www.exelisvis.com/ProductsServices/ENVI/ENVILiDAR.aspx>`_
@@ -130,6 +131,8 @@ Software with native LAZ support
 
 Download LAZ data
 ------------------------------------------------------------------------------
+* Sonoma County LiDAR from `SonomaVegMap Project <http://sonomavegmap.org/data-downloads/>`_
+* WMS served LiDAR by `Government of La Rioja in Spain <http://rapidlasso.com/2014/04/08/lidar-downloads-via-wms/>`_
 * `Puget Sound LiDAR Consortium <http://pugetsoundlidar.ess.washington.edu/lidardata/>`_
 
   * 2007: `sumpter <http://pugetsoundlidar.ess.washington.edu/lidardata/restricted/las/pslc2007/sumpter/>`_
