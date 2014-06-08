@@ -719,7 +719,7 @@ laszip_set_point(
         }
         else
         {
-          sprintf(laszip_dll->error, "target point has %d extra bytes but source point has %d", laszip_dll->point.num_extra_bytes == point->num_extra_bytes);
+          sprintf(laszip_dll->error, "target point has %d extra bytes but source point has %d", laszip_dll->point.num_extra_bytes, point->num_extra_bytes);
           return 1;
         }
       }
