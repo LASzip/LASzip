@@ -55,12 +55,11 @@ add_dependencies( copy make_osgeo4w_directories  )
 macro(copy_files GLOBPAT DESTINATION  )
 
     file(GLOB_RECURSE COPY_FILES
-         RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}
         ${GLOBPAT})
     foreach(FILENAME ${COPY_FILES})
         set(SRC "${FILENAME}")
         set(DST "${DESTINATION}")
-
         add_custom_command(
             TARGET copy
             COMMAND ${CMAKE_COMMAND} -E copy ${SRC} ${DST}
