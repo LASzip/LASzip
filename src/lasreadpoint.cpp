@@ -340,7 +340,7 @@ BOOL LASreadPoint::read(U8* const * point)
           if (current_chunk == number_chunks)
           {
             number_chunks += 256;
-            chunk_starts = (I64*)realloc(chunk_starts, sizeof(I64)*number_chunks);
+            chunk_starts = (I64*)realloc(chunk_starts, sizeof(I64)*(number_chunks+1));
           }
           chunk_starts[tabled_chunks] = point_start; // needs fixing
           tabled_chunks++;
@@ -407,11 +407,17 @@ BOOL LASreadPoint::read_chunk_table()
   // this is where the chunks start
   I64 chunks_start = instream->tell();
 
+  // was compressor interrupted before getting a chance to write the chunk table?
   if ((chunk_table_start_position + 8) == chunks_start)
   {
-    // then compressor was interrupted before getting a chance to write the chunk table
+    // no choice but to fail if adaptive chunking was used
+    if (chunk_size == U32_MAX)
+    {
+      return FALSE;
+    }
+    // otherwise we build the chunk table as we read the file
     number_chunks = 256;
-    chunk_starts = (I64*)malloc(sizeof(I64)*number_chunks);
+    chunk_starts = (I64*)malloc(sizeof(I64)*(number_chunks+1));
     if (chunk_starts == 0)
     {
       return FALSE;
@@ -498,12 +504,17 @@ BOOL LASreadPoint::read_chunk_table()
     // something went wrong while reading the chunk table
     if (chunk_totals) delete [] chunk_totals;
     chunk_totals = 0;
+    // no choice but to fail if adaptive chunking was used
+    if (chunk_size == U32_MAX)
+    {
+      return FALSE;
+    }
     // did we not even read the number of chunks
     if (number_chunks == U32_MAX)
     {
       // then compressor was interrupted before getting a chance to write the chunk table
       number_chunks = 256;
-      chunk_starts = (I64*)malloc(sizeof(I64)*number_chunks);
+      chunk_starts = (I64*)malloc(sizeof(I64)*(number_chunks+1));
       if (chunk_starts == 0)
       {
         return FALSE;
