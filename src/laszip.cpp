@@ -186,10 +186,17 @@ const char* LASzip::get_error() const
 
 bool LASzip::return_error(const char* error)
 {
+
+#if defined(_MSC_VER) && \
+    (_MSC_FULL_VER >= 150000000)
+#define CopyString _strdup
+#else
+#define CopyString strdup
+#endif
   char err[256];
   sprintf(err, "%s (LASzip v%d.%dr%d)", error, LASZIP_VERSION_MAJOR, LASZIP_VERSION_MINOR, LASZIP_VERSION_REVISION);
   if (error_string) free(error_string);
-  error_string = strdup(err);
+  error_string = CopyString(err);
   return false;
 }
 
