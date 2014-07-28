@@ -55,12 +55,10 @@ add_dependencies( copy make_osgeo4w_directories  )
 macro(copy_files GLOBPAT DESTINATION  )
 
     file(GLOB_RECURSE COPY_FILES
-         RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
         ${GLOBPAT})
     foreach(FILENAME ${COPY_FILES})
         set(SRC "${FILENAME}")
         set(DST "${DESTINATION}")
-
         add_custom_command(
             TARGET copy
             COMMAND ${CMAKE_COMMAND} -E copy ${SRC} ${DST}
@@ -91,7 +89,7 @@ endmacro(tar_directories)
 make_directories()
 copy_files(${LASZIP_BUILD_OUTPUT_DIRECTORY}/laszip.dll ${OSGEO4W_BIN_DIR}/  )
 copy_files(${LASZIP_BUILD_OUTPUT_DIRECTORY}/laszip.lib ${OSGEO4W_LIB_DIR}/  )
-copy_files(./include/laszip/*.hpp ${OSGEO4W_INCLUDE_DIR}/  )
+copy_files(${laszip_SOURCE_DIR}/include/laszip/*.hpp ${OSGEO4W_INCLUDE_DIR}/  )
 
 tar_directories(${OSGEO4W_DIR} ${laszip_SOURCE_DIR}/${OSGEO4W_PACKAGES}/laszip-${VERSION}-${OSGEO4W_UPSTREAM_RELEASE}.tar.bz2 "bin/;lib/;include/")
 

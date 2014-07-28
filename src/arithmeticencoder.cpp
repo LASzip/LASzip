@@ -125,7 +125,7 @@ void ArithmeticEncoder::done()
     assert(outbyte < outbuffer + AC_BUFFER_SIZE);
     outstream->putBytes(outbuffer + AC_BUFFER_SIZE, AC_BUFFER_SIZE);
   }
-  U32 buffer_size = outbyte - outbuffer;
+  U32 buffer_size = (U32)(outbyte - outbuffer);
   if (buffer_size) outstream->putBytes(outbuffer, buffer_size);
 
   // write two or three zero bytes to be in sync with the decoder's byte reads

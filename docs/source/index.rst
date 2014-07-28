@@ -123,12 +123,13 @@ Software with native LAZ support
 * GRASS GIS (7.0 and up) by `Open Source Geospatial Foundation (OSGeo) <http://grass.osgeo.org/>`_
 * OPALS by `TU Vienna <http://www.ipf.tuwien.ac.at/opals/>`_
 * EspaEngine by `ESPA Systems <http://www.espasystems.fi>`_
+* Blaze Point Cloud by `Eternix Ltd <http://eternix.co.il/point-cloud/>`_
 * ReportGen (2.9.0 and up), by `PDF3D <http://pdf3d.com/news/PDF3D_LiDAR_PressRelease_20dec2013.php>`_
 * OrbitGIS by `Orbit <http://www.orbitgis.com/>`_
 * K2Vi by `AAM Group <http://www.aamgroup.com/services-and-technology/3d-gis>`_
 * LiS by `LASERDATA <http://www.laserdata.at/>`_
-* Geoverse by `euclideon <http://www.euclideon.com/>`_
 * PointCloudViz by `mirage <http://www.mirage-tech.com/>`_
+* Geoverse by `euclideon <http://www.euclideon.com/>`_
 
 Download LAZ data
 ------------------------------------------------------------------------------
