@@ -100,9 +100,9 @@ makes it easy to add native LAZ support to your own software package.
 Software with native LAZ support
 ------------------------------------------------------------------------------
 
+* Fugroviewer (2.0 and up) by `Fugro <http://www.fugroviewer.com/>`_
 * QT Modeler (7.1.6 and up) by `Applied Imagery <http://www.appliedimagery.com/>`_
 * ERDAS IMAGINE (14.1 and up) by `Hexagon Geospatial <http://www.hexagongeospatial.com/products/ERDAS-IMAGINE/Details.aspx>`_
-* FUSION (3.40 and up) by `Bob McGaughey of the USDA <http://forsys.cfr.washington.edu/fusion/fusionlatest.html/>`_
 * Global Mapper (13.1 and up) by `Blue Marble Geo <http://www.bluemarblegeo.com/>`_
 * Trimble RealWorks (8.1 and up) by `Trimble Navigation Limited <http://www.trimble.com/3d-laser-scanning/realworks.aspx>`_
 * ENVI LiDAR (5.1 and up) by `Exelis VIS <http://www.exelisvis.com/ProductsServices/ENVI/ENVILiDAR.aspx>`_
@@ -114,6 +114,7 @@ Software with native LAZ support
 * SURE by `nframes <http://www.nframes.com/>`_
 * LAStools by `rapidlasso - fast tools to catch reality <http://rapidlasso.com/>`_
 * RiProcess by `RIEGL LMS GmbH <http://www.riegl.com/>`_
+* FUSION (3.40 and up) by `Bob McGaughey of the USDA <http://forsys.cfr.washington.edu/fusion/fusionlatest.html/>`_
 * ZEB1 by `3D Laser Mapping <http://www.3dlasermapping.com/index.php/products/handheld-mapping>`_
 * OCAD (11.4.0 and up) by `OCAD Inc. <http://ocad.com/blog/2013/11/ocad-11-4-0-supports-laz-files/>`_
 * Gexcel R3 by `Gexcel <http://www.gexcel.it/en/software/>`_
@@ -122,6 +123,7 @@ Software with native LAZ support
 * ScanLook by `LiDAR USA <http://www.lidarusa.com/>`_
 * GRASS GIS (7.0 and up) by `Open Source Geospatial Foundation (OSGeo) <http://grass.osgeo.org/>`_
 * OPALS by `TU Vienna <http://www.ipf.tuwien.ac.at/opals/>`_
+* Scop++ (5.5.3 and up) by `Trimble and TU Vienna <http://photo.geo.tuwien.ac.at/software/scop/>`_
 * EspaEngine by `ESPA Systems <http://www.espasystems.fi>`_
 * Blaze Point Cloud by `Eternix Ltd <http://eternix.co.il/point-cloud/>`_
 * ReportGen (2.9.0 and up), by `PDF3D <http://pdf3d.com/news/PDF3D_LiDAR_PressRelease_20dec2013.php>`_
