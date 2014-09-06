@@ -13,7 +13,7 @@
 
   COPYRIGHT:
 
-    (c) 2007-2012, martin isenburg, rapidlasso - tools to catch reality
+    (c) 2007-2014, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -219,19 +219,6 @@ BOOL LASreadPoint::init(ByteStreamIn* instream)
   if (!instream) return FALSE;
   this->instream = instream;
 
-  // on very first init with chunking enabled
-  if (number_chunks == U32_MAX)
-  {
-    if (!read_chunk_table())
-    {
-      return FALSE;
-    }
-    current_chunk = 0;
-    if (chunk_totals) chunk_size = chunk_totals[1];
-  }
-
-  point_start = instream->tell();
-
   U32 i;
   for (i = 0; i < num_readers; i++)
   {
@@ -240,10 +227,13 @@ BOOL LASreadPoint::init(ByteStreamIn* instream)
 
   if (dec)
   {
+    chunk_count = chunk_size;
+    point_start = 0;
     readers = 0;
   }
   else
   {
+    point_start = instream->tell();
     readers = readers_raw;
   }
 
@@ -256,6 +246,10 @@ BOOL LASreadPoint::seek(const U32 current, const U32 target)
   U32 delta = 0;
   if (dec)
   {
+    if (point_start == 0)
+    {
+      init_dec();
+    }
     if (chunk_starts)
     {
       U32 target_chunk;
@@ -277,7 +271,7 @@ BOOL LASreadPoint::seek(const U32 current, const U32 target)
           dec->done();
           current_chunk = (tabled_chunks-1);
           instream->seek(chunk_starts[current_chunk]);
-          init(instream);
+          init_dec();
           chunk_count = 0;
         }
         delta += (chunk_size*(target_chunk-current_chunk) - chunk_count);
@@ -287,7 +281,7 @@ BOOL LASreadPoint::seek(const U32 current, const U32 target)
         dec->done();
         current_chunk = target_chunk;
         instream->seek(chunk_starts[current_chunk]);
-        init(instream);
+        init_dec();
         chunk_count = 0;
       }
       else
@@ -299,7 +293,7 @@ BOOL LASreadPoint::seek(const U32 current, const U32 target)
     {
       dec->done();
       instream->seek(point_start);
-      init(instream);
+      init_dec();
       delta = target;
     }
     else if (current < target)
@@ -332,9 +326,12 @@ BOOL LASreadPoint::read(U8* const * point)
     {
       if (chunk_count == chunk_size)
       {
-        current_chunk++;
-        dec->done();
-        init(instream);
+        if (point_start != 0)
+        {
+          current_chunk++;
+          dec->done();
+        }
+        init_dec();
         if (tabled_chunks == current_chunk) // no or incomplete chunk table?
         {
           if (current_chunk == number_chunks)
@@ -392,6 +389,27 @@ BOOL LASreadPoint::done()
   {
     if (dec) dec->done();
   }
+  instream = 0;
+  return TRUE;
+}
+
+BOOL LASreadPoint::init_dec()
+{
+  // maybe read chunk table (only if chunking enabled)
+
+  if (number_chunks == U32_MAX)
+  {
+    if (!read_chunk_table())
+    {
+      return FALSE;
+    }
+    current_chunk = 0;
+    if (chunk_totals) chunk_size = chunk_totals[1];
+  }
+
+  point_start = instream->tell();
+  readers = 0;
+
   return TRUE;
 }
 
