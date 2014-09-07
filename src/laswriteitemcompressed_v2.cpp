@@ -56,7 +56,7 @@ struct LASpoint10
   U16 point_source_ID;
 };
 
-LASwriteItemCompressed_POINT10_v2::LASwriteItemCompressed_POINT10_v2(EntropyEncoder* enc)
+LASwriteItemCompressed_POINT10_v2::LASwriteItemCompressed_POINT10_v2(ArithmeticEncoder* enc)
 {
   U32 i;
 
@@ -243,7 +243,7 @@ inline BOOL LASwriteItemCompressed_POINT10_v2::write(const U8* item)
 
 #define LASZIP_GPSTIME_MULTI_TOTAL (LASZIP_GPSTIME_MULTI - LASZIP_GPSTIME_MULTI_MINUS + 6) 
 
-LASwriteItemCompressed_GPSTIME11_v2::LASwriteItemCompressed_GPSTIME11_v2(EntropyEncoder* enc)
+LASwriteItemCompressed_GPSTIME11_v2::LASwriteItemCompressed_GPSTIME11_v2(ArithmeticEncoder* enc)
 {
   /* set encoder */
   assert(enc);
@@ -455,7 +455,7 @@ inline BOOL LASwriteItemCompressed_GPSTIME11_v2::write(const U8* item)
 ===============================================================================
 */
 
-LASwriteItemCompressed_RGB12_v2::LASwriteItemCompressed_RGB12_v2(EntropyEncoder* enc)
+LASwriteItemCompressed_RGB12_v2::LASwriteItemCompressed_RGB12_v2(ArithmeticEncoder* enc)
 {
   /* set encoder */
   assert(enc);
@@ -558,7 +558,7 @@ inline BOOL LASwriteItemCompressed_RGB12_v2::write(const U8* item)
 ===============================================================================
 */
 
-LASwriteItemCompressed_BYTE_v2::LASwriteItemCompressed_BYTE_v2(EntropyEncoder* enc, U32 number)
+LASwriteItemCompressed_BYTE_v2::LASwriteItemCompressed_BYTE_v2(ArithmeticEncoder* enc, U32 number)
 {
   U32 i;
 
@@ -569,7 +569,7 @@ LASwriteItemCompressed_BYTE_v2::LASwriteItemCompressed_BYTE_v2(EntropyEncoder* e
   this->number = number;
 
   /* create models and integer compressors */
-  m_byte = new EntropyModel*[number];
+  m_byte = new ArithmeticModel*[number];
   for (i = 0; i < number; i++)
   {
     m_byte[i] = enc->createSymbolModel(256);

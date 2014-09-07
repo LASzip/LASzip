@@ -57,7 +57,7 @@ struct LASpoint10
   U16 point_source_ID;
 };
 
-LASwriteItemCompressed_POINT10_v1::LASwriteItemCompressed_POINT10_v1(EntropyEncoder* enc)
+LASwriteItemCompressed_POINT10_v1::LASwriteItemCompressed_POINT10_v1(ArithmeticEncoder* enc)
 {
   U32 i;
 
@@ -263,7 +263,7 @@ inline BOOL LASwriteItemCompressed_POINT10_v1::write(const U8* item)
 
 #define LASZIP_GPSTIME_MULTIMAX 512
 
-LASwriteItemCompressed_GPSTIME11_v1::LASwriteItemCompressed_GPSTIME11_v1(EntropyEncoder* enc)
+LASwriteItemCompressed_GPSTIME11_v1::LASwriteItemCompressed_GPSTIME11_v1(ArithmeticEncoder* enc)
 {
   /* set encoder */
   assert(enc);
@@ -417,7 +417,7 @@ inline BOOL LASwriteItemCompressed_GPSTIME11_v1::write(const U8* item)
 ===============================================================================
 */
 
-LASwriteItemCompressed_RGB12_v1::LASwriteItemCompressed_RGB12_v1(EntropyEncoder* enc)
+LASwriteItemCompressed_RGB12_v1::LASwriteItemCompressed_RGB12_v1(ArithmeticEncoder* enc)
 {
   /* set encoder */
   assert(enc);
@@ -476,7 +476,7 @@ inline BOOL LASwriteItemCompressed_RGB12_v1::write(const U8* item)
 ===============================================================================
 */
 
-LASwriteItemCompressed_WAVEPACKET13_v1::LASwriteItemCompressed_WAVEPACKET13_v1(EntropyEncoder* enc)
+LASwriteItemCompressed_WAVEPACKET13_v1::LASwriteItemCompressed_WAVEPACKET13_v1(ArithmeticEncoder* enc)
 {
   /* set encoder */
   assert(enc);
@@ -591,7 +591,7 @@ inline BOOL LASwriteItemCompressed_WAVEPACKET13_v1::write(const U8* item)
 ===============================================================================
 */
 
-LASwriteItemCompressed_BYTE_v1::LASwriteItemCompressed_BYTE_v1(EntropyEncoder* enc, U32 number)
+LASwriteItemCompressed_BYTE_v1::LASwriteItemCompressed_BYTE_v1(ArithmeticEncoder* enc, U32 number)
 {
   /* set encoder */
   assert(enc);

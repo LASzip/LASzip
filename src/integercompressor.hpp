@@ -25,7 +25,7 @@
 
   COPYRIGHT:
 
-    (c) 2005-2012, martin isenburg, rapidlasso - tools to catch reality
+    (c) 2005-2014, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -36,6 +36,7 @@
   
   CHANGE HISTORY:
   
+     6 September 2014 -- removed inheritance of EntropyEncoder and EntropyDecoder
     10 January 2011 -- licensing change for LGPL release and liblas integration
     10 December 2010 -- unified for all entropy coders at Baeckerei Schaefer
     31 October 2009 -- switched from the Rangecoder to the Entropycoder
@@ -47,16 +48,16 @@
 #ifndef INTEGER_COMPRESSOR_HPP
 #define INTEGER_COMPRESSOR_HPP
 
-#include "entropyencoder.hpp"
-#include "entropydecoder.hpp"
+#include "arithmeticencoder.hpp"
+#include "arithmeticdecoder.hpp"
 
 class IntegerCompressor
 {
 public:
 
   // Constructor & Deconstructor
-  IntegerCompressor(EntropyEncoder* enc, U32 bits=16, U32 contexts=1, U32 bits_high=8, U32 range=0);
-  IntegerCompressor(EntropyDecoder* dec, U32 bits=16, U32 contexts=1, U32 bits_high=8, U32 range=0);
+  IntegerCompressor(ArithmeticEncoder* enc, U32 bits=16, U32 contexts=1, U32 bits_high=8, U32 range=0);
+  IntegerCompressor(ArithmeticDecoder* dec, U32 bits=16, U32 contexts=1, U32 bits_high=8, U32 range=0);
   ~IntegerCompressor();
 
   // Manage Compressor
@@ -71,8 +72,8 @@ public:
   U32 getK() const {return k;};
 
 private:
-  void writeCorrector(I32 c, EntropyModel* model);
-  I32 readCorrector(EntropyModel* model);
+  void writeCorrector(I32 c, ArithmeticModel* model);
+  I32 readCorrector(ArithmeticModel* model);
 
   U32 k;
 
@@ -87,12 +88,12 @@ private:
   I32 corr_min;
   I32 corr_max;
 
-  EntropyEncoder* enc;
-  EntropyDecoder* dec;
+  ArithmeticEncoder* enc;
+  ArithmeticDecoder* dec;
 
-  EntropyModel** mBits;
+  ArithmeticModel** mBits;
 
-  EntropyModel** mCorrector;
+  ArithmeticModel** mCorrector;
 
   int** corr_histogram;
 };

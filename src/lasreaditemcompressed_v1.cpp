@@ -13,7 +13,7 @@
 
   COPYRIGHT:
 
-    (c) 2007-2012, martin isenburg, rapidlasso - fast tools to catch reality
+    (c) 2007-2014, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -57,7 +57,7 @@ struct LASpoint10
   U16 point_source_ID;
 };
 
-LASreadItemCompressed_POINT10_v1::LASreadItemCompressed_POINT10_v1(EntropyDecoder* dec)
+LASreadItemCompressed_POINT10_v1::LASreadItemCompressed_POINT10_v1(ArithmeticDecoder* dec)
 {
   U32 i;
 
@@ -258,7 +258,7 @@ inline void LASreadItemCompressed_POINT10_v1::read(U8* item)
 
 #define LASZIP_GPSTIME_MULTIMAX 512
 
-LASreadItemCompressed_GPSTIME11_v1::LASreadItemCompressed_GPSTIME11_v1(EntropyDecoder* dec)
+LASreadItemCompressed_GPSTIME11_v1::LASreadItemCompressed_GPSTIME11_v1(ArithmeticDecoder* dec)
 {
   /* set decoder */
   assert(dec);
@@ -368,7 +368,7 @@ inline void LASreadItemCompressed_GPSTIME11_v1::read(U8* item)
 ===============================================================================
 */
 
-LASreadItemCompressed_RGB12_v1::LASreadItemCompressed_RGB12_v1(EntropyDecoder* dec)
+LASreadItemCompressed_RGB12_v1::LASreadItemCompressed_RGB12_v1(ArithmeticDecoder* dec)
 {
   /* set decoder */
   assert(dec);
@@ -426,7 +426,7 @@ inline void LASreadItemCompressed_RGB12_v1::read(U8* item)
 ===============================================================================
 */
 
-LASreadItemCompressed_WAVEPACKET13_v1::LASreadItemCompressed_WAVEPACKET13_v1(EntropyDecoder* dec)
+LASreadItemCompressed_WAVEPACKET13_v1::LASreadItemCompressed_WAVEPACKET13_v1(ArithmeticDecoder* dec)
 {
   /* set decoder */
   assert(dec);
@@ -529,7 +529,7 @@ inline void LASreadItemCompressed_WAVEPACKET13_v1::read(U8* item)
 ===============================================================================
 */
 
-LASreadItemCompressed_BYTE_v1::LASreadItemCompressed_BYTE_v1(EntropyDecoder* dec, U32 number)
+LASreadItemCompressed_BYTE_v1::LASreadItemCompressed_BYTE_v1(ArithmeticDecoder* dec, U32 number)
 {
   /* set decoder */
   assert(dec);

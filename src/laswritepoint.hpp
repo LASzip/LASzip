@@ -1,7 +1,7 @@
 /*
 ===============================================================================
 
-  FILE:  LASwritePoint.hpp
+  FILE:  laswritepoint.hpp
   
   CONTENTS:
   
@@ -13,7 +13,7 @@
 
   COPYRIGHT:
 
-    (c) 2007-2012, martin isenburg, rapidlasso - tools to catch reality
+    (c) 2007-2014, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -24,6 +24,7 @@
   
   CHANGE HISTORY:
   
+    6 September 2014 -- removed inheritance of EntropyEncoder and EntropyDecoder
     6 October 2011 -- large file support & reading with missing chunk table
     9 May 2011 -- the chunked compressor now allows variable chunk sizes
     25 April 2011 -- added chunked laszip for random access decompression
@@ -35,15 +36,15 @@
   
 ===============================================================================
 */
-#ifndef LAS_WRITE_POINT_H
-#define LAS_WRITE_POINT_H
+#ifndef LAS_WRITE_POINT_HPP
+#define LAS_WRITE_POINT_HPP
 
 #include "mydefs.hpp"
 #include "laszip.hpp"
 #include "bytestreamout.hpp"
 
 class LASwriteItem;
-class EntropyEncoder;
+class ArithmeticEncoder;
 
 class LASwritePoint
 {
@@ -65,7 +66,7 @@ private:
   LASwriteItem** writers;
   LASwriteItem** writers_raw;
   LASwriteItem** writers_compressed;
-  EntropyEncoder* enc;
+  ArithmeticEncoder* enc;
   // used for chunking
   U32 chunk_size;
   U32 chunk_count;

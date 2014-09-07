@@ -14,7 +14,7 @@
 
   COPYRIGHT:
 
-    (c) 2007-2012, martin isenburg, rapidlasso - tools to catch reality
+    (c) 2007-2014, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -25,18 +25,23 @@
   
   CHANGE HISTORY:
   
+     6 September 2014 -- removed the (unused) inheritance from EntropyDecoder
     10 January 2011 -- licensing change for LGPL release and liblas integration
-    8 December 2010 -- unified framework for all entropy coders
+     8 December 2010 -- unified framework for all entropy coders
     30 October 2009 -- refactoring Amir Said's FastAC code
   
 ===============================================================================
 */
-#ifndef ARITHMETIC_DECODER_H
-#define ARITHMETIC_DECODER_H
+#ifndef ARITHMETIC_DECODER_HPP
+#define ARITHMETIC_DECODER_HPP
 
-#include "entropydecoder.hpp"
+#include "mydefs.hpp"
+#include "bytestreamin.hpp"
 
-class ArithmeticDecoder : public EntropyDecoder
+class ArithmeticModel;
+class ArithmeticBitModel;
+
+class ArithmeticDecoder
 {
 public:
 
@@ -49,20 +54,20 @@ public:
   void done();
 
 /* Manage an entropy model for a single bit                  */
-  EntropyModel* createBitModel();
-  void initBitModel(EntropyModel* model);
-  void destroyBitModel(EntropyModel* model);
+  ArithmeticBitModel* createBitModel();
+  void initBitModel(ArithmeticBitModel* model);
+  void destroyBitModel(ArithmeticBitModel* model);
 
 /* Manage an entropy model for n symbols (table optional)    */
-  EntropyModel* createSymbolModel(U32 n);
-  void initSymbolModel(EntropyModel* model, U32* table=0);
-  void destroySymbolModel(EntropyModel* model);
+  ArithmeticModel* createSymbolModel(U32 n);
+  void initSymbolModel(ArithmeticModel* model, U32* table=0);
+  void destroySymbolModel(ArithmeticModel* model);
 
 /* Decode a bit with modelling                               */
-  U32 decodeBit(EntropyModel* model);
+  U32 decodeBit(ArithmeticBitModel* model);
 
 /* Decode a symbol with modelling                            */
-  U32 decodeSymbol(EntropyModel* model);
+  U32 decodeSymbol(ArithmeticModel* model);
 
 /* Decode a bit without modelling                            */
   U32 readBit();

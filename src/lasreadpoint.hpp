@@ -24,6 +24,7 @@
   
   CHANGE HISTORY:
   
+    6 September 2014 -- removed inheritance of EntropyEncoder and EntropyDecoder
     24 August 2014 -- delay read of chunk table until first read() or seek() is called
     6 October 2011 -- large file support & reading with missing chunk table
     9 May 2011 -- the chunked compressor now allows variable chunk sizes
@@ -36,15 +37,15 @@
   
 ===============================================================================
 */
-#ifndef LAS_READ_POINT_H
-#define LAS_READ_POINT_H
+#ifndef LAS_READ_POINT_HPP
+#define LAS_READ_POINT_HPP
 
 #include "mydefs.hpp"
 #include "laszip.hpp"
 #include "bytestreamin.hpp"
 
 class LASreadItem;
-class EntropyDecoder;
+class ArithmeticDecoder;
 
 class LASreadPoint
 {
@@ -66,7 +67,7 @@ private:
   LASreadItem** readers;
   LASreadItem** readers_raw;
   LASreadItem** readers_compressed;
-  EntropyDecoder* dec;
+  ArithmeticDecoder* dec;
   // used for chunking
   U32 chunk_size;
   U32 chunk_count;
