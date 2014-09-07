@@ -450,10 +450,10 @@ LASreadItemCompressed_WAVEPACKET13_v1::LASreadItemCompressed_WAVEPACKET13_v1(Ent
 LASreadItemCompressed_WAVEPACKET13_v1::~LASreadItemCompressed_WAVEPACKET13_v1()
 {
   dec->destroySymbolModel(m_packet_index);
-  dec->destroyBitModel(m_offset_diff[0]);
-  dec->destroyBitModel(m_offset_diff[1]);
-  dec->destroyBitModel(m_offset_diff[2]);
-  dec->destroyBitModel(m_offset_diff[3]);
+  dec->destroySymbolModel(m_offset_diff[0]);
+  dec->destroySymbolModel(m_offset_diff[1]);
+  dec->destroySymbolModel(m_offset_diff[2]);
+  dec->destroySymbolModel(m_offset_diff[3]);
   delete ic_offset_diff;
   delete ic_packet_size;
   delete ic_return_point;
@@ -496,7 +496,6 @@ inline void LASreadItemCompressed_WAVEPACKET13_v1::read(U8* item)
 
   if (sym_last_offset_diff == 0)
   {
-
     this_item_m.offset = last_item_m.offset;
   }
   else if (sym_last_offset_diff == 1)

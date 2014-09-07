@@ -15,7 +15,7 @@
 
   COPYRIGHT:
 
-    (c) 2007-2012, martin isenburg, rapidlasso - fast tools to catch reality
+    (c) 2007-2014, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -26,7 +26,7 @@
   
   CHANGE HISTORY:
   
-      10 April 2014 - Refactor LASwavepacket13 and add other functions to it.
+    10 April 2014 - refactor LASwavepacket13 and add other functions to it
   
 ===============================================================================
 */
@@ -45,8 +45,9 @@ struct LASwavepacket13
   U32I32F32 y;
   U32I32F32 z;
 
-  static inline LASwavepacket13 unpack(const U8* item) {
-    // Make a lAS wavepacket out of raw memory
+  static inline LASwavepacket13 unpack(const U8* item)
+  {
+    // unpack a LAS wavepacket out of raw memory
     LASwavepacket13 r;
 
     r.offset = makeU64(item);
@@ -60,35 +61,41 @@ struct LASwavepacket13
     return r;
   }
   
-  void inline pack(U8 *item) {
-    // layout this packet into given memory
-    layU32((U32)(offset & 0xFFFFFFFF), item);
-    layU32((U32)(offset >> 32), item+4);
+  void inline pack(U8 *item)
+  {
+    // pack a LAS wavepacket into raw memory
+    packU32((U32)(offset & 0xFFFFFFFF), item);
+    packU32((U32)(offset >> 32), item+4);
 
-    layU32(packet_size, item + 8);
-    layU32(return_point.u32, item + 12);
-    layU32(x.u32, item + 16);
-    layU32(y.u32, item + 20);
-    layU32(z.u32, item + 24);
+    packU32(packet_size, item + 8);
+    packU32(return_point.u32, item + 12);
+    packU32(x.u32, item + 16);
+    packU32(y.u32, item + 20);
+    packU32(z.u32, item + 24);
   }
 
 private:
-  static inline U64 makeU64(const U8* item) {
+
+  static inline U64 makeU64(const U8* item)
+  {
     U64 dw0 = (U64)makeU32(item);
     U64 dw1 = (U64)makeU32(item+4);
 
     return dw0 | (dw1 << 32);
   }
 
-  static inline U32 makeU32(const U8 *item) {
-    U64 b0 = (U64)item[0];
-    U64 b1 = (U64)item[1];
-    U64 b2 = (U64)item[2];
-    U64 b3 = (U64)item[3];
+  static inline U32 makeU32(const U8 *item)
+  {
+    U32 b0 = (U32)item[0];
+    U32 b1 = (U32)item[1];
+    U32 b2 = (U32)item[2];
+    U32 b3 = (U32)item[3];
 
     return b0 | (b1 << 8) | (b2 << 16) | (b3 << 24);
   }
-  static inline void layU32(U32 v, U8 *item) {
+
+  static inline void packU32(U32 v, U8 *item)
+  {
 	  item[0] = v & 0xFF;
 	  item[1] = (v >> 8) & 0xFF;
 	  item[2] = (v >> 16) & 0xFF;
@@ -97,5 +104,3 @@ private:
 };
 
 #endif // LASZIP_COMMON_V1_HPP
-
-// vim: set ts=2 sw=2 expandtabs
