@@ -24,8 +24,6 @@ set(LASZIP_HPP
   bytestreamout_file.hpp
   bytestreamout_ostream.hpp
   endian.hpp
-  entropydecoder.hpp
-  entropyencoder.hpp
   integercompressor.hpp
   lasreaditem.hpp
   lasreaditemcompressed_v1.hpp

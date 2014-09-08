@@ -14,7 +14,7 @@
 
   COPYRIGHT:
 
-    (c) 2005-2012, martin isenburg, rapidlasso - tools to catch reality
+    (c) 2005-2014, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -96,45 +96,42 @@ void ArithmeticDecoder::done()
   instream = 0;
 }
 
-EntropyModel* ArithmeticDecoder::createBitModel()
+ArithmeticBitModel* ArithmeticDecoder::createBitModel()
 {
   ArithmeticBitModel* m = new ArithmeticBitModel();
-  return (EntropyModel*)m;
+  return m;
 }
 
-void ArithmeticDecoder::initBitModel(EntropyModel* model)
+void ArithmeticDecoder::initBitModel(ArithmeticBitModel* m)
 {
-  ArithmeticBitModel* m = (ArithmeticBitModel*)model;
   m->init();
 }
 
-void ArithmeticDecoder::destroyBitModel(EntropyModel* model)
+void ArithmeticDecoder::destroyBitModel(ArithmeticBitModel* m)
 {
-  ArithmeticBitModel* m = (ArithmeticBitModel*)model;
   delete m;
 }
 
-EntropyModel* ArithmeticDecoder::createSymbolModel(U32 n)
+ArithmeticModel* ArithmeticDecoder::createSymbolModel(U32 n)
 {
-  ArithmeticModel* m = new ArithmeticModel(n, false);
-  return (EntropyModel*)m;
+  ArithmeticModel* m = new ArithmeticModel(n, FALSE);
+  return m;
 }
 
-void ArithmeticDecoder::initSymbolModel(EntropyModel* model, U32 *table)
+void ArithmeticDecoder::initSymbolModel(ArithmeticModel* m, U32 *table)
 {
-  ArithmeticModel* m = (ArithmeticModel*)model;
   m->init(table);
 }
 
-void ArithmeticDecoder::destroySymbolModel(EntropyModel* model)
+void ArithmeticDecoder::destroySymbolModel(ArithmeticModel* m)
 {
-  ArithmeticModel* m = (ArithmeticModel*)model;
   delete m;
 }
 
-U32 ArithmeticDecoder::decodeBit(EntropyModel* model)
+U32 ArithmeticDecoder::decodeBit(ArithmeticBitModel* m)
 {
-  ArithmeticBitModel* m = (ArithmeticBitModel*)model;
+  assert(m);
+
   U32 x = m->bit_0_prob * (length >> BM__LengthShift);       // product l x p0
   U32 sym = (value >= x);                                          // decision
                                                     // update & shift interval
@@ -153,9 +150,8 @@ U32 ArithmeticDecoder::decodeBit(EntropyModel* model)
   return sym;                                         // return data bit value
 }
 
-U32 ArithmeticDecoder::decodeSymbol(EntropyModel* model)
+U32 ArithmeticDecoder::decodeSymbol(ArithmeticModel* m)
 {
-  ArithmeticModel* m = (ArithmeticModel*)model;
   U32 n, sym, x, y = length;
 
   if (m->decoder_table) {             // use table look-up for faster decoding
@@ -259,28 +255,28 @@ U16 ArithmeticDecoder::readShort()
   return (U16)sym;
 }
 
-inline U32 ArithmeticDecoder::readInt()
+U32 ArithmeticDecoder::readInt()
 {
   U32 lowerInt = readShort();
   U32 upperInt = readShort();
   return (upperInt<<16)|lowerInt;
 }
 
-inline F32 ArithmeticDecoder::readFloat() /* danger in float reinterpretation */
+F32 ArithmeticDecoder::readFloat() /* danger in float reinterpretation */
 {
   U32I32F32 u32i32f32;
   u32i32f32.u32 = readInt();
   return u32i32f32.f32;
 }
 
-inline U64 ArithmeticDecoder::readInt64()
+U64 ArithmeticDecoder::readInt64()
 {
   U64 lowerInt = readInt();
   U64 upperInt = readInt();
   return (upperInt<<32)|lowerInt;
 }
 
-inline F64 ArithmeticDecoder::readDouble() /* danger in float reinterpretation */
+F64 ArithmeticDecoder::readDouble() /* danger in float reinterpretation */
 {
   U64I64F64 u64i64f64;
   u64i64f64.u64 = readInt64();
@@ -289,7 +285,6 @@ inline F64 ArithmeticDecoder::readDouble() /* danger in float reinterpretation *
 
 ArithmeticDecoder::~ArithmeticDecoder()
 {
-
 }
 
 inline void ArithmeticDecoder::renorm_dec_interval()

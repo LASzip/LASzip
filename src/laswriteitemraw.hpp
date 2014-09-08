@@ -1,7 +1,7 @@
 /*
 ===============================================================================
 
-  FILE:  LASwriteitemraw.hpp
+  FILE:  laswriteitemraw.hpp
   
   CONTENTS:
   
@@ -13,7 +13,7 @@
 
   COPYRIGHT:
 
-    (c) 2007-2012, martin isenburg, rapidlasso - fast tools to catch reality
+    (c) 2007-2013, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -30,8 +30,8 @@
   
 ===============================================================================
 */
-#ifndef LAS_WRITE_ITEM_RAW_H
-#define LAS_WRITE_ITEM_RAW_H
+#ifndef LAS_WRITE_ITEM_RAW_HPP
+#define LAS_WRITE_ITEM_RAW_HPP
 
 #include "laswriteitem.hpp"
 
@@ -173,13 +173,16 @@ public:
   U8 user_data;
   U16 point_source_ID;
   // LAS 1.4 only
+  I16 extended_scan_angle;
   U8 extended_point_type : 2;
   U8 extended_scanner_channel : 2;
   U8 extended_classification_flags : 4;
   U8 extended_classification;
   U8 extended_return_number : 4;
   U8 extended_number_of_returns_of_given_pulse : 4;
-  I16 extended_scan_angle;
+  // for 8 byte alignment of the GPS time
+  U8 dummy[7];
+  F64 gps_time;
 };
 
 class LAStempWritePoint14
@@ -235,7 +238,7 @@ public:
       ((LAStempWritePoint14*)buffer)->scan_angle = I16_QUANTIZE(((LAStempWritePoint10*)item)->scan_angle_rank/0.006f);
     }
 
-    *((F64*)&buffer[22]) = *((F64*)&item[24]);
+    *((F64*)&buffer[22]) = ((LAStempWritePoint10*)item)->gps_time;
     return outstream->putBytes(buffer, 30);
   }
 private:

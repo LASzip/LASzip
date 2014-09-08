@@ -13,7 +13,7 @@
 
   COPYRIGHT:
 
-    (c) 2007-2012, martin isenburg, rapidlasso - fast tools to catch reality
+    (c) 2007-2014, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -24,6 +24,8 @@
   
   CHANGE HISTORY:
   
+    6 September 2014 -- removed inheritance of EntropyEncoder and EntropyDecoder
+    24 August 2014 -- delay read of chunk table until first read() or seek() is called
     6 October 2011 -- large file support & reading with missing chunk table
     9 May 2011 -- the chunked compressor now allows variable chunk sizes
     25 April 2011 -- added chunked laszip for random access decompression
@@ -35,15 +37,15 @@
   
 ===============================================================================
 */
-#ifndef LAS_READ_POINT_H
-#define LAS_READ_POINT_H
+#ifndef LAS_READ_POINT_HPP
+#define LAS_READ_POINT_HPP
 
 #include "mydefs.hpp"
 #include "laszip.hpp"
 #include "bytestreamin.hpp"
 
 class LASreadItem;
-class EntropyDecoder;
+class ArithmeticDecoder;
 
 class LASreadPoint
 {
@@ -65,7 +67,7 @@ private:
   LASreadItem** readers;
   LASreadItem** readers_raw;
   LASreadItem** readers_compressed;
-  EntropyDecoder* dec;
+  ArithmeticDecoder* dec;
   // used for chunking
   U32 chunk_size;
   U32 chunk_count;
@@ -74,6 +76,7 @@ private:
   U32 tabled_chunks;
   I64* chunk_starts;
   U32* chunk_totals;
+  BOOL init_dec();
   BOOL read_chunk_table();
   U32 search_chunk_table(const U32 index, const U32 lower, const U32 upper);
   // used for seeking

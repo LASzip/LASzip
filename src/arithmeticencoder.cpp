@@ -14,7 +14,7 @@
 
   COPYRIGHT:
 
-    (c) 2005-2012, martin isenburg, rapidlasso - fast tools to catch reality
+    (c) 2005-2014, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -136,47 +136,42 @@ void ArithmeticEncoder::done()
   outstream = 0;
 }
 
-EntropyModel* ArithmeticEncoder::createBitModel()
+ArithmeticBitModel* ArithmeticEncoder::createBitModel()
 {
   ArithmeticBitModel* m = new ArithmeticBitModel();
-  return (EntropyModel*)m;
+  return m;
 }
 
-void ArithmeticEncoder::initBitModel(EntropyModel* model)
+void ArithmeticEncoder::initBitModel(ArithmeticBitModel* m)
 {
-  ArithmeticBitModel* m = (ArithmeticBitModel*)model;
   m->init();
 }
 
-void ArithmeticEncoder::destroyBitModel(EntropyModel* model)
+void ArithmeticEncoder::destroyBitModel(ArithmeticBitModel* m)
 {
-  ArithmeticBitModel* m = (ArithmeticBitModel*)model;
   delete m;
 }
 
-EntropyModel* ArithmeticEncoder::createSymbolModel(U32 n)
+ArithmeticModel* ArithmeticEncoder::createSymbolModel(U32 n)
 {
   ArithmeticModel* m = new ArithmeticModel(n, true);
-  return (EntropyModel*)m;
+  return m;
 }
 
-void ArithmeticEncoder::initSymbolModel(EntropyModel* model, U32* table)
+void ArithmeticEncoder::initSymbolModel(ArithmeticModel* m, U32* table)
 {
-  ArithmeticModel* m = (ArithmeticModel*)model;
   m->init(table);
 }
 
-void ArithmeticEncoder::destroySymbolModel(EntropyModel* model)
+void ArithmeticEncoder::destroySymbolModel(ArithmeticModel* m)
 {
-  ArithmeticModel* m = (ArithmeticModel*)model;
   delete m;
 }
 
-void ArithmeticEncoder::encodeBit(EntropyModel* model, U32 sym)
+void ArithmeticEncoder::encodeBit(ArithmeticBitModel* m, U32 sym)
 {
-  assert(model && (sym <= 1));
+  assert(m && (sym <= 1));
 
-  ArithmeticBitModel* m = (ArithmeticBitModel*)model;
   U32 x = m->bit_0_prob * (length >> BM__LengthShift);       // product l x p0
                                                             // update interval
   if (sym == 0) {
@@ -194,11 +189,10 @@ void ArithmeticEncoder::encodeBit(EntropyModel* model, U32 sym)
   if (--m->bits_until_update == 0) m->update();       // periodic model update
 }
 
-void ArithmeticEncoder::encodeSymbol(EntropyModel* model, U32 sym)
+void ArithmeticEncoder::encodeSymbol(ArithmeticModel* m, U32 sym)
 {
-  assert(model);
-  ArithmeticModel* m = (ArithmeticModel*)model;
-  assert(sym <= m->last_symbol);
+  assert(m && (sym <= m->last_symbol));
+
   U32 x, init_base = base;
                                                            // compute products
   if (sym == m->last_symbol) {
@@ -266,26 +260,26 @@ void ArithmeticEncoder::writeShort(U16 sym)
   if (length < AC__MinLength) renorm_enc_interval();        // renormalization
 }
 
-inline void ArithmeticEncoder::writeInt(U32 sym)
+void ArithmeticEncoder::writeInt(U32 sym)
 {
   writeShort((U16)(sym & 0xFFFF)); // lower 16 bits
   writeShort((U16)(sym >> 16));    // UPPER 16 bits
 }
 
-inline void ArithmeticEncoder::writeFloat(F32 sym) /* danger in float reinterpretation */
+void ArithmeticEncoder::writeFloat(F32 sym) /* danger in float reinterpretation */
 {
   U32I32F32 u32i32f32;
   u32i32f32.f32 = sym;
   writeInt(u32i32f32.u32);
 }
 
-inline void ArithmeticEncoder::writeInt64(U64 sym)
+void ArithmeticEncoder::writeInt64(U64 sym)
 {
   writeInt((U32)(sym & 0xFFFFFFFF)); // lower 32 bits
   writeInt((U32)(sym >> 32));        // UPPER 32 bits
 }
 
-inline void ArithmeticEncoder::writeDouble(F64 sym) /* danger in float reinterpretation */
+void ArithmeticEncoder::writeDouble(F64 sym) /* danger in float reinterpretation */
 {
   U64I64F64 u64i64f64;
   u64i64f64.f64 = sym;
