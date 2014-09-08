@@ -5,7 +5,7 @@
 ###############################################################################
 
 
-set(OSGEO4W_DIR osgeo4w)
+set(OSGEO4W_DIR osgeo4w64)
 set(OSGEO4W_LIB_DIR ${OSGEO4W_DIR}/lib)
 set(OSGEO4W_BIN_DIR ${OSGEO4W_DIR}/bin)
 set(OSGEO4W_INCLUDE_DIR ${OSGEO4W_DIR}/include/laszip)
