@@ -181,7 +181,9 @@ public:
   U8 extended_return_number : 4;
   U8 extended_number_of_returns_of_given_pulse : 4;
   // for 8 byte alignment of the GPS time
-  U8 dummy[7];
+  U8 dummy[3];
+  // LASlib only
+  U32 deleted_flag;
   F64 gps_time;
 };
 
