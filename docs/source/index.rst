@@ -4,8 +4,13 @@
 LASzip - free and lossless LiDAR compression
 ******************************************************************************
 
-LASzip - a free product of `rapidlasso GmbH <http://rapidlasso.com/>`_ - quickly turns bulky LAS files into compact LAZ files without information loss. Terabytes of LAZ data are now available for free download from various agencies making LASzip, winner of the 2012 Geospatial World Forum `Technology Innovation Award <http://www.facebook.com/photo.php?fbid=370334049695712>`_ in LiDAR Processing and 2nd place winner for `innovative product at INTERGEO 2012 <http://gispoint.de/wia.html>`_, the de-facto standard for LiDAR compression.
+LASzip - a free product of `rapidlasso GmbH <http://rapidlasso.com/>`_ - quickly turns bulky LAS files into compact LAZ files without information loss. Terabytes of LAZ data are now available for free download from various agencies making LASzip, winner of the 2012 Geospatial World Forum `Technology Innovation Award <http://www.facebook.com/photo.php?fbid=370334049695712>`_ in LiDAR Processing and runner-up for `innovative product at INTERGEO 2012 <http://gispoint.de/wia.html>`_, the de-facto standard for LiDAR compression.
 
+
+Gold Sponsors (USD 10,000 or more)
+------------------------------------------------------------------------------
+* `CRREL - U.S. Army Corps of Engineers <http://www.crrel.usace.army.mil/>`_ 
+* `Digital Coast - NOAA Coastal Services Center <http://www.csc.noaa.gov/digitalcoast/>`_ 
 
 Download
 ------------------------------------------------------------------------------
@@ -114,6 +119,7 @@ Software with native LAZ support
 * SURE by `nframes <http://www.nframes.com/>`_
 * LAStools by `rapidlasso - fast tools to catch reality <http://rapidlasso.com/>`_
 * RiProcess by `RIEGL LMS GmbH <http://www.riegl.com/>`_
+* CloudPro by `Leica Geosystems AG <http://www.leica-geosystems.com/en/About-us-News_360.htm?id=5380>`_
 * FUSION (3.40 and up) by `Bob McGaughey of the USDA <http://forsys.cfr.washington.edu/fusion/fusionlatest.html/>`_
 * ZEB1 by `3D Laser Mapping <http://www.3dlasermapping.com/index.php/products/handheld-mapping>`_
 * OCAD (11.4.0 and up) by `OCAD Inc. <http://ocad.com/blog/2013/11/ocad-11-4-0-supports-laz-files/>`_
@@ -124,14 +130,17 @@ Software with native LAZ support
 * GRASS GIS (7.0 and up) by `Open Source Geospatial Foundation (OSGeo) <http://grass.osgeo.org/>`_
 * OPALS by `TU Vienna <http://www.ipf.tuwien.ac.at/opals/>`_
 * Scop++ (5.5.3 and up) by `Trimble and TU Vienna <http://photo.geo.tuwien.ac.at/software/scop/>`_
+* DTMaster (6.0 and up) by `Trimble INPHO <http://www.trimble.com/imaging/inpho/geo-modeling.aspx?dtID=DTMaster>`_
 * EspaEngine by `ESPA Systems <http://www.espasystems.fi>`_
-* Blaze Point Cloud by `Eternix Ltd <http://eternix.co.il/point-cloud/>`_
+* Blaze Point Cloud and Blaze Terra by `Eternix Ltd <http://eternix.co.il/>`_
 * ReportGen (2.9.0 and up), by `PDF3D <http://pdf3d.com/news/PDF3D_LiDAR_PressRelease_20dec2013.php>`_
 * OrbitGIS by `Orbit <http://www.orbitgis.com/>`_
 * K2Vi by `AAM Group <http://www.aamgroup.com/services-and-technology/3d-gis>`_
+* Card\1 (8.4 and up) by `IB&T GmbH <http://www.card-1.com/en/product/the-system-card1/>`_
 * LiS by `LASERDATA <http://www.laserdata.at/>`_
 * PointCloudViz by `mirage <http://www.mirage-tech.com/>`_
 * Geoverse by `euclideon <http://www.euclideon.com/>`_
+* PointCab by `PointCab Software <http://www.pointcab-software.com/en/technical-details/>`_
 
 Download LAZ data
 ------------------------------------------------------------------------------
