@@ -117,6 +117,7 @@ Software with native LAZ support
 * Pix4uav by `Pix4D <http://www.pix4d.com/>`_
 * CloudCompare by `Daniel Girardeau-Montaut <http://www.danielgm.net/cc/>`_
 * SURE by `nframes <http://www.nframes.com/>`_
+* Pointfuse by `Arithmetica <http://pointfuse.com/>`_
 * LAStools by `rapidlasso - fast tools to catch reality <http://rapidlasso.com/>`_
 * plas.io 3D Web Viewer by `Hobu Inc. <http://plas.io/>`_
 * RiProcess by `RIEGL LMS GmbH <http://www.riegl.com/>`_
