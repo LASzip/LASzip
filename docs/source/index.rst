@@ -118,6 +118,7 @@ Software with native LAZ support
 * CloudCompare by `Daniel Girardeau-Montaut <http://www.danielgm.net/cc/>`_
 * SURE by `nframes <http://www.nframes.com/>`_
 * LAStools by `rapidlasso - fast tools to catch reality <http://rapidlasso.com/>`_
+* plas.io 3D Web Viewer by `Hobu Inc. <http://plas.io/>`_
 * RiProcess by `RIEGL LMS GmbH <http://www.riegl.com/>`_
 * CloudPro by `Leica Geosystems AG <http://www.leica-geosystems.com/en/About-us-News_360.htm?id=5380>`_
 * FUSION (3.40 and up) by `Bob McGaughey of the USDA <http://forsys.cfr.washington.edu/fusion/fusionlatest.html/>`_
