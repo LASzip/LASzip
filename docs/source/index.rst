@@ -138,11 +138,11 @@ Software with native LAZ support
 * ReportGen (2.9.0 and up), by `PDF3D <http://pdf3d.com/news/PDF3D_LiDAR_PressRelease_20dec2013.php>`_
 * OrbitGIS by `Orbit <http://www.orbitgis.com/>`_
 * K2Vi by `AAM Group <http://www.aamgroup.com/services-and-technology/3d-gis>`_
-* Card\1 (8.4 and up) by `IB&T GmbH <http://www.card-1.com/en/product/the-system-card1/>`_
+* Card/1 (8.4 and up) by `IB&T GmbH <http://www.card-1.com/en/product/the-system-card1/>`_
 * LiS by `LASERDATA <http://www.laserdata.at/>`_
 * PointCloudViz by `mirage <http://www.mirage-tech.com/>`_
 * Geoverse by `euclideon <http://www.euclideon.com/>`_
-* PointCab by `PointCab Software <http://www.pointcab-software.com/en/technical-details/>`_
+* PointCab by `PointCab GmbH <http://www.pointcab-software.com/en/technical-details/>`_
 
 Download LAZ data
 ------------------------------------------------------------------------------
