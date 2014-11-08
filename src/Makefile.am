@@ -29,8 +29,6 @@ liblibrary_la_SOURCES =				arithmeticmodel.cpp \
                         bytestreamout.hpp \
                         bytestreamout_file.hpp \
                         bytestreamout_ostream.hpp \
-                        entropydecoder.hpp \
-                        entropyencoder.hpp \
                         lasreaditemraw.hpp \
                         lasreaditem.hpp \
                         laswriteitem.hpp \
