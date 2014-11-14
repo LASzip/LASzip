@@ -146,6 +146,14 @@ Software with native LAZ support
 
 Download LAZ data
 ------------------------------------------------------------------------------
+* USGS `LiDAR bulk download <ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/NED/LPC/projects/>`_ such as
+
+  * `AK_BrooksCamp_2012 <ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/NED/LPC/projects/AK_BrooksCamp_2012/laz/>`_, `AK_Coastal_2009 <ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/NED/LPC/projects/AK_Coastal_2009/laz/>`_, `AK_Fairbanks-NSBorough_2010 <ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/NED/LPC/projects/AK_Fairbanks-NSBorough_2010/laz/>`_, `AK_Juneau_2012 <ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/NED/LPC/projects/AK_Juneau_2012/laz/>`_, ...
+
+  * `CA_AlamedaCo_2006 <ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/NED/LPC/projects/CA_AlamedaCo_2006/laz/>`_, `CA-OR_KlamathRiver_2010 <ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/NED/LPC/projects/CA-OR_KlamathRiver_2010/laz/>`_, `CA-NV_LakeTahoe_2010 <ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/NED/LPC/projects/CA-NV_LakeTahoe_2010/laz/>`_, `CA_CanyonFire_2007 <ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/NED/LPC/projects/CA_CanyonFire_2007/laz/>`_, ...
+
+  * `... many more here ... <ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/NED/LPC/projects/>`_
+
 * Sonoma County LiDAR from `SonomaVegMap Project <http://sonomavegmap.org/data-downloads/>`_
 * WMS served LiDAR by `Government of La Rioja in Spain <http://rapidlasso.com/2014/04/08/lidar-downloads-via-wms/>`_
 * `Puget Sound LiDAR Consortium <http://pugetsoundlidar.ess.washington.edu/lidardata/>`_
