@@ -4,7 +4,7 @@
 LASzip - free and lossless LiDAR compression
 ******************************************************************************
 
-LASzip - a free product of `rapidlasso GmbH <http://rapidlasso.com/>`_ - quickly turns bulky LAS files into compact LAZ files without information loss. Terabytes of LAZ data are now available for free download from various agencies making LASzip, winner of the 2012 Geospatial World Forum `Technology Innovation Award <http://www.facebook.com/photo.php?fbid=370334049695712>`_ in LiDAR Processing and runner-up for `innovative product at INTERGEO 2012 <http://gispoint.de/wia.html>`_, the de-facto standard for LiDAR compression.
+LASzip - a free open source product of `rapidlasso GmbH <http://rapidlasso.com/>`_ - quickly turns bulky LAS files into compact LAZ files without information loss. Terabytes of LAZ data are now available for free download from various agencies making LASzip, winner of the 2012 Geospatial World Forum `Technology Innovation Award <http://www.facebook.com/photo.php?fbid=370334049695712>`_ in LiDAR Processing and runner-up for `innovative product at INTERGEO 2012 <http://gispoint.de/wia.html>`_, the de-facto standard for LiDAR compression.
 
 
 Gold Sponsors (USD 10,000 or more)
@@ -133,10 +133,12 @@ Software with native LAZ support
 * OPALS by `TU Vienna <http://www.ipf.tuwien.ac.at/opals/>`_
 * Scop++ (5.5.3 and up) by `Trimble and TU Vienna <http://photo.geo.tuwien.ac.at/software/scop/>`_
 * DTMaster (6.0 and up) by `Trimble INPHO <http://www.trimble.com/imaging/inpho/geo-modeling.aspx?dtID=DTMaster>`_
+* Pythagoras by `Pythagoras BVBA <http://www.pythagoras.net/>`_
 * EspaEngine by `ESPA Systems <http://www.espasystems.fi>`_
 * Blaze Point Cloud and Blaze Terra by `Eternix Ltd <http://eternix.co.il/>`_
 * ReportGen (2.9.0 and up), by `PDF3D <http://pdf3d.com/news/PDF3D_LiDAR_PressRelease_20dec2013.php>`_
 * OrbitGIS by `Orbit <http://www.orbitgis.com/>`_
+* PFMABE Software by `PFMABE Software <http://pfmabe.software/>`_
 * K2Vi by `AAM Group <http://www.aamgroup.com/services-and-technology/3d-gis>`_
 * Card/1 (8.4 and up) by `IB&T GmbH <http://www.card-1.com/en/product/the-system-card1/>`_
 * LiS by `LASERDATA <http://www.laserdata.at/>`_
