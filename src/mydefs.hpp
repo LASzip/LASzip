@@ -13,7 +13,7 @@
 
   COPYRIGHT:
 
-    (c) 2005-2013, martin isenburg, rapidlasso - fast tools to catch reality
+    (c) 2005-2015, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -53,7 +53,7 @@ typedef long long          I64;
 typedef float              F32;
 typedef double             F64;
 
-#if defined(_MSC_VER) && (_MSC_VER < 1300)
+#if defined(_MSC_VER) && (_MSC_VER < 1300) || defined (__MINGW32__)
 typedef int                BOOL;
 #else
 typedef bool               BOOL;
