@@ -126,6 +126,8 @@ Software with native LAZ support
 * plas.io 3D Web Viewer by `Hobu Inc. <http://plas.io/>`_
 * RiProcess by `RIEGL LMS GmbH <http://www.riegl.com/>`_
 * CloudPro by `Leica Geosystems AG <http://www.leica-geosystems.com/en/About-us-News_360.htm?id=5380>`_
+* Optech LMS (3.0 and up) by `Teledyne Optech <http://www.teledyneoptech.com/index.php/product/optech-lms/>`_
+* Leica LIDAR Survey Studio LSS (2.2 and up) by `Leica Geosystems AG <http://www.leica-geosystems.com/en/About-us-News_360.htm?id=5960>`_
 * FUSION (3.40 and up) by `Bob McGaughey of the USDA <http://forsys.cfr.washington.edu/fusion/fusionlatest.html/>`_
 * ZEB1 by `3D Laser Mapping <http://www.3dlasermapping.com/index.php/products/handheld-mapping>`_
 * OCAD (11.4.0 and up) by `OCAD Inc. <http://ocad.com/blog/2013/11/ocad-11-4-0-supports-laz-files/>`_
