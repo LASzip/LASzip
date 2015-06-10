@@ -133,7 +133,11 @@ Software with native LAZ support
 * OCAD (11.4.0 and up) by `OCAD Inc. <http://ocad.com/blog/2013/11/ocad-11-4-0-supports-laz-files/>`_
 * Gexcel R3 by `Gexcel <http://www.gexcel.it/en/software/>`_
 * Voyager (1.3 and up) by `Voyager GIS <http://www.voyagergis.com/>`_
+* LiMON Viewer by `Dephos Software http://www.limon.eu/products/compare-versions/>`_
 * Scanopy by `imagination <http://www.imagination.at/>`_
+* QINSy - Quality Integrated Navigation System by `Quality Positioning Services (QPS) B.V. <http://www.qps.nl/display/qinsy>`_
+* Potree Converter (1.0 and up) by `Markus Schuetz <http://github.com/potree/PotreeConverter>`_
+* FLAIM by `Fugro GeoServices B.V. <http://www.fugro.nl/werkgebieden/geo-informatie/geo-ict/software-productlijnen/flaim>`_
 * ScanLook by `LiDAR USA <http://www.lidarusa.com/>`_
 * GRASS GIS (7.0 and up) by `Open Source Geospatial Foundation (OSGeo) <http://grass.osgeo.org/>`_
 * OPALS by `TU Vienna <http://www.ipf.tuwien.ac.at/opals/>`_
