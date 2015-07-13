@@ -15,8 +15,8 @@ Often only a subset of all the attributes of a LiDAR return stored in the LAS fo
 
 **2. Re-writeable Flags and Classification**
 
-The 
+Most of the point attribute of an LAS file will never change --- *at laest* once the LiDAR was published. The xyz coordinates are final once the LiDAR flightlines were aligned, the return counts are fix, the intensities are direct measured, and the original GPS time stamps and the point source IDs should be preserved for posterity. What often does change, however, are the point classifications into "ground", "building", "noise", or "water" points, as well as the flags describing which points are to be "withheld" or which ones are part of the not always desired "overlap".  This is the second far reaching new feature of the native LAS 1.4 extension of LASzip: based on mechanisms that have already been field-tested as part of the "LASlayers" effort the new LASzip will support overriding the existing classifications or flags with a new layer of values. 
 
 **3. Specification Document**
 
-The LASzip compressor is currently only documented via an open source reference implementation. In order to create LASzip compressors and decompressors in otherprogramming languages it is currently necessary to step through the (reasonably well) C++ source code. We hope that funds can be made available that allow us to hire technical writers who can create a proper specification document that describes the open LASzip compressed LiDAR format.
+The LASzip compressor is currently only documented via an open source reference implementation in C++. In order to create LASzip compressors and decompressors in other programming languages it is currently necessary to step through the (reasonably well documented) C++ source code. We hope that funds can be made available that allow us to hire technical writers who can create a proper specification document that describes the open LASzip compressed LiDAR format.
