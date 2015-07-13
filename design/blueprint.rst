@@ -9,7 +9,8 @@ In particular we invite ESRI to tell us what exactly they need from the new "nat
 
 new feature for native LAS 1.4 extension
 -------- 
-1. selective decompression:
+**1. Selective Decompression:**
+
 Often only a subset of all the attributes of a LiDAR return stored in the LAS format are actually needed by an application. Currently all points attributes have to be read and decompressed by an application opening a LAS or a LAZ file. This is the most far reaching new feature of the native LAS 1.4 extension of LASzip: for the new point types, it will allow reading and decompressing only those points attributes that are relevant to the application. A Web-based LiDAR viewer, for example, may  only have to download, parse, and decompress the xyz coordinates and the intensities of the point cloud and a cloud-based service for DTM generation will only have to download, parse, and decompress the xyz coordinates and the classification values.
 
 2. re-writeable flags and classification
