@@ -19,7 +19,7 @@ Most of the point attribute of an LAS file will never change --- *at laest* once
 
 **3. Full Integration of Spatial Indexing**
 
-Already supported in the existing LASzip compressor as an optional item this will become a mandatory part of every new LAZ file that is written.
+Already supported in the existing LASzip compressor as an optional item this will become a mandatory part of every new LAZ file that is written. Area-of-interest queries are also a form or "selective decompression" and require two things: Knowledge where in the file the points that fall into the interesting area are located (e.g. in the seventeen point intervals [5236312,5236312], [6523634,6634523], ....) and the ability to seek in the compressed file and decompress only those point intervals. The letter has been an integral part of the LASzip compressor since day one as this was one of the core features sponsored by USACE. The first has been added after little by little to LASzip in order not to disrupt anything since the concept (i.e. LASindex and tiny LAX files) was first introduced at ELMF in 2012. The concept needs to be reworked slightly to accommodate files with over 4 billion points.
 
 **4. Attach-able Attributes (optional)**
 
