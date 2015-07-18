@@ -6,7 +6,7 @@ This document summarizes new features and implementation detail that will be par
 
 We should point out that the current `LASzip compressor <http://laszip.org>`_ can already handle (most) LAS 1.4 files via the `"LAS 1.4 compatibility mode" <http://rapidlasso.com/2014/10/06/rapidlasso-announces-laszip-compatibility-mode-for-las-1-4/>`_ that was sponsored in part by NOAA, Quantum Spatial, and Trimble. However, LAS 1.4 files are likely to stay with us for a long long time. The "native extension" of LASzip seeks to exploit the "natural break" in the lineage of the LAS specification to add entirely new features to the compressor that allow better exploitation of LAS files in the cloud or on Web portals as originally planned and suggested in the `joint proposal <http://rapidlasso.com/2014/04/01/esri-and-rapidlasso-develop-joint-lidar-compressor/>`_.
 
-Therefore we invite in particular ESRI to tell us what exactly they want us to include in the new "native extension" of `LASzip <http://laszip.org>`_. In the past ESRI has claimed to have identified very particular needs for processing LiDAR in the cloud that have warranted the development of their competing closed standard also know as the `"LAZ clone" <http://rapidlasso.com/2015/02/22/lidar-las-asprs-esri-and-the-laz-clone/>`_. The resulting format fragmentation has `upset <http://rapidlasso.com/2014/11/06/keeping-esri-honest/>`_ the geospatial community and led to an `Open Letter <http://wiki.osgeo.org/wiki/LIDAR_Format_Letter>`_ by OSGeo that has asked ESRI to change their course and work with the LiDAR users to avoid a format war. In parallel to the `resulting mediatation <http://wiki.osgeo.org/wiki/LIDAR_Format_Letter>`_ that is under way via the Open Geospatial Consortium (OGC) we are intending to progress towards a set of useful features for compressing LAS 1.4 content in the open and transparent manner we desire, yet at the speed that the needs of our industry demands. So here we go:
+Therefore we invite in particular ESRI to tell us what exactly they want us to include in the new "native extension" of `LASzip <http://laszip.org>`_. In the past ESRI has claimed to have identified very particular needs for processing LiDAR in the cloud that have warranted the development of their competing closed standard also know as the `"LAZ clone" <http://rapidlasso.com/2015/02/22/lidar-las-asprs-esri-and-the-laz-clone/>`_. The resulting format fragmentation has `upset <http://rapidlasso.com/2014/11/06/keeping-esri-honest/>`_ the geospatial community and led to an `Open Letter <http://wiki.osgeo.org/wiki/LIDAR_Format_Letter>`_ by OSGeo that has asked ESRI to change their course and work with the LiDAR users to avoid a format war. In parallel to the `resulting mediatation <http://wiki.osgeo.org/wiki/LIDAR_Format_Letter>`_ that is under way via the Open Geospatial Consortium (OGC) we are intending to progress towards a set of useful features for compressing LAS 1.4 content in the open and transparent manner we desire, yet at the speed that the needs of our industry demands. Here we go:
 
 ..
 
@@ -14,7 +14,7 @@ Therefore we invite in particular ESRI to tell us what exactly they want us to i
 
 ..
 
-Maybe the things that ESRI has added to their "optimized LAS" coder are already on our todo list. So as we wait for ESRI's answer we can already start fleshing out the feature set that the rest of the community wants to see in the new LASzip
+Maybe the things that ESRI has added to their "optimized LAS" coder are already on our todo list. So as we wait for ESRI's answer we can already start fleshing out the feature set that the rest of the community wants to see in the new LASzip:
 
 New Features
 -------- 
@@ -41,3 +41,5 @@ Selective decompression - or more importantly selective download - of large file
 **6. Specification Document**
 
 The LASzip compressor is currently only documented via an open source reference implementation in C++. In order to create LASzip compressors and decompressors in other programming languages it is currently necessary to step through the (reasonably well documented) C++ source code. We hope that funds can be made available that allow us to hire technical writers who can create a proper specification document that describes the open LASzip compressed LiDAR format.
+
+Please join us to continue the already on-going discussion in the `"LAS room" <http://groups.google.com/group/lasroom>`_ where we will finalize the feature set in an open censensus process.
