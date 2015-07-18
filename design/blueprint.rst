@@ -1,6 +1,5 @@
-===== 
 LASzip for LAS 1.4 (native extension)
-===== 
+========
 a working document 
 -------- 
 This document summarizes new features and implementation detail that will be part of the "native extension" of the LASzip compressor for the new point types 6 to 10 of the LAS 1.4 specification. This includes feedback from our `"Open Call for Input" <http://rapidlasso.com/2014/01/21/call-for-input-on-compression-of-las-1-4/>`_ from early 2014 as well as ideas from out initial proposal for a joint `LAS 1.4 compressor with ESRI <http://rapidlasso.com/2014/04/01/esri-and-rapidlasso-develop-joint-lidar-compressor/>`_ that was presented in form of a widely circulated and loudly applauded `April Fools' Day prank <http://rapidlasso.com/2014/04/01/esri-and-rapidlasso-develop-joint-lidar-compressor/>`_ after months of direct communication with ESRI had failed to produce any useful progress.
@@ -11,11 +10,13 @@ Therefore we invite in particular ESRI to tell us what exactly they want us to i
 
 ..
 
-  Dear ESRI, what features would you like in the native LAS 1.4 extension of LASzip?
+  Dear ESRI, please tell us what features would you like in the native LAS 1.4 extension of LASzip? What exactly are the key differences of your own "optimized LAS" that are currently missing in LASzip?
 
 ..
 
-New Features for the native LAS 1.4 extension
+Maybe the things that ESRI has added to their "optimized LAS" coder are already on our todo list. So as we wait for ESRI's answer we can already start fleshing out the feature set that the rest of the community wants to see in the new LASzip
+
+New Features
 -------- 
 **1. Selective Decompression:**
 
