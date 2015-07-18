@@ -9,7 +9,7 @@ We should point out that the current `LASzip compressor <http://laszip.org>`_ ca
 
 Therefore we invite in particular ESRI to tell us what exactly they want us to include in the new "native extension" of `LASzip <http://laszip.org>`_. In the past ESRI has claimed to have identified very particular needs for processing LiDAR in the cloud that have warranted the development of their competing closed standard also know as the `"LAZ clone" <http://rapidlasso.com/2015/02/22/lidar-las-asprs-esri-and-the-laz-clone/>`_. The resulting format fragmentation has `upset <http://rapidlasso.com/2014/11/06/keeping-esri-honest/>`_ the geospatial community and led to an `Open Letter <http://wiki.osgeo.org/wiki/LIDAR_Format_Letter>`_ by OSGeo that has asked ESRI to change their course and work with the LiDAR users to avoid a format war. In parallel to the `resulting mediatation <http://wiki.osgeo.org/wiki/LIDAR_Format_Letter>`_ that is under way via the Open Geospatial Consortium (OGC) we are intending to progress towards a set of useful features for compressing LAS 1.4 content in the open and transparent manner we desire, yet at the speed that the needs of our industry demands. So here we go:
 
-.. warning:: Dear ESRI, what features would you like in the native LAS 1.4 extension of LASzip?
+.. seealso:: Dear ESRI, what features would you like in the native LAS 1.4 extension of LASzip?
 
 New Features for the native LAS 1.4 extension
 -------- 
