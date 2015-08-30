@@ -12,6 +12,10 @@ Gold Sponsors (USD 10,000 or more)
 * `CRREL - U.S. Army Corps of Engineers <http://www.crrel.usace.army.mil/>`_ 
 * `Digital Coast - NOAA Coastal Services Center <http://www.csc.noaa.gov/digitalcoast/>`_ 
 
+Silver Sponsors (USD 5,000 or more)
+------------------------------------------------------------------------------
+* `RIEGL Laser Measurement Systems <http://riegl.com/>`_ 
+
 Bronze Sponsors (USD 2,000 or more)
 ------------------------------------------------------------------------------
 * `Quantum Spatial Inc. <http://quantumspatial.com/>`_ 
