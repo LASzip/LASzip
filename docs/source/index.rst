@@ -138,6 +138,8 @@ Software with native LAZ support
 * OCAD (11.4.0 and up) by `OCAD Inc. <http://ocad.com/blog/2013/11/ocad-11-4-0-supports-laz-files/>`_
 * Gexcel R3 by `Gexcel <http://www.gexcel.it/en/software/>`_
 * Voyager (1.3 and up) by `Voyager GIS <http://www.voyagergis.com/>`_
+* LIDAR Analyst (5.2 or 6.0 and up) by `TEXTRON Systems <http://www.textronsystems.com/>`_
+* TerraScan, TerraMatch, TerraPhoto, and TerraSlave (015.xxx and up) by `Terrasolid <http://www.terrasolid.com/>`_
 * LiMON Viewer by `Dephos Software <http://www.limon.eu/products/compare-versions/>`_
 * Scanopy by `imagination <http://www.imagination.at/>`_
 * QINSy - Quality Integrated Navigation System by `Quality Positioning Services (QPS) B.V. <http://www.qps.nl/display/qinsy>`_
