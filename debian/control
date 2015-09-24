@@ -7,7 +7,7 @@ Build-Depends: debhelper (>= 9), cmake
 
 Package: liblaszip6.0.0
 Architecture: any
-Depends: ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Turn bulky LAS files into compact LAZ files without information loss
  A free, open source point cloud compression library. This packaging is mostly
  for PDAL's (http://www.pdal.io) Travis PPA
