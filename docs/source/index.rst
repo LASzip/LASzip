@@ -142,6 +142,13 @@ Software with native LAZ support
 * TerraScan, TerraMatch, TerraPhoto, and TerraSlave (015.xxx and up) by `Terrasolid <http://www.terrasolid.com/>`_
 * LiMON Viewer by `Dephos Software <http://www.limon.eu/products/compare-versions/>`_
 * Scanopy by `imagination <http://www.imagination.at/>`_
+* WinGeoTransform by `KLT Assoc <http://www.kltassoc.com/>`_
+* BayesMap by `BayesMap Solutions, LLC <http://bayesmap.com/>`_
+* Point Cloud Technology by `Point Cloud Technology, GmbH <http://www.pointcloudtechnology.com/>`_
+* Scalypso by `Ingenieurbüro Dr.-Ing. R. König <http://www.scalypso.com/>`_
+* Photogrammetry Software by `Menci Software <http://www.menci.com/>`_
+* TopMDT by `Aplitop <http://www.aplitop.com/>`_
+* PhotoMesh by `SmartEarth <http://www.skylineglobe.cn/>`_
 * QINSy - Quality Integrated Navigation System by `Quality Positioning Services (QPS) B.V. <http://www.qps.nl/display/qinsy>`_
 * Potree Converter (1.0 and up) by `Markus Schuetz <http://github.com/potree/PotreeConverter>`_
 * FLAIM by `Fugro GeoServices B.V. <http://www.fugro.nl/werkgebieden/geo-informatie/geo-ict/software-productlijnen/flaim>`_
