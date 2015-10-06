@@ -145,7 +145,7 @@ Software with native LAZ support
 * WinGeoTransform by `KLT Assoc <http://www.kltassoc.com/>`_
 * BayesStripAlign by `BayesMap Solutions, LLC <http://bayesmap.com/>`_
 * Point Cloud Technology by `Point Cloud Technology, GmbH <http://www.pointcloudtechnology.com/>`_
-* Scalypso by `Ingenieurbüro Dr.-Ing. R. König <http://www.scalypso.com/>`_
+* Scalypso by `Ingenieurbuero Dr.-Ing. R. Koenig <http://www.scalypso.com/>`_
 * Photogrammetry Software by `Menci Software <http://www.menci.com/>`_
 * TcpMDT by `Aplitop <http://www.aplitop.com/>`_
 * PhotoMesh by `SmartEarth <http://www.skylineglobe.cn/>`_
