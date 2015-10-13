@@ -140,6 +140,8 @@ Software with native LAZ support
 * Voyager (1.3 and up) by `Voyager GIS <http://www.voyagergis.com/>`_
 * LIDAR Analyst (5.2 or 6.0 and up) by `TEXTRON Systems <http://www.textronsystems.com/>`_
 * TerraScan, TerraMatch, TerraPhoto, and TerraSlave (015.xxx and up) by `Terrasolid <http://www.terrasolid.com/>`_
+* Carlson (2016 and up) by `Carlson Software <http://carlsonsw.com/>`_
+* Remote Sensing Software by `Joanneum Research Forschungsgesellschaft mbH <http://www.remotesensing.at/en/remote-sensing-software.html>`_ 
 * LiMON Viewer by `Dephos Software <http://www.limon.eu/products/compare-versions/>`_
 * Scanopy by `imagination <http://www.imagination.at/>`_
 * WinGeoTransform by `KLT Assoc <http://www.kltassoc.com/>`_
