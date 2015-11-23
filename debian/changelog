@@ -1,6 +1,5 @@
-laszip (v2.2.0-129) trusty; urgency=low
+laszip (2.2.0-1) precise; urgency=medium
 
-  * First attempt to package
+  * Initial release.
 
- -- Howard Butler <howard@hobu.co>  Mon, 23 Nov 2015 13:21:57 +0000
-
+ -- Pete Gadomski <pete.gadomski@gmail.com>  Thu, 24 Sep 2015 07:08:04 -0500
