@@ -1,0 +1,6 @@
+laszip (v2.2.0-129) trusty; urgency=low
+
+  * First attempt to package
+
+ -- Howard Butler <howard@hobu.co>  Mon, 23 Nov 2015 13:21:57 +0000
+
