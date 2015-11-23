@@ -1,0 +1,8 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --builddirectory=build
+
+override_dh_auto_configure:
+	CC=gcc-4.7 CXX=g++-4.7 dh_auto_configure -- \
+	   -DCMAKE_BUILD_TYPE=Release
