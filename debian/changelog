@@ -1,3 +1,9 @@
+laszip (2.2.0-2) trusty; urgency=medium
+
+  * Trusty build
+
+ -- Howard Butler <howard@hobu.co>  Mon, 23 Nov 2015 07:08:04 -0500
+
 laszip (2.2.0-1) precise; urgency=medium
 
   * Initial release.
