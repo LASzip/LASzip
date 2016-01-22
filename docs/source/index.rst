@@ -167,6 +167,7 @@ Software with native LAZ support
 * PFMABE Software by `PFMABE Software <http://pfmabe.software/>`_
 * K2Vi by `AAM Group <http://www.aamgroup.com/services-and-technology/3d-gis>`_
 * Card/1 (8.4 and up) by `IB&T GmbH <http://www.card-1.com/en/product/the-system-card1/>`_
+* SceneMark by `XtSense GmbH <http://scenemark.com/>`_
 * LiS by `LASERDATA <http://www.laserdata.at/>`_
 * PointCloudViz by `mirage <http://www.mirage-tech.com/>`_
 * Geoverse by `euclideon <http://www.euclideon.com/>`_
