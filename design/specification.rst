@@ -1,39 +1,101 @@
 As before the LiDAR points are compressed in completely independent chunks that default to 50,000 points per chunk. Each chunk can be decompressed "on its own" once the start byte is know. As before the first point of each chunk is stored raw. The attributes of all following points are broken into several layers. Only the first layer containing the x and y coordinates (and a few pieces of information) is mandatory to be read  mandartory. The remaining layers containing independently useful attributes such as elevation, intensity, GPS times, colors, point source ID, classifications and flags do not necessarily need to be read from disk and be decompressed.
 
+LAZ File Layout:
+___-------------
+LASheader
+LASzip VLR
+First Chunk
+[...]
+Last Chunk
+Chunk Table
+EVLRs
+LASindex EVLR
+LASlayers EVLR (maybe in the future for edits of classifications / flags)
+
 Chunk Layout:
 -------------
 1) Raw point [30 - 68 (or more) bytes]
-2) Number of remaining points [4 bytes]
-3) XY layer
-  a) Number of bytes in XY layer [4 bytes]
-  b) bytes for XY layer
-4) Z layer
-  a) Number of bytes in Z layer [4 bytes]
-  b) bytes for Z layer
-5) intensity layer
-  a) Number of bytes in intensity layer [4 bytes]
-  b) bytes for intensity layer
-6) classification and flags layer
-  a) Number of bytes in classification and flags layer [4 bytes]
-  b) bytes for classification and flags layer
-7) point source ID layer
-  a) Number of bytes in point source ID layer [4 bytes]
-  b) bytes for point source ID layer
-8) user data layer
-  a) Number of bytes in user data layer [4 bytes]
-  b) bytes for user data layer
-9) GPS time stamp layer
-  a) Number of bytes in GPS time stamp layer [4 bytes]
-  b) bytes for GPS time stamp layer
-10) RGB layer
-  a) Number of bytes in RGB layer [4 bytes]
-  b) bytes for RGB layer
-11) NIR layer
-  a) Number of bytes in NIR layer [4 bytes]
-  b) bytes for NIR layer
-12) WavePacket layer
-  a) Number of bytes in WavePacket layer [4 bytes]
-  b) bytes for WavePacket layer
-13) ExtraBytes layer
-  a) Number of bytes in ExtraBytes layer [4 bytes]
-  b) bytes for ExtraBytes layer
+2) Numbers and Bytes
+  + Number of remaining points [4 bytes]
+  + Number of bytes (maybe compressed)
+     - XYZ and return type layer [4 bytes]
+     - classification and flags layer [4 bytes]
+     - intensity layer [4 bytes]
+     - point source ID layer [4 bytes]
+     - scan angle layer [4 bytes]
+     - user data layer [4 bytes]
+     - GPS time stamp layer [4 bytes]
+     - RGB layer [4 bytes]
+     - NIR layer [4 bytes]
+     - WavePacket layer [4 bytes]
+     - "Extra Bytes" layer [4 bytes]
+3) Layers
+     - XYZ and return type layer
+     - classification and flags layer
+     - intensity layer
+     - point source ID layer
+     - scan angle layer
+     - user data layer
+     - GPS time stamp layer
+     - RGB layer
+     - NIR layer
+     - WavePacket layer
+     - "Extra Bytes" layer
+
+Compression of XYZ and return layer
+-----------------------------------
+Due to the new scanner channel it is *crucial* to first encode whether a point is from the same and if not from which other scanner channel so that the correct context can be used for all subsequent predictions. Because of the strong correlation between GPS times, return numbers and number of returns awith each other and with the differences in XY we include them here as well.
+
+* scanner channel different from previous point (yes / no)
+* GPS time stamp different from previous point of same scanner channel (yes / no)
+* number of returns different of same scanner channel (yes / no)
+* return number different of same scanner channel (yes / no)
+
+This is turned into one symbol of 4 bits that we compress with either with four or six different contexts
+
+* 4 = based on whether the previous point is single or first/intermediate/last of many.
+* 6 = based on whether the previous point is single, first/last of two, or first/intermediate/last of many.
+
+If the scanner channel is different we compress this 2 bit symbol using the previous scanner channel one of four different contexts. Any following XYZ and attribute prediction based on a previous point is considering the previous point from the *same* scanner channel when such a point exists.
+
+If the number of returns is different we compress it with the previous number of returns (of same scanner channel) as one of sixteen contexts.
+
+If the return number different is different we compress it with the previous return number (of same scanner channel) and the information whether the GPS time stamp is different as one of thirtytwo contexts.
+
+We compress X, Y, and Z similar to how LASzip does it currently (but make all predictions from the previous points from the same scanner channel).
+
+Compression of classification and flags layer
+---------------------------------------------
+Compress the classification based on the context m and the previous value similar to the existing LASzip.
+
+Compression of intensity layer
+------------------------------
+Compress the intensity based on the context m similar to the existing LASzip.
+
+Compression of point source ID layer
+------------------------------
+Compress the point source ID ...
+
+Compression of scan angle layer
+------------------------------
+Compress the scan angle ...
+
+Compression of user data layer
+------------------------------
+Compress the user data layer ...
+
+Compression of RGB layer
+------------------------------
+Compress the RGB layer ...
+
+Compression of NIR layer
+------------------------------
+Compress the NIR layer ...
+
+Compression of WavePacket layer
+------------------------------
+Compress the WavePacket layer ...
+
+Compression of "Extra Bytes" layer
+------------------------------
+Compress the "Extra Bytes" layer ...
