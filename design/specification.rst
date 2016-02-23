@@ -1,17 +1,18 @@
 As before the LiDAR points are compressed in completely independent chunks that default to 50,000 points per chunk. Each chunk can be decompressed "on its own" once the start byte is know. As before the first point of each chunk is stored raw. The attributes of all following points are broken into several layers. Only the first layer containing the x and y coordinates (and a few pieces of information) is mandatory to be read  mandartory. The remaining layers containing independently useful attributes such as elevation, intensity, GPS times, colors, point source ID, classifications and flags do not necessarily need to be read from disk and be decompressed.
-Another new feature in LASzip compression for the new point types of LAS 1.4 is that it will be possible to continously vary the chunk size.
+
+Another new (or rather "revived") feature in LASzip compression for the new point types of LAS 1.4 is that it will be possible to continously vary the chunk size. This in the design of the original LASzip but broke when the file was streamed due to missing access to the per chunk point counts during a streaming read as those were only stored in the chunk table at the end of the LAZ file. This will be fixed by also storing the number of points inside each chunk.
 
 LAZ File Layout:
 ----------------
-LASheader
-LASzip VLR
-First Chunk
-[...]
-Last Chunk
-Chunk Table
-EVLRs
-LASindex EVLR
-LASlayers EVLR (maybe in the future for edits of classifications / flags)
+1) LASheader
+2) LASzip VLR
+3.1) First Chunk
+3.i [...]
+3.n) Last Chunk
+4) Chunk Table
+5) EVLRs
+6) LASindex EVLR
+7) LASlayers EVLR (future feature: for in-place edits of classifications / flags)
 
 Chunk Layout:
 -------------
