@@ -4,15 +4,18 @@ Another new (or rather "revived") feature in LASzip compression for the new poin
 
 LAZ File Layout:
 ----------------
-1) LASheader
-2) LASzip VLR
-3.1) First Chunk
-3.i [...]
-3.n) Last Chunk
-4) Chunk Table
-5) EVLRs
-6) LASindex EVLR
-7) LASlayers EVLR (future feature: for in-place edits of classifications / flags)
+1. LASheader
+2. LASzip VLR
+3. Sequence of n Chunks
+3.1. Chunk 1
+3.2. Chunk 2
+3.3. Chunk 3
+....
+3.n. Chunk n
+4. Chunk Table
+5. EVLRs
+6. LASindex EVLR
+7. LASlayers EVLR (future feature: for in-place edits of classifications / flags)
 
 Chunk Layout:
 -------------
