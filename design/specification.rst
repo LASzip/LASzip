@@ -14,9 +14,10 @@ LAZ File Layout:
    3. Chunk 3
    ....
    n. Chunk n
-4. Chunk Table
+
+4. Chunk Table (chunk starts and point numbers)
 5. EVLRs
-6. LASindex EVLR
+6. LASindex EVLR (optional index)
 7. LASlayers EVLR (future feature: for in-place edits of classifications / flags)
 
 Chunk Layout:
