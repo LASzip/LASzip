@@ -8,11 +8,11 @@ LAZ File Layout:
 1. LASheader
 2. LASzip VLR
 3. Sequence of n Chunks
-3.1. Chunk 1
-3.2. Chunk 2
-3.3. Chunk 3
-....
-3.n. Chunk n
+   1. Chunk 1
+   2. Chunk 2
+   3. Chunk 3
+   ....
+   n. Chunk n
 4. Chunk Table
 5. EVLRs
 6. LASindex EVLR
