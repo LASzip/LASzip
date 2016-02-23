@@ -4,6 +4,7 @@ Another new (or rather "revived") feature in LASzip compression for the new poin
 
 LAZ File Layout:
 ----------------
+
 1. LASheader
 2. LASzip VLR
 3. Sequence of n Chunks
