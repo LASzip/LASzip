@@ -13,7 +13,7 @@
   
   COPYRIGHT:
   
-    (c) 2007-2013, martin isenburg, rapidlasso - tools to catch reality
+    (c) 2007-2015, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -425,22 +425,147 @@ laszip_set_geoascii_params
 };
 
 /*---------------------------------------------------------------------------*/
+typedef laszip_I32 (*laszip_add_attribute_def)
+(
+    laszip_POINTER                     pointer
+    , laszip_U32                       type
+    , const laszip_CHAR*               name
+    , const laszip_CHAR*               description
+    , laszip_F64                       scale
+    , laszip_F64                       offset
+);
+laszip_add_attribute_def laszip_add_attribute_ptr = 0;
+LASZIP_API laszip_I32
+laszip_add_attribute
+(
+    laszip_POINTER                     pointer
+    , laszip_U32                       type
+    , const laszip_CHAR*               name
+    , const laszip_CHAR*               description
+    , laszip_F64                       scale
+    , laszip_F64                       offset
+)
+{
+  if (laszip_add_attribute_ptr)
+  {
+    return (*laszip_add_attribute_ptr)(pointer, type, name, description, scale, offset);
+  }
+  return 1;
+};
+
+/*---------------------------------------------------------------------------*/
 typedef laszip_I32 (*laszip_add_vlr_def)
 (
     laszip_POINTER                     pointer
-    , const laszip_vlr_struct*         vlr
+    , const laszip_CHAR*               user_id
+    , laszip_U16                       record_id
+    , laszip_U16                       record_length_after_header
+    , const laszip_CHAR*               description
+    , const laszip_U8*                 data
 );
 laszip_add_vlr_def laszip_add_vlr_ptr = 0;
 LASZIP_API laszip_I32
 laszip_add_vlr
 (
     laszip_POINTER                     pointer
-    , const laszip_vlr_struct*         vlr
+    , const laszip_CHAR*               user_id
+    , laszip_U16                       record_id
+    , laszip_U16                       record_length_after_header
+    , const laszip_CHAR*               description
+    , const laszip_U8*                 data
 )
 {
   if (laszip_add_vlr_ptr)
   {
-    return (*laszip_add_vlr_ptr)(pointer, vlr);
+    return (*laszip_add_vlr_ptr)(pointer, user_id, record_id, record_length_after_header, description, data);
+  }
+  return 1;
+};
+
+/*---------------------------------------------------------------------------*/
+typedef laszip_I32 (*laszip_remove_vlr_def)
+(
+    laszip_POINTER                     pointer
+    , const laszip_CHAR*               user_id
+    , laszip_U16                       record_id
+);
+laszip_remove_vlr_def laszip_remove_vlr_ptr = 0;
+LASZIP_API laszip_I32
+laszip_remove_vlr
+(
+    laszip_POINTER                     pointer
+    , const laszip_CHAR*               user_id
+    , laszip_U16                       record_id
+)
+{
+  if (laszip_remove_vlr_ptr)
+  {
+    return (*laszip_remove_vlr_ptr)(pointer, user_id, record_id);
+  }
+  return 1;
+};
+
+/*---------------------------------------------------------------------------*/
+typedef laszip_I32 (*laszip_create_spatial_index_def)
+(
+    laszip_POINTER                     pointer
+    , const laszip_BOOL                create
+    , const laszip_BOOL                append
+);
+laszip_create_spatial_index_def laszip_create_spatial_index_ptr = 0;
+LASZIP_API laszip_I32
+laszip_create_spatial_index
+(
+    laszip_POINTER                     pointer
+    , const laszip_BOOL                create
+    , const laszip_BOOL                append
+)
+{
+  if (laszip_create_spatial_index_ptr)
+  {
+    return (*laszip_create_spatial_index_ptr)(pointer, create, append);
+  }
+  return 1;
+};
+
+/*---------------------------------------------------------------------------*/
+typedef laszip_I32 (*laszip_preserve_generating_software_def)
+(
+    laszip_POINTER                     pointer
+    , const laszip_BOOL                preserve
+);
+laszip_preserve_generating_software_def laszip_preserve_generating_software_ptr = 0;
+LASZIP_API laszip_I32
+laszip_preserve_generating_software
+(
+    laszip_POINTER                     pointer
+    , const laszip_BOOL                preserve
+)
+{
+  if (laszip_preserve_generating_software_ptr)
+  {
+    return (*laszip_preserve_generating_software_ptr)(pointer, preserve);
+  }
+  return 1;
+};
+
+/*---------------------------------------------------------------------------*/
+typedef laszip_I32 (*laszip_request_compatibility_mode_def)
+(
+    laszip_POINTER                     pointer
+    , const laszip_BOOL                request
+);
+laszip_request_compatibility_mode_def laszip_request_compatibility_mode_ptr = 0;
+LASZIP_API laszip_I32
+laszip_request_compatibility_mode
+(
+    laszip_POINTER                     pointer
+    , const laszip_BOOL                request
+)
+{
+  if (laszip_request_compatibility_mode_ptr)
+  {
+    return (*laszip_request_compatibility_mode_ptr)(pointer, request);
   }
   return 1;
 };
@@ -488,6 +613,44 @@ laszip_write_point
 };
 
 /*---------------------------------------------------------------------------*/
+typedef laszip_I32 (*laszip_write_indexed_point_def)
+(
+    laszip_POINTER                     pointer
+);
+laszip_write_indexed_point_def laszip_write_indexed_point_ptr = 0;
+LASZIP_API laszip_I32
+laszip_write_indexed_point
+(
+    laszip_POINTER                     pointer
+)
+{
+  if (laszip_write_indexed_point_ptr)
+  {
+    return (*laszip_write_indexed_point_ptr)(pointer);
+  }
+  return 1;
+};
+
+/*---------------------------------------------------------------------------*/
+typedef laszip_I32 (*laszip_update_inventory_def)
+(
+    laszip_POINTER                     pointer
+);
+laszip_update_inventory_def laszip_update_inventory_ptr = 0;
+LASZIP_API laszip_I32
+laszip_update_inventory
+(
+    laszip_POINTER                     pointer
+)
+{
+  if (laszip_update_inventory_ptr)
+  {
+    return (*laszip_update_inventory_ptr)(pointer);
+  }
+  return 1;
+};
+
+/*---------------------------------------------------------------------------*/
 typedef laszip_I32 (*laszip_close_writer_def)
 (
     laszip_POINTER                     pointer
@@ -502,6 +665,27 @@ laszip_close_writer
   if (laszip_close_writer_ptr)
   {
     return (*laszip_close_writer_ptr)(pointer);
+  }
+  return 1;
+};
+
+/*---------------------------------------------------------------------------*/
+typedef laszip_I32 (*laszip_exploit_spatial_index_def)
+(
+    laszip_POINTER                     pointer
+    , const laszip_BOOL                exploit
+);
+laszip_exploit_spatial_index_def laszip_exploit_spatial_index_ptr = 0;
+LASZIP_API laszip_I32
+laszip_exploit_spatial_index
+(
+    laszip_POINTER                     pointer
+    , const laszip_BOOL                exploit
+)
+{
+  if (laszip_exploit_spatial_index_ptr)
+  {
+    return (*laszip_exploit_spatial_index_ptr)(pointer, exploit);
   }
   return 1;
 };
@@ -525,6 +709,58 @@ laszip_open_reader
   if (laszip_open_reader_ptr)
   {
     return (*laszip_open_reader_ptr)(pointer, file_name, is_compressed);
+  }
+  return 1;
+};
+
+/*---------------------------------------------------------------------------*/
+typedef laszip_I32 (*laszip_has_spatial_index_def)
+(
+    laszip_POINTER                     pointer
+    , laszip_BOOL*                     is_compressed
+    , laszip_BOOL*                     is_appended
+);
+laszip_has_spatial_index_def laszip_has_spatial_index_ptr = 0;
+LASZIP_API laszip_I32
+laszip_has_spatial_index
+(
+    laszip_POINTER                     pointer
+    , laszip_BOOL*                     is_compressed
+    , laszip_BOOL*                     is_appended
+)
+{
+  if (laszip_has_spatial_index_ptr)
+  {
+    return (*laszip_has_spatial_index_ptr)(pointer, is_compressed, is_appended);
+  }
+  return 1;
+};
+
+/*---------------------------------------------------------------------------*/
+typedef laszip_I32 (*laszip_inside_rectangle_def)
+(
+    laszip_POINTER                     pointer
+    , laszip_F64                       r_min_x
+    , laszip_F64                       r_min_y
+    , laszip_F64                       r_max_x
+    , laszip_F64                       r_max_y
+    , laszip_BOOL*                     is_empty
+);
+laszip_inside_rectangle_def laszip_inside_rectangle_ptr = 0;
+LASZIP_API laszip_I32
+laszip_inside_rectangle
+(
+    laszip_POINTER                     pointer
+    , laszip_F64                       r_min_x
+    , laszip_F64                       r_min_y
+    , laszip_F64                       r_max_x
+    , laszip_F64                       r_max_y
+    , laszip_BOOL*                     is_empty
+)
+{
+  if (laszip_inside_rectangle_ptr)
+  {
+    return (*laszip_inside_rectangle_ptr)(pointer, r_min_x, r_min_y, r_max_x, r_max_y, is_empty);
   }
   return 1;
 };
@@ -563,6 +799,26 @@ laszip_read_point(
   if (laszip_read_point_ptr)
   {
     return (*laszip_read_point_ptr)(pointer);
+  }
+  return 1;
+}
+
+/*---------------------------------------------------------------------------*/
+typedef laszip_I32 (*laszip_read_inside_point_def)
+(
+    laszip_POINTER                     pointer
+    , laszip_BOOL*                     is_done
+);
+laszip_read_inside_point_def laszip_read_inside_point_ptr = 0;
+LASZIP_API laszip_I32
+laszip_read_inside_point(
+    laszip_POINTER                     pointer
+    , laszip_BOOL*                     is_done
+)
+{
+  if (laszip_read_inside_point_ptr)
+  {
+    return (*laszip_read_inside_point_ptr)(pointer, is_done);
   }
   return 1;
 }
@@ -695,8 +951,33 @@ laszip_I32 laszip_load_dll()
      FreeLibrary(laszip_HINSTANCE);
      return 1;
   }
+  laszip_add_attribute_ptr = (laszip_add_attribute_def)GetProcAddress(laszip_HINSTANCE, "laszip_add_attribute");
+  if (laszip_add_attribute_ptr == NULL) {
+     FreeLibrary(laszip_HINSTANCE);
+     return 1;
+  }
   laszip_add_vlr_ptr = (laszip_add_vlr_def)GetProcAddress(laszip_HINSTANCE, "laszip_add_vlr");
   if (laszip_add_vlr_ptr == NULL) {
+     FreeLibrary(laszip_HINSTANCE);
+     return 1;
+  }
+  laszip_remove_vlr_ptr = (laszip_remove_vlr_def)GetProcAddress(laszip_HINSTANCE, "laszip_remove_vlr");
+  if (laszip_remove_vlr_ptr == NULL) {
+     FreeLibrary(laszip_HINSTANCE);
+     return 1;
+  }
+  laszip_create_spatial_index_ptr = (laszip_create_spatial_index_def)GetProcAddress(laszip_HINSTANCE, "laszip_create_spatial_index");
+  if (laszip_create_spatial_index_ptr == NULL) {
+     FreeLibrary(laszip_HINSTANCE);
+     return 1;
+  }
+  laszip_preserve_generating_software_ptr = (laszip_preserve_generating_software_def)GetProcAddress(laszip_HINSTANCE, "laszip_preserve_generating_software");
+  if (laszip_preserve_generating_software_ptr == NULL) {
+     FreeLibrary(laszip_HINSTANCE);
+     return 1;
+  }
+  laszip_request_compatibility_mode_ptr = (laszip_request_compatibility_mode_def)GetProcAddress(laszip_HINSTANCE, "laszip_request_compatibility_mode");
+  if (laszip_request_compatibility_mode_ptr == NULL) {
      FreeLibrary(laszip_HINSTANCE);
      return 1;
   }
@@ -710,13 +991,38 @@ laszip_I32 laszip_load_dll()
      FreeLibrary(laszip_HINSTANCE);
      return 1;
   }
+  laszip_write_indexed_point_ptr = (laszip_write_indexed_point_def)GetProcAddress(laszip_HINSTANCE, "laszip_write_indexed_point");
+  if (laszip_write_indexed_point_ptr == NULL) {
+     FreeLibrary(laszip_HINSTANCE);
+     return 1;
+  }
+  laszip_update_inventory_ptr = (laszip_update_inventory_def)GetProcAddress(laszip_HINSTANCE, "laszip_update_inventory");
+  if (laszip_update_inventory_ptr == NULL) {
+     FreeLibrary(laszip_HINSTANCE);
+     return 1;
+  }
   laszip_close_writer_ptr = (laszip_close_writer_def)GetProcAddress(laszip_HINSTANCE, "laszip_close_writer");
   if (laszip_close_writer_ptr == NULL) {
      FreeLibrary(laszip_HINSTANCE);
      return 1;
   }
+  laszip_exploit_spatial_index_ptr = (laszip_exploit_spatial_index_def)GetProcAddress(laszip_HINSTANCE, "laszip_exploit_spatial_index");
+  if (laszip_exploit_spatial_index_ptr == NULL) {
+     FreeLibrary(laszip_HINSTANCE);
+     return 1;
+  }
   laszip_open_reader_ptr = (laszip_open_reader_def)GetProcAddress(laszip_HINSTANCE, "laszip_open_reader");
   if (laszip_open_reader_ptr == NULL) {
+     FreeLibrary(laszip_HINSTANCE);
+     return 1;
+  }
+  laszip_has_spatial_index_ptr = (laszip_has_spatial_index_def)GetProcAddress(laszip_HINSTANCE, "laszip_has_spatial_index");
+  if (laszip_has_spatial_index_ptr == NULL) {
+     FreeLibrary(laszip_HINSTANCE);
+     return 1;
+  }
+  laszip_inside_rectangle_ptr = (laszip_inside_rectangle_def)GetProcAddress(laszip_HINSTANCE, "laszip_inside_rectangle");
+  if (laszip_inside_rectangle_ptr == NULL) {
      FreeLibrary(laszip_HINSTANCE);
      return 1;
   }
@@ -727,6 +1033,11 @@ laszip_I32 laszip_load_dll()
   }
   laszip_read_point_ptr = (laszip_read_point_def)GetProcAddress(laszip_HINSTANCE, "laszip_read_point");
   if (laszip_read_point_ptr == NULL) {
+     FreeLibrary(laszip_HINSTANCE);
+     return 1;
+  }
+  laszip_read_inside_point_ptr = (laszip_read_inside_point_def)GetProcAddress(laszip_HINSTANCE, "laszip_read_inside_point");
+  if (laszip_read_inside_point_ptr == NULL) {
      FreeLibrary(laszip_HINSTANCE);
      return 1;
   }

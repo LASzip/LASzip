@@ -13,7 +13,7 @@
   
   COPYRIGHT:
   
-    (c) 2007-2013, martin isenburg, rapidlasso - tools to catch reality
+    (c) 2007-2015, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -24,6 +24,12 @@
   
   CHANGE HISTORY:
   
+    23 September 2015 -- correct update of bounding box and counters from inventory on closing
+    22 September 2015 -- bug fix for not overwriting description of pre-existing "extra bytes"
+    5 September 2015 -- "LAS 1.4 compatibility mode" now allows pre-existing "extra bytes"
+    3 August 2015 -- incompatible DLL change for QSI-sponsored "LAS 1.4 compatibility mode"
+    8 July 2015 -- adding support for NOAA-sponsored "LAS 1.4 compatibility mode"
+    1 April 2015 -- adding exploitation and creation of spatial indexing information 
     8 August 2013 -- added laszip_get_coordinates() and laszip_set_coordinates()
     6 August 2013 -- added laszip_auto_offset() and laszip_check_for_integer_overflow()
     31 July 2013 -- added laszip_get_point_count() for FUSION integration
@@ -62,25 +68,11 @@ typedef int                laszip_BOOL;
 typedef unsigned char      laszip_U8;
 typedef unsigned short     laszip_U16;
 typedef unsigned int       laszip_U32;
-
-#if defined(_MSC_VER) && (_MSC_VER < 1300)
-#define LZ_WIN32_VC6
 typedef unsigned __int64   laszip_U64;
-#else
-typedef unsigned long long laszip_U64;
-#endif
-
 typedef char               laszip_I8;
 typedef short              laszip_I16;
 typedef int                laszip_I32;
-
-#if defined(_MSC_VER) && (_MSC_VER < 1300)
-#define LZ_WIN32_VC6
 typedef __int64            laszip_I64;
-#else
-typedef long long laszip_I64;
-#endif
-
 typedef char               laszip_CHAR;
 typedef float              laszip_F32;
 typedef double             laszip_F64;
@@ -167,26 +159,32 @@ typedef struct laszip_point
   laszip_I32 Z;
   laszip_U16 intensity;
   laszip_U8 return_number : 3;
-  laszip_U8 number_of_returns_of_given_pulse : 3;
+  laszip_U8 number_of_returns : 3;
   laszip_U8 scan_direction_flag : 1;
   laszip_U8 edge_of_flight_line : 1;
-  laszip_U8 classification;
+  laszip_U8 classification : 5;
+  laszip_U8 synthetic_flag : 1;
+  laszip_U8 keypoint_flag  : 1;
+  laszip_U8 withheld_flag  : 1;
   laszip_I8 scan_angle_rank;
   laszip_U8 user_data;
   laszip_U16 point_source_ID;
 
-  laszip_F64 gps_time;
-  laszip_U16 rgb[4];
-  laszip_U8 wave_packet[29];
-
   // LAS 1.4 only
+  laszip_I16 extended_scan_angle;
   laszip_U8 extended_point_type : 2;
   laszip_U8 extended_scanner_channel : 2;
   laszip_U8 extended_classification_flags : 4;
   laszip_U8 extended_classification;
   laszip_U8 extended_return_number : 4;
-  laszip_U8 extended_number_of_returns_of_given_pulse : 4;
-  laszip_I16 extended_scan_angle;
+  laszip_U8 extended_number_of_returns : 4;
+
+  // for 8 byte alignment of the GPS time
+  laszip_U8 dummy[7];
+
+  laszip_F64 gps_time;
+  laszip_U16 rgb[4];
+  laszip_U8 wave_packet[29];
 
   laszip_I32 num_extra_bytes;
   laszip_U8* extra_bytes;
@@ -332,9 +330,54 @@ laszip_set_geoascii_params(
 
 /*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
+laszip_add_attribute(
+    laszip_POINTER                     pointer
+    , laszip_U32                       type
+    , const laszip_CHAR*               name
+    , const laszip_CHAR*               description
+    , laszip_F64                       scale
+    , laszip_F64                       offset
+);
+
+/*---------------------------------------------------------------------------*/
+LASZIP_API laszip_I32
 laszip_add_vlr(
     laszip_POINTER                     pointer
-    , const laszip_vlr_struct*         vlr
+    , const laszip_CHAR*               user_id
+    , laszip_U16                       record_id
+    , laszip_U16                       record_length_after_header
+    , const laszip_CHAR*               description
+    , const laszip_U8*                 data
+);
+
+/*---------------------------------------------------------------------------*/
+LASZIP_API laszip_I32
+laszip_remove_vlr(
+    laszip_POINTER                     pointer
+    , const laszip_CHAR*               user_id
+    , laszip_U16                       record_id
+);
+
+/*---------------------------------------------------------------------------*/
+LASZIP_API laszip_I32
+laszip_create_spatial_index(
+    laszip_POINTER                     pointer
+    , const laszip_BOOL                create
+    , const laszip_BOOL                append
+);
+
+/*---------------------------------------------------------------------------*/
+LASZIP_API laszip_I32
+laszip_preserve_generating_software(
+    laszip_POINTER                     pointer
+    , const laszip_BOOL                preserve
+);
+
+/*---------------------------------------------------------------------------*/
+LASZIP_API laszip_I32
+laszip_request_compatibility_mode(
+    laszip_POINTER                     pointer
+    , const laszip_BOOL                request
 );
 
 /*---------------------------------------------------------------------------*/
@@ -343,11 +386,23 @@ laszip_open_writer(
     laszip_POINTER                     pointer
     , const laszip_CHAR*               file_name
     , laszip_BOOL                      compress
-    );
+);
 
 /*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
 laszip_write_point(
+    laszip_POINTER                     pointer
+);
+
+/*---------------------------------------------------------------------------*/
+LASZIP_API laszip_I32
+laszip_write_indexed_point(
+    laszip_POINTER                     pointer
+);
+
+/*---------------------------------------------------------------------------*/
+LASZIP_API laszip_I32
+laszip_update_inventory(
     laszip_POINTER                     pointer
 );
 
@@ -359,10 +414,36 @@ laszip_close_writer(
 
 /*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
+laszip_exploit_spatial_index(
+    laszip_POINTER                     pointer
+    , const laszip_BOOL                exploit
+);
+
+/*---------------------------------------------------------------------------*/
+LASZIP_API laszip_I32
 laszip_open_reader(
     laszip_POINTER                     pointer
     , const laszip_CHAR*               file_name
     , laszip_BOOL*                     is_compressed
+);
+
+/*---------------------------------------------------------------------------*/
+LASZIP_API laszip_I32
+laszip_has_spatial_index(
+    laszip_POINTER                     pointer
+    , laszip_BOOL*                     is_indexed
+    , laszip_BOOL*                     is_appended
+);
+
+/*---------------------------------------------------------------------------*/
+LASZIP_API laszip_I32
+laszip_inside_rectangle(
+    laszip_POINTER                     pointer
+    , laszip_F64                       min_x
+    , laszip_F64                       min_y
+    , laszip_F64                       max_x
+    , laszip_F64                       max_y
+    , laszip_BOOL*                     is_empty
 );
 
 /*---------------------------------------------------------------------------*/
@@ -376,6 +457,13 @@ laszip_seek_point(
 LASZIP_API laszip_I32
 laszip_read_point(
     laszip_POINTER                     pointer
+);
+
+/*---------------------------------------------------------------------------*/
+LASZIP_API laszip_I32
+laszip_read_inside_point(
+    laszip_POINTER                     pointer
+    , laszip_BOOL*                     is_done
 );
 
 /*---------------------------------------------------------------------------*/
