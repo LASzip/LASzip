@@ -14,7 +14,7 @@
 
   COPYRIGHT:
 
-    (c) 2007-2013, martin isenburg, rapidlasso - tools to catch reality
+    (c) 2007-2013, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -44,6 +44,7 @@
 #else
 #include <istream>
 #include <fstream>
+using namespace std;
 #endif
 
 class ByteStreamOut;
@@ -53,7 +54,7 @@ class LASZIP_DLL LASzipper
 {
 public:
   bool open(FILE* outfile, const LASzip* laszip);
-  bool open(std::ostream& outstream, const LASzip* laszip);
+  bool open(ostream& outstream, const LASzip* laszip);
 
   bool write(const unsigned char* const * point);
   bool chunk();
