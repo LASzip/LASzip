@@ -37,11 +37,11 @@ set(CMAKE_MODULE_PATH ${laszip_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 ###############################################################################
 # General build settings
 
-# Default to release mode 
+# Default to release mode
 if(NOT MSVC_IDE)
   if(NOT CMAKE_BUILD_TYPE)
 
-  set(CMAKE_BUILD_TYPE Release CACHE STRING 
+  set(CMAKE_BUILD_TYPE Release CACHE STRING
     "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel" FORCE)
   endif()
     message(STATUS "Setting LASzip build type - ${CMAKE_BUILD_TYPE}")
@@ -57,7 +57,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${LASZIP_BUILD_OUTPUT_DIRECTORY})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LASZIP_BUILD_OUTPUT_DIRECTORY})
 
 # Output directory in which to build ARCHIVE target files.
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${LASZIP_BUILD_OUTPUT_DIRECTORY}) 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${LASZIP_BUILD_OUTPUT_DIRECTORY})
 
 
 set(BUILD_STATIC FALSE CACHE BOOL "Build LASzip statically" )
@@ -119,13 +119,7 @@ set(LASZIP_INCLUDE_DIR ${LASZIP_INCLUDE_SUBDIR})
 # Processing of project directories
 
 add_subdirectory(src)
-
-
-if (DEFINED ENV{NACL_ROOT})
-    add_subdirectory(pnacl)
-else()
-    add_subdirectory(tools)
-endif()
+add_subdirectory(tools)
 
 # Version information
 SET(CPACK_PACKAGE_VERSION_MAJOR ${LASZIP_VERSION_MAJOR})
@@ -150,7 +144,7 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "unused")
 
 
 list(APPEND CPACK_SOURCE_IGNORE_FILES "CMakeCache.txt")
-# 
+#
 list(APPEND CPACK_SOURCE_IGNORE_FILES ".git/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES ".gitignore")
 
