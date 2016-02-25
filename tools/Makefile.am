@@ -1,5 +1,5 @@
 
-AM_CPPFLAGS = -I../include -I../include/laszip
+AM_CPPFLAGS = -I../src
 LDADD = ../liblaszip.la 
 
 laszippertest_SOURCES = laszippertest.cpp
