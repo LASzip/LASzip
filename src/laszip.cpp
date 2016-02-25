@@ -13,7 +13,7 @@
 
   COPYRIGHT:
 
-    (c) 2007-2013, martin isenburg, rapidlasso - tools to catch reality
+    (c) 2007-2013, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -279,6 +279,24 @@ bool LASzip::check()
   return true;
 }
 
+bool LASzip::request_compatibility_mode(const U16 requested_compatibility_mode)
+{
+  if (num_items != 0) return return_error("request compatibility mode before calling setup()");
+  if (requested_compatibility_mode > 1)
+  {
+    return return_error("compatibility mode larger than 1 not supported");
+  }
+  if (requested_compatibility_mode)
+  {
+    options = options | 0x00000001;
+  }
+  else
+  {
+    options = options & 0xFFFFFFFE;
+  }
+  return true;
+}
+
 bool LASzip::setup(const U8 point_type, const U16 point_size, const U16 compressor)
 {
   if (!check_compressor(compressor)) return false;
@@ -326,12 +344,17 @@ bool LASzip::setup(const U16 num_items, const LASitem* items, const U16 compress
 
 bool LASzip::setup(U16* num_items, LASitem** items, const U8 point_type, const U16 point_size, const U16 compressor)
 {
+  BOOL compatible = FALSE;
   BOOL have_point14 = FALSE;
   BOOL have_gps_time = FALSE;
   BOOL have_rgb = FALSE;
   BOOL have_nir = FALSE;
   BOOL have_wavepacket = FALSE;
   I32 extra_bytes_number = 0;
+
+  // turns on LAS 1.4 compatibility mode 
+
+  if (options & 1) compatible = TRUE;
 
   // switch over the point types we know
   switch (point_type)
@@ -406,6 +429,25 @@ bool LASzip::setup(U16* num_items, LASitem** items, const U8 point_type, const U
 //    return return_error(error);
     fprintf(stderr, "WARNING: point size %d too small by %d bytes for point type %d. assuming point_size of %d\n", point_size, -extra_bytes_number, point_type, point_size-extra_bytes_number);
     extra_bytes_number = 0;
+  }
+
+  // maybe represent new LAS 1.4 as corresponding LAS 1.3 points plus extra bytes for compatibility
+  if (have_point14 && compatible)
+  {
+    // we need 4 extra bytes for the new point attributes
+    extra_bytes_number += 5;
+    // we store the GPS time separately
+    have_gps_time = TRUE;
+    // we do not use the point14 item
+    have_point14 = FALSE;
+    // if we have NIR ...
+    if (have_nir)
+    {
+      // we need another 2 extra bytes 
+      extra_bytes_number += 2;
+      // we do not use the NIR item
+      have_nir = FALSE;
+    }
   }
 
   // create item description
@@ -506,7 +548,7 @@ bool LASzip::request_version(const U16 requested_version)
         items[i].version = 1; // no version 2
         break;
     default:
-        return return_error("itrm type not supported");
+        return return_error("item type not supported");
     }
   }
   return true;

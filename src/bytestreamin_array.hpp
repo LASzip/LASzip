@@ -22,7 +22,8 @@
   
   CHANGE HISTORY:
   
-    9 April 2012 -- created after cooking Zuccini/Onion/Potatoe dinner for Mara
+    19 July 2015 -- moved from LASlib to LASzip for "compatibility mode" in DLL
+     9 April 2012 -- created after cooking Zuccini/Onion/Potatoe dinner for Mara
   
 ===============================================================================
 */
