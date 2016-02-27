@@ -1,3 +1,38 @@
+cmake_minimum_required(VERSION 2.8.11)
+
+project(LASZIP CXX C)
+string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
+
+set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
+include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
+
+#------------------------------------------------------------------------------
+# internal cmake settings
+#------------------------------------------------------------------------------
+
+set(CMAKE_COLOR_MAKEFILE ON)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+include(FeatureSummary)
+
+# Allow advanced users to generate Makefiles printing detailed commands
+mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
+
+#------------------------------------------------------------------------------
+# LASZIP general settings
+#------------------------------------------------------------------------------
+
+# the next line is the ONLY place in the entire laszip system where
+# the version info is hard-coded
+set(LASZIP_VERSION_STRING "1.1.0" CACHE STRING "LASzip version" FORCE)
+
+DISSECT_VERSION()
+GET_OS_INFO()
+SET_INSTALL_DIRS()
+
+set(LASZIP_API_VERSION "1")
+set(LASZIP_BUILD_VERSION "6.0.0")
+
+
 ###############################################################################
 # Main CMake configuration file for laszip
 #
@@ -6,7 +41,6 @@
 #
 ###############################################################################
 # laszip general settings
-project(laszip)
 
 
 SET(LASZIP_VERSION_MAJOR "2")
@@ -15,147 +49,54 @@ SET(LASZIP_VERSION_PATCH "0")
 set(VERSION "${LASZIP_VERSION_MAJOR}.${LASZIP_VERSION_MINOR}.${LASZIP_VERSION_PATCH}")
 SET(LASZIP_LIB_SOVERSION "6.0.0")
 
-# Name of C++ library
-set(LASZIP_LIB_NAME laszip)
+set(LASZIP_BASE_LIB_NAME laszip)
+set(LASZIP_API_LIB_NAME laszip_api)
 
-message(STATUS "Configuring LASzip library")
 
-set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
-###############################################################################
-# CMake settings
-cmake_minimum_required(VERSION 2.6.0)
+set(LASZIP_OUTPUT_LIB_DIR "${LASZIP_BINARY_DIR}/${LASZIP_LIB_INSTALL_DIR}")
+set(LASZIP_OUTPUT_BIN_DIR "${LASZIP_BINARY_DIR}/${LASZIP_BIN_INSTALL_DIR}")
+set(LASZIP_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/${LASZIP_LIB_INSTALL_DIR}")
+file(MAKE_DIRECTORY "${LASZIP_OUTPUT_LIB_DIR}")
+file(MAKE_DIRECTORY "${LASZIP_OUTPUT_BIN_DIR}")
 
-set(CMAKE_COLOR_MAKEFILE ON)
-
-# Allow advanced users to generate Makefiles printing detailed commands
-mark_as_advanced(CLEAR CMAKE_VERBOSE_MAKEFILE )
-
-# Path to additional CMake modules
-set(CMAKE_MODULE_PATH ${laszip_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
-
-###############################################################################
-# General build settings
-
-# Default to release mode
-if(NOT MSVC_IDE)
-  if(NOT CMAKE_BUILD_TYPE)
-
-  set(CMAKE_BUILD_TYPE Release CACHE STRING
-    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel" FORCE)
-  endif()
-    message(STATUS "Setting LASzip build type - ${CMAKE_BUILD_TYPE}")
+# per http://www.cmake.org/Wiki/CMake_RPATH_handling
+SET(CMAKE_SKIP_BUILD_RPATH FALSE )
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+if (APPLE)
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 endif()
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+IF (APPLE)
+    SET(MACOSX_RPATH ON)
+endif()
+LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${LASZIP_LIB_INSTALL_DIR}" isSystemDir)
+IF("${isSystemDir}" STREQUAL "-1")
+    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LASZIP_LIB_INSTALL_DIR}")
+ENDIF("${isSystemDir}" STREQUAL "-1")
 
-# TODO: Still testing the output paths --mloskot
-set(LASZIP_BUILD_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/)
-
-# Output directory in which to build RUNTIME target files.
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${LASZIP_BUILD_OUTPUT_DIRECTORY})
-
-# Output directory in which to build LIBRARY target files
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LASZIP_BUILD_OUTPUT_DIRECTORY})
-
-# Output directory in which to build ARCHIVE target files.
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${LASZIP_BUILD_OUTPUT_DIRECTORY})
-
-
-set(BUILD_STATIC FALSE CACHE BOOL "Build LASzip statically" )
-###############################################################################
-# Platform and compiler specific settings
+# wipe lib/ drectory on clean. It will have plugins that could be out of date
+# in the next build
+set_directory_properties(PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${LASZIP_OUTPUT_LIB_DIR}/*")
 
 if(WIN32)
-  if (MSVC)
-    if (MSVC80 OR MSVC90 OR MSVC10 OR MSVC11 OR MSVC12)
-      add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
-      add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-      add_definitions(-D_CRT_NONSTDC_NO_WARNING)
-      add_definitions(-D_SCL_SECURE_NO_WARNINGS)
-    endif()
-  endif()
-endif()
+  add_definitions("-DLASZIP_DLL_EXPORT=1")
+  foreach(config ${CMAKE_CONFIGURATION_TYPES})
+    string(TOUPPER ${config} CONFIG)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CONFIG} "${LASZIP_OUTPUT_LIB_DIR}")
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CONFIG} "${LASZIP_OUTPUT_BIN_DIR}")
+    # ---[ Windows requires DLLs (shared libraries) to be installed in the same directory as executables
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CONFIG} "${LASZIP_OUTPUT_BIN_DIR}")
+  endforeach(config)
+else(WIN32)
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${LASZIP_OUTPUT_LIB_DIR}")
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${LASZIP_OUTPUT_BIN_DIR}")
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${LASZIP_OUTPUT_LIB_DIR}")
+endif(WIN32)
 
-###############################################################################
-# Installation settings
+set(LASZIP_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/laszip")
 
-if(WIN32)
-  set(DEFAULT_LIB_SUBDIR lib)
-  set(DEFAULT_DATA_SUBDIR .)
-  set(DEFAULT_INCLUDE_SUBDIR include)
-
-  if (MSVC)
-    set(DEFAULT_BIN_SUBDIR bin)
-  else()
-    set(DEFAULT_BIN_SUBDIR .)
-  endif()
-else()
-  # Common locations for Unix and Mac OS X
-  set(DEFAULT_BIN_SUBDIR bin)
-  set(DEFAULT_LIB_SUBDIR lib)
-  set(DEFAULT_INCLUDE_SUBDIR include)
-endif()
-
-# Locations are changeable by user to customize layout of laszip installation
-# (default values are platform-specific)
-set(LASZIP_BIN_SUBDIR ${DEFAULT_BIN_SUBDIR} CACHE STRING
-  "Subdirectory where executables will be installed")
-set(LASZIP_LIB_SUBDIR ${DEFAULT_LIB_SUBDIR} CACHE STRING
-  "Subdirectory where libraries will be installed")
-set(LASZIP_INCLUDE_SUBDIR ${DEFAULT_INCLUDE_SUBDIR} CACHE STRING
-  "Subdirectory where header files will be installed")
-set(LASZIP_DATA_SUBDIR ${DEFAULT_DATA_SUBDIR} CACHE STRING
-  "Subdirectory where data will be installed")
-
-# Mark *_SUBDIR variables as advanced and dedicated to use by power-users only.
-mark_as_advanced(LASZIP_BIN_SUBDIR
-  LASZIP_LIB_SUBDIR LASZIP_INCLUDE_SUBDIR LASZIP_DATA_SUBDIR)
-
-# Full paths for the installation
-set(LASZIP_BIN_DIR ${LASZIP_BIN_SUBDIR})
-set(LASZIP_LIB_DIR ${LASZIP_LIB_SUBDIR})
-set(LASZIP_INCLUDE_DIR ${LASZIP_INCLUDE_SUBDIR})
-
-###############################################################################
-# Processing of project directories
 
 add_subdirectory(src)
-add_subdirectory(tools)
-
-# Version information
-SET(CPACK_PACKAGE_VERSION_MAJOR ${LASZIP_VERSION_MAJOR})
-SET(CPACK_PACKAGE_VERSION_MINOR ${LASZIP_VERSION_MINOR})
-SET(CPACK_PACKAGE_VERSION_PATCH ${LASZIP_VERSION_REVISION})
-SET(OSGEO4W_UPSTREAM_RELEASE "1")
-
-SET(CPACK_SOURCE_GENERATOR "TGZ;ZIP")
-SET(CPACK_CMAKE_GENERATOR "Unix Makefiles")
-#SET(CPACK_RESOURCE_FILE_LICENSE "${laszip_SOURCE_DIR}/COPYING")
-
-set(CPACK_SOURCE_PACKAGE_FILE_NAME
-  "${CMAKE_PROJECT_NAME}-${VERSION}")
-
-list(APPEND CPACK_SOURCE_IGNORE_FILES "_CPack_Packages")
-list(APPEND CPACK_SOURCE_IGNORE_FILES ".gz")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "CMakeFiles")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "bin")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "hobu-config.bat")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "unused")
-
-
-
-list(APPEND CPACK_SOURCE_IGNORE_FILES "CMakeCache.txt")
-#
-list(APPEND CPACK_SOURCE_IGNORE_FILES ".git/")
-list(APPEND CPACK_SOURCE_IGNORE_FILES ".gitignore")
-
-include(CPack)
-
-add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
-
-if (WIN32)
-  option(LASZIP_BUILDOSGEO4W "Run the build OSGeo4W scripts" ON)
-  mark_as_advanced(LASZIP_BUILDOSGEO4W)
-  if(LASZIP_BUILDOSGEO4W)
-    include(BuildOSGeo4W)
-  endif(LASZIP_BUILDOSGEO4W)
-endif(WIN32)
+add_subdirectory(dll)
+#add_subdirectory(tools)

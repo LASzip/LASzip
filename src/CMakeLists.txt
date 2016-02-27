@@ -5,37 +5,46 @@
 # Copyright (c) 2009 Mateusz Loskot <mateusz@loskot.net>
 #
 ###############################################################################
-
 set(LASZIP_HEADERS_DIR ../include/laszip)
 
 set(LASZIP_HPP
-  ${LASZIP_HEADERS_DIR}/laszipexport.hpp
-  ${LASZIP_HEADERS_DIR}/laszip.hpp
-  ${LASZIP_HEADERS_DIR}/laszipper.hpp
-  ${LASZIP_HEADERS_DIR}/lasunzipper.hpp
-  arithmeticdecoder.hpp
-  arithmeticencoder.hpp
-  arithmeticmodel.hpp
-  bytestreamin.hpp
-  bytestreamin_array.hpp
-  bytestreamin_file.hpp
-  bytestreamin_istream.hpp
-  bytestreamout.hpp
-  bytestreamout_file.hpp
-  bytestreamout_ostream.hpp
-  endian.hpp
-  integercompressor.hpp
-  lasreaditem.hpp
-  lasreaditemcompressed_v1.hpp
-  lasreaditemcompressed_v2.hpp
-  lasreaditemraw.hpp
-  lasreadpoint.hpp
-  laswriteitem.hpp
-  laswriteitemcompressed_v1.hpp
-  laswriteitemcompressed_v2.hpp
-  laswriteitemraw.hpp
-  laswritepoint.hpp
-  mydefs.hpp
+    arithmeticdecoder.hpp
+    arithmeticencoder.hpp
+    arithmeticmodel.hpp
+    bytestreamin.hpp
+    bytestreamin_array.hpp
+    bytestreamin_file.hpp
+    bytestreamin_istream.hpp
+    bytestreaminout.hpp
+    bytestreaminout_file.hpp
+    bytestreamout.hpp
+    bytestreamout_array.hpp
+    bytestreamout_file.hpp
+    bytestreamout_nil.hpp
+    bytestreamout_ostream.hpp
+    endian.hpp
+    integercompressor.hpp
+    lasattributer.hpp
+    lasindex.hpp
+    lasinterval.hpp
+    laspoint.hpp
+    lasquadtree.hpp
+    lasquantizer.hpp
+    lasreaditem.hpp
+    lasreaditemcompressed_v1.hpp
+    lasreaditemcompressed_v2.hpp
+    lasreaditemraw.hpp
+    lasreadpoint.hpp
+    #lasunzipper.hpp
+    laswriteitem.hpp
+    laswriteitemcompressed_v1.hpp
+    laswriteitemcompressed_v2.hpp
+    laswriteitemraw.hpp
+    laswritepoint.hpp
+    laszip.hpp
+    laszip_common_v1.hpp
+    laszip_common_v2.hpp
+    mydefs.hpp
  )
 
 set(LASZIP_CPP
@@ -43,69 +52,31 @@ set(LASZIP_CPP
     arithmeticencoder.cpp
     arithmeticmodel.cpp
     integercompressor.cpp
+    lasindex.cpp
+    lasinterval.cpp
+    lasquadtree.cpp
     lasreaditemcompressed_v1.cpp
     lasreaditemcompressed_v2.cpp
     lasreadpoint.cpp
-    lasunzipper.cpp
+    #lasunzipper.cpp
     laswriteitemcompressed_v1.cpp
     laswriteitemcompressed_v2.cpp
     laswritepoint.cpp
     laszip.cpp
-    laszipper.cpp
-
+    laszip_dll.cpp
 )
 
-if (WIN32)
-    list (APPEND LASZIP_CPP     laszip_dll.cpp)
-endif()
+add_definitions(-DUNORDERED)
+add_definitions(-DLASZIPDLL_EXPORTS)
+
 set(LASZIP_SOURCES
   ${LASZIP_HPP}
   ${LASZIP_CPP}
   )
 
-if(WIN32)
-if(NOT BUILD_STATIC)
-    add_definitions("-DLASZIP_DLL_EXPORT=1")
-endif()
-endif()
+LASZIP_ADD_LIBRARY(${LASZIP_BASE_LIB_NAME} ${LASZIP_SOURCES})
 
-# Group source files for IDE source explorers (e.g. Visual Studio)
-source_group("CMake Files" FILES CMakeLists.txt)
-source_group("Header Files" FILES ${LASZIP_HPP})
-source_group("Source Files" FILES ${LASZIP_CPP})
+set_target_properties(${LASZIP_BASE_LIB_NAME} PROPERTIES VERSION "${LASZIP_BUILD_VERSION}"
+    SOVERSION "${LASZIP_API_VERSION}"
+    CLEAN_DIRECT_OUTPUT 1)
 
-# Standard include directory of laszip library
-include_directories(../include ../include/laszip . ../dll)
-
-
-if(BUILD_STATIC)
-    add_library(${LASZIP_LIB_NAME} STATIC ${LASZIP_SOURCES})
-else()
-    add_library(${LASZIP_LIB_NAME} SHARED ${LASZIP_SOURCES})
-endif()
-
-if (EMSCRIPTEN)
-    SET_TARGET_PROPERTIES(${LASZIP_LIB_NAME} PROPERTIES SUFFIX .o)
-endif()
-
-set_target_properties(${LASZIP_LIB_NAME}
-  PROPERTIES SOVERSION "${LASZIP_LIB_SOVERSION}" )
-      
-###############################################################################
-# Targets installation
-
-if (APPLE)
-  set_target_properties(
-    ${LASZIP_LIB_NAME}
-    PROPERTIES
-    INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
-endif()
-
-install(TARGETS ${LASZIP_LIB_NAME} 
-  RUNTIME DESTINATION ${LASZIP_BIN_DIR}
-  LIBRARY DESTINATION ${LASZIP_LIB_DIR}
-  ARCHIVE DESTINATION ${LASZIP_LIB_DIR})
-
-install(DIRECTORY ${LASZIP_HEADERS_DIR}
-  DESTINATION ${LASZIP_INCLUDE_DIR}
-  FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")

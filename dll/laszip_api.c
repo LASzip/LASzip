@@ -2,17 +2,17 @@
 ===============================================================================
 
   FILE:  laszip_dll.c
-  
+
   CONTENTS:
-      
+
     A simple set of linkable function signatures for the DLL of LASzip
 
   PROGRAMMERS:
-  
+
     martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
-  
+
   COPYRIGHT:
-  
+
     (c) 2007-2015, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
@@ -21,15 +21,15 @@
 
     This software is distributed WITHOUT ANY WARRANTY and without even the
     implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  
+
   CHANGE HISTORY:
-  
+
     see header file
 
 ===============================================================================
 */
 
-#include "laszip_dll.h"
+#include <laszip/laszip_api.h>
 
 // DLL function definitions
 
@@ -847,7 +847,21 @@ laszip_close_reader
 /*---------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------*/
-#include <windows.h>
+
+#ifdef _WIN32
+  #include <Windows.h>
+#else
+  #include <dlfcn.h>
+  typedef void* HINSTANCE;
+#define NULL 0
+  #define LoadLibrary dlopen
+#define GetProcAddress dlsym
+#define FreeLibrary dlclose
+#define TEXT
+
+#endif
+
+
 static HINSTANCE laszip_HINSTANCE = NULL;
 laszip_I32 laszip_load_dll()
 {
@@ -856,7 +870,12 @@ laszip_I32 laszip_load_dll()
     return 1;
   }
   // Load DLL file
+#ifdef _WIN32
   laszip_HINSTANCE = LoadLibrary(TEXT("LASzip.dll"));
+#else
+  laszip_HINSTANCE = dlopen("liblaszip.dylib", RTLD_NOW);
+#endif
+
   if (laszip_HINSTANCE == NULL) {
      return 1;
   }

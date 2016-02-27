@@ -2,17 +2,17 @@
 ===============================================================================
 
   FILE:  laszip_dll.h
-  
+
   CONTENTS:
-  
+
     A simple DLL interface to LASzip
-  
+
   PROGRAMMERS:
-  
+
     martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
-  
+
   COPYRIGHT:
-  
+
     (c) 2007-2015, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
@@ -21,20 +21,20 @@
 
     This software is distributed WITHOUT ANY WARRANTY and without even the
     implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  
+
   CHANGE HISTORY:
-  
+
     23 September 2015 -- correct update of bounding box and counters from inventory on closing
     22 September 2015 -- bug fix for not overwriting description of pre-existing "extra bytes"
     5 September 2015 -- "LAS 1.4 compatibility mode" now allows pre-existing "extra bytes"
     3 August 2015 -- incompatible DLL change for QSI-sponsored "LAS 1.4 compatibility mode"
     8 July 2015 -- adding support for NOAA-sponsored "LAS 1.4 compatibility mode"
-    1 April 2015 -- adding exploitation and creation of spatial indexing information 
+    1 April 2015 -- adding exploitation and creation of spatial indexing information
     8 August 2013 -- added laszip_get_coordinates() and laszip_set_coordinates()
     6 August 2013 -- added laszip_auto_offset() and laszip_check_for_integer_overflow()
     31 July 2013 -- added laszip_get_point_count() for FUSION integration
-    29 July 2013 -- reorganized to create an easy to use LASzip DLL 
-  
+    29 July 2013 -- reorganized to create an easy to use LASzip DLL
+
 ===============================================================================
 */
 
@@ -63,16 +63,17 @@ extern "C"
 /*---------------------------------------------------------------------------*/
 /*--------------- DLL variables to pass data to/from LASzip -----------------*/
 /*---------------------------------------------------------------------------*/
+#include <stdint.h>
 
 typedef int                laszip_BOOL;
-typedef unsigned char      laszip_U8;
-typedef unsigned short     laszip_U16;
-typedef unsigned int       laszip_U32;
-typedef unsigned __int64   laszip_U64;
-typedef char               laszip_I8;
-typedef short              laszip_I16;
-typedef int                laszip_I32;
-typedef __int64            laszip_I64;
+typedef uint8_t            laszip_U8;
+typedef uint16_t           laszip_U16;
+typedef uint32_t           laszip_U32;
+typedef uint64_t           laszip_U64;
+typedef int8_t             laszip_I8;
+typedef int16_t            laszip_I16;
+typedef int32_t            laszip_I32;
+typedef int64_t            laszip_I64;
 typedef char               laszip_CHAR;
 typedef float              laszip_F32;
 typedef double             laszip_F64;
@@ -89,7 +90,7 @@ typedef struct laszip_geokey
 typedef struct laszip_vlr
 {
   laszip_U16 reserved;
-  laszip_CHAR user_id[16]; 
+  laszip_CHAR user_id[16];
   laszip_U16 record_id;
   laszip_U16 record_length_after_header;
   laszip_CHAR description[32];
