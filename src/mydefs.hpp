@@ -24,13 +24,26 @@
   
   CHANGE HISTORY:
   
-    10 January 2011 -- licensing change for LGPL release and liblas integration
+    28 October 2015 -- adding DLL bindings via 'COMPILE_AS_DLL' and 'USE_AS_DLL'
+    10 January 2011 -- licensing change for LGPL release and libLAS integration
     13 July 2005 -- created after returning with many mosquito bites from OBX
   
 ===============================================================================
 */
 #ifndef MYDEFS_HPP
 #define MYDEFS_HPP
+
+#ifndef _WIN32
+#define LASLIB_DLL
+#else  // _WIN32
+#ifdef COMPILE_AS_DLL
+#define LASLIB_DLL __declspec(dllexport)
+#elif USE_AS_DLL
+#define LASLIB_DLL __declspec(dllimport)
+#else
+#define LASLIB_DLL
+#endif
+#endif // _WIN32
 
 typedef char               CHAR;
 
@@ -70,14 +83,17 @@ typedef union U64I64F64 { U64 u64; I64 i64; F64 f64; } U64I64F64;
 
 #define U8_MIN             ((U8)0x0)  // 0
 #define U8_MAX             ((U8)0xFF) // 255
+#define U8_MAX_MINUS_ONE   ((U8)0xFE) // 254
 #define U8_MAX_PLUS_ONE    0x0100     // 256
 
 #define U16_MIN            ((U16)0x0)    // 0
 #define U16_MAX            ((U16)0xFFFF) // 65535
+#define U16_MAX_MINUS_ONE  ((U16)0xFFFE) // 65534
 #define U16_MAX_PLUS_ONE   0x00010000    // 65536
 
 #define U32_MIN            ((U32)0x0)            // 0
 #define U32_MAX            ((U32)0xFFFFFFFF)     // 4294967295
+#define U32_MAX_MINUS_ONE  ((U32)0xFFFFFFFE)     // 4294967294
 #if defined(WIN32)            // 64 byte unsigned int constant under Windows 
 #define U32_MAX_PLUS_ONE   0x0000000100000000    // 4294967296
 #else                         // 64 byte unsigned int constant elsewhere ... 

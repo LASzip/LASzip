@@ -14,7 +14,7 @@
 
   COPYRIGHT:
 
-    (c) 2007-2013, martin isenburg, rapidlasso - tools to catch reality
+    (c) 2007-2016, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -25,6 +25,7 @@
   
   CHANGE HISTORY:
   
+    25 February 2016 -- depreciating old libLAS laszipper/lasunzipper binding
     29 July 2013 -- reorganized to create an easy-to-use LASzip DLL 
     5 December 2011 -- learns the chunk table if it is missing (e.g. truncated LAZ)
     6 October 2011 -- large file support, ability to read with missing chunk table
@@ -39,7 +40,6 @@
 */
 #ifndef LASZIP_HPP
 #define LASZIP_HPP
-
 
 #if defined(_MSC_VER) && (_MSC_VER < 1300)
 #define LZ_WIN32_VC6
@@ -56,9 +56,9 @@ typedef long long SIGNED_INT64;
 #endif
 
 #define LASZIP_VERSION_MAJOR                2
-#define LASZIP_VERSION_MINOR                2
-#define LASZIP_VERSION_REVISION             0
-#define LASZIP_VERSION_BUILD_DATE      130917
+#define LASZIP_VERSION_MINOR                4
+#define LASZIP_VERSION_REVISION             1
+#define LASZIP_VERSION_BUILD_DATE      150923
 
 #define LASZIP_COMPRESSOR_NONE              0
 #define LASZIP_COMPRESSOR_POINTWISE         1
@@ -75,9 +75,7 @@ typedef long long SIGNED_INT64;
 
 #define LASZIP_CHUNK_SIZE_DEFAULT           50000
 
-#include "laszipexport.hpp"
-
-class LASZIP_DLL LASitem
+class LASitem
 {
 public:
   enum Type { BYTE = 0, SHORT, INT, LONG, FLOAT, DOUBLE, POINT10, GPSTIME11, RGB12, WAVEPACKET13, POINT14, RGBNIR14 } type;
@@ -87,7 +85,7 @@ public:
   const char* get_name() const;
 };
 
-class LASZIP_DLL LASzip
+class LASzip
 {
 public:
 
@@ -109,6 +107,7 @@ public:
   bool pack(unsigned char*& bytes, int& num);
 
   // setup
+  bool request_compatibility_mode(const unsigned short requested_compatibility_mode=0); // 0 = none, 1 = LAS 1.4 compatibility mode
   bool setup(const unsigned char point_type, const unsigned short point_size, const unsigned short compressor=LASZIP_COMPRESSOR_DEFAULT);
   bool setup(const unsigned short num_items, const LASitem* items, const unsigned short compressor);
   bool set_chunk_size(const unsigned int chunk_size);             /* for compressor only */
