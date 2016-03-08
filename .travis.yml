@@ -2,6 +2,9 @@
 # Configure Travis CI service for http://github.com/LASzip
 language: cpp
 
+sudo: required
+dist: trusty
+
 compiler:
   - g++
   - clang
