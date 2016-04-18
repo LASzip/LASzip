@@ -9,4 +9,4 @@ cmake ..
 
 make
 
-./bin/laszippertest 
+#./bin/laszippertest
