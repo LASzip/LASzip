@@ -8,6 +8,6 @@ if [[ ! -z $TRAVIS_BUILD_DIR ]]; then
 buildpath="$TRAVIS_BUILD_DIR"
 fi
 
-docker run -v $buildpath:/data -w /data laszip/docs make html
+docker run -v $buildpath:/data -w /data/docs laszip/docs make html
 
 
