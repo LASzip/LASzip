@@ -4,6 +4,7 @@ language: cpp
 
 sudo: required
 services: docker
+dist: trusty
 
 compiler:
   - g++
