@@ -19,7 +19,7 @@ compiler:
 
 after_success:
   - echo "secure travis:" "$TRAVIS_SECURE_ENV_VARS"
-  - sh -c 'if test "$TRAVIS_SECURE_ENV_VARS" = "true" -a "$TRAVIS_BRANCH" = "docker-dockbuild"; then echo "publish website"; ./scripts/ci/build_docs.sh; ./scripts/ci/deploy_website.sh $TRAVIS_BUILD_DIR/doc/build; fi'
+  - sh -c 'if test "$TRAVIS_SECURE_ENV_VARS" = "true" -a "$TRAVIS_BRANCH" = "docker-dockbuild" -a "$CXX" = "g++"; then echo "publish website"; ./scripts/ci/build_docs.sh; ./scripts/ci/deploy_website.sh $TRAVIS_BUILD_DIR/doc/build; fi'
 
 before_install: ./scripts/ci/docker.sh
 
