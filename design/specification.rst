@@ -56,19 +56,18 @@ Due to the new scanner channel it is *crucial* to first encode whether a point i
 
 * scanner channel different from previous point (yes / no)
 * GPS time stamp different from previous point of same scanner channel (yes / no)
-* number of returns different of same scanner channel (yes / no)
-* return number different of same scanner channel (yes / no)
+* number of returns different from previous point of same scanner channel (yes / no)
+* return number different from previous point of same scanner channel (yes / no)
 
-This is turned into one symbol of 4 bits that we compress with either with four or six different contexts
+These 4 bits are combined into one symbol whose value ranges from 0 to 15 that we then compress with one of six (6) different contexts based on whether the directly previous point was a single return (0), the first (1) or the last (2) of a double return, or the first (3), an intermediate (4), or the last (5) of a triple or higher return.
 
-* 4 = based on whether the previous point is single or first/intermediate/last of many.
-* 6 = based on whether the previous point is single, first/last of two, or first/intermediate/last of many.
+If the scanner channel is different we use one symbol whose value ranges from 0 to 2 to encode whether we need to add 1, 2, or 3 to the previous scanner channel to get (modulo 4) to the current scanner channel that we then compress using the previous scanner channel as one of four different contexts. The following XYZ coordinates and attribute predictions are relative to the previous point from the *same* scanner channel. For each chunk the points of all four channels are initialized to the first point per chunks that is stored raw. 
 
-If the scanner channel is different we compress this 2 bit symbol using the previous scanner channel one of four different contexts. Any following XYZ and attribute prediction based on a previous point is considering the previous point from the *same* scanner channel when such a point exists.
+If the number of returns is different we use one symbol whose value ranges from 0 to 15 that we then compress it with the previous number of returns (of same scanner channel) as one of sixteen contexts.
 
-If the number of returns is different we compress it with the previous number of returns (of same scanner channel) as one of sixteen contexts.
-
-If the return number different is different we compress it with the previous return number (of same scanner channel) and the information whether the GPS time stamp is different as one of thirtytwo contexts.
+If the return number is different we encode in in two possible ways depending on whether the GPS time stamp has changed:
+   - if the GPS time stamp *has* *not* changed we use one symbol whose value ranges from 0 to 14 to encode whether we need to add 1, 2, 3, 4 ... , 14 or 15 to the previous return number (of same scanner channel) to get (modulo 16) to the current return number that we then compress using the previous return number (of same scanner channel) as one of sixteen contexts.
+   - if the GPS time stamp *has* changed we use one symbol whose value ranges from 0 to 15 to encode the current return number that we then compress with a single context.
 
 We compress X, Y, and Z similar to how LASzip does it currently (but make all predictions from the previous points from the same scanner channel).
 
