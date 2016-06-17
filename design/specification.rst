@@ -52,24 +52,24 @@ Chunk Layout:
 
 Compression of XYZ and return layer
 -----------------------------------
-Due to the new scanner channel it is *crucial* to first encode whether a point is from the same and if not from which other scanner channel so that the correct context can be used for all subsequent predictions. Because of the strong correlation between GPS times, return numbers and number of returns awith each other and with the differences in XY we include them here as well.
+Due to the new scanner channel it is *crucial* to first encode whether a point is from the same and if not from which other scanner channel so that the correct context can be used for all subsequent predictions. We also encode whether a point has a different GPS time stamp as the previous point from the same scanner channel as this correlates with changes in the return number, the number of returns, and the coordinates.
 
-* scanner channel different from previous point (yes / no)
-* GPS time stamp different from previous point of same scanner channel (yes / no)
-* number of returns different from previous point of same scanner channel (yes / no)
-* return number different from previous point of same scanner channel (yes / no)
+* scanner channel compared to from previous point (same / different)
+* GPS time stamp compared to previous point of the same scanner channel (same / different)
+* number of returns compared to previous point of the same scanner channel (same / different)
+* return number compared to previous point of the same scanner channel (same / plus one / minus one / other difference)
 
-These 4 bits are combined into one symbol whose value ranges from 0 to 15 that we then compress with one of six (6) different contexts based on whether the directly previous point was a single return (0), the first (1) or the last (2) of a double return, or the first (3), an intermediate (4), or the last (5) of a triple or higher return.
+These 5 bits of information are combined into one symbol whose value ranges from 0 to 31 that we then compress with one of six (6) different contexts based on whether the directly previous point was a single return (0), the first (1) or the last (2) of a double return, or the first (3), an intermediate (4), or the last (5) of a triple or higher return.
 
 If the scanner channel is different we use one symbol whose value ranges from 0 to 2 to encode whether we need to add 1, 2, or 3 to the previous scanner channel to get (modulo 4) to the current scanner channel that we then compress using the previous scanner channel as one of four different contexts. The following XYZ coordinates and attribute predictions are relative to the previous point from the *same* scanner channel. For each chunk the points of all four channels are initialized to the first point per chunks that is stored raw. 
 
-If the number of returns is different we use one symbol whose value ranges from 0 to 15 that we then compress it with the previous number of returns (of same scanner channel) as one of sixteen contexts.
+If the number of returns is different we use one symbol whose value ranges from 0 to 15 that we then compress it with the previous number of returns (of the same scanner channel) as one of sixteen contexts.
 
 If the return number is different we encode in in two possible ways depending on whether the GPS time stamp has changed:
-   - if the GPS time stamp *has* *not* changed we use one symbol whose value ranges from 0 to 14 to encode whether we need to add 1, 2, 3, 4 ... , 14 or 15 to the previous return number (of same scanner channel) to get (modulo 16) to the current return number that we then compress using the previous return number (of same scanner channel) as one of sixteen contexts.
-   - if the GPS time stamp *has* changed we use one symbol whose value ranges from 0 to 15 to encode the current return number that we then compress with a single context.
+   - if the GPS time stamp *has not* changed we use one symbol whose value ranges from 0 to 14 to encode whether we need to add 2, 3, 4 ... 12, 13 or 14 to the previous return number (of the same scanner channel) to get (modulo 16) to the current return number that we then compress using the previous return number (of the same scanner channel) as one of sixteen contexts.
+   - if the GPS time stamp *has* changed we use one symbol whose value ranges from 0 to 15 to encode the current return number that we then compress with the (already encoded) number of returns as one of sixteen contexts.
 
-We compress X, Y, and Z similar to how LASzip does it currently (but make all predictions from the previous points from the same scanner channel).
+We compress X, Y, and Z similar to how LASzip does it currently (but make all predictions from the previous point of the same scanner channel).
 
 Compression of classification and flags layer
 ---------------------------------------------
