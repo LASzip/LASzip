@@ -26,42 +26,43 @@ Chunk Layout:
 2) Numbers and Bytes
   + Number of remaining points [4 bytes]
   + Number of bytes (maybe compressed)
-     - XYZ and return type layer [4 bytes]
+     - scanner channel, point source ID, return counts, and XYZ layer [4 bytes]
      - classification and flags layer [4 bytes]
      - intensity layer [4 bytes]
-     - point source ID layer [4 bytes]
      - scan angle layer [4 bytes]
      - user data layer [4 bytes]
      - GPS time stamp layer [4 bytes]
      - RGB layer [4 bytes]
-     - NIR layer [4 bytes]
+     - RGB + NIR layer [4 bytes]
      - WavePacket layer [4 bytes]
      - "Extra Bytes" layer [4 bytes]
 3) Layers
-     - XYZ and return type layer
+     - scanner channel, point source ID, return counts, and XYZ layer
      - classification and flags layer
      - intensity layer
-     - point source ID layer
      - scan angle layer
      - user data layer
      - GPS time stamp layer
      - RGB layer
-     - NIR layer
+     - RGB + NIR layer
      - WavePacket layer
      - "Extra Bytes" layer
 
-Compression of XYZ and return layer
------------------------------------
+Compression of scanner channel, point source ID, return counts, and XYZ layer
+-----------------------------------------------------------------------------
 Due to the new scanner channel it is *crucial* to first encode whether a point is from the same and if not from which other scanner channel so that the correct context can be used for all subsequent predictions. We also encode whether a point has a different GPS time stamp as the previous point from the same scanner channel as this correlates with changes in the return number, the number of returns, and the coordinates.
 
-* scanner channel compared to from previous point (same / different)
-* GPS time stamp compared to previous point of the same scanner channel (same / different)
-* number of returns compared to previous point of the same scanner channel (same / different)
-* return number compared to previous point of the same scanner channel (same / plus one / minus one / other difference)
+* scanner channel compared to the scanner channel of the previous point (same = 0 / different = 1)
+* GPS time stamp compared to the GPS time stamp of the previous point from the *same* scanner channel (same = 0 / different = 1)
+* point source ID compared to the point source ID of the previous point from the *same* scanner channel (same = 0 / different = 1)
+* number of returns compared to the number of returns of the previous point from the *same* scanner channel (same = 0 / different = 1)
+* return number compared to the return number of th previous point from the *same* scanner channel (same = 0 / plus one = 1 / minus one = 2 / other difference = 3)
 
-These 5 bits of information are combined into one symbol whose value ranges from 0 to 31 that we then compress with one of six (6) different contexts based on whether the directly previous point was a single return (0), the first (1) or the last (2) of a double return, or the first (3), an intermediate (4), or the last (5) of a triple or higher return.
+These 6 bits of information are combined into one symbol whose value ranges from 0 to 63 that we then compress with one of six (6) different contexts based on whether the directly previous point was a single return (0), the first (1) or the last (2) of a double return, or the first (3), an intermediate (4), or the last (5) of a triple or higher return.
 
 If the scanner channel is different we use one symbol whose value ranges from 0 to 2 to encode whether we need to add 1, 2, or 3 to the previous scanner channel to get (modulo 4) to the current scanner channel that we then compress using the previous scanner channel as one of four different contexts. The following XYZ coordinates and attribute predictions are relative to the previous point from the *same* scanner channel. For each chunk the points of all four channels are initialized to the first point per chunks that is stored raw. 
+
+If the point source ID is different we ...
 
 If the number of returns is different we use one symbol whose value ranges from 0 to 15 that we then compress it with the previous number of returns (of the same scanner channel) as one of sixteen contexts.
 
