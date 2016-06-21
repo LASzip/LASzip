@@ -50,15 +50,20 @@ Chunk Layout:
 
 Compression of scanner channel, point source ID, return counts, and XYZ layer
 -----------------------------------------------------------------------------
-Due to the new scanner channel it is *crucial* to first encode whether a point is from the same and if not from which other scanner channel so that the correct context can be used for all subsequent predictions. We also encode whether a point has a different GPS time stamp as the previous point from the same scanner channel as this correlates with changes in the return number, the number of returns, and the coordinates.
+Due to the new scanner channel it is *crucial* to first encode whether a point is from the same and if not from which other scanner channel so that the correct context can be used for all subsequent predictions. We also encode whether a point has a different GPS time stamp and a different scan angle as the previous point from the same scanner channel as this correlates strongly with changes in the return number, the number of returns.
 
 * scanner channel compared to the scanner channel of the previous point (same = 0 / different = 1)
 * GPS time stamp compared to the GPS time stamp of the previous point from the *same* scanner channel (same = 0 / different = 1)
+* scan angle compared to the scan angle of the previous point from the *same* scanner channel (same = 0 / different = 1)
 * point source ID compared to the point source ID of the previous point from the *same* scanner channel (same = 0 / different = 1)
 * number of returns compared to the number of returns of the previous point from the *same* scanner channel (same = 0 / different = 1)
 * return number compared to the return number of th previous point from the *same* scanner channel (same = 0 / plus one = 1 / minus one = 2 / other difference = 3)
 
-These 6 bits of information are combined into one symbol whose value ranges from 0 to 63 that we then compress with one of six (6) different contexts based on whether the directly previous point was a single return (0), the first (1) or the last (2) of a double return, or the first (3), an intermediate (4), or the last (5) of a triple or higher return.
+These 7 bits of information are combined into one symbol whose value ranges from 0 to 127 that we then compress with one of four (4) different contexts based on whether the directly previous point was a single return (0), or the first (1), the last (2) or the intermediate (3) return in case of multi-return. Possible alternatives to consider:
+   * compress with only one context.
+   * compress with one of two (2) different contexts based on whether the directly previous point was a single return or the last return of a multi-return (0) or the first or intermediate return of a multi-return (1).
+   * compress with one of three (3) different contexts based on whether the directly previous point was a single return or the last return of a multi-return (0) or the first of a multi-return (1), or the intermediate return of a multi-return (2). 
+   * compress with one of six (6) different contexts based on whether the directly previous point was a single return (0), the first (1) or the last (2) of a double return, or the first (3), an intermediate (4), or the last (5) of a triple or higher return. 
 
 If the scanner channel is different we use one symbol whose value ranges from 0 to 2 to encode whether we need to add 1, 2, or 3 to the previous scanner channel to get (modulo 4) to the current scanner channel that we then compress using the previous scanner channel as one of four different contexts. The following XYZ coordinates and attribute predictions are relative to the previous point from the *same* scanner channel. For each chunk the points of all four channels are initialized to the first point per chunks that is stored raw. 
 
