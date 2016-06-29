@@ -16,31 +16,38 @@ In the past ESRI has claimed to have identified very particular needs for proces
 
 Some of the things that ESRI has added to "optimized LAS" are already part of LASzip and others may already be on our TODO list. So as we wait for ESRI's answer, let's already start fleshing out the feature set that the rest of the community wants to see in the new LASzip:
 
-New Features
+Core Features
 -------- 
 **1. Selective Decompression:**
 
 Often only a subset of all the attributes of a LiDAR return stored in the LAS format are actually needed by an application. Currently all points attributes have to be read and decompressed by an application opening a LAS or a LAZ file. This is the most far reaching new feature of the native LAS 1.4 extension of LASzip: for the new point types, it will allow reading and decompressing only those points attributes that are relevant to the application. A Web-based LiDAR viewer, for example, may  only have to download, parse, and decompress the xyz coordinates and the intensities of the point cloud and a cloud-based service for DTM generation will only have to download, parse, and decompress the xyz coordinates and the classification values.
 
-**2. Re-writeable Flags and Classification**
+**2. Variable Chunking:**
 
-Most of the point attribute of an LAS file will never change --- *at laest* once the LiDAR was published. The xyz coordinates are final once the LiDAR flightlines were aligned, the return counts are fix, the intensities are direct measured, and the original GPS time stamps and the point source IDs should be preserved for posterity. What often does change, however, are the point classifications into "ground", "building", "noise", or "water" points, as well as the flags describing which points are to be "withheld" or which ones are part of the not always desired "overlap".  This is the second far reaching new feature of the native LAS 1.4 extension of LASzip: based on mechanisms that have already been field-tested as part of the "LASlayers" effort the new LASzip will support overriding the existing classifications or flags with a new layer of values. 
+Instead of having each atomic unit of points that are compressed together - a chunk - have the same size of a default 50,000 points the compressor offer the option to let each chunk have a different size. This is in particularly useful when creating point orders that support spatially indexing by rearranging them, for example, into the cells of a quad tree that are laid out along a space-filling curve. Variable chunking allows granular access to only those points of a cell that was selected for loading.
 
-**3. Full Integration of Spatial Indexing**
+Optional Features
+--------
+
+**3. Tighter Integration of Spatial Indexing (likely)**
 
 Already supported in the existing LASzip compressor as an optional item this will become a mandatory part of every new LAZ file that is written. Area-of-interest queries are also a form or "selective decompression" and require two things: Knowledge where in the file the points that fall into the interesting area are located (e.g. in the seventeen point intervals [5236312,5236312], [6523634,6634523], ....) and the ability to seek in the compressed file and decompress only those point intervals. The letter has been an integral part of the LASzip compressor since day one as this was one of the core features sponsored by USACE. The first has been added after little by little to LASzip in order not to disrupt anything since the concept (i.e. LASindex and tiny LAX files) was first introduced at ELMF in 2012. The concept needs to be reworked slightly to accommodate files with over 4 billion points.
 
-**4. Attach-able Attributes (optional)**
+**4. Re-writeable Flags and Classification (maybe, definitely via LASlayers of LASlib) **
+
+Most of the point attribute of an LAS file will never change --- *at laest* once the LiDAR was published. The xyz coordinates are final once the LiDAR flightlines were aligned, the return counts are fix, the intensities are direct measured, and the original GPS time stamps and the point source IDs should be preserved for posterity. What often does change, however, are the point classifications into "ground", "building", "noise", or "water" points, as well as the flags describing which points are to be "withheld" or which ones are part of the not always desired "overlap".  This is the second far reaching new feature of the native LAS 1.4 extension of LASzip: based on mechanisms that have already been field-tested as part of the "LASlayers" effort the new LASzip will support overriding the existing classifications or flags with a new layer of values. 
+
+**4. Attach-able Attributes (maybe, more likely via LASlayers of LASlib) **
 
 Some LiDAR processing steps create additional per-point attributes such as RGB colors or NDVI values from a different source, error estimates, or point normals. During the design process of the the native LAS 1.4 extension of LASzip we want to consider to allow adding such attributes later without requiring a complete re-write of all existing points attributes that have not changed. 
 
-**5. Explode-able Files (optional)**
+**5. Explode-able Files (maybe, more likely via LASlayers of LASlib) **
 
 Selective decompression - or more importantly selective download - of large files may in some cases be more feasible to implement for a 3D Web viewer or a LiDAR service portal when the data for selectable attributes is stored for download in separate files. During the design process of the the native LAS 1.4 extension of LASzip we want to accomodate to later add the option to store one compressed LAZ file as a number of compressed files each of which encodes a different set of point attributes.  
 
-**6. Specification Document**
+**6. Specification Document (`in progress <http://groups.google.com/group/lasroom>`_) **
 
-The LASzip compressor is currently only documented via an open source reference implementation in C++. In order to create LASzip compressors and decompressors in other programming languages it is currently necessary to step through the (reasonably well documented) C++ source code. We hope that funds can be made available that allow us to hire technical writers who can create a proper specification document that describes the open LASzip compressed LiDAR format.
+The LASzip compressor is currently only documented via an open source reference implementation in C++. In order to create LASzip compressors and decompressors in other programming languages it is currently necessary to step through the (reasonably well documented) C++ source code. We hope that funds can be made available that allow us to hire technical writers who can create a proper `specification document <http://groups.google.com/group/lasroom>`_ that describes the open LASzip compressed LiDAR format.
 
 Open Forum
 -------- 
