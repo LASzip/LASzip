@@ -26,7 +26,7 @@ Chunk Layout:
 2) Numbers and Bytes
   + Number of remaining points [4 bytes]
   + Number of bytes (maybe compressed)
-     - scanner channel, GPS change, point source ID change, return counts, and XY layer [4 bytes]
+     - scanner channel, point source ID change, GPS time change, scan angle change, return counts, and XY layer [4 bytes]
      - Z layer [4 bytes]
      - classification layer [4 byte]
      - flags layer [4 bytes]
@@ -41,7 +41,7 @@ Chunk Layout:
      - WavePacket layer [4 bytes]
      - "Extra Bytes" layer [4 bytes]
 3) Layers
-     - scanner channel, GPS change, point source ID change, return counts, and XY layer
+     - scanner channel, point source ID change, GPS time change, scan angle change, return counts, and XY layer
      - classification layer
      - flags layer
      - intensity layer
@@ -55,46 +55,85 @@ Chunk Layout:
      - WavePacket layer
      - "Extra Bytes" layer
 
-Compression of scanner channel, point source ID, return counts, and XYZ layer
+Compression of scanner channel, point source ID change, GPS time change, scan angle change, return counts, and XY layer
 -----------------------------------------------------------------------------
-Due to the new scanner channel it is *crucial* to first encode whether a point is from the same and if not from which other scanner channel so that the correct context can be used for all subsequent predictions. We also encode whether a point has a different GPS time stamp and a different scan angle as the previous point from the same scanner channel as this correlates strongly with changes in the return number, the number of returns.
+Due to the new scanner channel it is *crucial* to first encode whether a point is from the same and if not from which other scanner channel so that the correct context can be used for all subsequent predictions. We also encode whether a point has a a different point source ID, a different GPS time, and a different scan angle as the previous point from the same scanner channel as these changes correlate strongly with another and the return counts that are also recorded in this layer.
 
 * scanner channel compared to the scanner channel of the previous point (same = 0 / different = 1)
+* point source ID compared to the point source ID of the previous point from the *same* scanner channel (same = 0 / different = 1)
 * GPS time stamp compared to the GPS time stamp of the previous point from the *same* scanner channel (same = 0 / different = 1)
 * scan angle compared to the scan angle of the previous point from the *same* scanner channel (same = 0 / different = 1)
-* point source ID compared to the point source ID of the previous point from the *same* scanner channel (same = 0 / different = 1)
 * number of returns compared to the number of returns of the previous point from the *same* scanner channel (same = 0 / different = 1)
 * return number compared to the return number of th previous point from the *same* scanner channel (same = 0 / plus one = 1 / minus one = 2 / other difference = 3)
 
-These 7 bits of information are combined into one symbol whose value ranges from 0 to 127 that we then compress with one of four (4) different contexts based on whether the directly previous point was a single return (0), or the first (1), the last (2) or the intermediate (3) return in case of multi-return. Possible alternatives to consider:
-   * compress with only one context.
-   * compress with one of two (2) different contexts based on whether the directly previous point was a single return or the last return of a multi-return (0) or the first or intermediate return of a multi-return (1).
-   * compress with one of three (3) different contexts based on whether the directly previous point was a single return or the last return of a multi-return (0) or the first of a multi-return (1), or the intermediate return of a multi-return (2). 
-   * compress with one of six (6) different contexts based on whether the directly previous point was a single return (0), the first (1) or the last (2) of a double return, or the first (3), an intermediate (4), or the last (5) of a triple or higher return. 
+These 7 bits of information are combined into one symbol whose value ranges from 0 to 127 that we then compress with one of four (4) different contexts based on whether the directly previous point was a single return (0), or the first (1), the last (2) or the intermediate (3) return in case of multi-return.
 
-If the scanner channel is different we use one symbol whose value ranges from 0 to 2 to encode whether we need to add 1, 2, or 3 to the previous scanner channel to get (modulo 4) to the current scanner channel that we then compress using the previous scanner channel as one of four different contexts. The following XYZ coordinates and attribute predictions are relative to the previous point from the *same* scanner channel. For each chunk the points of all four channels are initialized to the first point per chunks that is stored raw. 
-
-If the point source ID is different we ...
+If the scanner channel is different we use one symbol whose value ranges from 0 to 2 to encode whether we need to add 1, 2, or 3 to the previous scanner channel to get (modulo 4) to the current scanner channel that we then compress using the previous scanner channel as one of four different contexts. All following predictions are relative to the previous point from the *same* scanner channel. For each chunk the points of all four channels are initialized to the very first point per chunk that is stored raw. 
 
 If the number of returns is different we use one symbol whose value ranges from 0 to 15 that we then compress it with the previous number of returns (of the same scanner channel) as one of sixteen contexts.
 
 If the return number is different we encode in in two possible ways depending on whether the GPS time stamp has changed:
-   - if the GPS time stamp *has not* changed we use one symbol whose value ranges from 0 to 14 to encode whether we need to add 2, 3, 4 ... 12, 13 or 14 to the previous return number (of the same scanner channel) to get (modulo 16) to the current return number that we then compress using the previous return number (of the same scanner channel) as one of sixteen contexts.
+   - if the GPS time stamp *has not* changed we use one symbol whose value ranges from 0 to 12 to encode whether we need to add 2, 3, 4 ... 12, 13 or 14 to the previous return number (of the same scanner channel) to get (modulo 16) to the current return number that we then compress using the previous return number (of the same scanner channel) as one of sixteen contexts.
    - if the GPS time stamp *has* changed we use one symbol whose value ranges from 0 to 15 to encode the current return number that we then compress with the (already encoded) number of returns as one of sixteen contexts.
+
+Next we use the number of returns n and the return number r to to derive two numbers that are used for switching contexts later: a *return map m* and *a return level l*.
+
+The *return map m* simply serializes the valid combinations of r and n: for r = 1 and n = 1 it is 0, for r = 1 and n = 2 it is 1, for r = 2 and n = 2 it is 2, for r = 1 and n = 3 it is 3, for r = 2 and n = 3 it is 4, for r = 3 and n = 3 it is 5, for r = 1 and n = 4 it is 6, etc. Unfortunately, some LAS files start numbering r and n at 0, only have return numbers r, or only have number of return of given pulse counts n. We therefore complete the table to also map invalid combinations to be used as a context. Furthermore with up to 15 returns there would be too many different combinations (namely 120). Therefore we map combinations of many returns pulses to the same number m and also complete the table for all combinations of r and n as shown below:
+
+const U8 number_return_map_4bit[16][16] = 
+{
+  { 15, 14, 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0 },
+  { 14,  0,  1,  3,  6, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 },
+  { 13,  1,  2,  4,  7, 11, 11, 11, 11, 11, 11, 10, 10, 10, 10, 10 },
+  { 12,  3,  4,  5,  8, 12, 12, 12, 12, 11, 11, 11, 11, 11, 11, 11 },
+  { 11,  6,  7,  8,  9, 13, 13, 12, 12, 12, 12, 11, 11, 11, 11, 11 },
+  { 10, 10, 11, 12, 13, 14, 14, 13, 13, 12, 12, 12, 12, 12, 12, 12 },
+  {  9, 10, 11, 12, 13, 14, 15, 14, 13, 13, 13, 12, 12, 12, 12, 12 },
+  {  8, 10, 11, 12, 12, 13, 14, 15, 14, 13, 13, 13, 13, 12, 12, 12 },
+  {  7, 10, 11, 12, 12, 13, 13, 14, 15, 14, 14, 13, 13, 13, 13, 13 },
+  {  6, 10, 11, 11, 12, 12, 13, 13, 14, 15, 14, 14, 14, 13, 13, 13 },
+  {  5, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 14, 14, 14, 13, 13 },
+  {  4, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 14, 14, 14 },
+  {  3, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 15, 14, 14 },
+  {  2, 10, 10, 11, 11, 12, 12, 12, 13, 13, 14, 14, 15, 15, 15, 14 },
+  {  1, 10, 10, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 15, 15, 15 },
+  {  0, 10, 10, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15 }
+};
+
+The return level l specifies how many returns there have already been for a given pulse prior to this return. Given only valid combinations for the return number r and the number of returns of given pulse n we could compute it as l = n − r. But we again use a completed look-up table as shown below to map invalid combinations for r and l to different contexts.
+
+const U8 number_return_level_4bit[16][16] = 
+{
+  {  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 12, 14, 15 },
+  {  1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 12, 14 },
+  {  2,  1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 12 },
+  {  3,  2,  1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12 },
+  {  4,  3,  2,  1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11 },
+  {  5,  4,  3,  2,  1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10 },
+  {  6,  5,  4,  3,  2,  1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9 },
+  {  7,  6,  5,  4,  3,  2,  1,  0,  1,  2,  3,  4,  5,  6,  7,  8 },
+  {  8,  7,  6,  5,  4,  3,  2,  1,  0,  1,  2,  3,  4,  5,  6,  7 },
+  {  9,  8,  7,  6,  5,  4,  3,  2,  1,  0,  1,  2,  3,  4,  5,  6 },
+  { 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0,  1,  2,  3,  4,  5 },
+  { 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0,  1,  2,  3,  4 },
+  { 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0,  1,  2,  3 },
+  { 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0,  1,  2 },
+  { 14, 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0,  1 },
+  { 15, 14, 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0 }
+};
 
 We compress X, Y, and Z similar to how LASzip does it currently (but make all predictions from the previous point of the same scanner channel).
 
-Compression of classification and flags layer
----------------------------------------------
+Compression of classification layer
+-----------------------------------
 Compress the classification based on the context m and the previous value similar to the existing LASzip.
+
+Compression of flags layer
+--------------------------
 
 Compression of intensity layer
 ------------------------------
 Compress the intensity based on the context m similar to the existing LASzip.
-
-Compression of point source ID layer
-------------------------------
-Compress the point source ID ...
 
 Compression of scan angle layer
 ------------------------------
@@ -103,6 +142,14 @@ Compress the scan angle ...
 Compression of user data layer
 ------------------------------
 Compress the user data layer ...
+
+Compression of point source ID layer
+------------------------------
+Compress the user data layer ...
+
+Compression of GPS time layer
+-----------------------------
+Compress the GPS times ...
 
 Compression of RGB layer
 ------------------------------
