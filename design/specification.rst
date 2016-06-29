@@ -2,7 +2,9 @@ LASzip for LAS 1.4 (native extension)
 ========
 Specification Document 
 --------
-As before the LiDAR points are compressed in completely independent chunks that default to 50,000 points per chunk. Each chunk can be decompressed "on its own" once the start byte is know. As before the first point of each chunk is stored raw. The attributes of all following points are broken into several layers. Only the first layer containing the x and y coordinates (and a few pieces of information) is mandatory to be read  mandartory. The remaining layers containing independently useful attributes such as elevation, intensity, GPS times, colors, point source ID, classifications and flags do not necessarily need to be read from disk and be decompressed.
+As before the LASheader and the VLRs are stored uncompressed but the highest bit of the point type field is set (i.e. the compressed point types 128 to 138 correspond to the uncompressed point types 0 to 10). LiDAR points are compressed in completely independent chunks that default to 50,000 points per chunk. Each chunk can be decompressed "on its own" once the start byte is know. As before the first point of each chunk is stored raw. For point types 0 to 5 nothing changes and the same compression scheme as before is used. For the new point types 6 to 10 of LAS 1.4 there are two main changes: the chunks are encoded in layers and the chunks can have variable size.
+
+The attributes of all following points are broken into several layers. Only the first layer containing the x and y coordinates (and a few pieces of information) is to be read mandatory. The remaining layers containing independently useful attributes such as elevation, intensity, classifications, flags, GPS times, colors, point source ID, user data, and scan angles do not necessarily need be decompressed (or be read from disk).
 
 Another new (or rather "revived") feature in LASzip compression for the new point types of LAS 1.4 is that it will be possible to continously vary the chunk size. This in the design of the original LASzip but broke when the file was streamed due to missing access to the per chunk point counts during a streaming read as those were only stored in the chunk table at the end of the LAZ file. This will be fixed by also storing the number of points inside each chunk.
 
@@ -10,7 +12,7 @@ LAZ File Layout:
 ----------------
 
 1. LASheader
-2. LASzip VLR
+2. VLRs + LASzip VLR
 3. Sequence of n Chunks
 
    1. Chunk 1
