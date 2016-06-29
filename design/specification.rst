@@ -26,25 +26,32 @@ Chunk Layout:
 2) Numbers and Bytes
   + Number of remaining points [4 bytes]
   + Number of bytes (maybe compressed)
-     - scanner channel, point source ID, return counts, and XYZ layer [4 bytes]
-     - classification and flags layer [4 bytes]
+     - scanner channel, GPS change, point source ID change, return counts, and XY layer [4 bytes]
+     - Z layer [4 bytes]
+     - classification layer [4 byte]
+     - flags layer [4 bytes]
      - intensity layer [4 bytes]
      - scan angle layer [4 bytes]
      - user data layer [4 bytes]
+     - point source ID layer [4bytes]
      - GPS time stamp layer [4 bytes]
+     optional
      - RGB layer [4 bytes]
-     - RGB + NIR layer [4 bytes]
+     - NIR layer [4 bytes]
      - WavePacket layer [4 bytes]
      - "Extra Bytes" layer [4 bytes]
 3) Layers
-     - scanner channel, point source ID, return counts, and XYZ layer
-     - classification and flags layer
+     - scanner channel, GPS change, point source ID change, return counts, and XY layer
+     - classification layer
+     - flags layer
      - intensity layer
      - scan angle layer
      - user data layer
+     - point source ID layer
      - GPS time stamp layer
+     optional
      - RGB layer
-     - RGB + NIR layer
+     - NIR layer
      - WavePacket layer
      - "Extra Bytes" layer
 
