@@ -76,7 +76,7 @@ If the return number is different we encode in in two possible ways depending on
    - if the GPS time stamp *has not* changed we use one symbol whose value ranges from 0 to 12 to encode whether we need to add 2, 3, 4 ... 12, 13 or 14 to the previous return number (of the same scanner channel) to get (modulo 16) to the current return number that we then compress using the previous return number (of the same scanner channel) as one of sixteen contexts.
    - if the GPS time stamp *has* changed we use one symbol whose value ranges from 0 to 15 to encode the current return number that we then compress with the (already encoded) number of returns as one of sixteen contexts.
 
-Next we use the number of returns n and the return number r to to derive two numbers that are used for switching contexts later: a *return map m* and *a return level l*.
+Next we use the number of returns n and the return number r to to derive two numbers between 0 and 15 that are used for switching contexts later: a *return map m* and *a return level l*.
 
 The *return map m* simply serializes the valid combinations of r and n: for r = 1 and n = 1 it is 0, for r = 1 and n = 2 it is 1, for r = 2 and n = 2 it is 2, for r = 1 and n = 3 it is 3, for r = 2 and n = 3 it is 4, for r = 3 and n = 3 it is 5, for r = 1 and n = 4 it is 6, etc. Unfortunately, some LAS files start numbering r and n at 0, only have return numbers r, or only have number of return of given pulse counts n. We therefore complete the table to also map invalid combinations to be used as a context. Furthermore with up to 15 returns there would be too many different combinations (namely 120). Therefore we map combinations of many returns pulses to the same number m and also complete the table for all combinations of r and n as shown below:
 
@@ -100,7 +100,7 @@ const U8 number_return_map_4bit[16][16] =
   {  0, 10, 10, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15 }
 };
 
-The return level l specifies how many returns there have already been for a given pulse prior to this return. Given only valid combinations for the return number r and the number of returns of given pulse n we could compute it as l = n − r. But we again use a completed look-up table as shown below to map invalid combinations for r and l to different contexts.
+The *return level l* specifies how many returns there have already been for a given pulse prior to this return. Given only valid combinations for the return number r and the number of returns of given pulse n we could compute it as l = n − r. But we again use a completed look-up table as shown below to map invalid combinations for r and l to different contexts.
 
 const U8 number_return_level_4bit[16][16] = 
 {
@@ -122,7 +122,7 @@ const U8 number_return_level_4bit[16][16] =
   { 15, 14, 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0 }
 };
 
-We compress X, Y, and Z similar to how LASzip does it currently (but make all predictions from the previous point of the same scanner channel).
+We encode the X and Y coordinates with a second order predictor. We predict the differences dX and dY to the X and Y coordinates of the previous point from the same scanner channel with recently occuring differences. We predicts dX and dY between as the median of the five immediately preceding differences of points from the scanner channel and with the same return map m. The intuition behind this is, for example, that single returns are always from a different laser pulse than the previous point and therefore have a wider spacing in X and/or Y than the middle of three returns.
 
 Compression of classification layer
 -----------------------------------
