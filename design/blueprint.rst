@@ -45,10 +45,10 @@ Some LiDAR processing steps create additional per-point attributes such as RGB c
 
 Selective decompression - or more importantly selective download - of large files may in some cases be more feasible to implement for a 3D Web viewer or a LiDAR service portal when the data for selectable attributes is stored for download in separate files. During the design process of the the native LAS 1.4 extension of LASzip we want to accomodate to later add the option to store one compressed LAZ file as a number of compressed files each of which encodes a different set of point attributes.  
 
-**6. Specification Document (`in progress <http://groups.google.com/group/lasroom>`_) **
+**6. Specification Document (`in progress <http://github.com/LASzip/LASzip/blob/master/design/specification.rst>`_) **
 
 The LASzip compressor is currently only documented via an open source reference implementation in C++. In order to create LASzip compressors and decompressors in other programming languages it is currently necessary to step through the (reasonably well documented) C++ source code. We hope that funds can be made available that allow us to hire technical writers who can create a proper `specification document <http://groups.google.com/group/lasroom>`_ that describes the open LASzip compressed LiDAR format.
 
 Open Forum
 -------- 
-Please join us to continue the already on-going discussion in the `"LAS room" <http://groups.google.com/group/lasroom>`_ where we will finalize the feature set in an open censensus process.
+Please join us to continue the already on-going discussion in the `"LAS room" <https://github.com/LASzip/LASzip/blob/master/design/specification.rst>`_ where we will finalize the feature set in an open censensus process.
