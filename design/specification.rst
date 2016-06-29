@@ -34,7 +34,7 @@ Chunk Layout:
      - scan angle layer [4 bytes]
      - user data layer [4 bytes]
      - point source ID layer [4bytes]
-     - GPS time stamp layer [4 bytes]
+     - GPS time layer [4 bytes]
      optional
      - RGB layer [4 bytes]
      - NIR layer [4 bytes]
@@ -42,13 +42,14 @@ Chunk Layout:
      - "Extra Bytes" layer [4 bytes]
 3) Layers
      - scanner channel, point source ID change, GPS time change, scan angle change, return counts, and XY layer
+     - Z layer
      - classification layer
      - flags layer
      - intensity layer
      - scan angle layer
      - user data layer
      - point source ID layer
-     - GPS time stamp layer
+     - GPS time layer
      optional
      - RGB layer
      - NIR layer
