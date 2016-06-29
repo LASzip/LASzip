@@ -150,7 +150,14 @@ Compress the user data layer ...
 
 Compression of GPS time layer
 -----------------------------
-Compress the GPS times ...
+The GPS times of a single flight line stored in aquisition order are a monotonically increasing sequence of double-precision floating-point numbers where returns of the same pulse have the same GPS time and where subsequent pulses have a more or less constant spacing in time. LASzip treats the double-precision floating-point GPS times as signed 64 bit integers and predicts the deltas between them. We store up to four previously compressed GPS times with corresponding deltas to account for repeated jumps in GPS times that can arise when multiple flight paths are merged with fine spatial granularity. Nothing needs to be encoded when the GPS times are identical. Otherwise we distinguishes several cases that are entropy coded with 515 symbols depending on if the current GPS time is
+
+   +   0–500 : predicted using the current delta times 0 to 500.
+   + 501–510 : predicted using the current delta times -1 to -10.
+   +     511 : starting a new context.
+   + 512–514 : predicted with one of the other three contexts.
+   
+For the first two cases we subsequently difference code the delta prediction and the actual delta. We starts a new context when the delta overflows a 32 bit integer. For that it difference codes the 32 higher bits of the current GPS time and the current context and stores the lower 32 bits raw. Otherwise it switches to the specified context (where the delta will not overflows a 32 bit integer) and recurses. The current deltas stored with each context are updated to the actual delta when they were outside the predictable range more than 3 consecutive times (i.e. bigger than 500 times the current delta, smaller than -10 times the current delta, or zero).
 
 Compression of RGB layer
 ------------------------------
