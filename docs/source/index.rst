@@ -172,6 +172,9 @@ Software with native LAZ support
 * PointCloudViz by `mirage <http://www.mirage-tech.com/>`_
 * Geoverse by `euclideon <http://www.euclideon.com/>`_
 * PointCab by `PointCab GmbH <http://www.pointcab-software.com/en/technical-details/>`_
+* Z+F SynCaT Mobile Mapping Software by `Z+F Zoller+Frohlich <http://www.zf-laser.com/Z-F-SynCaT-R.174.0.html>`_
+* LidarViewer by `routescene <http://www.routescene.com/>`_
+* 3Dsurvey by `Modri Planet d. o. o. <http://www.3dsurvey.si/>`_
 
 Download LAZ data
 ------------------------------------------------------------------------------
