@@ -1,7 +1,7 @@
 /*
 ===============================================================================
 
-  FILE:  laszip_dll.h
+  FILE:  laszip_api.h
 
   CONTENTS:
 
@@ -13,7 +13,7 @@
 
   COPYRIGHT:
 
-    (c) 2007-2015, martin isenburg, rapidlasso - fast tools to catch reality
+    (c) 2007-2017, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -24,6 +24,10 @@
 
   CHANGE HISTORY:
 
+	8 January 2017 -- name change from 'laszip_dll.h' and integration Hobu's changes for Unix
+    7 January 2017 -- set reserved field in LASzip VLR from 0xAABB to 0x0
+    7 January 2017 -- make scan angle quantization in compatibility mode consistent with LIB
+    7 January 2017 -- compatibility mode *decompression* fix for points with waveforms
     23 September 2015 -- correct update of bounding box and counters from inventory on closing
     22 September 2015 -- bug fix for not overwriting description of pre-existing "extra bytes"
     5 September 2015 -- "LAS 1.4 compatibility mode" now allows pre-existing "extra bytes"
@@ -38,8 +42,8 @@
 ===============================================================================
 */
 
-#ifndef LASZIP_DLL_H
-#define LASZIP_DLL_H
+#ifndef LASZIP_API_H
+#define LASZIP_API_H
 
 #ifdef _WIN32
 #   ifdef LASZIP_DYN_LINK
@@ -60,11 +64,28 @@ extern "C"
 {
 #endif
 
+#include <stdio.h>
+
 /*---------------------------------------------------------------------------*/
 /*--------------- DLL variables to pass data to/from LASzip -----------------*/
 /*---------------------------------------------------------------------------*/
-#include <stdint.h>
 
+#ifdef _WIN32
+typedef int                laszip_BOOL;
+typedef unsigned char      laszip_U8;
+typedef unsigned short     laszip_U16;
+typedef unsigned int       laszip_U32;
+typedef unsigned __int64   laszip_U64;
+typedef char               laszip_I8;
+typedef short              laszip_I16;
+typedef int                laszip_I32;
+typedef __int64            laszip_I64;
+typedef char               laszip_CHAR;
+typedef float              laszip_F32;
+typedef double             laszip_F64;
+typedef void*              laszip_POINTER;
+#else
+#include <stdint.h>
 typedef int                laszip_BOOL;
 typedef uint8_t            laszip_U8;
 typedef uint16_t           laszip_U16;
@@ -78,6 +99,7 @@ typedef char               laszip_CHAR;
 typedef float              laszip_F32;
 typedef double             laszip_F64;
 typedef void*              laszip_POINTER;
+#endif
 
 typedef struct laszip_geokey
 {
@@ -493,4 +515,4 @@ laszip_unload_dll
 }
 #endif
 
-#endif /* LASZIP_DLL_H */
+#endif /* LASZIP_API_H */

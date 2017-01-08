@@ -1,7 +1,7 @@
 /*
 ===============================================================================
 
-  FILE:  laszip_dll.c
+  FILE:  laszip_api.c
 
   CONTENTS:
 
@@ -13,7 +13,7 @@
 
   COPYRIGHT:
 
-    (c) 2007-2015, martin isenburg, rapidlasso - fast tools to catch reality
+    (c) 2007-2017, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -847,21 +847,17 @@ laszip_close_reader
 /*---------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------*/
-
 #ifdef _WIN32
-  #include <Windows.h>
+  #include <windows.h>
 #else
   #include <dlfcn.h>
   typedef void* HINSTANCE;
 #define NULL 0
-  #define LoadLibrary dlopen
+#define LoadLibrary dlopen
 #define GetProcAddress dlsym
 #define FreeLibrary dlclose
 #define TEXT
-
 #endif
-
-
 static HINSTANCE laszip_HINSTANCE = NULL;
 laszip_I32 laszip_load_dll()
 {
@@ -873,9 +869,8 @@ laszip_I32 laszip_load_dll()
 #ifdef _WIN32
   laszip_HINSTANCE = LoadLibrary(TEXT("LASzip.dll"));
 #else
-  laszip_HINSTANCE = dlopen("liblaszip.dylib", RTLD_NOW);
+  laszip_HINSTANCE = LoadLibrary("liblaszip.dylib", RTLD_NOW);
 #endif
-
   if (laszip_HINSTANCE == NULL) {
      return 1;
   }

@@ -2,9 +2,9 @@
 ===============================================================================
 
   FILE:  laszip.hpp
-  
+
   CONTENTS:
-  
+
     Contains LASitem and LASchunk structs as well as the IDs of the currently
     supported entropy coding scheme
 
@@ -14,7 +14,7 @@
 
   COPYRIGHT:
 
-    (c) 2007-2016, martin isenburg, rapidlasso - fast tools to catch reality
+    (c) 2007-2017, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -25,6 +25,9 @@
   
   CHANGE HISTORY:
   
+    7 January 2017 -- set reserved VLR field from 0xAABB to 0x0 in DLL
+    7 January 2017 -- consistent compatibility mode scan angle quantization in DLL
+    7 January 2017 -- compatibility mode *decompression* fix for waveforms in DLL
     25 February 2016 -- depreciating old libLAS laszipper/lasunzipper binding
     29 July 2013 -- reorganized to create an easy-to-use LASzip DLL 
     5 December 2011 -- learns the chunk table if it is missing (e.g. truncated LAZ)
@@ -35,7 +38,7 @@
     20 March 2011 -- incrementing LASZIP_VERSION to 1.2 for improved compression
     10 January 2011 -- licensing change for LGPL release and liblas integration
     12 December 2010 -- refactored from lasdefinitions after movies with silke
-  
+
 ===============================================================================
 */
 #ifndef LASZIP_HPP
@@ -56,9 +59,9 @@ typedef long long SIGNED_INT64;
 #endif
 
 #define LASZIP_VERSION_MAJOR                2
-#define LASZIP_VERSION_MINOR                4
+#define LASZIP_VERSION_MINOR                5
 #define LASZIP_VERSION_REVISION             1
-#define LASZIP_VERSION_BUILD_DATE      150923
+#define LASZIP_VERSION_BUILD_DATE      170107
 
 #define LASZIP_COMPRESSOR_NONE              0
 #define LASZIP_COMPRESSOR_POINTWISE         1
