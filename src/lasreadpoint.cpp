@@ -2,11 +2,11 @@
 ===============================================================================
 
   FILE:  lasreadpoint.cpp
-  
+
   CONTENTS:
-  
+
     see corresponding header file
-  
+
   PROGRAMMERS:
 
     martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
@@ -21,11 +21,11 @@
 
     This software is distributed WITHOUT ANY WARRANTY and without even the
     implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  
+
   CHANGE HISTORY:
-  
+
     see corresponding header file
-  
+
 ===============================================================================
 */
 
@@ -319,7 +319,7 @@ BOOL LASreadPoint::seek(const U32 current, const U32 target)
   {
     if (current != target)
     {
-      instream->seek(point_start+point_size*target);
+      instream->seek(point_start+(I64)point_size*target);
     }
   }
   return TRUE;
