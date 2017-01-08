@@ -13,7 +13,7 @@
 
   COPYRIGHT:
 
-    (c) 2011-2015, martin isenburg, rapidlasso - fast tools to catch reality
+    (c) 2011-2017, martin isenburg, rapidlasso - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the GNU Lesser General Licence as published by the Free Software
@@ -334,7 +334,6 @@ BOOL LASindex::read(const char* file_name)
   FILE* file = fopen(name, "rb");
   if (file == 0)
   {
-    fprintf(stderr,"ERROR (LASindex): cannot open '%s' for read\n", name);
     free(name);
     return FALSE;
   }
