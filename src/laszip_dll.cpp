@@ -2254,6 +2254,15 @@ laszip_open_writer(
       }
       else
       {
+        if (laszip_dll->header.start_of_waveform_data_packet_record != 0)
+        {
+#ifdef _WIN32
+          sprintf(laszip_dll->warning, "header.start_of_waveform_data_packet_record is %I64d. writing 0 instead.", laszip_dll->header.start_of_waveform_data_packet_record);
+#else
+          sprintf(laszip_dll->warning, "header.start_of_waveform_data_packet_record is %llu. writing 0 instead.", laszip_dll->header.start_of_waveform_data_packet_record);
+#endif
+          laszip_dll->header.start_of_waveform_data_packet_record = 0;
+        }                  
         try { laszip_dll->streamout->put64bitsLE((U8*)&(laszip_dll->header.start_of_waveform_data_packet_record)); } catch(...)
         {
           sprintf(laszip_dll->error, "writing header.start_of_waveform_data_packet_record");
