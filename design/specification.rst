@@ -43,7 +43,7 @@ Chunk Layout:
      - GPS time layer [4 bytes]
      optional
      - RGB layer [4 bytes]
-     - RGBNIR layer [4 bytes]
+     - NIR layer [4 bytes]
      - WavePacket layer [4 bytes]
      - "Extra Bytes" layer [4 bytes per byte]
 3) Layers
@@ -58,9 +58,9 @@ Chunk Layout:
      - GPS time layer
      optional
      - RGB layer
-     - RGBNIR layer
+     - NIR layer
      - WavePacket layer
-     - "Extra Bytes" layer
+     - "Extra Bytes" layer(s)
 
 Compression of scanner channel, point source ID change, GPS time change, scan angle change, return counts, and XY layer
 -----------------------------------------------------------------------------
@@ -107,6 +107,28 @@ const U8 number_return_map_4bit[16][16] =
   {  0, 10, 10, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15 }
 };
 
+However. This turned out to give too many contexts resulting in many tables and hardly used prediction models. Therefore the above table was finally simplified to only map to 6 different contexts.
+
+const U8 number_return_map_6ctx[16][16] = 
+{
+  {  0,  1,  2,  3,  4,  5,  3,  4,  4,  5,  5,  5,  5,  5,  5,  5 },
+  {  1,  0,  1,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3 },
+  {  2,  1,  2,  4,  4,  4,  4,  4,  4,  4,  4,  3,  3,  3,  3,  3 },
+  {  3,  3,  4,  5,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4 },
+  {  4,  3,  4,  4,  5,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4 },
+  {  5,  3,  4,  4,  4,  5,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4 },
+  {  3,  3,  4,  4,  4,  4,  5,  4,  4,  4,  4,  4,  4,  4,  4,  4 },
+  {  4,  3,  4,  4,  4,  4,  4,  5,  4,  4,  4,  4,  4,  4,  4,  4 },
+  {  4,  3,  4,  4,  4,  4,  4,  4,  5,  4,  4,  4,  4,  4,  4,  4 },
+  {  5,  3,  4,  4,  4,  4,  4,  4,  4,  5,  4,  4,  4,  4,  4,  4 },
+  {  5,  3,  4,  4,  4,  4,  4,  4,  4,  4,  5,  4,  4,  4,  4,  4 },
+  {  5,  3,  3,  4,  4,  4,  4,  4,  4,  4,  4,  5,  5,  4,  4,  4 },
+  {  5,  3,  3,  4,  4,  4,  4,  4,  4,  4,  4,  5,  5,  5,  4,  4 },
+  {  5,  3,  3,  4,  4,  4,  4,  4,  4,  4,  4,  4,  5,  5,  5,  4 },
+  {  5,  3,  3,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  5,  5,  5 },
+  {  5,  3,  3,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  5,  5 }
+};
+
 The *return level l* specifies how many returns there have already been for a given pulse prior to this return. Given only valid combinations for the return number r and the number of returns of given pulse n we could compute it as l = n − r. But we again use a completed look-up table as shown below to map invalid combinations for r and l to different contexts.
 
 const U8 number_return_level_4bit[16][16] = 
@@ -127,6 +149,28 @@ const U8 number_return_level_4bit[16][16] =
   { 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0,  1,  2 },
   { 14, 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0,  1 },
   { 15, 14, 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0 }
+};
+
+However. This turned out to give too many contexts resulting in many tables and hardly used prediction models. Therefore the above table was simplified to only map to 8 different contexts.
+
+const U8 number_return_level_8ctx[16][16] = 
+{
+  {  0,  1,  2,  3,  4,  5,  6,  7,  7,  7,  7,  7,  7,  7,  7,  7 },
+  {  1,  0,  1,  2,  3,  4,  5,  6,  7,  7,  7,  7,  7,  7,  7,  7 },
+  {  2,  1,  0,  1,  2,  3,  4,  5,  6,  7,  7,  7,  7,  7,  7,  7 },
+  {  3,  2,  1,  0,  1,  2,  3,  4,  5,  6,  7,  7,  7,  7,  7,  7 },
+  {  4,  3,  2,  1,  0,  1,  2,  3,  4,  5,  6,  7,  7,  7,  7,  7 },
+  {  5,  4,  3,  2,  1,  0,  1,  2,  3,  4,  5,  6,  7,  7,  7,  7 },
+  {  6,  5,  4,  3,  2,  1,  0,  1,  2,  3,  4,  5,  6,  7,  7,  7 },
+  {  7,  6,  5,  4,  3,  2,  1,  0,  1,  2,  3,  4,  5,  6,  7,  7 },
+  {  7,  7,  6,  5,  4,  3,  2,  1,  0,  1,  2,  3,  4,  5,  6,  7 },
+  {  7,  7,  7,  6,  5,  4,  3,  2,  1,  0,  1,  2,  3,  4,  5,  6 },
+  {  7,  7,  7,  7,  6,  5,  4,  3,  2,  1,  0,  1,  2,  3,  4,  5 },
+  {  7,  7,  7,  7,  7,  6,  5,  4,  3,  2,  1,  0,  1,  2,  3,  4 },
+  {  7,  7,  7,  7,  7,  7,  6,  5,  4,  3,  2,  1,  0,  1,  2,  3 },
+  {  7,  7,  7,  7,  7,  7,  7,  6,  5,  4,  3,  2,  1,  0,  1,  2 },
+  {  7,  7,  7,  7,  7,  7,  7,  7,  6,  5,  4,  3,  2,  1,  0,  1 },
+  {  7,  7,  7,  7,  7,  7,  7,  7,  7,  6,  5,  4,  3,  2,  1,  0 }
 };
 
 We encode the X and Y coordinates with a second order predictor. We predict the differences dX and dY to the X and Y coordinates of the previous point from the same scanner channel with recently occuring differences. We predicts dX and dY between as the median of the five immediately preceding differences of points from the scanner channel and with the same return map m. The intuition behind this is, for example, that single returns are always from a different laser pulse than the previous point and therefore have a wider spacing in X and/or Y than the middle of three returns.
@@ -177,6 +221,6 @@ Compression of WavePacket layer
 ------------------------------
 Compress the WavePacket layer ...
 
-Compression of "Extra Bytes" layer
+Compression of "Extra Bytes" layers
 ------------------------------
 Compress the "Extra Bytes" layer ...
