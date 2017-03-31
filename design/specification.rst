@@ -2,11 +2,11 @@ LASzip for LAS 1.4 (native extension)
 ========
 Specification Document 
 --------
-As before the LASheader and the VLRs are stored uncompressed but the highest bit of the point type field is set (i.e. the compressed point types 128 to 138 correspond to the uncompressed point types 0 to 10). LiDAR points are compressed in completely independent chunks that default to 50,000 points per chunk. Each chunk can be decompressed "on its own" once the start byte is know. As before the first point of each chunk is stored raw. For point types 0 to 5 nothing changes and the same compression scheme as before is used. For the new point types 6 to 10 of LAS 1.4 there are two main changes: the chunks are encoded in layers and the chunks can have variable size.
+As before the LASheader and the VLRs are stored uncompressed but the highest bit of the point type field is set (i.e. the compressed point types 128 to 138 correspond to the uncompressed point types 0 to 10). LiDAR points are compressed in completely independent chunks that default to 50,000 points per chunk. Each chunk can be decompressed "on its own" once the start byte is know. For point types 0 to 5 nothing changes and the same compression scheme as before is used. For the new point types 6 to 10 of LAS 1.4 there are two main changes: the chunks are encoded in layers and the chunks can have variable size.
 
-The attributes of all following points are broken into several layers. Only the first layer containing the x and y coordinates (and a few pieces of information) is to be read mandatory. The remaining layers containing independently useful attributes such as elevation, intensity, classifications, flags, GPS times, colors, point source ID, user data, and scan angles do not necessarily need be decompressed (or be read from disk).
+As before the first point of each chunk is stored raw. The attributes of all following points are broken into several layers. Only the first layer containing the x and y coordinates (and a few pieces of information) is mandatory to read and decompress. The remaining layers containing independently useful attributes such as elevation, intensity, classifications, flags, GPS times, colors, point source ID, user data, scan angles, wavepackets, and extra bytes do not necessarily need be decompressed (or be read from disk).
 
-Another new (or rather "revived") feature in LASzip compression for the new point types of LAS 1.4 is that it will be possible to continously vary the chunk size. This in the design of the original LASzip but broke when the file was streamed due to missing access to the per chunk point counts during a streaming read as those were only stored in the chunk table at the end of the LAZ file. This will be fixed by also storing the number of points inside each chunk.
+Another new (or rather "revived") feature in LASzip compression for the new point types of LAS 1.4 is that it will be possible to continously vary the chunk size. This was in the design of the original LASzip coder but broke whenever the file was streamed due to missing access to the per chunk point counts during a streaming read as those were only stored in the chunk table at the very end of the LAZ file. This is fixed now (but only for the new point types) by also storing the number of points at the beginning of each chunk.
 
 LAZ File Layout:
 ----------------
@@ -23,14 +23,14 @@ LAZ File Layout:
 
 4. Chunk Table (chunk starts and point numbers)
 5. EVLRs
-6. LASindex EVLR (optional index)
+6. LASindex EVLR (future feature: optional index for faster spatial queries)
 7. LASlayers EVLR (future feature: for in-place edits of classifications / flags)
 
 Chunk Layout:
 -------------
 1) Raw point [30 - 68 (or more) bytes]
 2) Numbers and Bytes
-  + Number of remaining points [4 bytes]
+  + Number of *remaining* points [4 bytes]
   + Number of bytes (maybe compressed)
      - scanner channel, point source ID change, GPS time change, scan angle change, return counts, and XY layer [4 bytes]
      - Z layer [4 bytes]
@@ -43,9 +43,9 @@ Chunk Layout:
      - GPS time layer [4 bytes]
      optional
      - RGB layer [4 bytes]
-     - NIR layer [4 bytes]
+     - RGBNIR layer [4 bytes]
      - WavePacket layer [4 bytes]
-     - "Extra Bytes" layer [4 bytes]
+     - "Extra Bytes" layer [4 bytes per byte]
 3) Layers
      - scanner channel, point source ID change, GPS time change, scan angle change, return counts, and XY layer
      - Z layer
@@ -58,13 +58,13 @@ Chunk Layout:
      - GPS time layer
      optional
      - RGB layer
-     - NIR layer
+     - RGBNIR layer
      - WavePacket layer
      - "Extra Bytes" layer
 
 Compression of scanner channel, point source ID change, GPS time change, scan angle change, return counts, and XY layer
 -----------------------------------------------------------------------------
-Due to the new scanner channel it is *crucial* to first encode whether a point is from the same and if not from which other scanner channel so that the correct context can be used for all subsequent predictions. We also encode whether a point has a a different point source ID, a different GPS time, and a different scan angle as the previous point from the same scanner channel as these changes correlate strongly with another and the return counts that are also recorded in this layer.
+Due to the new scanner channel it is *crucial* to first encode whether a point is from the same and if not from which other scanner channel so that the correct context can be used for all subsequent predictions. We also encode whether a point has a a different point source ID, a different GPS time, and a different scan angle as the previous point from the same scanner channel as these changes correlate strongly with another. The return counts that are also recorded in this layer.
 
 * scanner channel compared to the scanner channel of the previous point (same = 0 / different = 1)
 * point source ID compared to the point source ID of the previous point from the *same* scanner channel (same = 0 / different = 1)
@@ -73,14 +73,14 @@ Due to the new scanner channel it is *crucial* to first encode whether a point i
 * number of returns compared to the number of returns of the previous point from the *same* scanner channel (same = 0 / different = 1)
 * return number compared to the return number of th previous point from the *same* scanner channel (same = 0 / plus one = 1 / minus one = 2 / other difference = 3)
 
-These 7 bits of information are combined into one symbol whose value ranges from 0 to 127 that we then compress with one of four (4) different contexts based on whether the directly previous point was a single return (0), or the first (1), the last (2) or the intermediate (3) return in case of multi-return.
+These 7 bits of information are combined into one symbol whose value ranges from 0 to 127 that we then compress with one of four (4) different contexts based on whether the *directly* previous point (no matter from which scanner channel) was a single return (0), or the first (1), the last (2) or the intermediate (3) return in case of multi-return.
 
-If the scanner channel is different we use one symbol whose value ranges from 0 to 2 to encode whether we need to add 1, 2, or 3 to the previous scanner channel to get (modulo 4) to the current scanner channel that we then compress using the previous scanner channel as one of four different contexts. All following predictions are relative to the previous point from the *same* scanner channel. For each chunk the points of all four channels are initialized to the very first point per chunk that is stored raw. 
+If the **scanner channel is different** we use one symbol whose value ranges from 0 to 2 to encode whether we need to add 1, 2, or 3 to the previous scanner channel to get (modulo 4) to the current scanner channel that we then compress using the previous scanner channel as one of four different contexts. All following predictions are relative to the previous point from the *same* scanner channel. If that point does not yet exist then the previous point (from whichever other scanner channel) is used. For the very first point per chunk *that gets compressed* this is that one point that is stored raw at the beginning of every chunk.
 
-If the number of returns is different we use one symbol whose value ranges from 0 to 15 that we then compress it with the previous number of returns (of the same scanner channel) as one of sixteen contexts.
+If the **number of returns is different** we use one symbol whose value ranges from 0 to 15 that we then compress with the previous number of returns (from the same scanner channel) as one of sixteen contexts.
 
-If the return number is different we encode in in two possible ways depending on whether the GPS time stamp has changed:
-   - if the GPS time stamp *has not* changed we use one symbol whose value ranges from 0 to 12 to encode whether we need to add 2, 3, 4 ... 12, 13 or 14 to the previous return number (of the same scanner channel) to get (modulo 16) to the current return number that we then compress using the previous return number (of the same scanner channel) as one of sixteen contexts.
+If the **return number is different** we encode in in two possible ways depending on whether the GPS time stamp has changed:
+   - if the GPS time stamp *has not* changed we use one symbol whose value ranges from 0 to 12 to encode whether we need to add 2, 3, 4 ... 12, 13 or 14 to the previous return number (from the same scanner channel) to get (modulo 16) to the current return number that we then compress using the previous return number (from the same scanner channel) as one of sixteen contexts.
    - if the GPS time stamp *has* changed we use one symbol whose value ranges from 0 to 15 to encode the current return number that we then compress with the (already encoded) number of returns as one of sixteen contexts.
 
 Next we use the number of returns n and the return number r to to derive two numbers between 0 and 15 that are used for switching contexts later: a *return map m* and *a return level l*.
