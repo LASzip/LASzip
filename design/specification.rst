@@ -173,18 +173,24 @@ const U8 number_return_level_8ctx[16][16] =
   {  7,  7,  7,  7,  7,  7,  7,  7,  7,  6,  5,  4,  3,  2,  1,  0 }
 };
 
+We also create a simple return context 'cpr' with four values for the *current point* that is used after its return number and its number of returns were compressed. Its values are single = 3, first  = 1, last = 2, and intermediate = 0 and it is computed:  
+
+I32 cpr = (r == 1 ? 2 : 0); // is first ?
+cpr += (r >= n ? 1 : 0); // is last ?
+
 We encode the X and Y coordinates with a second order predictor. We predict the differences dX and dY to the X and Y coordinates of the previous point from the same scanner channel with recently occuring differences. We predicts dX and dY between as the median of the five immediately preceding differences of points from the scanner channel and with the same return map m. The intuition behind this is, for example, that single returns are always from a different laser pulse than the previous point and therefore have a wider spacing in X and/or Y than the middle of three returns.
 
 Compression of classification layer
 -----------------------------------
-Compress the classification based on the context m and the previous value similar to the existing LASzip.
+We compress the classification as a symbol between 0 and 255 using 64 different context. This context is computed as the five lowest bits of the classification of the previous point (from the same scanner channel) multiplied by two plus one when the previous point (from the same scanner channel) was a single return.
 
 Compression of flags layer
 --------------------------
+We compress the classification as a 6 bit number or a symbol between 0 and 63 using 64 different context. The highest bit is the 'edge_of_flight_line' flag. The second higest bit is the 'scan_direction' flag. The lowest four bits are the four classification flags in the order listed in the LAS 1.4 specification. The context is simply the 6 bit number that represented the flags of the previous point (from the same scanner channel).
 
 Compression of intensity layer
 ------------------------------
-Compress the intensity based on the context m similar to the existing LASzip.
+We compress the intensity with the predictive integer compressor using four contexts that is simply the 'cpr' defined earlier. We use one of 8 possible previous intensities as the prediction. Which one is used is decided by the 'cpr' multiplied by two plus one if the GPS time in respect to the previous point (from the same scanner channel) has changed. All eight possible previous intensities are initialized to the intensity of the first point (from the same scanner channel) and updated after the intensity was compressed.
 
 Compression of scan angle layer
 ------------------------------
