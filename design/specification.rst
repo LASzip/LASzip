@@ -71,15 +71,15 @@ Due to the new scanner channel it is *crucial* to first encode whether a point i
 * GPS time stamp compared to the GPS time stamp of the previous point from the *same* scanner channel (same = 0 / different = 1)
 * scan angle compared to the scan angle of the previous point from the *same* scanner channel (same = 0 / different = 1)
 * number of returns compared to the number of returns of the previous point from the *same* scanner channel (same = 0 / different = 1)
-* return number compared to the return number of th previous point from the *same* scanner channel (same = 0 / plus one = 1 / minus one = 2 / other difference = 3)
+* return number compared to the return number of the previous point from the *same* scanner channel (same = 0 / plus one = 1 / minus one = 2 / other difference = 3)
 
 These 7 bits of information are combined into one symbol whose value ranges from 0 to 127 that we then compress with one of four (4) different contexts based on whether the *directly* previous point (no matter from which scanner channel) was a single return (0), or the first (1), the last (2) or the intermediate (3) return in case of multi-return.
 
-If the **scanner channel is different** we use one symbol whose value ranges from 0 to 2 to encode whether we need to add 1, 2, or 3 to the previous scanner channel to get (modulo 4) to the current scanner channel that we then compress using the previous scanner channel as one of four different contexts. All following predictions are relative to the previous point from the *same* scanner channel. If that point does not yet exist then the previous point (from whichever other scanner channel) is used. For the very first point per chunk *that gets compressed* this is that one point that is stored raw at the beginning of every chunk.
+Only if the **scanner channel is different** (as indicated by these 7 bits) we use one symbol whose value ranges from 0 to 2 to encode whether we need to add 1, 2, or 3 to the previous scanner channel to get (modulo 4) to the current scanner channel that we then compress using the previous scanner channel as one of four different contexts. All following predictions in all different layers are relative to the previous point from the *same* scanner channel. They first check whether the current point is from the same scanner channel and switch context if not. If no previous point exists for the new scanner channel (because this scanner channel appears the first time in this chunk) then the previous point (from whichever other scanner channel) is used. For the very first point per chunk *that gets compressed* this is that one point that is stored raw at the beginning of every chunk.
 
-If the **number of returns is different** we use one symbol whose value ranges from 0 to 15 that we then compress with the previous number of returns (from the same scanner channel) as one of sixteen contexts.
+Only if the **number of returns has an other difference** (as indicated by the 7 bits earlier) we use one symbol whose value ranges from 0 to 15 that we then compress with the previous number of returns (from the same scanner channel) as one of sixteen contexts.
 
-If the **return number is different** we encode in in two possible ways depending on whether the GPS time stamp has changed:
+Only if the **return number is different** (as indicated by the 7 bits earlier) we encode in in two possible ways depending on whether the GPS time stamp has changed:
    - if the GPS time stamp *has not* changed we use one symbol whose value ranges from 0 to 12 to encode whether we need to add 2, 3, 4 ... 12, 13 or 14 to the previous return number (from the same scanner channel) to get (modulo 16) to the current return number that we then compress using the previous return number (from the same scanner channel) as one of sixteen contexts.
    - if the GPS time stamp *has* changed we use one symbol whose value ranges from 0 to 15 to encode the current return number that we then compress with the (already encoded) number of returns as one of sixteen contexts.
 
@@ -190,23 +190,23 @@ We compress the classification as a 6 bit number or a symbol between 0 and 63 us
 
 Compression of intensity layer
 ------------------------------
-We compress the intensity with the predictive integer compressor using four contexts that is simply the 'cpr' defined earlier. We use one of 8 possible previous intensities as the prediction. Which one is used is decided by the 'cpr' multiplied by two plus one if the GPS time in respect to the previous point (from the same scanner channel) has changed. All eight possible previous intensities are initialized to the intensity of the first point (from the same scanner channel) and updated after the intensity was compressed.
+We compress the intensity with the difference integer compressor using four contexts that is simply the 'cpr' defined earlier. We use one of 8 possible previous intensities as the prediction. Which one is used is decided by the 'cpr' multiplied by two plus one if the GPS time in respect to the previous point (from the same scanner channel) has changed. All eight possible previous intensities are initialized to the intensity of the first point (from the same scanner channel) and updated after the intensity was compressed.
 
 Compression of scan angle layer
 ------------------------------
-Compress the scan angle ...
+Only if the **scan angle is different** (as indicated by the 7 bits earlier) we compress it with the difference integer compressor using two contexts that is whether the GPS time stamp of the previous point (from the same scanner channel) has changed (1) or not (0). We use the scan angle of the previous point (from the same scanner channel) as the prediction.
 
 Compression of user data layer
 ------------------------------
-Compress the user data layer ...
+We compress the user data layer which is an 8 bit number as a symbol between 0 and 255 using 64 different contexts. The context is simply the user data of the previous point (from the same scanner channel) divided by 4.
 
 Compression of point source ID layer
 ------------------------------
-Compress the user data layer ...
+Only if the **point source ID is different** (as indicated by the 7 bits earlier) we compress
 
 Compression of GPS time layer
 -----------------------------
-The GPS times of a single flight line stored in aquisition order are a monotonically increasing sequence of double-precision floating-point numbers where returns of the same pulse have the same GPS time and where subsequent pulses have a more or less constant spacing in time. LASzip treats the double-precision floating-point GPS times as signed 64 bit integers and predicts the deltas between them. We store up to four previously compressed GPS times with corresponding deltas to account for repeated jumps in GPS times that can arise when multiple flight paths are merged with fine spatial granularity. Nothing needs to be encoded when the GPS times are identical. Otherwise we distinguishes several cases that are entropy coded with 515 symbols depending on if the current GPS time is
+Only if the **GPS time is different** (as indicated by the 7 bits earlier) we compress it the same way it was done in the old LASzip coder. he GPS times of a single flight line stored in aquisition order are a monotonically increasing sequence of double-precision floating-point numbers where returns of the same pulse have the same GPS time and where subsequent pulses have a more or less constant spacing in time. LASzip treats the double-precision floating-point GPS times as signed 64 bit integers and predicts the deltas between them. We store up to four previously compressed GPS times with corresponding deltas to account for repeated jumps in GPS times that can arise when multiple flight paths are merged with fine spatial granularity. Nothing needs to be encoded when the GPS times are identical. Otherwise we distinguishes several cases that are entropy coded with 515 symbols depending on if the current GPS time is
 
    +   0–500 : predicted using the current delta times 0 to 500.
    + 501–510 : predicted using the current delta times -1 to -10.
