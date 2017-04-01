@@ -206,7 +206,7 @@ Only if the **point source ID is different** (as indicated by the 7 bits earlier
 
 Compression of GPS time layer
 -----------------------------
-Only if the **GPS time is different** (as indicated by the 7 bits earlier) we compress it the same way it was done in the old LASzip coder. he GPS times of a single flight line stored in aquisition order are a monotonically increasing sequence of double-precision floating-point numbers where returns of the same pulse have the same GPS time and where subsequent pulses have a more or less constant spacing in time. LASzip treats the double-precision floating-point GPS times as signed 64 bit integers and predicts the deltas between them. We store up to four previously compressed GPS times with corresponding deltas to account for repeated jumps in GPS times that can arise when multiple flight paths are merged with fine spatial granularity. Nothing needs to be encoded when the GPS times are identical. Otherwise we distinguishes several cases that are entropy coded with 515 symbols depending on if the current GPS time is
+Only if the **GPS time is different** (as indicated by the 7 bits earlier) we compress it the same way it was done in the old LASzip coder. The GPS times of a single flight line stored in aquisition order are a monotonically increasing sequence of double-precision floating-point numbers where returns of the same pulse have the same GPS time and where subsequent pulses have a more or less constant spacing in time. LASzip treats the double-precision floating-point GPS times as signed 64 bit integers and predicts the deltas between them. We store up to four previously compressed GPS times with corresponding deltas to account for repeated jumps in GPS times that can arise when multiple flight paths are merged with fine spatial granularity. Nothing needs to be encoded when the GPS times are identical. Otherwise we distinguishes several cases that are entropy coded with 515 symbols depending on if the current GPS time is
 
    +   0–500 : predicted using the current delta times 0 to 500.
    + 501–510 : predicted using the current delta times -1 to -10.
@@ -217,16 +217,22 @@ For the first two cases we subsequently difference code the delta prediction and
 
 Compression of RGB layer
 ------------------------------
-Compress the RGB layer ...
+We compress the RGB values the same way it was done in the old LASzip coder. LAS uses unsigned 16 bit integers for the R, G, and B
+channel. Some files—incorrectly—populate only the lower 8 bits so that the upper 8 bits are zero. Other files correctly multiply 8-bit colors with 256 so that the lower 8 bits are zero. The LASzip compressor therefore compresses the upper and lower byte of each channel separately. First it entropy codes (a) 6 bits that specify which of the six bytes have changed and (b) one bit that specifies whether the changes are the same in all three channels (i.e. grey colors) as one symbol between 0 and 127. For all bytes that have changed it then entropy codes the difference to the respective previous byte modulo 256. If the 7 bit symbol indicates that the changes are identical in all three channels only the R channel is compressed. Otherwise the channels are encoded in the order R, G, and B. Differences encoded in earlier channels are used to predict differences in later channels as there tends to be a correlation in the intensity across channels. For example, if there was a byte difference in the low byte of the R channel that difference is added to low byte of the G channel which - clamped to a 0 to 255 range - becomes the value to which the difference of the current low byte is computed.
 
 Compression of NIR layer
 ------------------------------
-Compress the NIR layer ...
+We compress the NIR value using the same technique as done for the RGB values. First it entropy codes 6 bits that specify which bytes have changed as one symbol.
 
 Compression of WavePacket layer
 ------------------------------
-Compress the WavePacket layer ...
+We compress the WavePackets the same way it was done in the old LASzip coder. They only occur in point types 9 and 10. So far there has been very little real-world demand for compressing LAS files containing waveform data simply due to a lack of data stored in this format (i.e. there is no a dedicated format for full waveform LiDAR called 'PulseWaves'). LASzip simply entropy codes the wave packet descriptor index, an unsigned byte that is zero if a point has no waveform and indexes the variable length record describing the format of the waveform otherwise. To compress the bytes offset to waveform data it entropy encodes one of 4 possible cases:
+  1) same as last offset
+  2) use last offset plus last packet size
+  3) difference to last offset is less than 32 bits
+  4) difference to last offset is more than 32 bits
+In the first two cases no other information is needed. For the other two cases LASzip difference codes the 32 or the 64 bit numbers. The LASzip compressor difference coded all remaining fields. Only waveform packet size in bytes is an integer number. The return point waveform location, x(t), y(t), and z(t) are single-precision floating-point numbers whose 32 bits are treated as if they were a 32-bit integer.
 
-Compression of "Extra Bytes" layers
+Compression of "Extra Bytes" layer(s)
 ------------------------------
-Compress the "Extra Bytes" layer ...
+We compress the "Extra Bytes" the same way it was done in the old LASzip coder but each byte is compressed into its own layer. A LAS point has “Extra Bytes” when the LAS header specifies a point size larger than required by the respective point type. Each “Extra Byte” is entropy encoded with its own context as the difference to the “Extra Byte” from the previous point  (from the same scanner channel) modulo 256. Treating them as individual bytes is the best that the LASzip compressor can do as there is not always a description what these “Extra Bytes” may mean. Six “extra bytes”, for example, could be a single-precision float storing the echo width followed by an unsigned short storing the normalized reflectivity. Or it could be an unsigned short storing a tile index followed by an unsigned integer storing the original index of the point.
