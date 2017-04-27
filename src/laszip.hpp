@@ -25,6 +25,8 @@
   
   CHANGE HISTORY:
   
+    8 April 2017 -- new check for whether point size and total size of items match
+    30 March 2017 -- support for "native LAS 1.4 extension" added into main branch
     7 January 2017 -- set reserved VLR field from 0xAABB to 0x0 in DLL
     7 January 2017 -- consistent compatibility mode scan angle quantization in DLL
     7 January 2017 -- compatibility mode *decompression* fix for waveforms in DLL
@@ -58,15 +60,16 @@ typedef long long SIGNED_INT64;
 #define LASCopyString strdup
 #endif
 
-#define LASZIP_VERSION_MAJOR                2
-#define LASZIP_VERSION_MINOR                5
-#define LASZIP_VERSION_REVISION             2
-#define LASZIP_VERSION_BUILD_DATE      170111
+#define LASZIP_VERSION_MAJOR                3
+#define LASZIP_VERSION_MINOR                0
+#define LASZIP_VERSION_REVISION             0
+#define LASZIP_VERSION_BUILD_DATE      170425
 
 #define LASZIP_COMPRESSOR_NONE              0
 #define LASZIP_COMPRESSOR_POINTWISE         1
 #define LASZIP_COMPRESSOR_POINTWISE_CHUNKED 2
-#define LASZIP_COMPRESSOR_TOTAL_NUMBER_OF   3
+#define LASZIP_COMPRESSOR_LAYERED_CHUNKED   3
+#define LASZIP_COMPRESSOR_TOTAL_NUMBER_OF   4
 
 #define LASZIP_COMPRESSOR_CHUNKED LASZIP_COMPRESSOR_POINTWISE_CHUNKED
 #define LASZIP_COMPRESSOR_NOT_CHUNKED LASZIP_COMPRESSOR_POINTWISE
@@ -81,7 +84,7 @@ typedef long long SIGNED_INT64;
 class LASitem
 {
 public:
-  enum Type { BYTE = 0, SHORT, INT, LONG, FLOAT, DOUBLE, POINT10, GPSTIME11, RGB12, WAVEPACKET13, POINT14, RGBNIR14 } type;
+  enum Type { BYTE = 0, SHORT, INT, LONG, FLOAT, DOUBLE, POINT10, GPSTIME11, RGB12, WAVEPACKET13, POINT14, RGB14, RGBNIR14, WAVEPACKET14, BYTE14 } type;
   unsigned short size;
   unsigned short version;
   bool is_type(LASitem::Type t) const;
@@ -96,8 +99,8 @@ public:
   bool check_compressor(const unsigned short compressor);
   bool check_coder(const unsigned short coder);
   bool check_item(const LASitem* item);
-  bool check_items(const unsigned short num_items, const LASitem* items);
-  bool check();
+  bool check_items(const unsigned short num_items, const LASitem* items, const unsigned short point_size=0);
+  bool check(const unsigned short point_size=0);
 
   // go back and forth between item array and point type & size
   bool setup(unsigned short* num_items, LASitem** items, const unsigned char point_type, const unsigned short point_size, const unsigned short compressor=LASZIP_COMPRESSOR_NONE);
