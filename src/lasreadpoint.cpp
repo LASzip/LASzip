@@ -41,7 +41,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-LASreadPoint::LASreadPoint(U32 decompress_delective)
+LASreadPoint::LASreadPoint(U32 decompress_selective)
 {
   point_size = 0;
   instream = 0;
@@ -60,7 +60,7 @@ LASreadPoint::LASreadPoint(U32 decompress_delective)
   chunk_totals = 0;
   chunk_starts = 0;
   // used for selective decompression (new LAS 1.4 point types only)
-  this->decompress_delective = decompress_delective;
+  this->decompress_selective = decompress_selective;
   // used for seeking
   point_start = 0;
   seek_point = 0;
@@ -179,7 +179,17 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, const LASzip* lasz
     }
     seek_point = new U8*[num_items];
     if (!seek_point) return FALSE;
-    seek_point[0] = new U8[point_size];
+    if (layered_las14_compression)
+    {
+      // because combo LAS 1.0 - 1.4 point struct has padding
+      seek_point[0] = new U8[(point_size*2)];
+      // because extended_point_type must be set
+      seek_point[0][22] = 1;
+    }
+    else
+    {
+      seek_point[0] = new U8[point_size];
+    }
     if (!seek_point[0]) return FALSE;
     for (i = 0; i < num_readers; i++)
     {
@@ -219,25 +229,25 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, const LASzip* lasz
         break;
       case LASitem::POINT14:
         if ((items[i].version == 3) || (items[i].version == 2)) // version == 2 from lasproto
-          readers_compressed[i] = new LASreadItemCompressed_POINT14_v3(dec, decompress_delective);
+          readers_compressed[i] = new LASreadItemCompressed_POINT14_v3(dec, decompress_selective);
         else
           return FALSE;
         break;
       case LASitem::RGB14:
         if ((items[i].version == 3) || (items[i].version == 2)) // version == 2 from lasproto
-          readers_compressed[i] = new LASreadItemCompressed_RGB14_v3(dec, decompress_delective);
+          readers_compressed[i] = new LASreadItemCompressed_RGB14_v3(dec, decompress_selective);
         else
           return FALSE;
         break;
       case LASitem::RGBNIR14:
         if ((items[i].version == 3) || (items[i].version == 2)) // version == 2 from lasproto
-          readers_compressed[i] = new LASreadItemCompressed_RGBNIR14_v3(dec, decompress_delective);
+          readers_compressed[i] = new LASreadItemCompressed_RGBNIR14_v3(dec, decompress_selective);
         else
           return FALSE;
         break;
       case LASitem::BYTE14:
         if ((items[i].version == 3) || (items[i].version == 2)) // version == 2 from lasproto
-          readers_compressed[i] = new LASreadItemCompressed_BYTE14_v3(dec, items[i].size, decompress_delective);
+          readers_compressed[i] = new LASreadItemCompressed_BYTE14_v3(dec, items[i].size, decompress_selective);
         else
           return FALSE;
         break;
@@ -249,14 +259,25 @@ BOOL LASreadPoint::setup(U32 num_items, const LASitem* items, const LASzip* lasz
         break;
       case LASitem::WAVEPACKET14:
         if (items[i].version == 3)
-          readers_compressed[i] = new LASreadItemCompressed_WAVEPACKET14_v3(dec, decompress_delective);
+          readers_compressed[i] = new LASreadItemCompressed_WAVEPACKET14_v3(dec, decompress_selective);
         else
           return FALSE;
         break;
       default:
         return FALSE;
       }
-      if (i) seek_point[i] = seek_point[i-1]+items[i-1].size;
+      if (i)
+      {
+        if (layered_las14_compression)
+        {
+          // because combo LAS 1.0 - 1.4 point struct has padding
+          seek_point[i] = seek_point[i-1]+(2*items[i-1].size);
+        }
+        else
+        {
+          seek_point[i] = seek_point[i-1]+items[i-1].size;
+        }
+      }
     }
     if (laszip->compressor != LASZIP_COMPRESSOR_POINTWISE)
     {

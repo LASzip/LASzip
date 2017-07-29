@@ -24,6 +24,7 @@
   
   CHANGE HISTORY:
   
+    18 July 2017 -- bug fix for spatial-indexed reading of native compressed LAS 1.4 
     19 April 2017 -- support for selective decompression for new LAS 1.4 points 
     23 August 2016 -- layering of items for selective decompression in LAS 1.4 
     6 September 2014 -- removed inheritance of EntropyEncoder and EntropyDecoder
@@ -53,7 +54,7 @@ class ArithmeticDecoder;
 class LASreadPoint
 {
 public:
-  LASreadPoint(U32 decompress_delective=LASZIP_DECOMPRESS_SELECTIVE_ALL);
+  LASreadPoint(U32 decompress_selective=LASZIP_DECOMPRESS_SELECTIVE_ALL);
   ~LASreadPoint();
 
   // should only be called *once*
@@ -88,7 +89,7 @@ private:
   BOOL read_chunk_table();
   U32 search_chunk_table(const U32 index, const U32 lower, const U32 upper);
   // used for selective decompression (new LAS 1.4 point types only)
-  U32 decompress_delective;
+  U32 decompress_selective;
   // used for seeking
   I64 point_start;
   U32 point_size;
