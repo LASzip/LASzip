@@ -24,6 +24,7 @@
 
   CHANGE HISTORY:
 
+    3 August 2017 -- new 'laszip_create_laszip_vlr()' gets VLR as C++ std::vector
    29 July 2017 -- integrating minimal stream-based reading/writing into branch
    20 July 2017 -- Andrew Bell adds support for stream-based reading/writing
    28 May 2017 -- support for "LAS 1.4 selective decompression" added into DLL API
@@ -1638,6 +1639,14 @@ laszip_create_spatial_index(
 }
 
 /*---------------------------------------------------------------------------*/
+static U32 laszip_vrl_payload_size(
+    LASzip                             *laszip
+)
+{
+  return 34 + (6 * laszip->num_items);
+}
+
+/*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
 laszip_open_writer(
     laszip_POINTER                     pointer
@@ -2104,8 +2113,6 @@ laszip_open_writer(
       }
     }
 
-    U32 laszip_vrl_payload_size = 0;
-
     if (compress)
     {
       if ((laszip_dll->header.point_data_format > 5) && laszip_dll->request_native_extension)
@@ -2128,10 +2135,6 @@ laszip_open_writer(
       // request version (for old point types only, new point types automatically use version 3)
 
       laszip->request_version(2);
-
-      // calculate payload size
-
-      laszip_vrl_payload_size = 34 + 6*laszip->num_items;
 
       // maybe we should change the chunk size
 
@@ -2254,7 +2257,7 @@ laszip_open_writer(
     }
     if (compress)
     {
-      laszip_dll->header.offset_to_point_data += (54 + laszip_vrl_payload_size);
+      laszip_dll->header.offset_to_point_data += (54 + laszip_vrl_payload_size(laszip));
     }
     try { laszip_dll->streamout->put32bitsLE((U8*)&(laszip_dll->header.offset_to_point_data)); } catch(...)
     {
@@ -2263,7 +2266,7 @@ laszip_open_writer(
     }
     if (compress)
     {
-      laszip_dll->header.offset_to_point_data -= (54 + laszip_vrl_payload_size);
+      laszip_dll->header.offset_to_point_data -= (54 + laszip_vrl_payload_size(laszip));
       laszip_dll->header.number_of_variable_length_records += 1;
     }
     try { laszip_dll->streamout->put32bitsLE((U8*)&(laszip_dll->header.number_of_variable_length_records)); } catch(...)
@@ -2515,7 +2518,7 @@ laszip_open_writer(
         sprintf(laszip_dll->error, "writing header.vlrs[%d].record_id", i);
         return 1;
       }
-      U16 record_length_after_header = laszip_vrl_payload_size;
+      U16 record_length_after_header = laszip_vrl_payload_size(laszip);
       try { laszip_dll->streamout->put16bitsLE((U8*)&record_length_after_header); } catch(...)
       {
         sprintf(laszip_dll->error, "writing header.vlrs[%d].record_length_after_header", i);
@@ -4640,14 +4643,6 @@ laszip_open_writer_stream(
   }
   laszip_dll->error[0] = '\0';
   return 0;
-}
-
-/*---------------------------------------------------------------------------*/
-static U32 laszip_vrl_payload_size(
-    LASzip                             *laszip
-)
-{
-  return 34 + (6 * laszip->num_items);
 }
  
 /*---------------------------------------------------------------------------*/
