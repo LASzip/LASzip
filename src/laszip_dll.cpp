@@ -27,7 +27,7 @@
    29 July 2017 -- integrating minimal stream-based reading/writing into branch
    20 July 2017 -- Andrew Bell adds support for stream-based reading/writing
    28 May 2017 -- support for "LAS 1.4 selective decompression" added into DLL API
-   25 April 2017 -- adding initial support for new "native LAS 1.4 extension" 
+   25 April 2017 -- adding initial support for new "native LAS 1.4 extension"
     8 January 2017 -- changed from "laszip_dll.h" to "laszip_api.h" for hobu
 
 ===============================================================================
@@ -1700,7 +1700,7 @@ laszip_open_writer(
 #ifdef _WIN32
           sprintf(laszip_dll->error, "inconsistent number_of_point_records %u and extended_number_of_point_records %I64d", laszip_dll->header.number_of_point_records, laszip_dll->header.extended_number_of_point_records);
 #else
-          sprintf(laszip_dll->error, "inconsistent number_of_point_records %u and extended_number_of_point_records %%llu", laszip_dll->header.number_of_point_records, laszip_dll->header.extended_number_of_point_records);
+          sprintf(laszip_dll->error, "inconsistent number_of_point_records %u and extended_number_of_point_records %llu", laszip_dll->header.number_of_point_records, laszip_dll->header.extended_number_of_point_records);
 #endif
 	return 1;
         }
@@ -2148,7 +2148,7 @@ laszip_open_writer(
     {
       laszip->request_version(0);
     }
-    
+
     // open the file
 
     laszip_dll->file = fopen(file_name, "wb");
@@ -2382,7 +2382,7 @@ laszip_open_writer(
           sprintf(laszip_dll->warning, "header.start_of_waveform_data_packet_record is %llu. writing 0 instead.", laszip_dll->header.start_of_waveform_data_packet_record);
 #endif
           laszip_dll->header.start_of_waveform_data_packet_record = 0;
-        }                  
+        }
         try { laszip_dll->streamout->put64bitsLE((U8*)&(laszip_dll->header.start_of_waveform_data_packet_record)); } catch(...)
         {
           sprintf(laszip_dll->error, "writing header.start_of_waveform_data_packet_record");
@@ -3821,7 +3821,7 @@ laszip_open_reader(
 #ifdef _WIN32
               fprintf(stderr,"WARNING: number_of_point_records is %u. but extended_number_of_point_records is %I64d.\n", laszip_dll->header.number_of_point_records, number_of_extended_variable_length_records);
 #else
-              fprintf(stderr,"WARNING: number_of_point_records is %u. but extended_number_of_point_records is %llu.\n", laszip_dll->header.number_of_point_records, number_of_extended_variable_length_records);
+              fprintf(stderr,"WARNING: number_of_point_records is %u. but extended_number_of_point_records is %u.\n", laszip_dll->header.number_of_point_records, number_of_extended_variable_length_records);
 #endif
             }
             laszip_dll->header.extended_number_of_point_records = extended_number_of_point_records;
@@ -4221,7 +4221,7 @@ laszip_read_point(
       flags_and_channel = point->extra_bytes[laszip_dll->start_flags_and_channel];
       if (laszip_dll->start_NIR_band != -1)
       {
-        ((U16)(point->rgb[3])) = *((U16*)(point->extra_bytes + laszip_dll->start_NIR_band));
+        point->rgb[3] = *((U16*)(point->extra_bytes) + laszip_dll->start_NIR_band);
       }
 
       // decompose into individual attributes
@@ -5059,7 +5059,7 @@ laszip_I32 laszip_reader_init(
 #ifdef _WIN32
             fprintf(stderr,"WARNING: number_of_point_records is %u. but extended_number_of_point_records is %I64d.\n", laszip_dll->header.number_of_point_records, number_of_extended_variable_length_records);
 #else
-            fprintf(stderr,"WARNING: number_of_point_records is %u. but extended_number_of_point_records is %llu.\n", laszip_dll->header.number_of_point_records, number_of_extended_variable_length_records);
+            fprintf(stderr,"WARNING: number_of_point_records is %u. but extended_number_of_point_records is %u.\n", laszip_dll->header.number_of_point_records, number_of_extended_variable_length_records);
 #endif
           }
           laszip_dll->header.extended_number_of_point_records = extended_number_of_point_records;
@@ -5210,7 +5210,7 @@ laszip_I32 laszip_reader_init(
 
   // should we try to exploit existing spatial indexing information
 
-  if (0) // (laszip_dll->lax_exploit) // maybe not possible via your stream interface? 
+  if (0) // (laszip_dll->lax_exploit) // maybe not possible via your stream interface?
   {
     laszip_dll->lax_index = new LASindex();
 

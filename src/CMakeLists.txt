@@ -7,47 +7,7 @@
 ###############################################################################
 set(LASZIP_HEADERS_DIR ../include/laszip)
 
-set(LASZIP_HPP
-    arithmeticdecoder.hpp
-    arithmeticencoder.hpp
-    arithmeticmodel.hpp
-    bytestreamin.hpp
-    bytestreamin_array.hpp
-    bytestreamin_file.hpp
-    bytestreamin_istream.hpp
-    bytestreaminout.hpp
-    bytestreaminout_file.hpp
-    bytestreamout.hpp
-    bytestreamout_array.hpp
-    bytestreamout_file.hpp
-    bytestreamout_nil.hpp
-    bytestreamout_ostream.hpp
-    endian.hpp
-    integercompressor.hpp
-    lasattributer.hpp
-    lasindex.hpp
-    lasinterval.hpp
-    laspoint.hpp
-    lasquadtree.hpp
-    lasquantizer.hpp
-    lasreaditem.hpp
-    lasreaditemcompressed_v1.hpp
-    lasreaditemcompressed_v2.hpp
-    lasreaditemraw.hpp
-    lasreadpoint.hpp
-    #lasunzipper.hpp
-    laswriteitem.hpp
-    laswriteitemcompressed_v1.hpp
-    laswriteitemcompressed_v2.hpp
-    laswriteitemraw.hpp
-    laswritepoint.hpp
-    laszip.hpp
-    laszip_common_v1.hpp
-    laszip_common_v2.hpp
-    mydefs.hpp
- )
-
-set(LASZIP_CPP
+set(LASZIP_SOURCES
     arithmeticdecoder.cpp
     arithmeticencoder.cpp
     arithmeticmodel.cpp
@@ -57,10 +17,12 @@ set(LASZIP_CPP
     lasquadtree.cpp
     lasreaditemcompressed_v1.cpp
     lasreaditemcompressed_v2.cpp
+    lasreaditemcompressed_v3.cpp
     lasreadpoint.cpp
     #lasunzipper.cpp
     laswriteitemcompressed_v1.cpp
     laswriteitemcompressed_v2.cpp
+    laswriteitemcompressed_v3.cpp
     laswritepoint.cpp
     laszip.cpp
     laszip_dll.cpp
@@ -68,11 +30,6 @@ set(LASZIP_CPP
 
 add_definitions(-DUNORDERED)
 add_definitions(-DLASZIPDLL_EXPORTS)
-
-set(LASZIP_SOURCES
-  ${LASZIP_HPP}
-  ${LASZIP_CPP}
-  )
 
 LASZIP_ADD_LIBRARY(${LASZIP_BASE_LIB_NAME} ${LASZIP_SOURCES})
 
