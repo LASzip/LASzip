@@ -1725,7 +1725,7 @@ static laszip_I32 write_laszip_vlr_header(
     return 1;
   }
   U16 record_length_after_header = (U16)laszip_vrl_payload_size(laszip);
-  try { laszip_dll->streamout->put16bitsLE((U8*)&record_length_after_header); } catch(...)
+  try { out->put16bitsLE((U8*)&record_length_after_header); } catch(...)
   {
     sprintf(laszip_dll->error, "writing LASzip VLR header.record_length_after_header");
     return 1;
@@ -1733,7 +1733,7 @@ static laszip_I32 write_laszip_vlr_header(
   CHAR description[32];
   memset(description, 0, 32);
   sprintf(description, "LASzip DLL %d.%d r%d (%d)", LASZIP_VERSION_MAJOR, LASZIP_VERSION_MINOR, LASZIP_VERSION_REVISION, LASZIP_VERSION_BUILD_DATE);
-  try { laszip_dll->streamout->putBytes((U8*)description, 32); } catch(...)
+  try { out->putBytes((U8*)description, 32); } catch(...)
   {
     sprintf(laszip_dll->error, "writing LASzip VLR header.description");
     return 1;
