@@ -24,6 +24,7 @@
 
   CHANGE HISTORY:
 
+   23 August 2017 -- turn on "native" by default
     3 August 2017 -- new 'laszip_create_laszip_vlr()' gets VLR as C++ std::vector
    29 July 2017 -- integrating minimal stream-based reading/writing into branch
    20 July 2017 -- Andrew Bell adds support for stream-based reading/writing
@@ -335,6 +336,7 @@ laszip_clean(
     laszip_dll->header.y_scale_factor = 0.01;
     laszip_dll->header.z_scale_factor = 0.01;
     laszip_dll->set_chunk_size = LASZIP_CHUNK_SIZE_DEFAULT;
+    laszip_dll->request_native_extension = TRUE;
     laszip_dll->las14_decompress_selective = LASZIP_DECOMPRESS_SELECTIVE_ALL;
   }
   catch (...)
@@ -2868,7 +2870,7 @@ laszip_write_point(
       point->extra_bytes[laszip_dll->start_flags_and_channel] = (U8)((scanner_channel << 1) | overlap_bit);
       if (laszip_dll->start_NIR_band != -1)
       {
-        *((U16*)(point->extra_bytes + laszip_dll->start_NIR_band)) = ((U16)(point->rgb[3]));
+        *((U16*)(point->extra_bytes + laszip_dll->start_NIR_band)) = point->rgb[3];
       }
     }
 
@@ -3862,9 +3864,9 @@ static laszip_I32 laszip_read_header(
           if (((U64)(laszip_dll->header.number_of_point_records)) != extended_number_of_point_records)
           {
 #ifdef _WIN32
-            fprintf(stderr,"WARNING: number_of_point_records is %u. but extended_number_of_point_records is %I64d.\n", laszip_dll->header.number_of_point_records, number_of_extended_variable_length_records);
+            fprintf(stderr,"WARNING: number_of_point_records is %u. but extended_number_of_point_records is %I64d.\n", laszip_dll->header.number_of_point_records, extended_number_of_point_records);
 #else
-            fprintf(stderr,"WARNING: number_of_point_records is %u. but extended_number_of_point_records is %u.\n", laszip_dll->header.number_of_point_records, number_of_extended_variable_length_records);
+            fprintf(stderr,"WARNING: number_of_point_records is %u. but extended_number_of_point_records is %llu.\n", laszip_dll->header.number_of_point_records, extended_number_of_point_records);
 #endif
           }
           laszip_dll->header.extended_number_of_point_records = extended_number_of_point_records;
@@ -4601,11 +4603,6 @@ laszip_open_writer_stream(
     {
       sprintf(laszip_dll->error, "reader is already open");
       return 1;
-    }
-
-    if (compress)
-    {
-      laszip_dll->request_native_extension = TRUE;
     }
 
     if (do_not_write_header == FALSE)
