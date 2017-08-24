@@ -44,15 +44,6 @@ set(LASZIP_COMPATIBILITY_VERSION ${LASZIP_API_VERSION_MAJOR})
 ###############################################################################
 # laszip general settings
 
-
-SET(LASZIP_API_VERSION_MAJOR "1")
-SET(LASZIP_API_VERSION_MINOR "1")
-SET(LASZIP_API_VERSION_PATCH "0")
-#[[
-set(VERSION "${LASZIP_VERSION_MAJOR}.${LASZIP_VERSION_MINOR}.${LASZIP_VERSION_PATCH}")
-SET(LASZIP_LIB_SOVERSION "1.0.0")
-]]
-
 set(LASZIP_API_VERSION_H
     ${CMAKE_CURRENT_BINARY_DIR}/include/laszip/laszip_api_version.h)
 
