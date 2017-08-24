@@ -57,7 +57,13 @@ endmacro(LASZIP_ADD_INCLUDES)
 # ARGN The source files for the library.
 macro(LASZIP_ADD_LIBRARY _name)
     add_library(${_name} ${LASZIP_LIB_TYPE} ${ARGN})
-    set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
+    set_target_properties(
+        ${_name} PROPERTIES
+        VERSION ${LASZIP_API_VERSION}
+        SOVERSION ${LASZIP_COMPATIBILITY_VERSION}
+        CLEAN_DIRECT_OUTPUT 1
+        FOLDER Libraries
+    )
 
     install(TARGETS ${_name}
         EXPORT LASZIPTargets
@@ -141,13 +147,17 @@ endmacro(GET_OS_INFO)
 macro(DISSECT_VERSION)
     # Find version components
     string(REGEX REPLACE "^([0-9]+).*" "\\1"
-        LASZIP_VERSION_MAJOR "${LASZIP_VERSION_STRING}")
+        LASZIP_API_VERSION_MAJOR "${LASZIP_API_VERSION_STRING}")
     string(REGEX REPLACE "^[0-9]+\\.([0-9]+).*" "\\1"
-        LASZIP_VERSION_MINOR "${LASZIP_VERSION_STRING}")
+        LASZIP_API_VERSION_MINOR "${LASZIP_API_VERSION_STRING}")
     string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1"
-        LASZIP_VERSION_PATCH "${LASZIP_VERSION_STRING}")
-    string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1"
-        LASZIP_CANDIDATE_VERSION "${LASZIP_VERSION_STRING}")
+        LASZIP_API_VERSION_PATCH "${LASZIP_API_VERSION_STRING}")
+    if (NOT LASZIP_API_VERSION_MINOR)
+        set(LASZIP_API_VERSION_MINOR "0")
+    endif()
+    if (NOT LASZIP_API_VERSION_PATCH)
+        set(LASZIP_API_VERSION_PATCH "0")
+    endif()
 endmacro(DISSECT_VERSION)
 
 ###############################################################################

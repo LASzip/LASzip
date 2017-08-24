@@ -5,8 +5,6 @@
 # Copyright (c) 2009 Mateusz Loskot <mateusz@loskot.net>
 #
 ###############################################################################
-set(LASZIP_HEADERS_DIR ../include/laszip)
-
 set(LASZIP_SOURCES
     arithmeticdecoder.cpp
     arithmeticencoder.cpp
@@ -32,8 +30,3 @@ add_definitions(-DUNORDERED)
 add_definitions(-DLASZIPDLL_EXPORTS)
 
 LASZIP_ADD_LIBRARY(${LASZIP_BASE_LIB_NAME} ${LASZIP_SOURCES})
-
-set_target_properties(${LASZIP_BASE_LIB_NAME} PROPERTIES VERSION "${LASZIP_BUILD_VERSION}"
-    SOVERSION "${LASZIP_API_VERSION}"
-    CLEAN_DIRECT_OUTPUT 1)
-
