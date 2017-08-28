@@ -23,14 +23,16 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 
 # the next line is the ONLY place in the entire laszip system where
 # the version info is hard-coded
-set(LASZIP_VERSION_STRING "1.1.0" CACHE STRING "LASzip version" FORCE)
+set(LASZIP_API_VERSION_STRING "1.1.0" CACHE STRING "LASzip version" FORCE)
 
+#
+# Extract the pieces of the version info from the version string above.
 DISSECT_VERSION()
 GET_OS_INFO()
 SET_INSTALL_DIRS()
 
-set(LASZIP_API_VERSION "1")
-set(LASZIP_BUILD_VERSION "6.0.0")
+set(LASZIP_API_VERSION ${LASZIP_API_VERSION_MAJOR}.${LASZIP_API_VERSION_MINOR}.${LASZIP_API_VERSION_PATCH})
+set(LASZIP_COMPATIBILITY_VERSION ${LASZIP_API_VERSION_MAJOR})
 
 
 ###############################################################################
@@ -42,17 +44,15 @@ set(LASZIP_BUILD_VERSION "6.0.0")
 ###############################################################################
 # laszip general settings
 
+set(LASZIP_API_VERSION_H
+    ${CMAKE_CURRENT_BINARY_DIR}/include/laszip/laszip_api_version.h)
 
-SET(LASZIP_VERSION_MAJOR "2")
-SET(LASZIP_VERSION_MINOR "2")
-SET(LASZIP_VERSION_PATCH "0")
-set(VERSION "${LASZIP_VERSION_MAJOR}.${LASZIP_VERSION_MINOR}.${LASZIP_VERSION_PATCH}")
-SET(LASZIP_LIB_SOVERSION "6.0.0")
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/laszip_api_version.h.in
+    ${LASZIP_API_VERSION_H})
 
 set(LASZIP_BASE_LIB_NAME laszip)
 set(LASZIP_API_LIB_NAME laszip_api)
-
-
 
 set(LASZIP_OUTPUT_LIB_DIR "${LASZIP_BINARY_DIR}/${LASZIP_LIB_INSTALL_DIR}")
 set(LASZIP_OUTPUT_BIN_DIR "${LASZIP_BINARY_DIR}/${LASZIP_BIN_INSTALL_DIR}")
@@ -96,7 +96,5 @@ endif(WIN32)
 
 set(LASZIP_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/laszip")
 
-
 add_subdirectory(src)
 add_subdirectory(dll)
-#add_subdirectory(tools)
