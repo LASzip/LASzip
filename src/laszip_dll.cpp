@@ -4739,7 +4739,6 @@ laszip_open_writer_stream(
 LASZIP_API laszip_I32
 laszip_create_laszip_vlr(
     laszip_POINTER                     pointer
-    , const laszip_BOOL                compress
     , std::vector<laszip_U8>&          vlr
 )
 {
@@ -4747,7 +4746,7 @@ laszip_create_laszip_vlr(
   laszip_dll_struct *laszip_dll = (laszip_dll_struct *)pointer;
 
   LASzip laszip;
-  if (setup_laszip_items(laszip_dll, &laszip, compress))
+  if (setup_laszip_items(laszip_dll, &laszip, TRUE))
   {
     return 1;
   }
@@ -4759,6 +4758,12 @@ laszip_create_laszip_vlr(
   else
     out = new ByteStreamOutArrayBE();
 
+  if (out == 0)
+  {
+    sprintf(laszip_dll->error, "could not alloc ByteStreamOutArray");
+    return 1;
+  }
+	
   if (write_laszip_vlr_header(laszip_dll, &laszip, out))
   {
     return 1;
