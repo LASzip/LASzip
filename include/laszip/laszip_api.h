@@ -52,7 +52,9 @@
 #ifndef LASZIP_API_H
 #define LASZIP_API_H
 
+#ifdef LASZIP_API_VERSION
 #include <laszip/laszip_api_version.h>
+#endif
 
 #ifdef _WIN32
 #   ifdef LASZIP_DYN_LINK
