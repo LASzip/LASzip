@@ -147,6 +147,7 @@ typedef struct laszip_dll {
   I32 start_flags_and_channel;
   I32 start_NIR_band;
   laszip_dll_inventory* inventory;
+  std::vector<void *> buffers;
 } laszip_dll_struct;
 
 /*---------------------------------------------------------------------------*/
@@ -319,6 +320,11 @@ laszip_clean(
       delete laszip_dll->attributer;
       laszip_dll->attributer = 0;
     }
+
+    for (size_t i = 0; i < laszip_dll->buffers.size(); ++i)
+        free(laszip_dll->buffers[i]);
+    laszip_dll->buffers.clear();
+
 
     // zero everything
 
@@ -4736,10 +4742,12 @@ laszip_open_writer_stream(
 
 /*---------------------------------------------------------------------------*/
 // creates complete LASzip VLR for currently selected point type and compression
+// The VLR data is valid until the laszip_dll pointer is destroyed.
 LASZIP_API laszip_I32
 laszip_create_laszip_vlr(
     laszip_POINTER                     pointer
-    , std::vector<laszip_U8>&          vlr
+    , laszip_U8 * &                    vlr
+    , size_t&                           vlrSize
 )
 {
   if (pointer == 0) return 1;
@@ -4763,7 +4771,7 @@ laszip_create_laszip_vlr(
     sprintf(laszip_dll->error, "could not alloc ByteStreamOutArray");
     return 1;
   }
-	
+
   if (write_laszip_vlr_header(laszip_dll, &laszip, out))
   {
     return 1;
@@ -4774,7 +4782,10 @@ laszip_create_laszip_vlr(
     return 1;
   }
 
-  vlr.assign(out->getData(), out->getData() + out->getSize());
+  vlr = (laszip_U8 *)malloc(out->getSize());
+  vlrSize = out->getSize();
+  laszip_dll->buffers.push_back(vlr);
+  std::copy(out->getData(), out->getData() + out->getSize(), vlr);
 
   delete out;
 
