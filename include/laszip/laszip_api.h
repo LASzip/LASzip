@@ -612,7 +612,8 @@ laszip_open_writer_stream(
 LASZIP_API laszip_I32
 laszip_create_laszip_vlr(
     laszip_POINTER                     pointer
-    , std::vector<laszip_U8>&          vlr
+    , laszip_U8 * &                    vlr
+    , size_t&                           vlrSize
 );
 
 #endif  // __cplusplus
