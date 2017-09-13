@@ -12,7 +12,7 @@ SET(CPACK_PACKAGE_VENDOR "LASzip Development Team")
 SET(CPACK_RESOURCE_FILE_LICENSE    "${PROJECT_SOURCE_DIR}/COPYING")
 
 set(CPACK_SOURCE_PACKAGE_FILE_NAME
-    "${CPACK_PACKAGE_NAME}-${LASZIP_API_VERSION_STRING}-src")
+    "laszip-src-${LASZIP_API_VERSION_STRING}")
 
 set(CPACK_SOURCE_IGNORE_FILES
 "/\\\\.gitattributes;/\\\\.vagrant;/\\\\.DS_Store;/CVS/;/\\\\.git/;\\\\.swp$;~$;\\\\.\\\\#;/\\\\#")
