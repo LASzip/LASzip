@@ -4,6 +4,11 @@ project(LASZIP CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
+
+# the next line is the ONLY place in the entire laszip system where
+# the version info is hard-coded
+set(LASZIP_API_VERSION_STRING "3.1.0" CACHE STRING "LASzip version" FORCE)
+
 include (CheckIncludeFileCXX)
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 include(${ROOT_DIR}/cmake/cpack.cmake NO_POLICY_SCOPE)
@@ -23,9 +28,6 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 # LASZIP general settings
 #------------------------------------------------------------------------------
 
-# the next line is the ONLY place in the entire laszip system where
-# the version info is hard-coded
-set(LASZIP_API_VERSION_STRING "3.1.0" CACHE STRING "LASzip version" FORCE)
 
 #
 # Extract the pieces of the version info from the version string above.
