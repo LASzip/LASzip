@@ -4786,7 +4786,7 @@ laszip_create_laszip_vlr(
   *vlr = (laszip_U8*)malloc(out->getSize());
   *vlr_size = (U32)out->getSize();
   laszip_dll->buffers.push_back(*vlr);
-  memcpy(vlr, out->getData(), out->getSize());
+  memcpy(*vlr, out->getData(), out->getSize());
 
   delete out;
 
