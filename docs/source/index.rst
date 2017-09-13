@@ -6,20 +6,42 @@ LASzip - free and lossless LiDAR compression
 
 LASzip - a free open source product of `rapidlasso GmbH <http://rapidlasso.com/>`_ - quickly turns bulky LAS files into compact LAZ files without information loss. Terabytes of LAZ data are now available for free download from various agencies making LASzip, winner of the 2012 Geospatial World Forum `Technology Innovation Award <http://www.facebook.com/photo.php?fbid=370334049695712>`_ in LiDAR Processing and runner-up for `innovative product at INTERGEO 2012 <http://gispoint.de/wia.html>`_, the de-facto standard for LiDAR compression.
 
+Source
+..............................................................................
+
+* **2017-09-13**
+
+  - `laszip-3.1.0.tar.gz <https://github.com/LASzip/LASzip/releases/download/v3.1.0/laszip-src-3.1.0.tar.gz>`_
+    `(md5) <https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-src-3.1.0.tar.gz.md5>`__
+
+
+Past Release(s)
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* **2013-08-05**
+
+  - `laszip-2.2.0.tar.gz <https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-src-2.2.0.tar.gz>`_
+    `(md5) <https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-src-2.2.0.tar.gz.md5>`__
+
+  - `laszip-win32-msvc2009.zip <https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-win32-msvc2009.zip>`_
+    `(md5) <https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-win32-msvc2009.zip.md5>`__
+
+
+
 
 Gold Sponsors (USD 10,000 or more)
 ------------------------------------------------------------------------------
-* `CRREL - U.S. Army Corps of Engineers <http://www.crrel.usace.army.mil/>`_ 
-* `Digital Coast - NOAA Coastal Services Center <http://www.csc.noaa.gov/digitalcoast/>`_ 
+* `CRREL - U.S. Army Corps of Engineers <http://www.crrel.usace.army.mil/>`_
+* `Digital Coast - NOAA Coastal Services Center <http://www.csc.noaa.gov/digitalcoast/>`_
 
 Silver Sponsors (USD 5,000 or more)
 ------------------------------------------------------------------------------
-* `RIEGL Laser Measurement Systems <http://riegl.com/>`_ 
+* `RIEGL Laser Measurement Systems <http://riegl.com/>`_
 
 Bronze Sponsors (USD 2,000 or more)
 ------------------------------------------------------------------------------
-* `Quantum Spatial Inc. <http://quantumspatial.com/>`_ 
-* `Trimble Geospatial <http://www.trimble.com/Industries/GeoSpatial/>`_ 
+* `Quantum Spatial Inc. <http://quantumspatial.com/>`_
+* `Trimble Geospatial <http://www.trimble.com/Industries/GeoSpatial/>`_
 
 Download
 ------------------------------------------------------------------------------
@@ -31,37 +53,12 @@ library which fully integrates and enhances the LASzip codebase with spatial
 indexing, filters, transforms, geo-referencing, ... of LAS and LAZ files.
 
 
-Source
-..............................................................................
-
-
-* **2013-08-05** 
-
-  - `laszip-2.2.0.tar.gz <https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-src-2.2.0.tar.gz>`_ 
-    `(md5) <https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-src-2.2.0.tar.gz.md5>`__ 
-
-  - `laszip-win32-msvc2009.zip <https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-win32-msvc2009.zip>`_ 
-    `(md5) <https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-win32-msvc2009.zip.md5>`__
-
-
-Past Release(s)
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-* **2012-01-04** 
-
-  - `laszip-2.1.0.tar.gz <http://download.osgeo.org/laszip/laszip-2.1.0.tar.gz>`_ 
-    `(md5) <http://download.osgeo.org/laszip/laszip-2.1.0.tar.gz.md5>`__ 
-
-  - `laszip-2.1.0.zip <http://download.osgeo.org/laszip/laszip-2.1.0.zip>`_ 
-    `(md5) <http://download.osgeo.org/liblas/laszip-2.1.0.zip.md5>`__
-
 
 Binaries
 ..............................................................................
 
-  - See `OSGeo4W`_ for Windows .lib and 
-    include files to compile LASzip into your own application. `libLAS`_ 
+  - See `OSGeo4W`_ for Windows .lib and
+    include files to compile LASzip into your own application. `libLAS`_
     binaries through `OSGeo4W`_ also link LASzip.
 
   - For explicit compression (decompression) of LAS (LAZ) files a Windows
@@ -94,7 +91,7 @@ and write compressed data.
 
 LASzip is completely lossless. It compresses bulky LAS files into compact LAZ
 files that are only 7-20 percent of the original size, accurately preserving
-every single bit. For example, compressing and decompressing the LAS file 
+every single bit. For example, compressing and decompressing the LAS file
 lidar.las with `laszip.exe`_ (command-line only `laszip-cli.exe`_) as shown below results in lidar_copy.las that
 is bit-identical to lidar.las. However, the small size of lidar.laz makes it
 much easier to store, copy, transmit, or archive large amounts of LIDAR.
@@ -106,7 +103,7 @@ LASzip compression can be many times smaller and many times faster than
 generic compressors like `bz2`_, `gzip`_, and `rar`_ because it knows what
 the different bytes in a LAS file represent. Another advantage of LASzip
 is that it allows you to treat compressed LAZ files just like standard LAS
-files. You can load them directly from compressed form into your application 
+files. You can load them directly from compressed form into your application
 without needing to decompress them onto disk first. The availability of the
 `LASzip`_ DLL and two APIs, `libLAS`_ and `LASlib`_, with LASzip capability
 makes it easy to add native LAZ support to your own software package.
@@ -141,7 +138,7 @@ Software with native LAZ support
 * LIDAR Analyst (5.2 or 6.0 and up) by `TEXTRON Systems <http://www.textronsystems.com/>`_
 * TerraScan, TerraMatch, TerraPhoto, and TerraSlave (015.xxx and up) by `Terrasolid <http://www.terrasolid.com/>`_
 * Carlson (2016 and up) by `Carlson Software <http://carlsonsw.com/>`_
-* Remote Sensing Software by `Joanneum Research Forschungsgesellschaft mbH <http://www.remotesensing.at/en/remote-sensing-software.html>`_ 
+* Remote Sensing Software by `Joanneum Research Forschungsgesellschaft mbH <http://www.remotesensing.at/en/remote-sensing-software.html>`_
 * LiMON Viewer by `Dephos Software <http://www.limon.eu/products/compare-versions/>`_
 * Scanopy by `imagination <http://www.imagination.at/>`_
 * WinGeoTransform by `KLT Assoc <http://www.kltassoc.com/>`_
@@ -207,7 +204,7 @@ Download LAZ data
 
 * LiDAR of `Kanton Zurich, Switzerland <http://maps.zh.ch/download/hoehen/2014/lidar/>`_
 * LiDAR of `Kanton Solothurn, Switzerland <http://www.catais.org/geodaten/ch/so/agi/hoehen/2014/lidar/>`_
-* GRAFCAN `LiDAR of the Canary Islands <http://tiendavirtual.grafcan.es/visor.jsf?currentSeriePk=263585792>`_ 
+* GRAFCAN `LiDAR of the Canary Islands <http://tiendavirtual.grafcan.es/visor.jsf?currentSeriePk=263585792>`_
 * Alaska LiDAR in the `Matanuska-Susitna Borough <http://matsu.gina.alaska.edu/LiDAR/Point_MacKenzie/Point_Cloud/Classified.laz/>`_
 * NSF-funded LiDAR hosting facility `OpenTopography <http://opentopo.sdsc.edu/gridsphere/gridsphere?cid=geonlidar>`_
 * Clark County Kentucky LiDAR data `Clark County GIS <http://www.ccgisonline.com/LAZ/IndexMap.pdf>`_
@@ -264,8 +261,8 @@ Download LAS data (yet to be laszipped)
 * Spain: `Pais Vasco LiDAR <ftp://ftp.geo.euskadi.net/lidar/LIDAR_2012_ETRS89/LAS/>`_
 
 .. toctree::
-   :hidden: 
-   
+   :hidden:
+
 .. _`OSGeo4W`: http://trac.osgeo.org/osgeo4w
 .. _`Martin Isenburg`: http://www.cs.unc.edu/~isenburg
 .. _`ASPRS LAS format`: http://www.asprs.org/society/committees/standards/lidar_exchange_format.html
