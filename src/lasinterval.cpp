@@ -29,6 +29,7 @@
 ===============================================================================
 */
 #include "lasinterval.hpp"
+#include "laszip.hpp"
 
 #include "bytestreamin.hpp"
 #include "bytestreamout.hpp"
@@ -57,6 +58,10 @@ using namespace std;
     using namespace tr1;
 #   endif
 typedef unordered_map<I32, LASintervalStartCell*> my_cell_hash;
+#elif defined(LZ_WIN32_VC6)
+#include <hash_map>
+using namespace std;
+typedef hash_map<I32, LASintervalStartCell*> my_cell_hash;
 #else
 #include <unordered_map>
 using namespace std;

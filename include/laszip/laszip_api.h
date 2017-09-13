@@ -607,15 +607,13 @@ laszip_open_writer_stream(
     , laszip_BOOL                      do_not_write_header
 );
 
-#include <vector>
-
 /*---------------------------------------------------------------------------*/
-// make LASzip VLR for given point type and size (always request native LAS 1.4 extension)
+// make LASzip VLR for point type and point size already specified earlier
 LASZIP_API laszip_I32
 laszip_create_laszip_vlr(
     laszip_POINTER                     pointer
-    , laszip_U8 * &                    vlr
-    , size_t&                           vlrSize
+    , laszip_U8**                      vlr
+    , laszip_U32*                      vlr_size
 );
 
 #endif  // __cplusplus
