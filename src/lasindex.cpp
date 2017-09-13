@@ -60,9 +60,9 @@
 #   endif
 typedef unordered_map<I32,U32> my_cell_hash;
 #else
-#include <hash_map>
+#include <unordered_map>
 using namespace std;
-typedef hash_map<I32,U32> my_cell_hash;
+typedef unordered_map<I32,U32> my_cell_hash;
 #endif
 
 LASindex::LASindex()

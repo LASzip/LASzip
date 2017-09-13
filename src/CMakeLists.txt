@@ -26,7 +26,6 @@ set(LASZIP_SOURCES
     laszip_dll.cpp
 )
 
-add_definitions(-DUNORDERED)
 add_definitions(-DLASZIPDLL_EXPORTS)
 
 LASZIP_ADD_LIBRARY(${LASZIP_BASE_LIB_NAME} ${LASZIP_SOURCES})
