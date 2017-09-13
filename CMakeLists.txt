@@ -4,6 +4,7 @@ project(LASZIP CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
+include (CheckIncludeFileCXX)
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 include(${ROOT_DIR}/cmake/cpack.cmake NO_POLICY_SCOPE)
 
@@ -35,6 +36,7 @@ SET_INSTALL_DIRS()
 set(LASZIP_API_VERSION ${LASZIP_API_VERSION_MAJOR}.${LASZIP_API_VERSION_MINOR}.${LASZIP_API_VERSION_PATCH})
 set(LASZIP_COMPATIBILITY_VERSION ${LASZIP_API_VERSION_MAJOR})
 
+check_include_file_cxx ("unordered_map" HAVE_UNORDERED_MAP)
 
 ###############################################################################
 # Main CMake configuration file for laszip

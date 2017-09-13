@@ -52,11 +52,14 @@ using namespace std;
 #     define UNORDERED_FOUND
 #    endif
 #  endif
-#  ifndef UNORDERED_FOUND
+#  ifdef HAVE_UNORDERED_MAP
+#     include <unordered_map>
+      using namespace std;
+#  elif UNORDERED_FOUND
 #    include <tr1/unordered_map>
     using namespace std;
     using namespace tr1;
-#   endif
+#  endif
 typedef unordered_map<I32, LASintervalStartCell*> my_cell_hash;
 #elif defined(LZ_WIN32_VC6)
 #include <hash_map>
