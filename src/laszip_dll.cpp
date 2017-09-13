@@ -40,7 +40,6 @@
 #define LASZIP_SOURCE
 
 #include <laszip/laszip_api.h>
-#include <iostream>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -3183,7 +3182,7 @@ laszip_close_writer(
 
     delete laszip_dll->streamout;
     laszip_dll->streamout = 0;
-    
+
 	if (laszip_dll->file)
       fclose(laszip_dll->file);
     laszip_dll->file = 0;
@@ -4786,7 +4785,7 @@ laszip_create_laszip_vlr(
   vlr = (laszip_U8 *)malloc(out->getSize());
   vlrSize = out->getSize();
   laszip_dll->buffers.push_back(vlr);
-  std::copy(out->getData(), out->getData() + out->getSize(), vlr);
+  memcpy(vlr, out->getData(), out->getData() + out->getSize());
 
   delete out;
 
