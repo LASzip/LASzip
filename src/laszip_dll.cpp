@@ -40,7 +40,7 @@
 #define LASZIP_SOURCE
 
 #include <laszip/laszip_api.h>
-
+#include <iostream>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -3183,8 +3183,9 @@ laszip_close_writer(
 
     delete laszip_dll->streamout;
     laszip_dll->streamout = 0;
-
-    fclose(laszip_dll->file);
+    
+	if (laszip_dll->file)
+      fclose(laszip_dll->file);
     laszip_dll->file = 0;
   }
   catch (...)
@@ -4537,7 +4538,6 @@ laszip_close_reader(
 {
   if (pointer == 0) return 1;
   laszip_dll_struct* laszip_dll = (laszip_dll_struct*)pointer;
-
   try
   {
     if (laszip_dll->reader == 0)
@@ -4567,7 +4567,8 @@ laszip_close_reader(
       laszip_dll->lax_index = 0;
     }
 
-    fclose(laszip_dll->file);
+	if (laszip_dll->file)
+      fclose(laszip_dll->file);
     laszip_dll->file = 0;
   }
   catch (...)
