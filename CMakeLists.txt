@@ -5,6 +5,7 @@ string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
+include(${ROOT_DIR}/cmake/cpack.cmake NO_POLICY_SCOPE)
 
 #------------------------------------------------------------------------------
 # internal cmake settings
@@ -96,3 +97,7 @@ set(LASZIP_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/laszip")
 
 add_subdirectory(src)
 add_subdirectory(dll)
+
+#
+add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+
