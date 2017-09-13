@@ -4746,8 +4746,8 @@ laszip_open_writer_stream(
 LASZIP_API laszip_I32
 laszip_create_laszip_vlr(
     laszip_POINTER                     pointer
-    , laszip_U8 * &                    vlr
-    , size_t&                           vlrSize
+    , laszip_U8**                      vlr
+    , laszip_U32*                      vlr_size
 )
 {
   if (pointer == 0) return 1;
@@ -4782,10 +4782,10 @@ laszip_create_laszip_vlr(
     return 1;
   }
 
-  vlr = (laszip_U8 *)malloc(out->getSize());
-  vlrSize = out->getSize();
-  laszip_dll->buffers.push_back(vlr);
-  memcpy(vlr, out->getData(), out->getData() + out->getSize());
+  *vlr = (laszip_U8*)malloc(out->getSize());
+  *vlr_size = (U32)out->getSize();
+  laszip_dll->buffers.push_back(*vlr);
+  memcpy(vlr, out->getData(), out->getSize());
 
   delete out;
 
