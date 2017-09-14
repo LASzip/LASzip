@@ -27,12 +27,13 @@ Past Release(s)
     `(md5) <https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-win32-msvc2009.zip.md5>`__
 
 
-
+Platinum Sponsors (USD 25,000 or more)
+------------------------------------------------------------------------------
+* `Digital Coast - NOAA Coastal Services Center <http://www.csc.noaa.gov/digitalcoast/>`_
 
 Gold Sponsors (USD 10,000 or more)
 ------------------------------------------------------------------------------
 * `CRREL - U.S. Army Corps of Engineers <http://www.crrel.usace.army.mil/>`_
-* `Digital Coast - NOAA Coastal Services Center <http://www.csc.noaa.gov/digitalcoast/>`_
 
 Silver Sponsors (USD 5,000 or more)
 ------------------------------------------------------------------------------
