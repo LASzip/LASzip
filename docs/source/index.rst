@@ -11,8 +11,8 @@ Source
 
 * **2017-09-13**
 
-  - `laszip-3.1.0.tar.gz <https://github.com/LASzip/LASzip/releases/download/v3.1.0/laszip-src-3.1.0.tar.gz>`_
-    `(md5) <https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-src-3.1.0.tar.gz.md5>`__
+  - `laszip-3.1.0.tar.gz <https://github.com/LASzip/LASzip/releases/download/3.1.0/laszip-src-3.1.0.tar.gz>`_
+    `(md5) <https://github.com/LASzip/LASzip/releases/download/3.1.0/laszip-src-3.1.0.tar.gz.md5>`__
 
 
 Past Release(s)
