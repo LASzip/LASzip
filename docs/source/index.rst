@@ -29,7 +29,7 @@ Past Release(s)
 
 Platinum Sponsors (USD 25,000 or more)
 ------------------------------------------------------------------------------
-* `Digital Coast - NOAA Coastal Services Center <http://coast.noaa.gov/digitalcoast/>`_
+* `Digital Coast - NOAA Office for Coastal Management <http://coast.noaa.gov/digitalcoast/>`_
 
 Gold Sponsors (USD 10,000 or more)
 ------------------------------------------------------------------------------
@@ -201,7 +201,7 @@ Download LAZ data
 * nationwide open LiDAR data of `the Netherlands <https://groups.google.com/d/topic/lastools/Y0fdLGEJ6XE/discussion>`_
 * `Digital Coast LiDAR <http://coast.noaa.gov/dataviewer>`_ by NOAA (+ `how to download <http://geozoneblog.wordpress.com/2013/01/28/how-download-lots-lidar-digital-coast>`_)
 
-  * `Folders for Batch Download: <http://coast.noaa.gov/htdata/lidar1_z/>`
+  * `Folders for Batch Download: <http://coast.noaa.gov/htdata/lidar1_z/>`_
 
 * LiDAR of `Kanton Zurich, Switzerland <http://maps.zh.ch/download/hoehen/2014/lidar/>`_
 * LiDAR of `Kanton Solothurn, Switzerland <http://www.catais.org/geodaten/ch/so/agi/hoehen/2014/lidar/>`_
