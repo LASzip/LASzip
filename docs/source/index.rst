@@ -199,10 +199,7 @@ Download LAZ data
 
 * open LiDAR data strategy of the `National Land Survey of Finland <https://tiedostopalvelu.maanmittauslaitos.fi/tp/kartta?lang=en>`_
 * nationwide open LiDAR data of `the Netherlands <https://groups.google.com/d/topic/lastools/Y0fdLGEJ6XE/discussion>`_
-* `Digital Coast LiDAR <http://coast.noaa.gov/dataviewer>`_ by NOAA (+ `how to download <http://geozoneblog.wordpress.com/2013/01/28/how-download-lots-lidar-digital-coast>`_)
-
-  * `Folders for Batch Download: <http://coast.noaa.gov/htdata/lidar1_z/>`_
-
+* `Digital Coast LiDAR <http://coast.noaa.gov/dataviewer>`_ by NOAA (+ `how to download <http://geozoneblog.wordpress.com/2013/01/28/how-download-lots-lidar-digital-coast>`_) and `folders for batch download <http://coast.noaa.gov/htdata/lidar1_z/>`_
 * LiDAR of `Kanton Zurich, Switzerland <http://maps.zh.ch/download/hoehen/2014/lidar/>`_
 * LiDAR of `Kanton Solothurn, Switzerland <http://www.catais.org/geodaten/ch/so/agi/hoehen/2014/lidar/>`_
 * GRAFCAN `LiDAR of the Canary Islands <http://tiendavirtual.grafcan.es/visor.jsf?currentSeriePk=263585792>`_
