@@ -174,6 +174,12 @@ Software with native LAZ support
 * Z+F SynCaT Mobile Mapping Software by `Z+F Zoller+Frohlich <http://www.zf-laser.com/Z-F-SynCaT-R.174.0.html>`_
 * LidarViewer by `routescene <http://www.routescene.com/>`_
 * 3Dsurvey by `Modri Planet d. o. o. <http://www.3dsurvey.si/>`_
+* Vision Lidar by `geo-plus <http://www.geo-plus.com/>`_
+* PPIMMS by `viametris <http://www.viametris.com/>`_
+* SuperGIS by `Supergeo Technologies Inc. <http://www.supergeotek.com/>`_
+* Smart Processing Lidar by `3D TARGET srl <http://www.3dtarget.it/>`_
+* Geomapping+ by `GEOMAPPING <http://www.geomapping.fr/>`_
+* GEOgraph 3D by `HHK Datentechnik GmbH <http://www.hhk.de/>`_
 
 Download LAZ data
 ------------------------------------------------------------------------------
