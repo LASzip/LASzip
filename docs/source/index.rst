@@ -180,6 +180,8 @@ Software with native LAZ support
 * Smart Processing Lidar by `3D TARGET srl <http://www.3dtarget.it/>`_
 * Geomapping+ by `GEOMAPPING <http://www.geomapping.fr/>`_
 * GEOgraph 3D by `HHK Datentechnik GmbH <http://www.hhk.de/>`_
+* Dot3DEdit (version 2.0 and up) by `DotProduct LLC <http://www.dotproduct3d.com/>`_
+* HydroVish and KomVish by `AirborneHydroMapping GmbH <http://www.ahm.co.at/>`_
 
 Download LAZ data
 ------------------------------------------------------------------------------
