@@ -235,6 +235,8 @@ Download LAZ data
 * `MassGIS LiDAR Terrain Data <http://www.mass.gov/anf/research-and-tech/it-serv-and-support/application-serv/office-of-geographic-information-massgis/datalayers/lidar.html>`_
 * https://www.lidar-online.com/product-list.php
 
+* `Nationwide LiDAR Data of Denmark <https://download.kortforsyningen.dk/content/dhmpunktsky>`_
+
 Users of LASzip
 ------------------------------------------------------------------------------
 
@@ -255,7 +257,6 @@ Users of LASzip
 Download LAS data (yet to be laszipped)
 ------------------------------------------------------------------------------
 
-* `Nationwide LiDAR Data of Denmark <http://download.kortforsyningen.dk/>`_
 * `Spring 2011 Rhode Island Statewide LiDAR Data <http://www.edc.uri.edu/rigis/data/download/lidar/2011USGS/tiles.aspx/>`_
 * `PAMAP - LiDAR data of Pennsylvania <ftp://pamap.pasda.psu.edu/pamap_lidar/>`_
 * `Iowa LiDAR Mapping Project <http://geotree2.geog.uni.edu/IowaLidar/>`_
