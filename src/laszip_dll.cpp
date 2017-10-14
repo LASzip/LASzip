@@ -2776,7 +2776,7 @@ laszip_open_writer(
 
     // open the file
 
-    laszip_dll->file = fopen(file_name, "wb");
+    laszip_dll->file = LASindex::openFile(file_name, "wb");
 
     if (laszip_dll->file == 0)
     {
@@ -4156,7 +4156,7 @@ laszip_open_reader(
 
     // open the file
 
-    laszip_dll->file = fopen(file_name, "rb");
+    laszip_dll->file = LASindex::openFile(file_name, "rb");
 
     if (laszip_dll->file == 0)
     {

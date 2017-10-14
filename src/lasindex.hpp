@@ -64,6 +64,7 @@ public:
   void complete(U32 minimum_points=100000, I32 maximum_intervals=-1, const BOOL verbose=TRUE);
 
   // read from file or write to file
+  static FILE* openFile(const char* file_name, const char* mode);
   BOOL read(FILE* file);
   BOOL write(FILE* file) const;
   BOOL read(const char* file_name);
