@@ -33,7 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <vector>
 #include "lasquadtree.hpp"
 #include "lasinterval.hpp"
 #ifdef LASZIPDLL_EXPORTS
