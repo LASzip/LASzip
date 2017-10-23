@@ -11,7 +11,7 @@ install(DIRECTORY "${LASZIP_HEADERS_DIR}"
 )
 
 install(DIRECTORY "${CMAKE_BINARY_DIR}/include/laszip/"
-        DESTINATION "${LASZIP_INCLUDE_INSTALL_DIR}"
+        DESTINATION "${LASZIP_INCLUDE_INSTALL_DIR}/laszip"
         PATTERN "/CMakeFiles/*" EXCLUDE
 )
 
