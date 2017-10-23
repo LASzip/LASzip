@@ -176,7 +176,7 @@ macro(SET_INSTALL_DIRS)
           set(LASZIP_LIB_INSTALL_DIR "lib")
       endif()
   endif ()
-    set(LASZIP_INCLUDE_INSTALL_ROOT "include/")
+    set(LASZIP_INCLUDE_INSTALL_ROOT "include")
     set(LASZIP_INCLUDE_INSTALL_DIR
         "${LASZIP_INCLUDE_INSTALL_ROOT}")
     set(LASZIP_DOC_INCLUDE_DIR
