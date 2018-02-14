@@ -70,10 +70,6 @@ macro(LASZIP_ADD_LIBRARY _name)
         RUNTIME DESTINATION ${LASZIP_BIN_INSTALL_DIR}
         LIBRARY DESTINATION ${LASZIP_LIB_INSTALL_DIR}
         ARCHIVE DESTINATION ${LASZIP_LIB_INSTALL_DIR})
-#    if (APPLE)
-#        set_target_properties(${_name} PROPERTIES INSTALL_NAME_DIR
-#            "@executable_path/../lib")
-#    endif()
 endmacro(LASZIP_ADD_LIBRARY)
 
 ###############################################################################
