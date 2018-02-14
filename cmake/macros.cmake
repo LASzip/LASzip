@@ -70,61 +70,11 @@ macro(LASZIP_ADD_LIBRARY _name)
         RUNTIME DESTINATION ${LASZIP_BIN_INSTALL_DIR}
         LIBRARY DESTINATION ${LASZIP_LIB_INSTALL_DIR}
         ARCHIVE DESTINATION ${LASZIP_LIB_INSTALL_DIR})
-    if (APPLE)
-        set_target_properties(${_name} PROPERTIES INSTALL_NAME_DIR
-            "@executable_path/../lib")
-    endif()
+#    if (APPLE)
+#        set_target_properties(${_name} PROPERTIES INSTALL_NAME_DIR
+#            "@executable_path/../lib")
+#    endif()
 endmacro(LASZIP_ADD_LIBRARY)
-
-###############################################################################
-# Add an executable target.
-# _name The executable name.
-# _component The part of LASZIP that this library belongs to.
-# ARGN the source files for the library.
-macro(LASZIP_ADD_EXECUTABLE _name)
-    add_executable(${_name} ${ARGN})
-
-    set(LASZIP_EXECUTABLES ${LASZIP_EXECUTABLES} ${_name})
-    install(TARGETS ${_name}
-        EXPORT LASZIPTargets
-        RUNTIME DESTINATION ${LASZIP_BIN_INSTALL_DIR})
-endmacro(LASZIP_ADD_EXECUTABLE)
-
-
-###############################################################################
-# Add a test target.
-# _name The driver name.
-# ARGN :
-#    FILES the source files for the test
-#    LINK_WITH link test executable with libraries
-macro(LASZIP_ADD_TEST _name)
-    set(options)
-    set(oneValueArgs)
-    set(multiValueArgs FILES LINK_WITH)
-    cmake_parse_arguments(LASZIP_ADD_TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-    include_directories(${PROJECT_SOURCE_DIR}/test/unit)
-    include_directories(${PROJECT_BINARY_DIR}/test/unit)
-    set(common_srcs
-        ${PROJECT_SOURCE_DIR}/test/unit/Support.cpp
-        ${PROJECT_SOURCE_DIR}/test/unit/TestConfig.cpp
-    )
-    if (WIN32)
-        list(APPEND ${LASZIP_ADD_TEST_FILES} ${LASZIP_TARGET_OBJECTS})
-        add_definitions("-DLASZIP_DLL_EXPORT=1")
-    endif()
-    add_executable(${_name} ${LASZIP_ADD_TEST_FILES} ${common_srcs})
-    set_target_properties(${_name} PROPERTIES COMPILE_DEFINITIONS LASZIP_DLL_IMPORT)
-    set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
-    target_link_libraries(${_name} ${LASZIP_BASE_LIB_NAME} gtest
-        ${LASZIP_ADD_TEST_LINK_WITH})
-    add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}" WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
-    set_property(TEST ${_name} PROPERTY ENVIRONMENT
-      # Ensure plugins are loaded from build dir
-      # https://github.com/LASZIP/LASZIP/issues/840
-      "LASZIP_DRIVER_PATH=${PROJECT_BINARY_DIR}/lib"
-    )
-endmacro(LASZIP_ADD_TEST)
-
 
 ###############################################################################
 # Get the operating system information. Generally, CMake does a good job of
