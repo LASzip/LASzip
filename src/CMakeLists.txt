@@ -16,11 +16,13 @@ set(LASZIP_SOURCES
     lasreaditemcompressed_v1.cpp
     lasreaditemcompressed_v2.cpp
     lasreaditemcompressed_v3.cpp
+    lasreaditemcompressed_v4.cpp
     lasreadpoint.cpp
     #lasunzipper.cpp
     laswriteitemcompressed_v1.cpp
     laswriteitemcompressed_v2.cpp
     laswriteitemcompressed_v3.cpp
+    laswriteitemcompressed_v4.cpp
     laswritepoint.cpp
     laszip.cpp
     laszip_dll.cpp
