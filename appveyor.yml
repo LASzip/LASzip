@@ -6,6 +6,12 @@ platform: x64
 
 configuration: Release
 
+environment:
+  OSGEO4W_ROOT: C:\\OSGeo4W64
+
+  matrix:
+    - OSGEO4W_BUILD: ON
+
 matrix:
   fast_finish: true
 
