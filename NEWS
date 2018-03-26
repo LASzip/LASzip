@@ -2,6 +2,20 @@
 LASzip
 ================================================================================
 
+3.2.1 26-MAR-18
+--------------------------------------------------------------------------------
+
+* Library SOVERSIONing for libtool to 8.0.0 https://github.com/LASzip/LASzip/issues/36
+* Update NEWS and ChangeLog
+* Library version inadvertently had major version in name (only relevant on windows)
+* Now building on AppVeyor and Travis https://ci.appveyor.com/project/hobu/laszip/history
+  https://travis-ci.org/LASzip/LASzip
+
+3.2.0 21-MAR-18
+--------------------------------------------------------------------------------
+
+* Fix install of laszip_api_version.h https://github.com/LASzip/LASzip/issues/30
+* Add LAZ V4 reader methods in preparation for a future release
 
 3.1.1 10-OCT-17
 --------------------------------------------------------------------------------
