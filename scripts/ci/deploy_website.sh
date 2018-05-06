@@ -8,7 +8,7 @@ DATE=$(date +'%y.%m.%d %H:%M:%S')
 
 git clone git@github.com:LASzip/laszip.github.io.git $destdir/laszipdocs
 cd $destdir/laszipdocs
-git checkout gh-pages
+git checkout master
 
 
 cd $builddir/html
