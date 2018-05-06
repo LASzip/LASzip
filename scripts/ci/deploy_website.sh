@@ -6,7 +6,7 @@ builddir=$1
 destdir=$2
 DATE=$(date +'%y.%m.%d %H:%M:%S')
 
-git git@github.com:LASzip/laszip.github.io.git $destdir/laszipdocs
+git clone git@github.com:LASzip/laszip.github.io.git $destdir/laszipdocs
 cd $destdir/laszipdocs
 git checkout gh-pages
 
