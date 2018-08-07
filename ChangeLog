@@ -1,3 +1,52 @@
+2018-03-22
+	* Howard Butler <howard@hobu.co> call vcvars (03:41:11)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:LASzip/LASzip (03:39:49)
+	* Howard Butler <howard@hobu.co> VC vars (03:39:11)
+
+2018-03-21
+	* Howard Butler <howard@hobu.co> use laszip3 as DLL name for new builds on windows (08:34:15)
+	* Howard Butler <howard@hobu.co> fix doc version (08:29:18)
+	* Howard Butler <howard@hobu.co> point to 3.2.0 release (08:25:52)
+	* Howard Butler <howard@hobu.co> fix LASZIP_VERSION_BUILD_DATE (08:21:21)
+	* Howard Butler <howard@hobu.co> configure environment (07:51:08)
+	* Howard Butler <howard@hobu.co> whitespace normalization (07:49:14)
+	* Howard Butler <howard@hobu.co> use 2017 for appveyor builds (07:48:06)
+	* Howard Butler <howard@hobu.co> remove matrix (06:04:53)
+	* Howard Butler <howard@hobu.co> appveyor builds (06:01:40)
+	* Howard Butler <howard@hobu.co> set version to 3.2.0 (06:01:30)
+	* Howard Butler <howard@hobu.co> Create README.rst (05:31:12)
+
+2018-03-19
+	* Howard Butler <howard@hobu.co> make sure to compile lasreaditemcompressed_v4.cpp laswriteitemcompressed_v4.cpp too (11:10:47)
+
+2018-02-09
+	* Martin Isenburg <martin.isenburg@gmail.com>  version increment to 3.2 (can read v4 compressed items) (03:56:42)
+	* Martin Isenburg <martin@rapidlasso.com> prepare to correct 'context switch' bug reported by Wanwannodao (03:45:51)
+	* Martin Isenburg <martin@rapidlasso.com> better WARNINGS and fix for MSVC2013 C4258 warning about shadowed 'i' value (03:35:20)
+	* Martin Isenburg <martin@rapidlasso.com> small fix in set_extended_classification() (03:27:38)
+	* Martin Isenburg <martin@rapidlasso.com> define fixes for std::unordered_map by Evon (03:26:09)
+
+2018-01-29
+	* Howard Butler <howard@hobu.co> Merge pull request #41 from pblottiere/fix_install (09:51:34)
+	* Blottiere Paul <blottiere.paul@gmail.com> Fix install of laszip_api_version.h (08:03:55)
+
+2018-01-12
+	* Howard Butler <howard@hobu.co> Merge pull request #38 from hobu/laszip-4.0-work-ticket (09:47:10)
+
+2018-01-02
+	* Howard Butler <howard@hobu.co> another include install path attempt (10:54:31)
+	* Howard Butler <howard@hobu.co> bump version to 4.0.0 (10:43:22)
+	* Howard Butler <howard@hobu.co> include install location broken (10:43:15)
+
+2017-10-19
+	* Howard Butler <howard@hobu.co> Merge pull request #33 from gadomski/load-dll-on-debian (13:02:11)
+	* Pete Gadomski <pete.gadomski@gmail.com> Load .so dll on non-apple (12:06:55)
+
+2017-10-10
+	* Howard Butler <howard@hobu.co> download link for release (14:24:34)
+	* Howard Butler <howard@hobu.co> increment versions for 3.1.1 release (14:04:35)
+	* Howard Butler <howard@hobu.co> ChangeLog refresh (13:47:49)
+
 2017-10-09
 	* Howard Butler <howard@hobu.co> Merge pull request #31 from kbevers/dk-lidar (09:38:12)
 	* Kristian Evers <kristianevers@gmail.com> Moved link to Danish LiDAR to LAZ section of data providers and updated link (09:35:22)

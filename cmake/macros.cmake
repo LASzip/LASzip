@@ -59,7 +59,7 @@ macro(LASZIP_ADD_LIBRARY _name)
     add_library(${_name} ${LASZIP_LIB_TYPE} ${ARGN})
     set_target_properties(
         ${_name} PROPERTIES
-        VERSION ${LASZIP_API_VERSION}
+        VERSION ${LASZIP_SO_VERSION}
         SOVERSION ${LASZIP_COMPATIBILITY_VERSION}
         CLEAN_DIRECT_OUTPUT 1
         FOLDER Libraries
