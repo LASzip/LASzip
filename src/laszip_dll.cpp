@@ -24,7 +24,9 @@
 
   CHANGE HISTORY:
 
-    6 April 2018 == added zero() function to laszip_dll struct to fix memory leak
+   19 September 2018 -- removed tuples and triple support from attributes
+    7 September 2018 -- replaced calls to _strdup with calls to the LASCopyString macro
+    6 April 2018 -- added zero() function to laszip_dll struct to fix memory leak
    30 August 2017 -- completing stream-based writing (with writing LAS header)
    23 August 2017 -- turn on "native" by default
     3 August 2017 -- new 'laszip_create_laszip_vlr()' gets VLR as C++ std::vector
@@ -40,7 +42,7 @@
 #define LASZIP_DYN_LINK
 #define LASZIP_SOURCE
 
-#include <laszip/laszip_api.h>
+#include "laszip_api.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -409,7 +411,7 @@ laszip_clean(
     }
 
     // dealloc the inventory although close_writer() call should have done this already
-    
+
     if (laszip_dll->inventory == 0)
     {
       delete laszip_dll->inventory;
@@ -1360,8 +1362,8 @@ laszip_add_attribute(
     }
 
     LASattribute lasattribute(type, name, description);
-    lasattribute.set_scale(scale, 0);
-    lasattribute.set_offset(offset, 0);
+    lasattribute.set_scale(scale);
+    lasattribute.set_offset(offset);
 
     if (laszip_dll->attributer == 0)
     {
@@ -2083,7 +2085,7 @@ laszip_prepare_point_for_write(
 
       // scan_angle (difference or remainder) is stored as a I16
       LASattribute lasattribute_scan_angle(LAS_ATTRIBUTE_I16, "LAS 1.4 scan angle", "additional attributes");
-      lasattribute_scan_angle.set_scale(0.006, 0);
+      lasattribute_scan_angle.set_scale(0.006);
       I32 index_scan_angle = laszip_dll->attributer->add_attribute(lasattribute_scan_angle);
       laszip_dll->start_scan_angle = laszip_dll->attributer->get_attribute_start(index_scan_angle);
       // extended returns stored as a U8
@@ -2958,7 +2960,7 @@ laszip_open_writer(
 
       // copy the file name for later
 
-      laszip_dll->lax_file_name = strdup(file_name);
+      laszip_dll->lax_file_name = LASCopyString(file_name);
     }
 
     // set the point number and point count
@@ -4549,7 +4551,7 @@ laszip_read_point(
       point->extended_number_of_returns = number_of_returns_increment + point->number_of_returns;
       point->extended_classification = classification + point->classification;
       point->extended_scanner_channel = scanner_channel;
-      point->extended_classification_flags = (overlap_bit << 3) | (point->classification >> 5);
+      point->extended_classification_flags = (overlap_bit << 3) | ((point->withheld_flag) << 2) | ((point->keypoint_flag) << 1) | (point->synthetic_flag);
     }
 
     laszip_dll->p_count++;
