@@ -272,7 +272,7 @@ public:
     if (((LAStempWritePoint10*)item)->extended_point_type)
     {
       ((LAStempWritePoint14*)swapped)->classification_flags = (((LAStempWritePoint10*)item)->extended_classification_flags & 8) | (((LAStempWritePoint10*)item)->classification >> 5);
-      (((LAStempWritePoint14*)swapped)->classification == 0) ((LAStempWritePoint14*)swapped)->classification = ((LAStempWritePoint10*)item)->extended_classification;
+      if (((LAStempWritePoint14*)swapped)->classification == 0) ((LAStempWritePoint14*)swapped)->classification = ((LAStempWritePoint10*)item)->extended_classification;
       ((LAStempWritePoint14*)swapped)->scanner_channel = ((LAStempWritePoint10*)item)->extended_scanner_channel;
       ((LAStempWritePoint14*)swapped)->return_number = ((LAStempWritePoint10*)item)->extended_return_number;
       ((LAStempWritePoint14*)swapped)->number_of_returns = ((LAStempWritePoint10*)item)->extended_number_of_returns;
