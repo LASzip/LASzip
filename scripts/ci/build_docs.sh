@@ -8,6 +8,6 @@ if [[ ! -z $TRAVIS_BUILD_DIR ]]; then
 buildpath="$TRAVIS_BUILD_DIR"
 fi
 
-docker run -v $buildpath:/data -w /data/docs osgeo/proj.4 make html
+docker run -v $buildpath:/data -w /data/docs pdal/docs make html
 
 
