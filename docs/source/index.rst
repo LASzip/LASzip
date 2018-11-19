@@ -9,14 +9,19 @@ LASzip - a free open source product of `rapidlasso GmbH <http://rapidlasso.com/>
 Source
 ..............................................................................
 
-* **2018-03-27**
+* **2018-11-19**
 
-  - `laszip-3.2.2.tar.gz <https://github.com/LASzip/LASzip/releases/download/3.2.2/laszip-src-3.2.2.tar.gz>`_
-    `(md5) <https://github.com/LASzip/LASzip/releases/download/3.2.2/laszip-src-3.2.2.tar.gz.md5>`__
+  - `laszip-3.2.8.tar.gz <https://github.com/LASzip/LASzip/releases/download/3.2.8/laszip-src-3.2.8.tar.gz>`_
+    `(md5) <https://github.com/LASzip/LASzip/releases/download/3.2.8/laszip-src-3.2.8.tar.gz.md5>`__
 
 
 Past Release(s)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* **2018-03-27**
+
+  - `laszip-3.2.2.tar.gz <https://github.com/LASzip/LASzip/releases/download/3.2.2/laszip-src-3.2.2.tar.gz>`_
+    `(md5) <https://github.com/LASzip/LASzip/releases/download/3.2.2/laszip-src-3.2.2.tar.gz.md5>`__
 
 * **2017-10-10**
 

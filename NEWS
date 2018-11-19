@@ -2,6 +2,20 @@
 LASzip
 ================================================================================
 
+3.2.8 19-NOV-18
+--------------------------------------------------------------------------------
+
+** NOTE: The version number is 3.2.8 to be brought in line with the patch version
+number present in LAStools, which had been incremented without being kept in sync
+with the laszip.org version. We regret the error. The following bug fixes have been
+made since 3.2.2:
+
+*    7 November 2018 -- upped to 3.2 r8 for identical legacy and extended flags check
+*   20 October 2018 -- upped to 3.2 r7 for rare bug in LASinterval::merge_intervals()
+*    5 October 2018 -- upped to 3.2 r6 for corrected 'is_empty' return value
+*   28 September 2018 -- upped to 3.2 r5 for fix in extended classification writing
+
+
 3.2.2 27-MAR-18
 --------------------------------------------------------------------------------
 
