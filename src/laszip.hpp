@@ -31,7 +31,7 @@
      7 November 2018 -- upped to 3.2 r8 for identical legacy and extended flags check
     20 October 2018 -- upped to 3.2 r7 for rare bug in LASinterval::merge_intervals()
      5 October 2018 -- upped to 3.2 r6 for corrected 'is_empty' return value
-    28 September 2018 -- upped to 3.2 r5 for fix in extended classification writing 
+    28 September 2018 -- upped to 3.2 r5 for fix in extended classification writing
      9 February 2018 -- minor version increment as it can read v4 compressed items
     28 December 2017 -- fix incorrect 'context switch' reported by Wanwannodao
     23 August 2017 -- minor version increment for C++ stream-based read/write API
@@ -72,9 +72,9 @@ typedef long long SIGNED_INT64;
 #endif
 
 #define LASZIP_VERSION_MAJOR                3
-#define LASZIP_VERSION_MINOR                2
-#define LASZIP_VERSION_REVISION             9
-#define LASZIP_VERSION_BUILD_DATE      190221
+#define LASZIP_VERSION_MINOR                3
+#define LASZIP_VERSION_REVISION             0
+#define LASZIP_VERSION_BUILD_DATE      190308
 
 #define LASZIP_COMPRESSOR_NONE              0
 #define LASZIP_COMPRESSOR_POINTWISE         1
