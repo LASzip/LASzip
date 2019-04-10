@@ -53,7 +53,7 @@ public:
 /* seek to the end of the file                               */
   BOOL seekEnd();
 /* destructor                                                */
-  ~ByteStreamOutArray(){};
+  ~ByteStreamOutArray(){ if (data) free(data); };
 /* get access to data                                        */
   inline I64 getSize() const { return size; };
   inline I64 getCurr() const { return curr; };
