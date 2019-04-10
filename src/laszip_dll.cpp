@@ -2794,6 +2794,7 @@ setup_laszip_items(
 
   // compute offsets (or points item pointers) for data transfer from the point items
 
+  if (laszip_dll->point_items) delete [] laszip_dll->point_items;
   laszip_dll->point_items = new U8*[laszip->num_items];
   if (laszip_dll->point_items == 0)
   {
