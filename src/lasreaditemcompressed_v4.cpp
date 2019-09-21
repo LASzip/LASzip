@@ -1,7 +1,7 @@
 /*
 ===============================================================================
 
-  FILE:  lasreaditemcompressed_v3.cpp
+  FILE:  lasreaditemcompressed_v4.cpp
   
   CONTENTS:
   
@@ -29,7 +29,7 @@
 ===============================================================================
 */
 
-#include "lasreaditemcompressed_v3.hpp"
+#include "lasreaditemcompressed_v4.hpp"
 
 #include <assert.h>
 #include <string.h>
@@ -79,7 +79,7 @@ typedef struct LASpoint14
 
 #define LASZIP_GPSTIME_MULTI_TOTAL (LASZIP_GPSTIME_MULTI - LASZIP_GPSTIME_MULTI_MINUS + 5) 
 
-LASreadItemCompressed_POINT14_v3::LASreadItemCompressed_POINT14_v3(ArithmeticDecoder* dec, const U32 decompress_selective)
+LASreadItemCompressed_POINT14_v4::LASreadItemCompressed_POINT14_v4(ArithmeticDecoder* dec, const U32 decompress_selective)
 {
   /* not used as a decoder. just gives access to instream */
 
@@ -153,7 +153,7 @@ LASreadItemCompressed_POINT14_v3::LASreadItemCompressed_POINT14_v3(ArithmeticDec
   num_bytes_allocated = 0;
 }
 
-LASreadItemCompressed_POINT14_v3::~LASreadItemCompressed_POINT14_v3()
+LASreadItemCompressed_POINT14_v4::~LASreadItemCompressed_POINT14_v4()
 {
   U32 c, i;
 
@@ -222,7 +222,7 @@ LASreadItemCompressed_POINT14_v3::~LASreadItemCompressed_POINT14_v3()
   if (bytes) delete [] bytes;
 }
 
-inline BOOL LASreadItemCompressed_POINT14_v3::createAndInitModelsAndDecompressors(U32 context, const U8* item)
+inline BOOL LASreadItemCompressed_POINT14_v4::createAndInitModelsAndDecompressors(U32 context, const U8* item)
 {
   I32 i;
 
@@ -382,7 +382,7 @@ inline BOOL LASreadItemCompressed_POINT14_v3::createAndInitModelsAndDecompressor
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_POINT14_v3::chunk_sizes()
+BOOL LASreadItemCompressed_POINT14_v4::chunk_sizes()
 {
   /* for layered compression 'dec' only hands over the stream */
 
@@ -403,7 +403,7 @@ BOOL LASreadItemCompressed_POINT14_v3::chunk_sizes()
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_POINT14_v3::init(const U8* item, U32& context)
+BOOL LASreadItemCompressed_POINT14_v4::init(const U8* item, U32& context)
 {
   /* for layered compression 'dec' only hands over the stream */
 
@@ -703,7 +703,7 @@ BOOL LASreadItemCompressed_POINT14_v3::init(const U8* item, U32& context)
   return TRUE;
 }
 
-inline void LASreadItemCompressed_POINT14_v3::read(U8* item, U32& context)
+inline void LASreadItemCompressed_POINT14_v4::read(U8* item, U32& context)
 {
   // get last
 
@@ -740,12 +740,12 @@ inline void LASreadItemCompressed_POINT14_v3::read(U8* item, U32& context)
     }
     // switch context to current scanner channel
     current_context = scanner_channel;
-    context = current_context; // the POINT14 reader sets context for all other items
 
     // get last for new context
     last_item = contexts[current_context].last_item;
     ((LASpoint14*)last_item)->scanner_channel = scanner_channel;
   }
+  context = current_context; // the POINT14 reader sets context for all other items
 
   // determine changed attributes
 
@@ -994,7 +994,7 @@ inline void LASreadItemCompressed_POINT14_v3::read(U8* item, U32& context)
   ((LASpoint14*)last_item)->gps_time_change = gps_time_change;
 }
 
-void LASreadItemCompressed_POINT14_v3::read_gps_time()
+void LASreadItemCompressed_POINT14_v4::read_gps_time()
 {
   I32 multi;
   if (contexts[current_context].last_gpstime_diff[contexts[current_context].last] == 0) // if the last integer difference was zero
@@ -1100,11 +1100,11 @@ void LASreadItemCompressed_POINT14_v3::read_gps_time()
 
 /*
 ===============================================================================
-                       LASreadItemCompressed_RGB14_v3
+                       LASreadItemCompressed_RGB14_v4
 ===============================================================================
 */
 
-LASreadItemCompressed_RGB14_v3::LASreadItemCompressed_RGB14_v3(ArithmeticDecoder* dec, const U32 decompress_selective)
+LASreadItemCompressed_RGB14_v4::LASreadItemCompressed_RGB14_v4(ArithmeticDecoder* dec, const U32 decompress_selective)
 {
   /* not used as a decoder. just gives access to instream */
 
@@ -1140,7 +1140,7 @@ LASreadItemCompressed_RGB14_v3::LASreadItemCompressed_RGB14_v3(ArithmeticDecoder
   current_context = 0;
 }
 
-LASreadItemCompressed_RGB14_v3::~LASreadItemCompressed_RGB14_v3()
+LASreadItemCompressed_RGB14_v4::~LASreadItemCompressed_RGB14_v4()
 {
   /* destroy all initialized scanner channel contexts */
 
@@ -1171,7 +1171,7 @@ LASreadItemCompressed_RGB14_v3::~LASreadItemCompressed_RGB14_v3()
   if (bytes) delete [] bytes;
 }
 
-inline BOOL LASreadItemCompressed_RGB14_v3::createAndInitModelsAndDecompressors(U32 context, const U8* item)
+inline BOOL LASreadItemCompressed_RGB14_v4::createAndInitModelsAndDecompressors(U32 context, const U8* item)
 {
   /* should only be called when context is unused */
 
@@ -1209,7 +1209,7 @@ inline BOOL LASreadItemCompressed_RGB14_v3::createAndInitModelsAndDecompressors(
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_RGB14_v3::chunk_sizes()
+BOOL LASreadItemCompressed_RGB14_v4::chunk_sizes()
 {
   /* for layered compression 'dec' only hands over the stream */
 
@@ -1222,7 +1222,7 @@ BOOL LASreadItemCompressed_RGB14_v3::chunk_sizes()
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_RGB14_v3::init(const U8* item, U32& context)
+BOOL LASreadItemCompressed_RGB14_v4::init(const U8* item, U32& context)
 {
   /* for layered compression 'dec' only hands over the stream */
 
@@ -1303,7 +1303,7 @@ BOOL LASreadItemCompressed_RGB14_v3::init(const U8* item, U32& context)
   return TRUE;
 }
 
-inline void LASreadItemCompressed_RGB14_v3::read(U8* item, U32& context)
+inline void LASreadItemCompressed_RGB14_v4::read(U8* item, U32& context)
 {
   // get last
 
@@ -1317,8 +1317,8 @@ inline void LASreadItemCompressed_RGB14_v3::read(U8* item, U32& context)
     if (contexts[current_context].unused)
     {
       createAndInitModelsAndDecompressors(current_context, (U8*)last_item);
-      last_item = contexts[current_context].last_item;
     }
+    last_item = contexts[current_context].last_item;
   }
 
   // decompress
@@ -1404,11 +1404,11 @@ inline void LASreadItemCompressed_RGB14_v3::read(U8* item, U32& context)
 
 /*
 ===============================================================================
-                    LASreadItemCompressed_RGBNIR14_v3
+                    LASreadItemCompressed_RGBNIR14_v4
 ===============================================================================
 */
 
-LASreadItemCompressed_RGBNIR14_v3::LASreadItemCompressed_RGBNIR14_v3(ArithmeticDecoder* dec, const U32 decompress_selective)
+LASreadItemCompressed_RGBNIR14_v4::LASreadItemCompressed_RGBNIR14_v4(ArithmeticDecoder* dec, const U32 decompress_selective)
 {
   /* not used as a decoder. just gives access to instream */
 
@@ -1450,7 +1450,7 @@ LASreadItemCompressed_RGBNIR14_v3::LASreadItemCompressed_RGBNIR14_v3(ArithmeticD
   current_context = 0;
 }
 
-LASreadItemCompressed_RGBNIR14_v3::~LASreadItemCompressed_RGBNIR14_v3()
+LASreadItemCompressed_RGBNIR14_v4::~LASreadItemCompressed_RGBNIR14_v4()
 {
   /* destroy all initialized scanner channel contexts */
 
@@ -1495,7 +1495,7 @@ LASreadItemCompressed_RGBNIR14_v3::~LASreadItemCompressed_RGBNIR14_v3()
   if (bytes) delete [] bytes;
 }
 
-inline BOOL LASreadItemCompressed_RGBNIR14_v3::createAndInitModelsAndDecompressors(U32 context, const U8* item)
+inline BOOL LASreadItemCompressed_RGBNIR14_v4::createAndInitModelsAndDecompressors(U32 context, const U8* item)
 {
   /* should only be called when context is unused */
 
@@ -1552,7 +1552,7 @@ inline BOOL LASreadItemCompressed_RGBNIR14_v3::createAndInitModelsAndDecompresso
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_RGBNIR14_v3::chunk_sizes()
+BOOL LASreadItemCompressed_RGBNIR14_v4::chunk_sizes()
 {
   /* for layered compression 'dec' only hands over the stream */
 
@@ -1566,7 +1566,7 @@ BOOL LASreadItemCompressed_RGBNIR14_v3::chunk_sizes()
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_RGBNIR14_v3::init(const U8* item, U32& context)
+BOOL LASreadItemCompressed_RGBNIR14_v4::init(const U8* item, U32& context)
 {
   /* for layered compression 'dec' only hands over the stream */
 
@@ -1683,7 +1683,7 @@ BOOL LASreadItemCompressed_RGBNIR14_v3::init(const U8* item, U32& context)
   return TRUE;
 }
 
-inline void LASreadItemCompressed_RGBNIR14_v3::read(U8* item, U32& context)
+inline void LASreadItemCompressed_RGBNIR14_v4::read(U8* item, U32& context)
 {
   // get last
 
@@ -1697,8 +1697,8 @@ inline void LASreadItemCompressed_RGBNIR14_v3::read(U8* item, U32& context)
     if (contexts[current_context].unused)
     {
       createAndInitModelsAndDecompressors(current_context, (U8*)last_item);
-      last_item = contexts[current_context].last_item;
     }
+    last_item = contexts[current_context].last_item;
   }
 
   // decompress
@@ -1811,21 +1811,21 @@ inline void LASreadItemCompressed_RGBNIR14_v3::read(U8* item, U32& context)
     {
       ((U16*)item)[3] |= (last_item[3]&0xFF00);
     }
-    last_item[3] = ((U16*)item)[3];
+    contexts[current_context].last_item[3] = ((U16*)item)[3];
   }
   else
   {
-    ((U16*)item)[3] = last_item[3];
+    ((U16*)item)[3] = contexts[current_context].last_item[3];
   }
 }
 
 /*
 ===============================================================================
-                       LASreadItemCompressed_WAVEPACKET14_v3
+                       LASreadItemCompressed_WAVEPACKET14_v4
 ===============================================================================
 */
 
-LASreadItemCompressed_WAVEPACKET14_v3::LASreadItemCompressed_WAVEPACKET14_v3(ArithmeticDecoder* dec, const U32 decompress_selective)
+LASreadItemCompressed_WAVEPACKET14_v4::LASreadItemCompressed_WAVEPACKET14_v4(ArithmeticDecoder* dec, const U32 decompress_selective)
 {
   /* not used as a decoder. just gives access to instream */
 
@@ -1861,7 +1861,7 @@ LASreadItemCompressed_WAVEPACKET14_v3::LASreadItemCompressed_WAVEPACKET14_v3(Ari
   current_context = 0;
 }
 
-LASreadItemCompressed_WAVEPACKET14_v3::~LASreadItemCompressed_WAVEPACKET14_v3()
+LASreadItemCompressed_WAVEPACKET14_v4::~LASreadItemCompressed_WAVEPACKET14_v4()
 {
   /* destroy all initialized scanner channel contexts */
 
@@ -1894,7 +1894,7 @@ LASreadItemCompressed_WAVEPACKET14_v3::~LASreadItemCompressed_WAVEPACKET14_v3()
   if (bytes) delete [] bytes;
 }
 
-inline BOOL LASreadItemCompressed_WAVEPACKET14_v3::createAndInitModelsAndDecompressors(U32 context, const U8* item)
+inline BOOL LASreadItemCompressed_WAVEPACKET14_v4::createAndInitModelsAndDecompressors(U32 context, const U8* item)
 {
   /* should only be called when context is unused */
 
@@ -1941,7 +1941,7 @@ inline BOOL LASreadItemCompressed_WAVEPACKET14_v3::createAndInitModelsAndDecompr
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_WAVEPACKET14_v3::chunk_sizes()
+BOOL LASreadItemCompressed_WAVEPACKET14_v4::chunk_sizes()
 {
   /* for layered compression 'dec' only hands over the stream */
 
@@ -1954,7 +1954,7 @@ BOOL LASreadItemCompressed_WAVEPACKET14_v3::chunk_sizes()
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_WAVEPACKET14_v3::init(const U8* item, U32& context)
+BOOL LASreadItemCompressed_WAVEPACKET14_v4::init(const U8* item, U32& context)
 {
   /* for layered compression 'dec' only hands over the stream */
 
@@ -2035,7 +2035,7 @@ BOOL LASreadItemCompressed_WAVEPACKET14_v3::init(const U8* item, U32& context)
   return TRUE;
 }
 
-inline void LASreadItemCompressed_WAVEPACKET14_v3::read(U8* item, U32& context)
+inline void LASreadItemCompressed_WAVEPACKET14_v4::read(U8* item, U32& context)
 {
   // get last
 
@@ -2049,8 +2049,8 @@ inline void LASreadItemCompressed_WAVEPACKET14_v3::read(U8* item, U32& context)
     if (contexts[current_context].unused)
     {
       createAndInitModelsAndDecompressors(current_context, last_item);
-      last_item = contexts[current_context].last_item;
     }
+    last_item = contexts[current_context].last_item;
   }
 
   // decompress
@@ -2096,11 +2096,11 @@ inline void LASreadItemCompressed_WAVEPACKET14_v3::read(U8* item, U32& context)
 
 /*
 ===============================================================================
-                       LASreadItemCompressed_BYTE14_v3
+                       LASreadItemCompressed_BYTE14_v4
 ===============================================================================
 */
 
-LASreadItemCompressed_BYTE14_v3::LASreadItemCompressed_BYTE14_v3(ArithmeticDecoder* dec, U32 number, const U32 decompress_selective)
+LASreadItemCompressed_BYTE14_v4::LASreadItemCompressed_BYTE14_v4(ArithmeticDecoder* dec, U32 number, const U32 decompress_selective)
 {
   /* not used as a decoder. just gives access to instream */
 
@@ -2151,7 +2151,7 @@ LASreadItemCompressed_BYTE14_v3::LASreadItemCompressed_BYTE14_v3(ArithmeticDecod
   current_context = 0;
 }
 
-LASreadItemCompressed_BYTE14_v3::~LASreadItemCompressed_BYTE14_v3()
+LASreadItemCompressed_BYTE14_v4::~LASreadItemCompressed_BYTE14_v4()
 {
   /* destroy all initialized scanner channel contexts */
 
@@ -2197,7 +2197,7 @@ LASreadItemCompressed_BYTE14_v3::~LASreadItemCompressed_BYTE14_v3()
   if (bytes) delete [] bytes;
 }
 
-inline BOOL LASreadItemCompressed_BYTE14_v3::createAndInitModelsAndDecompressors(U32 context, const U8* item)
+inline BOOL LASreadItemCompressed_BYTE14_v4::createAndInitModelsAndDecompressors(U32 context, const U8* item)
 {
   U32 i;
 
@@ -2236,7 +2236,7 @@ inline BOOL LASreadItemCompressed_BYTE14_v3::createAndInitModelsAndDecompressors
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_BYTE14_v3::chunk_sizes()
+BOOL LASreadItemCompressed_BYTE14_v4::chunk_sizes()
 {
   U32 i;
 
@@ -2254,7 +2254,7 @@ BOOL LASreadItemCompressed_BYTE14_v3::chunk_sizes()
   return TRUE;
 }
 
-BOOL LASreadItemCompressed_BYTE14_v3::init(const U8* item, U32& context)
+BOOL LASreadItemCompressed_BYTE14_v4::init(const U8* item, U32& context)
 {
   U32 i;
 
@@ -2368,7 +2368,7 @@ BOOL LASreadItemCompressed_BYTE14_v3::init(const U8* item, U32& context)
   return TRUE;
 }
 
-inline void LASreadItemCompressed_BYTE14_v3::read(U8* item, U32& context)
+inline void LASreadItemCompressed_BYTE14_v4::read(U8* item, U32& context)
 {
   // get last
 
@@ -2382,8 +2382,8 @@ inline void LASreadItemCompressed_BYTE14_v3::read(U8* item, U32& context)
     if (contexts[current_context].unused)
     {
       createAndInitModelsAndDecompressors(current_context, (U8*)last_item);
-      last_item = contexts[current_context].last_item;
     }
+    last_item = contexts[current_context].last_item;
   }
 
   // decompress

@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# laszip/docs image has all of the Sphinx
-# dependencies need to build LASzip's docs
+# proj.4 image has all of the Sphinx
+# dependencies need to build proj.4's docs
 
-docker pull laszip/docs
-
+docker pull  pdal/docs

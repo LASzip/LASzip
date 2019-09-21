@@ -1,7 +1,7 @@
 /*
 ===============================================================================
 
-  FILE:  lasreaditemcompressed_v3.hpp
+  FILE:  lasreaditemcompressed_v4.hpp
   
   CONTENTS:
   
@@ -25,14 +25,15 @@
   CHANGE HISTORY:
   
     19 March 2019 -- set "legacy classification" to zero if "classification > 31"  
+    28 December 2017 -- fix incorrect 'context switch' reported by Wanwannodao 
     28 August 2017 -- moving 'context' from global development hack to interface  
     19 April 2017 -- support for selective decompression for new LAS 1.4 points 
     22 June 2016 -- created after Island beat Austria 2:1 in the EM2016
   
 ===============================================================================
 */
-#ifndef LAS_READ_ITEM_COMPRESSED_V3_HPP
-#define LAS_READ_ITEM_COMPRESSED_V3_HPP
+#ifndef LAS_READ_ITEM_COMPRESSED_V4_HPP
+#define LAS_READ_ITEM_COMPRESSED_V4_HPP
 
 #include "lasreaditem.hpp"
 #include "arithmeticdecoder.hpp"
@@ -42,17 +43,17 @@
 #include "laszip_common_v3.hpp"
 #include "laszip_decompress_selective_v3.hpp"
 
-class LASreadItemCompressed_POINT14_v3 : public LASreadItemCompressed
+class LASreadItemCompressed_POINT14_v4 : public LASreadItemCompressed
 {
 public:
 
-  LASreadItemCompressed_POINT14_v3(ArithmeticDecoder* dec, const U32 decompress_selective=LASZIP_DECOMPRESS_SELECTIVE_ALL);
+  LASreadItemCompressed_POINT14_v4(ArithmeticDecoder* dec, const U32 decompress_selective=LASZIP_DECOMPRESS_SELECTIVE_ALL);
 
   BOOL chunk_sizes();
   BOOL init(const U8* item, U32& context); // context is set
   void read(U8* item, U32& context);       // context is set
 
-  ~LASreadItemCompressed_POINT14_v3();
+  ~LASreadItemCompressed_POINT14_v4();
 
 private:
 
@@ -118,17 +119,17 @@ private:
   void read_gps_time();
 };
 
-class LASreadItemCompressed_RGB14_v3 : public LASreadItemCompressed
+class LASreadItemCompressed_RGB14_v4 : public LASreadItemCompressed
 {
 public:
 
-  LASreadItemCompressed_RGB14_v3(ArithmeticDecoder* dec, const U32 decompress_selective=LASZIP_DECOMPRESS_SELECTIVE_ALL);
+  LASreadItemCompressed_RGB14_v4(ArithmeticDecoder* dec, const U32 decompress_selective=LASZIP_DECOMPRESS_SELECTIVE_ALL);
 
   BOOL chunk_sizes();
   BOOL init(const U8* item, U32& context); // context is only read
   void read(U8* item, U32& context);       // context is only read
 
-  ~LASreadItemCompressed_RGB14_v3();
+  ~LASreadItemCompressed_RGB14_v4();
 
 private:
 
@@ -155,17 +156,17 @@ private:
   BOOL createAndInitModelsAndDecompressors(U32 context, const U8* item);
 };
 
-class LASreadItemCompressed_RGBNIR14_v3 : public LASreadItemCompressed
+class LASreadItemCompressed_RGBNIR14_v4 : public LASreadItemCompressed
 {
 public:
 
-  LASreadItemCompressed_RGBNIR14_v3(ArithmeticDecoder* dec, const U32 decompress_selective=LASZIP_DECOMPRESS_SELECTIVE_ALL);
+  LASreadItemCompressed_RGBNIR14_v4(ArithmeticDecoder* dec, const U32 decompress_selective=LASZIP_DECOMPRESS_SELECTIVE_ALL);
 
   BOOL chunk_sizes();
   BOOL init(const U8* item, U32& context); // context is only read
   void read(U8* item, U32& context);       // context is only read
 
-  ~LASreadItemCompressed_RGBNIR14_v3();
+  ~LASreadItemCompressed_RGBNIR14_v4();
 
 private:
 
@@ -197,17 +198,17 @@ private:
   BOOL createAndInitModelsAndDecompressors(U32 context, const U8* item);
 };
 
-class LASreadItemCompressed_WAVEPACKET14_v3 : public LASreadItemCompressed
+class LASreadItemCompressed_WAVEPACKET14_v4 : public LASreadItemCompressed
 {
 public:
 
-  LASreadItemCompressed_WAVEPACKET14_v3(ArithmeticDecoder* dec, const U32 decompress_selective=LASZIP_DECOMPRESS_SELECTIVE_ALL);
+  LASreadItemCompressed_WAVEPACKET14_v4(ArithmeticDecoder* dec, const U32 decompress_selective=LASZIP_DECOMPRESS_SELECTIVE_ALL);
 
   BOOL chunk_sizes();
   BOOL init(const U8* item, U32& context); // context is only read
   void read(U8* item, U32& context);       // context is only read
 
-  ~LASreadItemCompressed_WAVEPACKET14_v3();
+  ~LASreadItemCompressed_WAVEPACKET14_v4();
 
 private:
 
@@ -234,17 +235,17 @@ private:
   BOOL createAndInitModelsAndDecompressors(U32 context, const U8* item);
 };
 
-class LASreadItemCompressed_BYTE14_v3 : public LASreadItemCompressed
+class LASreadItemCompressed_BYTE14_v4 : public LASreadItemCompressed
 {
 public:
 
-  LASreadItemCompressed_BYTE14_v3(ArithmeticDecoder* dec, U32 number, const U32 decompress_selective=LASZIP_DECOMPRESS_SELECTIVE_ALL);
+  LASreadItemCompressed_BYTE14_v4(ArithmeticDecoder* dec, U32 number, const U32 decompress_selective=LASZIP_DECOMPRESS_SELECTIVE_ALL);
 
   BOOL chunk_sizes();
   BOOL init(const U8* item, U32& context); // context is only read
   void read(U8* item, U32& context);       // context is only read
 
-  ~LASreadItemCompressed_BYTE14_v3();
+  ~LASreadItemCompressed_BYTE14_v4();
 
 private:
 

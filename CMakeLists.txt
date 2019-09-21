@@ -7,7 +7,7 @@ set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
 
 # the next line is the ONLY place in the entire laszip system where
 # the version info is hard-coded
-set(LASZIP_API_VERSION_STRING "3.1.1" CACHE STRING "LASzip version" FORCE)
+set(LASZIP_API_VERSION_STRING "3.4.1" CACHE STRING "LASzip version" FORCE)
 
 include (CheckIncludeFileCXX)
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
@@ -35,8 +35,14 @@ DISSECT_VERSION()
 GET_OS_INFO()
 SET_INSTALL_DIRS()
 
+
 set(LASZIP_API_VERSION ${LASZIP_API_VERSION_MAJOR}.${LASZIP_API_VERSION_MINOR}.${LASZIP_API_VERSION_PATCH})
-set(LASZIP_COMPATIBILITY_VERSION ${LASZIP_API_VERSION_MAJOR})
+
+# libtool SO version naming
+# 8.0.0 for 3.2.1
+# 9.0.0 for 4.0+
+set(LASZIP_SO_VERSION "8.0.4")
+set(LASZIP_COMPATIBILITY_VERSION 8)
 
 check_include_file_cxx ("unordered_map" HAVE_UNORDERED_MAP)
 
@@ -58,6 +64,12 @@ configure_file(
 
 set(LASZIP_BASE_LIB_NAME laszip)
 set(LASZIP_API_LIB_NAME laszip_api)
+
+if(WIN32)
+    set(LASZIP_BASE_LIB_NAME "${LASZIP_BASE_LIB_NAME}${LASZIP_API_VERSION_MAJOR}")
+    set(LASZIP_API_LIB_NAME "${LASZIP_API_LIB_NAME}${LASZIP_API_VERSION_MAJOR}")
+endif()
+
 
 set(LASZIP_OUTPUT_LIB_DIR "${LASZIP_BINARY_DIR}/${LASZIP_LIB_INSTALL_DIR}")
 set(LASZIP_OUTPUT_BIN_DIR "${LASZIP_BINARY_DIR}/${LASZIP_BIN_INSTALL_DIR}")

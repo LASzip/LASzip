@@ -1,7 +1,7 @@
 /*
 ===============================================================================
 
-  FILE:  laswriteitemcompressed_v3.cpp
+  FILE:  laswriteitemcompressed_v4.cpp
   
   CONTENTS:
   
@@ -29,7 +29,7 @@
 ===============================================================================
 */
 
-#include "laswriteitemcompressed_v3.hpp"
+#include "laswriteitemcompressed_v4.hpp"
 
 #include <assert.h>
 #include <string.h>
@@ -37,7 +37,7 @@
 
 /*
 ===============================================================================
-                       LASwriteItemCompressed_POINT14_v3
+                       LASwriteItemCompressed_POINT14_v4
 ===============================================================================
 */
 
@@ -88,7 +88,7 @@ typedef struct LASpoint14
 
 #define LASZIP_GPSTIME_MULTI_TOTAL (LASZIP_GPSTIME_MULTI - LASZIP_GPSTIME_MULTI_MINUS + 5) 
 
-LASwriteItemCompressed_POINT14_v3::LASwriteItemCompressed_POINT14_v3(ArithmeticEncoder* enc)
+LASwriteItemCompressed_POINT14_v4::LASwriteItemCompressed_POINT14_v4(ArithmeticEncoder* enc)
 {
   /* not used as a encoder. just gives access to outstream */
 
@@ -139,7 +139,7 @@ LASwriteItemCompressed_POINT14_v3::LASwriteItemCompressed_POINT14_v3(ArithmeticE
   num_bytes_gps_time = 0;
 }
 
-LASwriteItemCompressed_POINT14_v3::~LASwriteItemCompressed_POINT14_v3()
+LASwriteItemCompressed_POINT14_v4::~LASwriteItemCompressed_POINT14_v4()
 {
   U32 c, i;
 
@@ -206,11 +206,9 @@ LASwriteItemCompressed_POINT14_v3::~LASwriteItemCompressed_POINT14_v3()
     delete outstream_point_source;
     delete outstream_gps_time;
   }
-
-//  fprintf(stderr, "%u %u %u %u %u %u %u %u %u\n", num_bytes_channel_returns_XY, num_bytes_Z, num_bytes_classification, num_bytes_flags, num_bytes_intensity, num_bytes_scan_angle, num_bytes_user_data, num_bytes_point_source, num_bytes_gps_time);
 }
 
-inline BOOL LASwriteItemCompressed_POINT14_v3::createAndInitModelsAndCompressors(U32 context, const U8* item)
+inline BOOL LASwriteItemCompressed_POINT14_v4::createAndInitModelsAndCompressors(U32 context, const U8* item)
 {
   I32 i;
 
@@ -368,7 +366,7 @@ inline BOOL LASwriteItemCompressed_POINT14_v3::createAndInitModelsAndCompressors
   return TRUE;
 }
 
-BOOL LASwriteItemCompressed_POINT14_v3::init(const U8* item, U32& context)
+BOOL LASwriteItemCompressed_POINT14_v4::init(const U8* item, U32& context)
 {
   /* on the first init create outstreams and encoders */
 
@@ -468,7 +466,7 @@ BOOL LASwriteItemCompressed_POINT14_v3::init(const U8* item, U32& context)
   return TRUE;
 }
 
-inline BOOL LASwriteItemCompressed_POINT14_v3::write(const U8* item, U32& context)
+inline BOOL LASwriteItemCompressed_POINT14_v4::write(const U8* item, U32& context)
 {
   // get last
 
@@ -568,8 +566,8 @@ inline BOOL LASwriteItemCompressed_POINT14_v3::write(const U8* item, U32& contex
     }
     // switch context to current scanner channel
     current_context = scanner_channel;
-    context = current_context; // the POINT14 writer sets context for all other items
   }
+  context = current_context; // the POINT14 writer sets context for all other items
 
   // if number of returns is different we compress it
 
@@ -751,7 +749,7 @@ inline BOOL LASwriteItemCompressed_POINT14_v3::write(const U8* item, U32& contex
   return TRUE;
 }
 
-inline BOOL LASwriteItemCompressed_POINT14_v3::chunk_sizes()
+inline BOOL LASwriteItemCompressed_POINT14_v4::chunk_sizes()
 {
   U32 num_bytes = 0;
   ByteStreamOut* outstream = enc->getByteStreamOut();
@@ -879,7 +877,7 @@ inline BOOL LASwriteItemCompressed_POINT14_v3::chunk_sizes()
   return TRUE;
 }
 
-inline BOOL LASwriteItemCompressed_POINT14_v3::chunk_bytes()
+inline BOOL LASwriteItemCompressed_POINT14_v4::chunk_bytes()
 {
   U32 num_bytes = 0;
   ByteStreamOut* outstream = enc->getByteStreamOut();
@@ -965,7 +963,7 @@ inline BOOL LASwriteItemCompressed_POINT14_v3::chunk_bytes()
   return TRUE;
 }
 
-void LASwriteItemCompressed_POINT14_v3::write_gps_time(const U64I64F64 gps_time)
+void LASwriteItemCompressed_POINT14_v4::write_gps_time(const U64I64F64 gps_time)
 {
   if (contexts[current_context].last_gpstime_diff[contexts[current_context].last] == 0) // if the last integer difference was zero
   {
@@ -1112,11 +1110,11 @@ void LASwriteItemCompressed_POINT14_v3::write_gps_time(const U64I64F64 gps_time)
 
 /*
 ===============================================================================
-                       LASwriteItemCompressed_RGB14_v3
+                       LASwriteItemCompressed_RGB14_v4
 ===============================================================================
 */
 
-LASwriteItemCompressed_RGB14_v3::LASwriteItemCompressed_RGB14_v3(ArithmeticEncoder* enc)
+LASwriteItemCompressed_RGB14_v4::LASwriteItemCompressed_RGB14_v4(ArithmeticEncoder* enc)
 {
   /* not used as a encoder. just gives access to outstream */
 
@@ -1145,7 +1143,7 @@ LASwriteItemCompressed_RGB14_v3::LASwriteItemCompressed_RGB14_v3(ArithmeticEncod
   current_context = 0;
 }
 
-LASwriteItemCompressed_RGB14_v3::~LASwriteItemCompressed_RGB14_v3()
+LASwriteItemCompressed_RGB14_v4::~LASwriteItemCompressed_RGB14_v4()
 {
   /* destroy all initialized scanner channel contexts */
 
@@ -1174,7 +1172,7 @@ LASwriteItemCompressed_RGB14_v3::~LASwriteItemCompressed_RGB14_v3()
   }
 }
 
-inline BOOL LASwriteItemCompressed_RGB14_v3::createAndInitModelsAndCompressors(U32 context, const U8* item)
+inline BOOL LASwriteItemCompressed_RGB14_v4::createAndInitModelsAndCompressors(U32 context, const U8* item)
 {
   /* should only be called when context is unused */
 
@@ -1212,7 +1210,7 @@ inline BOOL LASwriteItemCompressed_RGB14_v3::createAndInitModelsAndCompressors(U
   return TRUE;
 }
 
-BOOL LASwriteItemCompressed_RGB14_v3::init(const U8* item, U32& context)
+BOOL LASwriteItemCompressed_RGB14_v4::init(const U8* item, U32& context)
 {
   /* on the first init create outstreams and encoders */
 
@@ -1267,7 +1265,7 @@ BOOL LASwriteItemCompressed_RGB14_v3::init(const U8* item, U32& context)
   return TRUE;
 }
 
-inline BOOL LASwriteItemCompressed_RGB14_v3::write(const U8* item, U32& context)
+inline BOOL LASwriteItemCompressed_RGB14_v4::write(const U8* item, U32& context)
 {
   // get last
 
@@ -1281,8 +1279,8 @@ inline BOOL LASwriteItemCompressed_RGB14_v3::write(const U8* item, U32& context)
     if (contexts[current_context].unused)
     {
       createAndInitModelsAndCompressors(current_context, (U8*)last_item);
-      last_item = contexts[current_context].last_item;
     }
+    last_item = contexts[current_context].last_item;
   }
 
   // compress
@@ -1342,7 +1340,7 @@ inline BOOL LASwriteItemCompressed_RGB14_v3::write(const U8* item, U32& context)
   return TRUE;
 }
 
-inline BOOL LASwriteItemCompressed_RGB14_v3::chunk_sizes()
+inline BOOL LASwriteItemCompressed_RGB14_v4::chunk_sizes()
 {
   U32 num_bytes = 0;
   ByteStreamOut* outstream = enc->getByteStreamOut();
@@ -1367,7 +1365,7 @@ inline BOOL LASwriteItemCompressed_RGB14_v3::chunk_sizes()
   return TRUE;
 }
 
-inline BOOL LASwriteItemCompressed_RGB14_v3::chunk_bytes()
+inline BOOL LASwriteItemCompressed_RGB14_v4::chunk_bytes()
 {
   U32 num_bytes = 0;
   ByteStreamOut* outstream = enc->getByteStreamOut();
@@ -1385,11 +1383,11 @@ inline BOOL LASwriteItemCompressed_RGB14_v3::chunk_bytes()
 
 /*
 ===============================================================================
-                     LASwriteItemCompressed_RGBNIR14_v3
+                     LASwriteItemCompressed_RGBNIR14_v4
 ===============================================================================
 */
 
-LASwriteItemCompressed_RGBNIR14_v3::LASwriteItemCompressed_RGBNIR14_v3(ArithmeticEncoder* enc)
+LASwriteItemCompressed_RGBNIR14_v4::LASwriteItemCompressed_RGBNIR14_v4(ArithmeticEncoder* enc)
 {
   /* not used as a encoder. just gives access to outstream */
 
@@ -1422,7 +1420,7 @@ LASwriteItemCompressed_RGBNIR14_v3::LASwriteItemCompressed_RGBNIR14_v3(Arithmeti
   current_context = 0;
 }
 
-LASwriteItemCompressed_RGBNIR14_v3::~LASwriteItemCompressed_RGBNIR14_v3()
+LASwriteItemCompressed_RGBNIR14_v4::~LASwriteItemCompressed_RGBNIR14_v4()
 {
   /* destroy all initialized scanner channel contexts */
 
@@ -1457,7 +1455,7 @@ LASwriteItemCompressed_RGBNIR14_v3::~LASwriteItemCompressed_RGBNIR14_v3()
   }
 }
 
-inline BOOL LASwriteItemCompressed_RGBNIR14_v3::createAndInitModelsAndCompressors(U32 context, const U8* item)
+inline BOOL LASwriteItemCompressed_RGBNIR14_v4::createAndInitModelsAndCompressors(U32 context, const U8* item)
 {
   /* should only be called when context is unused */
 
@@ -1503,7 +1501,7 @@ inline BOOL LASwriteItemCompressed_RGBNIR14_v3::createAndInitModelsAndCompressor
   return TRUE;
 }
 
-BOOL LASwriteItemCompressed_RGBNIR14_v3::init(const U8* item, U32& context)
+BOOL LASwriteItemCompressed_RGBNIR14_v4::init(const U8* item, U32& context)
 {
   /* on the first init create outstreams and encoders */
 
@@ -1564,7 +1562,7 @@ BOOL LASwriteItemCompressed_RGBNIR14_v3::init(const U8* item, U32& context)
   return TRUE;
 }
 
-inline BOOL LASwriteItemCompressed_RGBNIR14_v3::write(const U8* item, U32& context)
+inline BOOL LASwriteItemCompressed_RGBNIR14_v4::write(const U8* item, U32& context)
 {
   // get last
 
@@ -1578,8 +1576,8 @@ inline BOOL LASwriteItemCompressed_RGBNIR14_v3::write(const U8* item, U32& conte
     if (contexts[current_context].unused)
     {
       createAndInitModelsAndCompressors(current_context, (U8*)last_item);
-      last_item = contexts[current_context].last_item;
     }
+    last_item = contexts[current_context].last_item;
   }
 
   // compress
@@ -1657,7 +1655,7 @@ inline BOOL LASwriteItemCompressed_RGBNIR14_v3::write(const U8* item, U32& conte
   return TRUE;
 }
 
-inline BOOL LASwriteItemCompressed_RGBNIR14_v3::chunk_sizes()
+inline BOOL LASwriteItemCompressed_RGBNIR14_v4::chunk_sizes()
 {
   U32 num_bytes = 0;
   ByteStreamOut* outstream = enc->getByteStreamOut();
@@ -1694,7 +1692,7 @@ inline BOOL LASwriteItemCompressed_RGBNIR14_v3::chunk_sizes()
   return TRUE;
 }
 
-inline BOOL LASwriteItemCompressed_RGBNIR14_v3::chunk_bytes()
+inline BOOL LASwriteItemCompressed_RGBNIR14_v4::chunk_bytes()
 {
   U32 num_bytes = 0;
   ByteStreamOut* outstream = enc->getByteStreamOut();
@@ -1726,11 +1724,11 @@ inline BOOL LASwriteItemCompressed_RGBNIR14_v3::chunk_bytes()
 
 /*
 ===============================================================================
-                       LASwriteItemCompressed_WAVEPACKET14_v3
+                       LASwriteItemCompressed_WAVEPACKET14_v4
 ===============================================================================
 */
 
-LASwriteItemCompressed_WAVEPACKET14_v3::LASwriteItemCompressed_WAVEPACKET14_v3(ArithmeticEncoder* enc)
+LASwriteItemCompressed_WAVEPACKET14_v4::LASwriteItemCompressed_WAVEPACKET14_v4(ArithmeticEncoder* enc)
 {
   /* not used as a encoder. just gives access to outstream */
 
@@ -1759,7 +1757,7 @@ LASwriteItemCompressed_WAVEPACKET14_v3::LASwriteItemCompressed_WAVEPACKET14_v3(A
   current_context = 0;
 }
 
-LASwriteItemCompressed_WAVEPACKET14_v3::~LASwriteItemCompressed_WAVEPACKET14_v3()
+LASwriteItemCompressed_WAVEPACKET14_v4::~LASwriteItemCompressed_WAVEPACKET14_v4()
 {
   /* destroy all initialized scanner channel contexts */
 
@@ -1790,7 +1788,7 @@ LASwriteItemCompressed_WAVEPACKET14_v3::~LASwriteItemCompressed_WAVEPACKET14_v3(
   }
 }
 
-inline BOOL LASwriteItemCompressed_WAVEPACKET14_v3::createAndInitModelsAndCompressors(U32 context, const U8* item)
+inline BOOL LASwriteItemCompressed_WAVEPACKET14_v4::createAndInitModelsAndCompressors(U32 context, const U8* item)
 {
   /* should only be called when context is unused */
 
@@ -1834,7 +1832,7 @@ inline BOOL LASwriteItemCompressed_WAVEPACKET14_v3::createAndInitModelsAndCompre
   return TRUE;
 }
 
-BOOL LASwriteItemCompressed_WAVEPACKET14_v3::init(const U8* item, U32& context)
+BOOL LASwriteItemCompressed_WAVEPACKET14_v4::init(const U8* item, U32& context)
 {
   /* on the first init create outstreams and encoders */
 
@@ -1889,7 +1887,7 @@ BOOL LASwriteItemCompressed_WAVEPACKET14_v3::init(const U8* item, U32& context)
   return TRUE;
 }
 
-inline BOOL LASwriteItemCompressed_WAVEPACKET14_v3::write(const U8* item, U32& context)
+inline BOOL LASwriteItemCompressed_WAVEPACKET14_v4::write(const U8* item, U32& context)
 {
   // get last
 
@@ -1903,8 +1901,8 @@ inline BOOL LASwriteItemCompressed_WAVEPACKET14_v3::write(const U8* item, U32& c
     if (contexts[current_context].unused)
     {
       createAndInitModelsAndCompressors(current_context, (U8*)last_item);
-      last_item = contexts[current_context].last_item;
     }
+    last_item = contexts[current_context].last_item;
   }
 
   if (memcmp(item, last_item, 29) != 0)
@@ -1962,7 +1960,7 @@ inline BOOL LASwriteItemCompressed_WAVEPACKET14_v3::write(const U8* item, U32& c
   return TRUE;
 }
 
-inline BOOL LASwriteItemCompressed_WAVEPACKET14_v3::chunk_sizes()
+inline BOOL LASwriteItemCompressed_WAVEPACKET14_v4::chunk_sizes()
 {
   U32 num_bytes = 0;
   ByteStreamOut* outstream = enc->getByteStreamOut();
@@ -1987,7 +1985,7 @@ inline BOOL LASwriteItemCompressed_WAVEPACKET14_v3::chunk_sizes()
   return TRUE;
 }
 
-inline BOOL LASwriteItemCompressed_WAVEPACKET14_v3::chunk_bytes()
+inline BOOL LASwriteItemCompressed_WAVEPACKET14_v4::chunk_bytes()
 {
   U32 num_bytes = 0;
   ByteStreamOut* outstream = enc->getByteStreamOut();
@@ -2005,11 +2003,11 @@ inline BOOL LASwriteItemCompressed_WAVEPACKET14_v3::chunk_bytes()
 
 /*
 ===============================================================================
-                      LASwriteItemCompressed_BYTE14_v3
+                      LASwriteItemCompressed_BYTE14_v4
 ===============================================================================
 */
 
-LASwriteItemCompressed_BYTE14_v3::LASwriteItemCompressed_BYTE14_v3(ArithmeticEncoder* enc, U32 number)
+LASwriteItemCompressed_BYTE14_v4::LASwriteItemCompressed_BYTE14_v4(ArithmeticEncoder* enc, U32 number)
 {
   /* not used as a encoder. just gives access to outstream */
 
@@ -2051,7 +2049,7 @@ LASwriteItemCompressed_BYTE14_v3::LASwriteItemCompressed_BYTE14_v3(ArithmeticEnc
   current_context = 0;
 }
 
-LASwriteItemCompressed_BYTE14_v3::~LASwriteItemCompressed_BYTE14_v3()
+LASwriteItemCompressed_BYTE14_v4::~LASwriteItemCompressed_BYTE14_v4()
 {
   /* destroy all initialized scanner channel contexts */
 
@@ -2093,7 +2091,7 @@ LASwriteItemCompressed_BYTE14_v3::~LASwriteItemCompressed_BYTE14_v3()
   if (changed_Bytes) delete [] changed_Bytes;
 }
 
-inline BOOL LASwriteItemCompressed_BYTE14_v3::createAndInitModelsAndCompressors(U32 context, const U8* item)
+inline BOOL LASwriteItemCompressed_BYTE14_v4::createAndInitModelsAndCompressors(U32 context, const U8* item)
 {
   U32 i;
 
@@ -2132,7 +2130,7 @@ inline BOOL LASwriteItemCompressed_BYTE14_v3::createAndInitModelsAndCompressors(
   return TRUE;
 }
 
-BOOL LASwriteItemCompressed_BYTE14_v3::init(const U8* item, U32& context)
+BOOL LASwriteItemCompressed_BYTE14_v4::init(const U8* item, U32& context)
 {
   U32 i;
 
@@ -2215,7 +2213,7 @@ BOOL LASwriteItemCompressed_BYTE14_v3::init(const U8* item, U32& context)
   return TRUE;
 }
 
-inline BOOL LASwriteItemCompressed_BYTE14_v3::write(const U8* item, U32& context)
+inline BOOL LASwriteItemCompressed_BYTE14_v4::write(const U8* item, U32& context)
 {
   // get last
 
@@ -2229,8 +2227,8 @@ inline BOOL LASwriteItemCompressed_BYTE14_v3::write(const U8* item, U32& context
     if (contexts[current_context].unused)
     {
       createAndInitModelsAndCompressors(current_context, last_item);
-      last_item = contexts[current_context].last_item;
     }
+    last_item = contexts[current_context].last_item;
   }
 
   // compress
@@ -2250,7 +2248,7 @@ inline BOOL LASwriteItemCompressed_BYTE14_v3::write(const U8* item, U32& context
   return TRUE;
 }
 
-inline BOOL LASwriteItemCompressed_BYTE14_v3::chunk_sizes()
+inline BOOL LASwriteItemCompressed_BYTE14_v4::chunk_sizes()
 {
   U32 i;
   U32 num_bytes = 0;
@@ -2278,7 +2276,7 @@ inline BOOL LASwriteItemCompressed_BYTE14_v3::chunk_sizes()
   return TRUE;
 }
 
-inline BOOL LASwriteItemCompressed_BYTE14_v3::chunk_bytes()
+inline BOOL LASwriteItemCompressed_BYTE14_v4::chunk_bytes()
 {
   U32 i;
   U32 num_bytes = 0;
