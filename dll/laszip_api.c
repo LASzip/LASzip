@@ -957,7 +957,7 @@ laszip_I32 laszip_load_dll()
   }
   // Load DLL file
 #ifdef _WIN32
-  laszip_HINSTANCE = LoadLibrary(TEXT("LASzip.dll"));
+  laszip_HINSTANCE = LoadLibrary(TEXT("laszip3.dll"));
 #elif __APPLE__
   laszip_HINSTANCE = LoadLibrary("liblaszip.dylib", RTLD_NOW);
 #else
