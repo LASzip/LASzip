@@ -561,7 +561,9 @@ public:
   inline U16 get_point_source_ID() const { return point_source_ID; };
   inline U8 get_deleted_flag() const { return deleted_flag; };
   inline F64 get_gps_time() const { return gps_time; };
-  inline const U16* get_rgb() const { return rgb; };
+  inline const U16* get_RGB() const { return rgb; };
+  inline const U16* get_RGBI() const { return rgb; };
+  inline U16 get_RGBI(const U32 band) const { return rgb[band]; };
   inline U16 get_R() const { return rgb[0]; };
   inline U16 get_G() const { return rgb[1]; };
   inline U16 get_B() const { return rgb[2]; };
@@ -587,6 +589,7 @@ public:
   inline void set_gps_time(const F64 gps_time) { this->gps_time = gps_time; };
   inline void set_RGB(const U16* rgb) { memcpy(this->rgb, rgb, sizeof(U16) * 3); };
   inline void set_RGBI(const U16* rgb) { memcpy(this->rgb, rgb, sizeof(U16) * 4); };
+  inline void set_RGBI(const U32 band, const U16 value) { rgb[band] = value; };
   inline void set_R(const U16 R) { this->rgb[0] = R; };
   inline void set_G(const U16 G) { this->rgb[1] = G; };
   inline void set_B(const U16 B) { this->rgb[2] = B; };
