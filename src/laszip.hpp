@@ -58,6 +58,8 @@
 #ifndef LASZIP_HPP
 #define LASZIP_HPP
 
+#include "mydefs.hpp"
+
 #if defined(_MSC_VER) && (_MSC_VER < 1300)
 #define LZ_WIN32_VC6
 typedef __int64   SIGNED_INT64;
@@ -65,17 +67,21 @@ typedef __int64   SIGNED_INT64;
 typedef long long SIGNED_INT64;
 #endif
 
-#if defined(_MSC_VER) && \
-    (_MSC_FULL_VER >= 150000000)
+#if defined(_MSC_VER) && (_MSC_FULL_VER >= 150000000)
 #define LASCopyString _strdup
 #else
 #define LASCopyString strdup
 #endif
 
+#if defined(_MSC_VER)
+#include <windows.h>
+wchar_t* UTF8toUTF16(const char* utf8);
+#endif
+
 #define LASZIP_VERSION_MAJOR                3
 #define LASZIP_VERSION_MINOR                4
-#define LASZIP_VERSION_REVISION             1
-#define LASZIP_VERSION_BUILD_DATE      190411
+#define LASZIP_VERSION_REVISION             2
+#define LASZIP_VERSION_BUILD_DATE      191015
 
 #define LASZIP_COMPRESSOR_NONE              0
 #define LASZIP_COMPRESSOR_POINTWISE         1
@@ -93,7 +99,7 @@ typedef long long SIGNED_INT64;
 
 #define LASZIP_CHUNK_SIZE_DEFAULT           50000
 
-class LASitem
+class LASLIB_DLL LASitem
 {
 public:
   enum Type { BYTE = 0, SHORT, INT, LONG, FLOAT, DOUBLE, POINT10, GPSTIME11, RGB12, WAVEPACKET13, POINT14, RGB14, RGBNIR14, WAVEPACKET14, BYTE14 } type;
@@ -103,7 +109,7 @@ public:
   const char* get_name() const;
 };
 
-class LASzip
+class LASLIB_DLL LASzip
 {
 public:
 
