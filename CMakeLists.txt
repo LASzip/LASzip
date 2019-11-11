@@ -7,7 +7,7 @@ set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
 
 # the next line is the ONLY place in the entire laszip system where
 # the version info is hard-coded
-set(LASZIP_API_VERSION_STRING "3.4.1" CACHE STRING "LASzip version" FORCE)
+set(LASZIP_API_VERSION_STRING "3.4.3" CACHE STRING "LASzip version" FORCE)
 
 include (CheckIncludeFileCXX)
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
@@ -41,7 +41,7 @@ set(LASZIP_API_VERSION ${LASZIP_API_VERSION_MAJOR}.${LASZIP_API_VERSION_MINOR}.$
 # libtool SO version naming
 # 8.0.0 for 3.2.1
 # 9.0.0 for 4.0+
-set(LASZIP_SO_VERSION "8.0.4")
+set(LASZIP_SO_VERSION "8.0.5")
 set(LASZIP_COMPATIBILITY_VERSION 8)
 
 check_include_file_cxx ("unordered_map" HAVE_UNORDERED_MAP)
