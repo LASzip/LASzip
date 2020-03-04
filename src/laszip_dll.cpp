@@ -2094,7 +2094,7 @@ laszip_prepare_point_for_write(
           }
 
           // describe any undocumented "extra bytes" as "unknown" U8  attributes
-          for (I32 i = (I32)(laszip_dll->attributer->get_attributes_size()); i < number_of_existing_extrabytes; i++)
+          for (I16 i = laszip_dll->attributer->get_attributes_size(); i < number_of_existing_extrabytes; i++)
           {
             CHAR unknown_name[16];
             memset(unknown_name, 0, 16);
