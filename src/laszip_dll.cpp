@@ -53,6 +53,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <vector>
+#ifndef _WIN32
+#include <inttypes.h>
+#endif
 
 #include "laszip.hpp"
 #include "lasattributer.hpp"
@@ -1850,7 +1853,7 @@ laszip_prepare_header_for_write(
 #ifdef _WIN32
         sprintf(laszip_dll->error, "inconsistent number_of_point_records %u and extended_number_of_point_records %I64d", laszip_dll->header.number_of_point_records, laszip_dll->header.extended_number_of_point_records);
 #else
-        sprintf(laszip_dll->error, "inconsistent number_of_point_records %u and extended_number_of_point_records %llu", laszip_dll->header.number_of_point_records, laszip_dll->header.extended_number_of_point_records);
+        sprintf(laszip_dll->error, "inconsistent number_of_point_records %u and extended_number_of_point_records %" PRIu64, laszip_dll->header.number_of_point_records, laszip_dll->header.extended_number_of_point_records);
 #endif
         return 1;
       }
@@ -1868,7 +1871,7 @@ laszip_prepare_header_for_write(
 #ifdef _WIN32
           sprintf(laszip_dll->error, "inconsistent number_of_points_by_return[%u] %u and extended_number_of_points_by_return[%u] %I64d", i, laszip_dll->header.number_of_points_by_return[i], i, laszip_dll->header.extended_number_of_points_by_return[i]);
 #else
-          sprintf(laszip_dll->error, "inconsistent number_of_points_by_return[%u] %u and extended_number_of_points_by_return[%u] %llu", i, laszip_dll->header.number_of_points_by_return[i], i, laszip_dll->header.extended_number_of_points_by_return[i]);
+          sprintf(laszip_dll->error, "inconsistent number_of_points_by_return[%u] %u and extended_number_of_points_by_return[%u] %" PRIu64, i, laszip_dll->header.number_of_points_by_return[i], i, laszip_dll->header.extended_number_of_points_by_return[i]);
 #endif
           return 1;
         }
@@ -1917,7 +1920,7 @@ laszip_prepare_point_for_write(
 #ifdef _WIN32
         sprintf(laszip_dll->error, "extended_number_of_point_records of %I64d is too much for 32-bit counters of compatibility mode", laszip_dll->header.extended_number_of_point_records);
 #else
-        sprintf(laszip_dll->error, "extended_number_of_point_records of %llu is too much for 32-bit counters of compatibility mode", laszip_dll->header.extended_number_of_point_records);
+        sprintf(laszip_dll->error, "extended_number_of_point_records of %" PRIu64 " is too much for 32-bit counters of compatibility mode", laszip_dll->header.extended_number_of_point_records);
 #endif
         return 1;
       }
@@ -2590,7 +2593,7 @@ laszip_write_header(
 #ifdef _WIN32
         sprintf(laszip_dll->warning, "header.start_of_waveform_data_packet_record is %I64d. writing 0 instead.", laszip_dll->header.start_of_waveform_data_packet_record);
 #else
-        sprintf(laszip_dll->warning, "header.start_of_waveform_data_packet_record is %llu. writing 0 instead.", laszip_dll->header.start_of_waveform_data_packet_record);
+        sprintf(laszip_dll->warning, "header.start_of_waveform_data_packet_record is %" PRIu64 ". writing 0 instead.", laszip_dll->header.start_of_waveform_data_packet_record);
 #endif
         laszip_dll->header.start_of_waveform_data_packet_record = 0;
       }
@@ -4548,7 +4551,7 @@ laszip_seek_point(
 #ifdef _WIN32
       sprintf(laszip_dll->error, "seeking from index %I64d to index %I64d for file with %I64d points", laszip_dll->p_count, index, laszip_dll->npoints);
 #else
-      sprintf(laszip_dll->error, "seeking from index %lld to index %lld for file with %lld points", laszip_dll->p_count, index, laszip_dll->npoints);
+      sprintf(laszip_dll->error, "seeking from index %lld to index %" PRId64 " for file with %lld points", laszip_dll->p_count, index, laszip_dll->npoints);
 #endif
       return 1;
     }
