@@ -2046,7 +2046,7 @@ laszip_prepare_point_for_write(
 
       // add the compatibility VLR
 
-      if (laszip_add_vlr(laszip_dll, "lascompatible\0\0", 22204, (laszip_U16)(2+2+4+148), 0, (laszip_U8*)out->takeData()))
+      if (laszip_add_vlr(laszip_dll, "lascompatible\0\0", 22204, (laszip_U16)(2+2+4+148), 0, (laszip_U8*)out->getData()))
       {
         sprintf(laszip_dll->error, "adding the compatibility VLR");
         return 1;
