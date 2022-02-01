@@ -10,12 +10,12 @@
 
   PROGRAMMERS:
 
-    martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
+    info@rapidlasso.de  -  https://rapidlasso.de
     uday.karan@gmail.com - http://github.com/verma
 
   COPYRIGHT:
 
-    (c) 2007-2021, martin isenburg, rapidlasso - fast tools to catch reality
+    (c) 2007-2022, rapidlasso GmbH - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the Apache Public License 2.0 published by the Apache Software
