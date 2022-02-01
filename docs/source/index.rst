@@ -76,7 +76,7 @@ Bronze Sponsors (USD 2,000 or more)
 Download
 ------------------------------------------------------------------------------
 
-The LGPL-licensed LASzip library is easiest integrated via the DLL that is in
+The Apache 2.0-licensed LASzip library is easiest integrated via the DLL that is in
 the LASzip subdirectory of the `LAStools`_ distribtion. Other options are to
 link LASzip via the BSD-licensed `libLAS`_ library or to work with the `LASlib`_
 library which fully integrates and enhances the LASzip codebase with spatial
@@ -118,6 +118,13 @@ as an `LGPL`_-licensed stand-alone software library to allow other softwares
 that handle LAS data to read and write LASzip-compressed data. The BSD-licensed
 `libLAS`_ and the LGPL-licensed `LASlib`_ can take advantage of LASzip to read
 and write compressed data.
+
+LASzip was originally released as an `LGPL`_-licensed library, but in January
+2022, it was relicensed as `Apache Public License 2.0
+<https://www.apache.org/licenses/LICENSE-2.0>`__ by `Rapidlasso GmbH
+<https://rapidlasso.de>`__. For those wishing for validation of this licensing
+change, a notarized document to that effect is available by contacting
+Howard Butler at howard@hobu.co or Rapidlasso, GmbH at info@rapidlasso.de.
 
 LASzip is completely lossless. It compresses bulky LAS files into compact LAZ
 files that are only 7-20 percent of the original size, accurately preserving

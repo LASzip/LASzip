@@ -2,6 +2,23 @@
 LASzip
 ================================================================================
 
+3.5.0
+--------------------------------------------------------------------------------
+
+LASzip was relicensed to Apache Public License 2.0 by Rapidlasso, GmbH in 
+January 2022. This relicense corresponds to only software in the 
+LASzip GitHub repository at https://github.com/LASzip/LASzip and 
+none of the LAStools software that lives at https://github.com/LAStools/LAStools/ 
+There are duplicates of a number of files in both repositories. Developers 
+wishing to use APL versions must use the ones in the LASzip repository. 
+
+* Small memory leak https://github.com/LASzip/LASzip/pull/79
+* bug fix for signed long (I32) in set_value_as_float() 85993b506e4680a615e5beb1ec3d18dd20be8250
+* limit level_offset init loop in quadtree ff8adcac9ccc0b5ab80e4ab4b06d62a444f718f7
+* fix for uncommon zero'd chunk tables 7b18a692cb152768e30b12e18b69e83cf90591d8
+* wfopen usage on windows 933036c26581dd3b53e962d02372e1b09ada1c0e
+
+
 3.2.9 27-DEC-18
 --------------------------------------------------------------------------------
 
