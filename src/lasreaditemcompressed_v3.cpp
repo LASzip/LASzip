@@ -9,14 +9,14 @@
   
   PROGRAMMERS:
 
-    martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
+    info@rapidlasso.de  -  https://rapidlasso.de
 
   COPYRIGHT:
 
-    (c) 2007-2017, martin isenburg, rapidlasso - fast tools to catch reality
+    (c) 2007-2022, rapidlasso GmbH - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
-    terms of the GNU Lesser General Licence as published by the Free Software
+    terms of the Apache Public License 2.0 published by the Apache Software
     Foundation. See the COPYING file for more information.
 
     This software is distributed WITHOUT ANY WARRANTY and without even the
@@ -207,6 +207,7 @@ LASreadItemCompressed_POINT14_v3::~LASreadItemCompressed_POINT14_v3()
     delete dec_intensity;
     delete dec_scan_angle;
     delete dec_user_data;
+    delete dec_point_source;
     delete dec_gps_time;
 
     delete instream_channel_returns_XY;
@@ -216,6 +217,7 @@ LASreadItemCompressed_POINT14_v3::~LASreadItemCompressed_POINT14_v3()
     delete instream_intensity;
     delete instream_scan_angle;
     delete instream_user_data;
+    delete instream_point_source;
     delete instream_gps_time;
   }
 

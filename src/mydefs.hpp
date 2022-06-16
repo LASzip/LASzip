@@ -9,14 +9,14 @@
  
   PROGRAMMERS:
 
-    martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
+    info@rapidlasso.de  -  https://rapidlasso.de
 
   COPYRIGHT:
 
-    (c) 2005-2015, martin isenburg, rapidlasso - fast tools to catch reality
+    (c) 2007-2022, rapidlasso GmbH - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
-    terms of the GNU Lesser General Licence as published by the Free Software
+    terms of the Apache Public License 2.0 published by the Apache Software
     Foundation. See the COPYING file for more information.
 
     This software is distributed WITHOUT ANY WARRANTY and without even the
@@ -135,6 +135,16 @@ typedef union I64U32I32F32 { I64 i64; U32 u32[2]; I32 i32[2]; F32 f32[2]; } I64U
 
 #define I64_QUANTIZE(n) (((n) >= 0) ? (I64)((n)+0.5) : (I64)((n)-0.5))
 #define U64_QUANTIZE(n) (((n) >= 0) ? (U64)((n)+0.5) : (U64)(0))
+
+#define I8_CLAMP_QUANTIZE(n)     (((n) <= I8_MIN) ? I8_MIN : (((n) >= I8_MAX) ? I8_MAX : (I8_QUANTIZE(n))))
+#define U8_CLAMP_QUANTIZE(n)     (((n) <= U8_MIN) ? U8_MIN : (((n) >= U8_MAX) ? U8_MAX : (U8_QUANTIZE(n))))
+
+#define I16_CLAMP_QUANTIZE(n)    (((n) <= I16_MIN) ? I16_MIN : (((n) >= I16_MAX) ? I16_MAX : (I16_QUANTIZE(n))))
+#define U16_CLAMP_QUANTIZE(n)    (((n) <= U16_MIN) ? U16_MIN : (((n) >= U16_MAX) ? U16_MAX : (U16_QUANTIZE(n))))
+
+#define I32_CLAMP_QUANTIZE(n)    (((n) <= I32_MIN) ? I32_MIN : (((n) >= I32_MAX) ? I32_MAX : (I32_QUANTIZE(n))))
+#define U32_CLAMP_QUANTIZE(n)    (((n) <= U32_MIN) ? U32_MIN : (((n) >= U32_MAX) ? U32_MAX : (U32_QUANTIZE(n))))
+
 
 #define I16_FLOOR(n) ((((I16)(n)) > (n)) ? (((I16)(n))-1) : ((I16)(n)))
 #define I32_FLOOR(n) ((((I32)(n)) > (n)) ? (((I32)(n))-1) : ((I32)(n)))

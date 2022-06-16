@@ -9,14 +9,14 @@
 
   PROGRAMMERS:
 
-    martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
+    info@rapidlasso.de  -  https://rapidlasso.de
 
   COPYRIGHT:
 
-    (c) 2007-2019, martin isenburg, rapidlasso - fast tools to catch reality
+    (c) 2007-2022, rapidlasso GmbH - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
-    terms of the GNU Lesser General Licence as published by the Free Software
+    terms of the Apache Public License 2.0 published by the Apache Software
     Foundation. See the COPYING file for more information.
 
     This software is distributed WITHOUT ANY WARRANTY and without even the
@@ -24,6 +24,7 @@
 
   CHANGE HISTORY:
 
+    24 March 2021 -- fix small memory leak
     15 October 2019 -- support reading from and writing to unicode file names under Windows
     20 March 2019 -- check consistent legacy and extended classification in laszip_write_point()
      7 November 2018 -- assure identical legacy and extended flags in laszip_write_point()
@@ -1204,8 +1205,10 @@ laszip_set_geokeys(
     if (laszip_add_vlr(laszip_dll, "LASF_Projection", 34735, (laszip_U16)(8 + number*8), 0, (laszip_U8*)key_entries_plus_one))
     {
       sprintf(laszip_dll->error, "setting %u geodouble_params", number);
+      delete [] key_entries_plus_one;
       return 1;
     }
+    delete [] key_entries_plus_one;
   }
   catch (...)
   {
@@ -3948,7 +3951,7 @@ laszip_read_header(
   {
     if (!laszip)
     {
-      sprintf(laszip_dll->error, "this file was compressed with an experimental version of LASzip. contact 'martin.isenburg@rapidlasso.com' for assistance");
+      sprintf(laszip_dll->error, "this file was compressed with an experimental version of LASzip. contact 'info@rapidlasso.de' for assistance");
       return 1;
     }
     laszip_dll->header.point_data_format &= 127;
@@ -3962,7 +3965,7 @@ laszip_read_header(
     *is_compressed = 1;
     if (!laszip->check(laszip_dll->header.point_data_record_length))
     {
-      sprintf(laszip_dll->error, "%s upgrade to the latest release of LASzip or contact 'martin.isenburg@rapidlasso.com' for assistance", laszip->get_error());
+      sprintf(laszip_dll->error, "%s upgrade to the latest release of LASzip or contact 'info@rapidlasso.de' for assistance", laszip->get_error());
       return 1;
     }
   }

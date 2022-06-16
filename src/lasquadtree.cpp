@@ -9,15 +9,15 @@
   
   PROGRAMMERS:
 
-    martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
+    info@rapidlasso.de  -  https://rapidlasso.de
 
   COPYRIGHT:
 
-    (c) 2007-2015, martin isenburg, rapidlasso - fast tools to catch reality
+    (c) 2007-2022, rapidlasso GmbH - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
-    terms of the GNU Lesser General Licence as published by the Free Software
-    Foundation. See the LICENSE.txt file for more information.
+    terms of the Apache Public License 2.0 published by the Apache Software
+    Foundation. See the COPYING file for more information.
 
     This software is distributed WITHOUT ANY WARRANTY and without even the
     implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -1657,7 +1657,7 @@ LASquadtree::LASquadtree()
   sub_level = 0;
   sub_level_index = 0;
   level_offset[0] = 0;
-  for (l = 0; l < 23; l++)
+  for (l = 0; l < 16; l++)
   {
     level_offset[l+1] = level_offset[l] + ((1<<l)*(1<<l));
   }

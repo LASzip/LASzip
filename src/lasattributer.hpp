@@ -10,21 +10,22 @@
 
   PROGRAMMERS:
 
-    martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
+    info@rapidlasso.de  -  https://rapidlasso.de
 
   COPYRIGHT:
 
-    (c) 2007-2015, martin isenburg, rapidlasso - fast tools to catch reality
+    (c) 2007-2022, rapidlasso GmbH - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
-    terms of the GNU Lesser General Licence as published by the Free Software
-    Foundation. See the LICENSE.txt file for more information.
+    terms of the Apache Public License 2.0 published by the Apache Software
+    Foundation. See the COPYING file for more information.
 
     This software is distributed WITHOUT ANY WARRANTY and without even the
     implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   
   CHANGE HISTORY:
   
+    24 March 2021 -- bug fix for signed long (I32) in set_value_as_float()
     13 September 2018 -- removed tuples and triple support from attributes
     19 July 2015 -- created after FOSS4GE in the train back from Lake Como
   
@@ -254,7 +255,7 @@ public:
     else if (type == 4)
       *((U32*)pointer) = U32_QUANTIZE(unoffset_and_unscaled_value);
     else if (type == 5)
-      *((I32*)pointer) = U32_QUANTIZE(unoffset_and_unscaled_value);
+      *((I32*)pointer) = I32_QUANTIZE(unoffset_and_unscaled_value);
     else if (type == 6)
       *((U64*)pointer) = U64_QUANTIZE(unoffset_and_unscaled_value);
     else if (type == 7)
