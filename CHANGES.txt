@@ -1,3 +1,4 @@
+18 January 2023 -- use 64-bit point counts in laszip_dll_inventory
 22 March 2022 -- fix fseek for gcc for las/lax file > 2Gb
 30 December 2021 -- fix small memory leak in lasreaditemcompressed_v3.cpp 
  2 December 2020 -- fix memory leak in laszip_dll.cpp

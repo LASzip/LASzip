@@ -72,8 +72,8 @@ class laszip_dll_inventory
 {
 public:
   BOOL active() const { return (first == FALSE); };
-  U32 number_of_point_records;
-  U32 number_of_points_by_return[16];
+  U64 number_of_point_records;
+  U64 number_of_points_by_return[16];
   I32 max_X;
   I32 min_X;
   I32 max_Y;
@@ -3254,17 +3254,21 @@ laszip_close_writer(
 
     if (laszip_dll->inventory)
     {
+      U64 point_count = laszip_dll->inventory->number_of_point_records;
       if (laszip_dll->header.point_data_format <= 5) // only update legacy counters for old point types
       {
+        U32 number_of_point_records = (point_count <= U32_MAX ? (U32)point_count : 0);
         laszip_dll->streamout->seek(107);
-        if (!laszip_dll->streamout->put32bitsLE((const U8*)&(laszip_dll->inventory->number_of_point_records)))
+        if (!laszip_dll->streamout->put32bitsLE((const U8*)&(number_of_point_records)))
         {
           sprintf(laszip_dll->error, "updating laszip_dll->inventory->number_of_point_records");
           return 1;
         }
         for (I32 i = 0; i < 5; i++)
         {
-          if (!laszip_dll->streamout->put32bitsLE((const U8*)&(laszip_dll->inventory->number_of_points_by_return[i+1])))
+          U32 number_of_points_by_return =
+            (point_count <= U32_MAX ? (U32)laszip_dll->inventory->number_of_points_by_return[i+1] : 0);
+          if (!laszip_dll->streamout->put32bitsLE((const U8*)&(number_of_points_by_return)))
           {
             sprintf(laszip_dll->error, "updating laszip_dll->inventory->number_of_points_by_return[%d]\n", i);
             return 1;
@@ -3312,16 +3316,14 @@ laszip_close_writer(
       if (laszip_dll->header.version_minor >= 4) // only update extended counters for LAS 1.4
       {
         laszip_dll->streamout->seek(247);
-        I64 number = laszip_dll->inventory->number_of_point_records;
-        if (!laszip_dll->streamout->put64bitsLE((const U8*)&number))
+        if (!laszip_dll->streamout->put64bitsLE((const U8*)&laszip_dll->inventory->number_of_point_records))
         {
           sprintf(laszip_dll->error, "updating laszip_dll->inventory->extended_number_of_point_records");
           return 1;
         }
         for (I32 i = 0; i < 15; i++)
         {
-          number = laszip_dll->inventory->number_of_points_by_return[i+1];
-          if (!laszip_dll->streamout->put64bitsLE((const U8*)&number))
+          if (!laszip_dll->streamout->put64bitsLE((const U8*)&laszip_dll->inventory->number_of_points_by_return[i+1]))
           {
             sprintf(laszip_dll->error, "updating laszip_dll->inventory->extended_number_of_points_by_return[%d]\n", i);
             return 1;
@@ -3332,6 +3334,12 @@ laszip_close_writer(
 
       delete laszip_dll->inventory;
       laszip_dll->inventory = 0;
+
+      if (point_count > U32_MAX && laszip_dll->header.version_minor < 4)
+      {
+        sprintf(laszip_dll->error, "point_count is greater than U32_MAX");
+        return 1;
+      }
     }
 
     if (laszip_dll->lax_index)
