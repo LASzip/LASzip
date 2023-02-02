@@ -13,7 +13,7 @@
 
   COPYRIGHT:
 
-    (c) 2007-2022, rapidlasso GmbH - fast tools to catch reality
+    (c) 2007-2023, rapidlasso GmbH - fast tools to catch reality
 
     This is free software; you can redistribute and/or modify it under the
     terms of the Apache Public License 2.0 published by the Apache Software
@@ -23,7 +23,7 @@
     implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   
   CHANGE HISTORY:
-  
+
     22 March 2022 -- Fix fseek for gcc for las/lax file > 2Gb  
      1 October 2011 -- added 64 bit file support in MSVC 6.0 at McCafe at Hbf Linz
     10 January 2011 -- licensing change for LGPL release and liblas integration
