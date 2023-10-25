@@ -1,3 +1,6 @@
+2023-10-20
+  * Jochen Keil <jochen.keil@rapidlasso.de> merge (PR #92): Fix integer overflow of number_of_point_records when using laszip_update_inventory
+
 2018-03-22
 	* Howard Butler <howard@hobu.co> call vcvars (03:41:11)
 	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:LASzip/LASzip (03:39:49)
