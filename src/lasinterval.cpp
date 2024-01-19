@@ -37,10 +37,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
+#include <cassert>
 
 #include <map>
 #include <set>
+
 using namespace std;
 
 #ifdef UNORDERED
@@ -73,6 +74,7 @@ typedef unordered_map<I32, LASintervalStartCell*> my_cell_hash;
 
 typedef multimap<U32, LASintervalCell*> my_cell_map;
 typedef set<LASintervalStartCell*> my_cell_set;
+
 
 LASintervalCell::LASintervalCell()
 {
