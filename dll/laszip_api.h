@@ -219,6 +219,26 @@ typedef struct laszip_point
 
 } laszip_point_struct;
 
+enum laszip_message_type
+{
+  laszip_DEBUG = 0
+  , laszip_VERY_VERBOSE
+  , laszip_VERBOSE
+  , laszip_INFO
+  , laszip_WARNING
+  , laszip_SERIOUS_WARNING
+  , laszip_ERROR
+  , laszip_FATAL_ERROR
+};
+
+typedef void(*laszip_message_handler)(
+  enum laszip_message_type             type
+  , const char*                        msg
+  , void*                              user_data
+);
+
+/**
+
 /*---------------------------------------------------------------------------*/
 /*------ DLL constants for selective decompression via LASzip DLL -----------*/
 /*---------------------------------------------------------------------------*/
@@ -265,6 +285,38 @@ laszip_get_version
 LASZIP_API laszip_I32
 laszip_create(
     laszip_POINTER*                    pointer
+);
+
+/*---------------------------------------------------------------------------*/
+LASZIP_API laszip_I32
+laszip_set_las_message_handler
+(
+    laszip_POINTER*                    pointer
+    , laszip_message_handler           callback
+    , void*                            user_data
+);
+
+/*---------------------------------------------------------------------------*/
+LASZIP_API laszip_I32
+laszip_unset_las_message_handler
+(
+    laszip_POINTER*                    pointer
+);
+
+/*---------------------------------------------------------------------------*/
+LASZIP_API laszip_I32
+laszip_set_las_message_log_level
+(
+    laszip_POINTER                     pointer
+    , enum laszip_message_type         log_level
+);
+
+/*---------------------------------------------------------------------------*/
+LASZIP_API laszip_I32
+laszip_get_las_message_log_level
+(
+    laszip_POINTER                     pointer
+    , enum laszip_message_type*        log_level
 );
 
 /*---------------------------------------------------------------------------*/
