@@ -1,6 +1,36 @@
+/*
+===============================================================================
+
+  FILE:  lasmessage.cpp
+
+  CONTENTS:
+
+    see corresponding header file
+
+  PROGRAMMERS:
+
+    info@rapidlasso.de  -  https://rapidlasso.de
+
+  COPYRIGHT:
+
+    (c) 2007-2024, rapidlasso GmbH - fast tools to catch reality
+
+    This is free software; you can redistribute and/or modify it under the
+    terms of the Apache Public License 2.0 published by the Apache Software
+    Foundation. See the COPYING file for more information.
+
+    This software is distributed WITHOUT ANY WARRANTY and without even the
+    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+  CHANGE HISTORY:
+
+    see corresponding header file
+
+===============================================================================
+*/
 #include "lasmessage.hpp"
 #include <stdio.h>
-#include <stdarg.h> 
+#include <stdarg.h>
 #include <string>
 #include <assert.h>
 
