@@ -1,7 +1,7 @@
 LASzip for LAS 1.4 (native extension)
-========
-Specification Document 
---------
+=====================================
+Specification Document
+----------------------
 As before the LASheader and the VLRs are stored uncompressed but the highest bit of the point type field is set (i.e. the compressed point types 128 to 138 correspond to the uncompressed point types 0 to 10). LiDAR points are compressed in completely independent chunks that default to 50,000 points per chunk. Each chunk can be decompressed "on its own" once the start byte is know. For point types 0 to 5 nothing changes and the same compression scheme as before is used. For the new point types 6 to 10 of LAS 1.4 there are two main changes: the chunks are encoded in layers and the chunks can have variable size.
 
 As before the first point of each chunk is stored raw. The attributes of all following points are broken into several layers. Only the first layer containing the x and y coordinates (and a few pieces of information) is mandatory to read and decompress. The remaining layers containing independently useful attributes such as elevation, intensity, classifications, flags, GPS times, colors, point source ID, user data, scan angles, wavepackets, and extra bytes do not necessarily need be decompressed (or be read from disk).
@@ -63,7 +63,7 @@ Chunk Layout:
      - "Extra Bytes" layer(s)
 
 Compression of scanner channel, point source ID change, GPS time change, scan angle change, return counts, and XY layer
------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------
 Due to the new scanner channel it is *crucial* to first encode whether a point is from the same and if not from which other scanner channel so that the correct context can be used for all subsequent predictions. We also encode whether a point has a a different point source ID, a different GPS time, and a different scan angle as the previous point from the same scanner channel as these changes correlate strongly with another. The return counts that are also recorded in this layer.
 
 * scanner channel compared to the scanner channel of the previous point (same = 0 / different = 1)
@@ -193,7 +193,7 @@ Compression of intensity layer
 We compress the intensity with the difference integer compressor using four contexts that is simply the 'cpr' defined earlier. We use one of 8 possible previous intensities as the prediction. Which one is used is decided by the 'cpr' multiplied by two plus one if the GPS time in respect to the previous point (from the same scanner channel) has changed. All eight possible previous intensities are initialized to the intensity of the first point (from the same scanner channel) and updated after the intensity was compressed.
 
 Compression of scan angle layer
-------------------------------
+-------------------------------
 Only if the **scan angle is different** (as indicated by the 7 bits earlier) we compress it with the difference integer compressor using two contexts that is whether the GPS time stamp of the previous point (from the same scanner channel) has changed (1) or not (0). We use the scan angle of the previous point (from the same scanner channel) as the prediction.
 
 Compression of user data layer
@@ -201,7 +201,7 @@ Compression of user data layer
 We compress the user data layer which is an 8 bit number as a symbol between 0 and 255 using 64 different contexts. The context is simply the user data of the previous point (from the same scanner channel) divided by 4.
 
 Compression of point source ID layer
-------------------------------
+------------------------------------
 Only if the **point source ID is different** (as indicated by the 7 bits earlier) we compress
 
 Compression of GPS time layer
@@ -216,16 +216,16 @@ Only if the **GPS time is different** (as indicated by the 7 bits earlier) we co
 For the first two cases we subsequently difference code the delta prediction and the actual delta. We starts a new context when the delta overflows a 32 bit integer. For that it difference codes the 32 higher bits of the current GPS time and the current context and stores the lower 32 bits raw. Otherwise it switches to the specified context (where the delta will not overflows a 32 bit integer) and recurses. The current deltas stored with each context are updated to the actual delta when they were outside the predictable range more than 3 consecutive times (i.e. bigger than 500 times the current delta, smaller than -10 times the current delta, or zero).
 
 Compression of RGB layer
-------------------------------
+------------------------
 We compress the RGB values the same way it was done in the old LASzip coder. LAS uses unsigned 16 bit integers for the R, G, and B
 channel. Some files—incorrectly—populate only the lower 8 bits so that the upper 8 bits are zero. Other files correctly multiply 8-bit colors with 256 so that the lower 8 bits are zero. The LASzip compressor therefore compresses the upper and lower byte of each channel separately. First it entropy codes (a) 6 bits that specify which of the six bytes have changed in comparison to the previous point (from the same scanner channel) and (b) one bit that specifies whether those changes are the same in all three channels (i.e. grey colors) as one symbol between 0 and 127. For all bytes that have changed it then entropy codes the difference to the respective previous byte (of the point from the same scanner channel) modulo 256. If the 7 bit symbol indicates that the changes are identical in all three channels only the R channel is compressed. Otherwise the channels are encoded in the order R, G, and B. Differences encoded in earlier channels are used to predict differences in later channels as there tends to be a correlation in the intensity across channels. For example, if there was a byte difference in the low byte of the R channel that difference is added to low byte of the G channel which - clamped to a 0 to 255 range - becomes the value to which the difference of the current low byte is computed.
 
 Compression of NIR layer
-------------------------------
+------------------------
 We compress the NIR value using the same technique as done for the RGB values. First it entropy codes 2 bits that specify which bytes have changed as one symbol. For all bytes that have changed it then entropy codes the difference to the respective previous byte (of the point from the same scanner channel) modulo 256.
 
 Compression of WavePacket layer
-------------------------------
+-------------------------------
 We compress the WavePackets the same way it was done in the old LASzip coder. They only occur in point types 9 and 10. So far there has been very little real-world demand for compressing LAS files containing waveform data simply due to a lack of data stored in this format (i.e. there is no a dedicated format for full waveform LiDAR called 'PulseWaves'). LASzip simply entropy codes the wave packet descriptor index, an unsigned byte that is zero if a point has no waveform and indexes the variable length record describing the format of the waveform otherwise. To compress the bytes offset to waveform data it entropy encodes one of 4 possible cases:
   1) same as last offset
   2) use last offset plus last packet size
@@ -234,5 +234,5 @@ We compress the WavePackets the same way it was done in the old LASzip coder. Th
 In the first two cases no other information is needed. For the other two cases LASzip difference codes the 32 or the 64 bit numbers. The LASzip compressor difference coded all remaining fields. Only waveform packet size in bytes is an integer number. The return point waveform location, x(t), y(t), and z(t) are single-precision floating-point numbers whose 32 bits are treated as if they were a 32-bit integer.
 
 Compression of "Extra Bytes" layer(s)
-------------------------------
+-------------------------------------
 We compress the "Extra Bytes" the same way it was done in the old LASzip coder but each byte is compressed into its own layer. A LAS point has “Extra Bytes” when the LAS header specifies a point size larger than required by the respective point type. Each “Extra Byte” is entropy encoded with its own context as the difference to the “Extra Byte” from the previous point  (from the same scanner channel) modulo 256. Treating them as individual bytes is the best that the LASzip compressor can do as there is not always a description what these “Extra Bytes” may mean. Six “extra bytes”, for example, could be a single-precision float storing the echo width followed by an unsigned short storing the normalized reflectivity. Or it could be an unsigned short storing a tile index followed by an unsigned integer storing the original index of the point.
