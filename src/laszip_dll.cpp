@@ -49,6 +49,11 @@
 #define LASZIP_DYN_LINK
 #define LASZIP_SOURCE
 
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#define _HAS_STD_BYTE 0
+
 #include <limits>
 #include <stdio.h>
 #include <string.h>
