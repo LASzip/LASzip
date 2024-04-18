@@ -169,8 +169,8 @@ void las_default_message_handler(LAS_MESSAGE_TYPE type, const char* msg, void* u
 	if (!prefix.empty())
 	{
 		format_message(message, (unsigned)prefix.size());
-		fprintf(stderr, prefix.c_str());
-		fprintf(stderr, message.c_str());
+		fprintf(stderr, "%s", prefix.c_str());
+		fprintf(stderr, "%s", message.c_str());
 	}
 	else
 	{
