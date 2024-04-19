@@ -4720,7 +4720,7 @@ laszip_close_reader(
 LASZIP_API laszip_I32
 laszip_open_reader_stream(
     laszip_POINTER                     pointer
-    , istream&                         stream
+    , std::istream&                    stream
     , laszip_BOOL*                     is_compressed
 )
 {
@@ -4777,7 +4777,7 @@ laszip_open_reader_stream(
 LASZIP_API laszip_I32
 laszip_open_writer_stream(
     laszip_POINTER                     pointer
-    , ostream&                         stream
+    , std::ostream&                    stream
     , laszip_BOOL                      compress
     , laszip_BOOL                      do_not_write_header
 )
