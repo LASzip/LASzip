@@ -1,3 +1,6 @@
+This changelog is deprecated.
+Future changes will be found in CHANGES.txt
+
 2023-10-20
   * Jochen Keil <jochen.keil@rapidlasso.de> merge (PR #92): Fix integer overflow of number_of_point_records when using laszip_update_inventory
 
