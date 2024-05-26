@@ -251,42 +251,14 @@ laszip_message_func(
   if (laszip_dll->message_callback_data == 0) return;
   if (laszip_dll->message_callback_data->callback == 0) return;
 
-  enum laszip_message_type message_type;
-  switch (type)
-  {
-  case LAS_MESSAGE_TYPE::LAS_DEBUG:
-    message_type = laszip_message_type::laszip_DEBUG;
-    break;
-  case LAS_MESSAGE_TYPE::LAS_VERY_VERBOSE:
-    message_type = laszip_message_type::laszip_VERY_VERBOSE;
-    break;
-  case LAS_MESSAGE_TYPE::LAS_VERBOSE:
-    message_type = laszip_message_type::laszip_VERBOSE;
-    break;
-  case LAS_MESSAGE_TYPE::LAS_INFO:
-    message_type = laszip_message_type::laszip_INFO;
-    break;
-  case LAS_MESSAGE_TYPE::LAS_WARNING:
-    message_type = laszip_message_type::laszip_WARNING;
-    break;
-  case LAS_MESSAGE_TYPE::LAS_SERIOUS_WARNING:
-    message_type = laszip_message_type::laszip_SERIOUS_WARNING;
-    break;
-  case LAS_MESSAGE_TYPE::LAS_ERROR:
-    message_type = laszip_message_type::laszip_ERROR;
-    break;
-  case LAS_MESSAGE_TYPE::LAS_FATAL_ERROR:
-    message_type = laszip_message_type::laszip_FATAL_ERROR;
-    break;
-  }
   laszip_dll->message_callback_data->callback(
-    message_type, msg, laszip_dll->message_callback_data->user_data);
+    type, msg, laszip_dll->message_callback_data->user_data);
 }
 
 /*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
 laszip_set_error_handler(
-    laszip_POINTER*                    pointer
+    laszip_POINTER                     pointer
     , laszip_message_handler           callback
     , void*                            user_data
 )
@@ -323,7 +295,7 @@ laszip_set_error_handler(
 LASZIP_API laszip_I32
 laszip_unset_las_message_handler
 (
-    laszip_POINTER*                    pointer
+    laszip_POINTER                     pointer
 )
 {
   if (pointer == 0) return 1;
@@ -351,7 +323,7 @@ LASZIP_API laszip_I32
 laszip_set_las_message_log_level
 (
     laszip_POINTER                     pointer
-    , enum laszip_message_type         log_level
+    , enum LAS_MESSAGE_TYPE            type
 )
 {
   if (pointer == 0) return 1;
@@ -359,35 +331,7 @@ laszip_set_las_message_log_level
 
   try
   {
-    enum LAS_MESSAGE_TYPE message_type;
-    switch (log_level)
-    {
-    case laszip_message_type::laszip_DEBUG:
-      message_type = LAS_MESSAGE_TYPE::LAS_DEBUG;
-      break;
-    case laszip_message_type::laszip_VERY_VERBOSE:
-      message_type = LAS_MESSAGE_TYPE::LAS_VERY_VERBOSE;
-      break;
-    case laszip_message_type::laszip_VERBOSE:
-      message_type = LAS_MESSAGE_TYPE::LAS_VERBOSE;
-      break;
-    case laszip_message_type::laszip_INFO:
-      message_type = LAS_MESSAGE_TYPE::LAS_INFO;
-      break;
-    case laszip_message_type::laszip_WARNING:
-      message_type = LAS_MESSAGE_TYPE::LAS_WARNING;
-      break;
-    case laszip_message_type::laszip_SERIOUS_WARNING:
-      message_type = LAS_MESSAGE_TYPE::LAS_SERIOUS_WARNING;
-      break;
-    case laszip_message_type::laszip_ERROR:
-      message_type = LAS_MESSAGE_TYPE::LAS_ERROR;
-      break;
-    case laszip_message_type::laszip_FATAL_ERROR:
-      message_type = LAS_MESSAGE_TYPE::LAS_FATAL_ERROR;
-      break;
-    }
-    set_message_log_level(message_type);
+    set_message_log_level(type);
   }
   catch (...)
   {
@@ -403,43 +347,16 @@ LASZIP_API laszip_I32
 laszip_get_las_message_log_level
 (
     laszip_POINTER                     pointer
-    , enum laszip_message_type*        log_level
+    , enum LAS_MESSAGE_TYPE*           type
 )
 {
   if (pointer == 0) return 1;
   laszip_dll_struct* laszip_dll = (laszip_dll_struct*)pointer;
-  if (log_level == 0) return 1;
+  if (type == 0) return 1;
 
   try
   {
-    enum LAS_MESSAGE_TYPE message_type = get_message_log_level();
-    switch (message_type)
-    {
-    case LAS_MESSAGE_TYPE::LAS_DEBUG:
-      *log_level = laszip_message_type::laszip_DEBUG;
-      break;
-    case LAS_MESSAGE_TYPE::LAS_VERY_VERBOSE:
-      *log_level = laszip_message_type::laszip_VERY_VERBOSE;
-      break;
-    case LAS_MESSAGE_TYPE::LAS_VERBOSE:
-      *log_level = laszip_message_type::laszip_VERBOSE;
-      break;
-    case LAS_MESSAGE_TYPE::LAS_INFO:
-      *log_level = laszip_message_type::laszip_INFO;
-      break;
-    case LAS_MESSAGE_TYPE::LAS_WARNING:
-      *log_level = laszip_message_type::laszip_WARNING;
-      break;
-    case LAS_MESSAGE_TYPE::LAS_SERIOUS_WARNING:
-      *log_level = laszip_message_type::laszip_SERIOUS_WARNING;
-      break;
-    case LAS_MESSAGE_TYPE::LAS_ERROR:
-      *log_level = laszip_message_type::laszip_ERROR;
-      break;
-    case LAS_MESSAGE_TYPE::LAS_FATAL_ERROR:
-      *log_level = laszip_message_type::laszip_FATAL_ERROR;
-      break;
-    }
+    *type = get_message_log_level();
   }
   catch (...)
   {

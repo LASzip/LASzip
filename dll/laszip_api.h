@@ -70,6 +70,8 @@
 #   define LASZIP_API
 #endif
 
+#include <laszip/laszip_common.h>
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -84,7 +86,7 @@ typedef int                laszip_BOOL;
 typedef char               laszip_CHAR;
 typedef float              laszip_F32;
 typedef double             laszip_F64;
-typedef void* laszip_POINTER;
+typedef void*              laszip_POINTER;
 #ifdef _WIN32
 typedef unsigned char      laszip_U8;
 typedef unsigned short     laszip_U16;
@@ -219,25 +221,11 @@ typedef struct laszip_point
 
 } laszip_point_struct;
 
-enum laszip_message_type
-{
-  laszip_DEBUG = 0
-  , laszip_VERY_VERBOSE
-  , laszip_VERBOSE
-  , laszip_INFO
-  , laszip_WARNING
-  , laszip_SERIOUS_WARNING
-  , laszip_ERROR
-  , laszip_FATAL_ERROR
-};
-
 typedef void(*laszip_message_handler)(
-  enum laszip_message_type             type
+  enum LAS_MESSAGE_TYPE                type
   , const char*                        msg
   , void*                              user_data
 );
-
-/**
 
 /*---------------------------------------------------------------------------*/
 /*------ DLL constants for selective decompression via LASzip DLL -----------*/
@@ -273,8 +261,7 @@ typedef void(*laszip_message_handler)(
 
 /*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
-laszip_get_version
-(
+laszip_get_version(
     laszip_U8*                         version_major
     , laszip_U8*                       version_minor
     , laszip_U16*                      version_revision
@@ -289,48 +276,42 @@ laszip_create(
 
 /*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
-laszip_set_las_message_handler
-(
-    laszip_POINTER*                    pointer
+laszip_set_las_message_handler(
+    laszip_POINTER                     pointer
     , laszip_message_handler           callback
     , void*                            user_data
 );
 
 /*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
-laszip_unset_las_message_handler
-(
-    laszip_POINTER*                    pointer
-);
-
-/*---------------------------------------------------------------------------*/
-LASZIP_API laszip_I32
-laszip_set_las_message_log_level
-(
+laszip_unset_las_message_handler(
     laszip_POINTER                     pointer
-    , enum laszip_message_type         log_level
 );
 
 /*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
-laszip_get_las_message_log_level
-(
+laszip_set_las_message_log_level(
     laszip_POINTER                     pointer
-    , enum laszip_message_type*        log_level
+    , enum LAS_MESSAGE_TYPE            type
 );
 
 /*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
-laszip_get_error
-(
+laszip_get_las_message_log_level(
+    laszip_POINTER                     pointer
+    , enum LAS_MESSAGE_TYPE*           type
+);
+
+/*---------------------------------------------------------------------------*/
+LASZIP_API laszip_I32
+laszip_get_error(
     laszip_POINTER                     pointer
     , laszip_CHAR**                    error
 );
 
 /*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
-laszip_get_warning
-(
+laszip_get_warning(
     laszip_POINTER                     pointer
     , laszip_CHAR**                    warning
 );
@@ -615,14 +596,12 @@ laszip_close_reader(
 
 /*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
-laszip_load_dll
-(
+laszip_load_dll(
 );
 
 /*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
-laszip_unload_dll
-(
+laszip_unload_dll(
 );
 
 #ifdef __cplusplus
