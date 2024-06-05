@@ -70,7 +70,7 @@
 #   define LASZIP_API
 #endif
 
-#include <laszip/laszip_common.h>
+#include <laszip_common.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -261,7 +261,8 @@ typedef void(*laszip_message_handler)(
 
 /*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
-laszip_get_version(
+laszip_get_version
+(
     laszip_U8*                         version_major
     , laszip_U8*                       version_minor
     , laszip_U16*                      version_revision
@@ -311,7 +312,8 @@ laszip_get_error(
 
 /*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
-laszip_get_warning(
+laszip_get_warning
+(
     laszip_POINTER                     pointer
     , laszip_CHAR**                    warning
 );
@@ -596,12 +598,14 @@ laszip_close_reader(
 
 /*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
-laszip_load_dll(
+laszip_load_dll
+(
 );
 
 /*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
-laszip_unload_dll(
+laszip_unload_dll
+(
 );
 
 #ifdef __cplusplus
