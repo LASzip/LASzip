@@ -4765,6 +4765,60 @@ laszip_open_reader_stream(
 }
 
 /*---------------------------------------------------------------------------*/
+LASZIP_API laszip_I32
+laszip_open_reader_array(
+    laszip_POINTER                     pointer
+    , laszip_U8*                       bytes
+    , laszip_U32                       size
+    , laszip_BOOL*                     is_compressed
+)
+{
+  if (pointer == 0) return 1;
+  laszip_dll_struct* laszip_dll = (laszip_dll_struct*)pointer;
+
+  try
+  {
+    if (is_compressed == 0)
+    {
+      sprintf(laszip_dll->error, "laszip_BOOL pointer 'is_compressed' is zero");
+      return 1;
+    }
+
+    if (laszip_dll->writer)
+    {
+      sprintf(laszip_dll->error, "writer is already open");
+      return 1;
+    }
+
+    if (laszip_dll->reader)
+    {
+      sprintf(laszip_dll->error, "reader is already open");
+      return 1;
+    }
+
+    // open the file
+
+    if (IS_LITTLE_ENDIAN())
+      laszip_dll->streamin = new ByteStreamInArrayLE(bytes, size);
+    else
+      laszip_dll->streamin = new ByteStreamInArrayBE(bytes, size);
+
+    if (laszip_dll->streamin == 0)
+    {
+      sprintf(laszip_dll->error, "could not alloc ByteStreamInIstream");
+      return 1;
+    }
+
+    return laszip_read_header(laszip_dll, is_compressed);
+  }
+  catch (...)
+  {
+    sprintf(laszip_dll->error, "internal error in laszip_open_reader");
+    return 1;
+  }
+}
+
+/*---------------------------------------------------------------------------*/
 // The stream writer also supports software that writes the LAS header on its
 // own simply by setting the BOOL 'do_not_write_header' to TRUE. This function
 // should then be called just prior to writing points as data is then written

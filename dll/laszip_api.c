@@ -800,6 +800,32 @@ laszip_open_reader
 };
 
 /*---------------------------------------------------------------------------*/
+typedef laszip_I32 (*laszip_open_reader_array_def)
+(
+    laszip_POINTER                     pointer
+    , laszip_CHAR*                     bytes
+    , laszip_U32                       size
+    , laszip_BOOL*                     is_compressed
+);
+laszip_open_reader_array_def laszip_open_reader_array_ptr = 0;
+LASZIP_API laszip_I32
+laszip_open_reader_array
+(
+    laszip_POINTER                     pointer
+    , laszip_U8*                       bytes
+    , laszip_U32                       size
+    , laszip_BOOL*                     is_compressed
+)
+{
+  if (laszip_open_reader_array_ptr)
+  {
+    return (*laszip_open_reader_array_ptr)(pointer, bytes, size, is_compressed);
+  }
+  return 1;
+};
+
+
+/*---------------------------------------------------------------------------*/
 typedef laszip_I32 (*laszip_has_spatial_index_def)
 (
     laszip_POINTER                     pointer
