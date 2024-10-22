@@ -10,3 +10,4 @@ CPackSourceConfig.cmake
 _CPack_Packages/
 install_mainifest.txt
 
+docs/build
