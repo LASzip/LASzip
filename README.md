@@ -9,6 +9,9 @@ This is the repository of the open source LAZ compressor under the terms of the 
 
 For the full LASlib and LAStools repository include the popular open source tools las2las, las2txt, txt2las please see https://github.com/LAStools/LAStools  
 
+# Specification
+
+LAZ Specification 1.4 - Revision R1 available at https://rapidlasso.de/laszip/
 
 # Installation
 
