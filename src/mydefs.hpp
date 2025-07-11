@@ -212,12 +212,6 @@ typedef union I64U32I32F32 {
 #define NULL 0
 #endif
 
-//#ifdef _MSC_VER -> has been replaced by the wrapper of the same name
-//#define strncpy_las(dest, destsz, src, count) strncpy_s((dest), (destsz), (src), (count)); 
-//#else
-//#define strncpy_las(dest, destsz, src, count) strncpy((dest), (src), (count)); 
-//#endif
-
 #ifdef _MSC_VER
 #define strcpy_las(dest, destsz, src) strcpy_s((dest), (destsz), (src))
 #else
@@ -407,6 +401,12 @@ void ReplaceStringInPlace(std::string& subject, const std::string& search, const
 
 bool StringEndsWith(const std::string& fullString, const std::string& ending);
 
+bool HasFileExt(std::string fn, std::string ext);
+
+std::string FileExtSet(std::string fn_in, std::string ext_new);
+
+bool IsLasLazFile(std::string fn);
+
 /// returns TRUE if 'val' is found in 'vec'
 bool StringInVector(const std::string& value, const std::vector<std::string>& array, bool casesense);
 
@@ -415,7 +415,7 @@ void* realloc_las(void* ptr, size_t size);
 /// Wrapper for `sscanf` on other platforms than _MSC_VER and `sscanf_s` on Windows and ensures that the size is passed correctly for strings.
 int sscanf_las(const char* buffer, const char* format, ...);
 /// Wrapper for `strncpy` on other platforms than _MSC_VER and `strncpy_s` on Windows.
-int strncpy_las(char *dest, size_t destsz, const char *src, size_t count);
+void strncpy_las(char* dest, size_t destsz, const char* src, size_t count = 0);
 
 #ifdef BOOST_USE
 #define BOOST_PRE boost::algorithm::
@@ -446,11 +446,8 @@ double stoddefault(const std::string& val, double def = 0);
 /// Function for rounding to a specific number of decimal places
 double DoubleRound(double value, int decimals);
 
-/// return double as string with a maximum number of decimal places
-std::string DoubleToString(double dd, short decimals);
-
-/// return double as string with a fix number of decimal places
-std::string DoubleToFixLenString(double dd, short decimals);
+/// return double as string rounded to a maximum number of decimal places. optional trim trailing 0s
+std::string DoubleToString(double dd, short decimals, bool trim_right_zeros = false);
 
 /// CamelCase to non_camel_case converter
 std::string CcToUnderline(const std::string& in);

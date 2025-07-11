@@ -36,6 +36,7 @@
 #ifndef LAS_POINT_HPP
 #define LAS_POINT_HPP
 
+#include <cmath>
 #include "lasattributer.hpp"
 #include "lasmessage.hpp"
 #include "lasquantizer.hpp"
@@ -104,7 +105,6 @@ class LASLIB_DLL LASwavepacket {
 class LASLIB_DLL LASpoint {
  public:
   // these fields contain the data that describe each point
-
   I32 X;
   I32 Y;
   I32 Z;
@@ -149,7 +149,7 @@ class LASLIB_DLL LASpoint {
 
   const LASquantizer* quantizer = nullptr;
   F64 coordinates[3];
-
+  
   // for attributed access to the extra bytes
 
   const LASattributer* attributer;
@@ -484,7 +484,7 @@ class LASLIB_DLL LASpoint {
   void clean() {
     zero();
 
-    if (extra_bytes) {
+    if (extra_bytes && extra_bytes[0]!=0) {
       delete[] extra_bytes;
       extra_bytes = 0;
     };
@@ -568,9 +568,6 @@ class LASLIB_DLL LASpoint {
   inline U8 get_edge_of_flight_line() const {
     return edge_of_flight_line;
   };
-  inline U8 get_classification() const {
-    return classification;
-  };
   inline U8 get_synthetic_flag() const {
     return synthetic_flag;
   };
@@ -580,7 +577,9 @@ class LASLIB_DLL LASpoint {
   inline U8 get_withheld_flag() const {
     return withheld_flag;
   };
-  inline I8 get_scan_angle_rank() const {
+  [[deprecated("use get_scan_angle() for LAS 1.4 compatibility")]]
+  inline I8 get_scan_angle_rank() const
+  {
     return scan_angle_rank;
   };
   inline U8 get_user_data() const {
@@ -644,10 +643,32 @@ class LASLIB_DLL LASpoint {
   inline void set_edge_of_flight_line(const U8 edge_of_flight_line) {
     this->edge_of_flight_line = edge_of_flight_line;
   };
-  inline void set_classification(U8 classification) {
-    if (classification < 32) {
-      this->classification = classification;
+  inline void set_classification_uni(U8 classification) {
+    if (extended_point_type) {
       this->extended_classification = classification;
+      if (extended_classification > 31)
+        this->classification = 0;
+      else
+        this->classification = classification;
+    } else {
+      if (classification < 32) {
+        this->classification = classification;
+        this->extended_classification = classification;
+      }
+    }
+  };
+  U8 classification_max() {
+    return (extended_point_type ? 255 : 31);
+  };
+  inline void set_classification_int(I32 temp_i) {
+    if (temp_i < 0) {
+      LASMessage(LAS_WARNING, "classification %d is negative. zeroing ...", temp_i);
+      set_classification_uni(0);
+    } else if (temp_i > classification_max()) {
+      LASMessage(LAS_WARNING, "classification %d is larger than %d. clamping ...", temp_i, classification_max());
+      set_classification_uni(classification_max());
+    } else {
+      set_classification_uni((U8)temp_i);
     }
   };
   inline void set_synthetic_flag(U8 synthetic_flag) {
@@ -677,6 +698,7 @@ class LASLIB_DLL LASpoint {
       this->extended_classification_flags &= 0x0B;
     }
   };
+  [[deprecated("use set_scan_angle() for LAS 1.4 compatibility")]]
   inline void set_scan_angle_rank(I8 scan_angle_rank) {
     this->scan_angle_rank = scan_angle_rank;
   };
@@ -748,13 +770,12 @@ class LASLIB_DLL LASpoint {
       return TRUE;
     }
   };
-
-  inline BOOL is_extended_point_type() const {
-    return extended_point_type;
-  };
-
-  inline U8 get_extended_classification() const {
-    return extended_classification;
+  U8 get_classification_uni() const {
+    if (extended_point_type) {
+      return extended_classification;
+    } else {
+      return classification;
+    }
   };
   inline U8 get_extended_return_number() const {
     return extended_return_number;
@@ -771,14 +792,6 @@ class LASLIB_DLL LASpoint {
   inline U8 get_extended_scanner_channel() const {
     return extended_scanner_channel;
   };
-
-  U8 get_classification_uni() const {
-    if (extended_point_type) {
-      return get_extended_classification();
-    } else {
-      return get_classification();
-    }
-  };
   U8 get_return_number_uni() const {
     if (extended_point_type) {
       return get_extended_return_number();
@@ -794,13 +807,6 @@ class LASLIB_DLL LASpoint {
     }
   };
 
-  inline void set_extended_classification(U8 extended_classification) {
-    this->extended_classification = extended_classification;
-    if (extended_classification > 31)
-      this->classification = 0;
-    else
-      this->classification = extended_classification;
-  };
   inline void set_extended_return_number(U8 extended_return_number) {
     this->extended_return_number = extended_return_number;
   };
@@ -816,14 +822,6 @@ class LASLIB_DLL LASpoint {
   inline void set_extended_scanner_channel(U8 extended_scanner_channel) {
     this->extended_scanner_channel = extended_scanner_channel;
   };
-
-  inline void set_classification_uni(U8 classification) {
-    if (extended_point_type) {
-      set_extended_classification(classification);
-    } else {
-      set_classification(classification);
-    }
-  };
   inline void set_return_number_uni(U8 return_number) {
     if (extended_point_type) {
       set_extended_return_number(return_number);
@@ -838,25 +836,50 @@ class LASLIB_DLL LASpoint {
       set_number_of_returns(number_of_returns);
     }
   };
-
+  // get raw scan angle (I8/I16) without conversion to degree e.g. for comparison or assignment
+  inline I16 get_scan_angle_raw() const {
+    if (extended_point_type)
+      return extended_scan_angle;
+    else
+      return scan_angle_rank;
+  };
+  // get scan angle without decimals for unified raster ops
+  inline I16 get_scan_angle_rounded() const {
+    if (extended_point_type)
+      return (I16)std::round(extended_scan_angle * 0.006f);
+    else
+      return (I16)scan_angle_rank;
+  };
+  // get scan angle in degree
   inline F32 get_scan_angle() const {
     if (extended_point_type)
       return 0.006f * extended_scan_angle;
     else
       return (F32)scan_angle_rank;
   };
+  // get scan angle with common decimals
+  inline F32 get_scan_angle_disp() const {
+      return static_cast<F32>(DoubleRound(get_scan_angle(), extended_point_type?3:0));
+  };
+  // get scan angle as string
+  inline std::string get_scan_angle_string() const {
+    if (extended_point_type)
+      return DoubleToString(0.006f * extended_scan_angle, 3);
+    else
+      return std::to_string(scan_angle_rank);
+  };
+  // get absolute scan angle
   inline F32 get_abs_scan_angle() const {
     if (extended_point_type)
       return (extended_scan_angle < 0 ? -0.006f * extended_scan_angle : 0.006f * extended_scan_angle);
     else
       return (scan_angle_rank < 0 ? (F32)-scan_angle_rank : (F32)scan_angle_rank);
   };
-
   inline void set_scan_angle(F32 scan_angle) {
     if (extended_point_type)
-      set_extended_scan_angle(I16_QUANTIZE(scan_angle / 0.006f));
+      extended_scan_angle = I16_QUANTIZE(scan_angle / 0.006f);
     else
-      set_scan_angle_rank(I8_QUANTIZE(scan_angle));
+      scan_angle_rank = I8_QUANTIZE(scan_angle);
   };
 
   // Adapted from https://axonflux.com/handy-rgb-to-hsl-and-rgb-to-hsv-color-model-c

@@ -325,6 +325,41 @@ bool StringEndsWith(const std::string& fullString, const std::string& ending) {
   return fullString.compare(fullString.size() - ending.size(), ending.size(), ending) == 0;
 }
 
+/// <summary>
+/// Check if file has a certain file extension (case insensitive)
+/// </summary>
+/// <param name="fn">filename</param>
+/// <param name="ext">extension, like ".laz" or "laz"</param>
+/// <returns>TRUE if filename has the given extension</returns>
+bool HasFileExt(std::string fn, std::string ext) {
+  if (fn.empty()) return false;
+  if (ext.empty()) return false;
+  // if fn does not have a ext: it is maybe just an ext - compare those
+  if ((fn.length() == ext.length()) || (fn.find_last_of(".") == std::string::npos)) {
+    return fn.compare(ext) == 0;
+  }
+  if (ext[0] != '.') ext = '.' + ext;
+  to_lower(ext);
+  to_lower(fn);
+  return (fn.substr(fn.find_last_of(".")) == ext);
+}
+
+// replace file extension of input_file with new extension (with or without leading '.')
+std::string FileExtSet(std::string fn_in, std::string ext_new) {
+  if (!ext_new.empty() && (ext_new[0] != '.')) ext_new = '.' + ext_new;
+  size_t pos = fn_in.find_last_of('.');
+  if (pos == std::string::npos) {
+    return fn_in  + ext_new;
+  } else {
+    return fn_in.substr(0, pos) + ext_new;
+  }
+}
+
+// checks if given file is a las/laz file
+bool IsLasLazFile(std::string fn) {
+  return HasFileExt(fn, "las") || HasFileExt(fn, "laz");
+}
+
 /// returns TRUE if 'val' is found in 'vec'
 bool StringInVector(const std::string& val, const std::vector<std::string>& vec, bool casesense) {
   if (casesense) {
@@ -346,84 +381,82 @@ void* realloc_las(void* ptr, size_t size) {
   }
 }
 
-/// Wrapper for `sscanf` on other platforms than _MSC_VER and `sscanf_s` on Windows and ensures that the size is passed correctly for strings.
+/// Wrapper for `vsscanf`
 int sscanf_las(const char* buffer, const char* format, ...) {
   va_list args;
   va_start(args, format);
 
-#ifdef _MSC_VER
-  // On Windows we use sscanf_s and may need `sizeof` for strings
-  int result = 0;
-  const char* cursor = format;
-
-  // Temporary argument stack for handling `sizeof` strings
-  va_list args_copy;
-  va_copy(args_copy, args);
-
-  // Count the arguments in the format string and insert `sizeof` where necessary
-  char adjusted_format[512] = {0};
-  char* adjusted_cursor = adjusted_format;
-
-  while (*cursor) {
-    if (*cursor == '%' && (*(cursor + 1) != '%')) {
-      *adjusted_cursor++ = *cursor++;
-      if (*cursor == 's') {
-        // Copy argument and add size
-        void* str_arg = va_arg(args_copy, void*);
-#pragma warning(push)
-#pragma warning(disable : 6269)
-        va_arg(args_copy, unsigned int);  // sizeof argument
-#pragma warning(pop)
-        adjusted_cursor += sprintf(adjusted_cursor, "%%s");
-      }
-    }
-    *adjusted_cursor++ = *cursor++;
-  }
-
-  *adjusted_cursor = '\0';
-  result = vsscanf_s(buffer, adjusted_format, args_copy);
-
-  va_end(args_copy);
-#else
-  // On other platforms we use sscanf without size specifications
   int result = vsscanf(buffer, format, args);
-#endif
 
   va_end(args);
   return result;
 }
 
-/// Wrapper for `strncpy` on other platforms than _MSC_VER and `strncpy_s` on Windows
-int strncpy_las(char* dest, size_t destsz, const char* src, size_t count) {
-  if (dest == nullptr || src == nullptr) {
-    return -1;
+/// <summary>
+/// secure wrapper for `strncpy`
+/// target size defined, source size detected or defined.
+/// target size needs to be 1 larger than bytes to copy to ensure trailing 0.
+/// WARNING if target size is smaller than source data or requested size to copy.
+/// ERROR (and halt by default) if strncopy failed.
+/// </summary>
+/// <param name="dest">target buffer</param>
+/// <param name="destsz">size of target buffer include trailing 0</param>
+/// <param name="src">source buffer</param>
+/// <param name="count">number of bytes to copy without trailing 0; 0=detect number of bytes by src length</param>
+void strncpy_las(char* dest, size_t destsz, const char* src, size_t count /*=0*/) {
+  // source is empty -> set target empty and return
+  if (src == nullptr) {
+    if (destsz > 0 && dest != nullptr) {
+      dest[0] = '\0';
+    } 
+    return;
+  }
+  // target NULL -> nothing to do
+  if (dest == nullptr) {
+    return;
+  }
+  // calculate src len if not given; crop len if src is shorter than defined len
+  if (count == 0) {
+    count = strlen(src);
+  }
+  // if target is smaller than source: copy as much as possible
+  bool free = false;
+  char* source;
+  if (destsz <= count) {
+    source = new char[destsz];
+    memcpy(source, src, destsz - 1);
+    source[destsz-1] = '\0';
+    free = true;
+    LASMessage(LAS_WARNING, "target buffer too small [%llu < %llu] for \"%s\"", destsz-1, count, src);
+    count = destsz-1;
+  } else {
+    source = const_cast<char*>(src);
   }
 #ifdef _MSC_VER
-  if (strncpy_s(dest, destsz, src, count) != 0) {
-    return -1;
+  errno_t err = strncpy_s(dest, destsz, source, count);
+  if (err != 0) {
+    laserror("strncpy_s failed: %d", err);
   }
 #else
-  strncpy(dest, src, count);
+  strncpy(dest, source, count);
 #endif
-  // Nulltermination
-  if (count < destsz) {
-    dest[count] = '\0';
-  } else {
-    dest[destsz - 1] = '\0';
+  if (free) {
+    delete[] source;
   }
-  return 0;
+  // ensure string termination
+  dest[count] = '\0';
 }
 
 #ifdef BOOST_USE
 #else
 // simple NON BOOST implementations
 void to_lower(std::string& in) {
-  for (int i = 0; i < in.size(); i++) in[i] = std::tolower(in[i]);
+  for (size_t i = 0; i < in.size(); i++) in[i] = std::tolower(in[i]);
   return;
 }
 
 void to_upper(std::string& in) {
-  for (int i = 0; i < in.size(); i++) in[i] = std::toupper(in[i]);
+  for (size_t i = 0; i < in.size(); i++) in[i] = std::toupper(in[i]);
   return;
 }
 
@@ -512,19 +545,19 @@ double stoddefault(const std::string& val, double def) {
 
 double DoubleRound(double value, int decimals) {
   double scale = pow(10.0, decimals);  // e.g. 10^10 for 10 decimal places
-  return round(value * scale) / scale;
+  return std::round(value * scale) / scale;
 }
 
-std::string DoubleToString(double dd, short decimals) {
-  std::stringstream ss;
-  ss << std::setprecision(decimals) << dd;
-  return ss.str();
-}
-
-std::string DoubleToFixLenString(double dd, short decimals) {
-  std::stringstream ss;
-  ss << std::fixed << std::setprecision(decimals) << dd;
-  return ss.str();
+std::string DoubleToString(double dd, short decimals, bool trim_right_zeros) {
+  char xx[44];
+  int cnt = snprintf(xx, 44, "%.*f", decimals, dd);
+  if (trim_right_zeros) {
+    while ((cnt > 0) && ((xx[cnt - 1] == '0') || (xx[cnt - 1] == '.'))) {
+      xx[cnt - 1] = '\0';
+      cnt--;
+    }
+  }
+  return xx;
 }
 
 std::string CcToUnderline(const std::string& in) {
@@ -545,7 +578,7 @@ std::string CcToUnderline(const std::string& in) {
 /// returns the occurency count of 'toCount' in 'in'
 size_t StringCountChar(const std::string& in, const char toCount) {
   int count = 0;
-  for (int i = 0; i < in.size(); i++)
+  for (size_t i = 0; i < in.size(); i++)
     if (in[i] == toCount) count++;
   return count;
 }
