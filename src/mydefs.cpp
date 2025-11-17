@@ -38,20 +38,15 @@
 #include <cstdarg>
 #include <cstring>
 #include <filesystem>
-#include <stdarg.h>
-#include <stdio.h>
 #include <string>
-#ifdef _MSC_VER
+#include <stdio.h>
+#ifdef _WIN32
 #include <windows.h>
 #else
-#include <math.h>
-#include <algorithm>
-#include <iomanip>
 #include <unistd.h>
 #endif
 
-#if defined(_MSC_VER)
-#include <windows.h>
+#if defined(_WIN32)
 /// Converting UTF-8 to UTF-16
 wchar_t* UTF8toUTF16(const char* utf8) {
   if (utf8 == nullptr) return nullptr;
@@ -123,23 +118,104 @@ extern void LASLIB_DLL byebye() {
 }
 
 /// Validates whether a given string is UTF-8 encoded.
-bool validate_utf8(const char* utf8) noexcept {
-  if (utf8 == nullptr) return false;
-
-  while (*utf8) {
-    if ((*utf8 & 0b10000000) != 0) {
-      if ((*utf8 & 0b01000000) == 0) return false;
-      if ((*utf8 & 0b00100000) != 0) {
-        if ((*utf8 & 0b00010000) != 0) {
-          if ((*utf8 & 0b00001000) != 0) return false;
-          if ((*++utf8 & 0b11000000) != 0b10000000) return false;
-        }
-        if ((*++utf8 & 0b11000000) != 0b10000000) return false;
-      }
-      if ((*++utf8 & 0b11000000) != 0b10000000) return false;
-    }
-    ++utf8;
+bool validate_utf8(const char* str, bool restrict_to_two_bytes) noexcept {
+  if (!str) {
+    return false;
   }
+
+  constexpr uint8_t UTF8_2BYTE_MASK = 0xE0;
+  constexpr uint8_t UTF8_2BYTE_PREFIX = 0xC0;
+  constexpr uint8_t UTF8_3BYTE_MASK = 0xF0;
+  constexpr uint8_t UTF8_3BYTE_PREFIX = 0xE0;
+  constexpr uint8_t UTF8_4BYTE_MASK = 0xF8;
+  constexpr uint8_t UTF8_4BYTE_PREFIX = 0xF0;
+  constexpr uint8_t UTF8_CONTINUATION_MASK = 0xC0;
+  constexpr uint8_t UTF8_CONTINUATION_PREFIX = 0x80;
+
+  // bool has_two_byte = false;
+  const auto* p = reinterpret_cast<const unsigned char*>(str);
+
+  while (*p) {
+    uint8_t c = *p;
+
+    // Single-byte ASCII (U+0000 - U+007F)
+    if (c <= 0x7F) {
+      ++p;
+      continue;
+    }
+
+    // Detect standalone high bytes (0x80-0xFF), common in Windows-1252
+    if (c >= 0x80 && (c < 0xC2 || (c & UTF8_2BYTE_MASK) != UTF8_2BYTE_PREFIX) && (c & UTF8_3BYTE_MASK) != UTF8_3BYTE_PREFIX &&
+        (c & UTF8_4BYTE_MASK) != UTF8_4BYTE_PREFIX) {
+      return false;  // Invalid UTF-8 start byte, likely ANSI
+    }
+
+    // 2-byte sequence (U+0080 - U+07FF)
+    if ((c & UTF8_2BYTE_MASK) == UTF8_2BYTE_PREFIX) {
+      if (c < 0xC2 || !p[1]) {
+        return false;  // Overlong encoding or missing continuation byte
+      }
+      uint8_t c1 = p[1];
+      if ((c1 & UTF8_CONTINUATION_MASK) != UTF8_CONTINUATION_PREFIX) {
+        // Check for ANSI-like second byte (0x40-0x7F), common in GBK/Shift-JIS
+        if (c1 >= 0x40 && c1 <= 0x7F) {
+          return false;  // Likely GBK or Shift-JIS, not UTF-8
+        }
+        return false;  // Invalid continuation byte
+      }
+      // Decode and check code point to exclude rare ranges
+      uint32_t code_point = ((c & 0x1F) << 6) | (c1 & 0x3F);
+      if (code_point < 0x80 || code_point > 0x7FF || (code_point >= 0x0080 && code_point <= 0x05FF)) {
+        return false;  // Invalid or rare code point, likely ANSI
+      }
+      // has_two_byte = true;
+      p += 2;
+      continue;
+    }
+
+    // Restrict to 2-byte sequences if specified
+    if (restrict_to_two_bytes) {
+      return false;
+    }
+
+    // 3-byte sequence (U+0800 - U+FFFF)
+    if ((c & UTF8_3BYTE_MASK) == UTF8_3BYTE_PREFIX) {
+      if (!p[1] || !p[2]) {
+        return false;  // Missing continuation bytes
+      }
+      uint8_t c1 = p[1], c2 = p[2];
+      if ((c1 & UTF8_CONTINUATION_MASK) != UTF8_CONTINUATION_PREFIX || (c2 & UTF8_CONTINUATION_MASK) != UTF8_CONTINUATION_PREFIX) {
+        return false;  // Invalid continuation bytes
+      }
+      // Check for overlong encoding or surrogate pairs (U+D800-U+DFFF)
+      if ((c == 0xE0 && c1 < 0xA0) || (c == 0xED && c1 >= 0xA0)) {
+        return false;
+      }
+      p += 3;
+      continue;
+    }
+
+    // 4-byte sequence (U+10000 - U+10FFFF)
+    if ((c & UTF8_4BYTE_MASK) == UTF8_4BYTE_PREFIX) {
+      if (!p[1] || !p[2] || !p[3]) {
+        return false;  // Missing continuation bytes
+      }
+      uint8_t c1 = p[1], c2 = p[2], c3 = p[3];
+      if ((c1 & UTF8_CONTINUATION_MASK) != UTF8_CONTINUATION_PREFIX || (c2 & UTF8_CONTINUATION_MASK) != UTF8_CONTINUATION_PREFIX ||
+          (c3 & UTF8_CONTINUATION_MASK) != UTF8_CONTINUATION_PREFIX) {
+        return false;  // Invalid continuation bytes
+      }
+      // Check valid code point range
+      if ((c == 0xF0 && c1 < 0x90) || (c == 0xF4 && c1 > 0x8F) || (c > 0xF4)) {
+        return false;
+      }
+      p += 4;
+      continue;
+    }
+
+    return false;  // Invalid start byte
+  }
+
   return true;
 }
 
@@ -169,10 +245,13 @@ FILE* LASfopen(const char* const filename, const char* const mode) {
   }
   FILE* file = nullptr;
 
-#ifdef _MSC_VER
+#ifdef _WIN32
   wchar_t* utf16_file_name = nullptr;
   wchar_t* utf16_mode = nullptr;
 
+#ifdef FORCE_UTF8_PATH
+  utf16_file_name = UTF8toUTF16(filename);
+#else
   if (validate_utf8(filename)) {
     utf16_file_name = UTF8toUTF16(filename);
   } else {
@@ -186,6 +265,7 @@ FILE* LASfopen(const char* const filename, const char* const mode) {
   }
   delete[] utf16_file_name;
   delete[] utf16_mode;
+#endif
 #else
 // The following block of code is deactivated as it is very unlikely to be needed under non-Windows systems.
 // To re-enable, change #if 0 to #if 1.
@@ -205,6 +285,27 @@ FILE* LASfopen(const char* const filename, const char* const mode) {
 #endif
 
   return file;
+}
+
+/// <summary>
+/// delete a file on common OS and report failure
+/// </summary>
+/// <param name="filename">absolute filename to delete</param>
+/// <param name="onFailMsg">message type on failure</param>
+void FileDelete(std::string filename, LAS_MESSAGE_TYPE onFailMsg) {
+  if (filename.empty()) return;
+  std::string cmd;
+#ifdef _WIN32
+  cmd = "del ";
+#else
+  cmd = "rm ";
+#endif
+  cmd += filename;
+  LASMessage(LAS_VERY_VERBOSE, "deleting '%s'", filename.c_str());
+  int res = system(cmd.c_str());
+  if (res != 0) {
+    LASMessage(onFailMsg, "delete of file '%s' failed [%d]", filename.c_str(), res);
+  }
 }
 
 /// !!The caller is responsible for managing the memory of the returned const char*
@@ -259,16 +360,16 @@ void ExeNameToPathWithoutTrailingDelimiter(int& path_len, char* path) {
 std::string exe_path() {
   size_t len = 0;
 #ifdef _WIN32
-  TCHAR path[MAX_PATH];
-  GetModuleFileName(NULL, path, MAX_PATH);
+  TCHAR path[MAX_PATH_LAS];
+  GetModuleFileName(NULL, path, MAX_PATH_LAS);
 #ifdef UNICODE
   len = wcslen(path);
 #else
   len = strlen(path);
 #endif
 #else
-  char path[MAX_PATH];
-  len = readlink("/proc/self/exe", path, MAX_PATH);
+  char path[MAX_PATH_LAS];
+  len = readlink("/proc/self/exe", path, MAX_PATH_LAS);
 #endif
   while (len && (path[len] != '\\') && (path[len] != '/')) len--;
   path[len] = '\0';
@@ -284,13 +385,35 @@ std::string exe_path() {
 /// get the current directory (exclude trailing delimiter)
 /// </summary>
 std::string dir_current() {
-  char curr_directory[MAX_PATH];
-#ifdef _MSC_VER
-  GetCurrentDirectory(MAX_PATH, curr_directory);
+  char curr_directory[MAX_PATH_LAS];
+#ifdef _WIN32
+  GetCurrentDirectory(MAX_PATH_LAS, curr_directory);
 #else
-  getcwd(curr_directory, MAX_PATH);
+  getcwd(curr_directory, MAX_PATH_LAS);
 #endif
   return std::string(curr_directory);
+}
+
+/// <summary>
+/// get the temp path include trailing delimiter. system default or temp_user.
+/// responsitility of the user if temp_user is a valid and terminated path.
+/// </summary>
+/// <param name="temp_user">optional user defined temp path</param>
+/// <returns>temp path to use</returns>
+std::string temp_path(std::string temp_user) {
+  std::string td;
+  if (temp_user.empty()) {
+    td = std::filesystem::temp_directory_path().string();
+    if (td.empty()) {
+      td = ".";
+    }
+  } else {
+    td = temp_user;
+  }
+  if (td.back() != DIRECTORY_SLASH) {
+    td += DIRECTORY_SLASH;
+  }
+  return td;
 }
 
 /// replace all occurrences of search in subject with replace and return new string
@@ -355,6 +478,19 @@ std::string FileExtSet(std::string fn_in, std::string ext_new) {
   }
 }
 
+/// Returns the extension of the file
+std::string getFileExtension(const char* filepath) {
+  if (!filepath) return "";
+
+  const char* dot = strrchr(filepath, '.');
+  if (!dot || *(dot + 1) == '\0') return "";  // No point or nothing after that
+
+  std::string ext(dot + 1);
+  // Optional: in lowercase letters
+  for (char& c : ext) c = std::tolower(static_cast<unsigned char>(c));
+  return ext;
+}
+
 // checks if given file is a las/laz file
 bool IsLasLazFile(std::string fn) {
   return HasFileExt(fn, "las") || HasFileExt(fn, "laz");
@@ -370,15 +506,97 @@ bool StringInVector(const std::string& val, const std::vector<std::string>& vec,
   }
 }
 
+/// Converts a byte count into a human-readable value and unit
+void bytes_to_readable(size_t bytes, double* value_out, const char** unit_out) {
+  double value = (double)bytes;
+  const char* unit = "Bytes";
+
+  if (bytes >= (1ULL << 30)) {  // 1 GB
+    value = value / (1ULL << 30);
+    unit = "GB";
+  } else if (bytes >= (1ULL << 20)) {  // 1 MB
+    value = value / (1ULL << 20);
+    unit = "MB";
+  } else if (bytes >= (1ULL << 10)) {  // 1 KB
+    value = value / (1ULL << 10);
+    unit = "KB";
+  }
+
+  if (value_out) *value_out = value;
+  if (unit_out) *unit_out = unit;
+}
+
+/// Returns the amount of currently available physical RAM in bytes
+/// Note that this value is only a snapshot.
+#ifdef _WIN32
+size_t get_available_RAM() {
+  MEMORYSTATUSEX statex;
+  statex.dwLength = sizeof(statex);
+  if (GlobalMemoryStatusEx(&statex)) {
+    return statex.ullAvailPhys;
+  }
+  return 0;
+}
+#else
+size_t get_available_RAM() {
+  FILE* f = fopen("/proc/meminfo", "r");
+  if (!f) return 0;
+  size_t avail = 0;
+  char line[256];
+  while (fgets(line, sizeof(line), f)) {
+    if (sscanf(line, "MemAvailable: %zu kB", &avail) == 1) {
+      avail *= 1024;
+      break;
+    }
+  }
+  fclose(f);
+  return avail;
+}
+#endif
+
+/// Checks whether the available RAM is larger than the requested allocation. 
+/// The check is only performed for requests of at least 1 MB to avoid overhead for small allocations.
+bool check_available_RAM(size_t size) {
+  const size_t MIN_MB = 1024 * 1024;  // 1 MB in Bytes
+
+  if (size > MIN_MB) {
+    size_t ram_size = get_available_RAM();
+
+    if (size > ram_size) {
+      double value_1, value_2;
+      const char *unit_1, *unit_2;
+    
+      bytes_to_readable(size, &value_1, &unit_1);
+      bytes_to_readable(ram_size, &value_2, &unit_2);
+      LASMessage(LAS_WARNING, "failed to allocate %.0f%s memory as only approx. %.0f%s free reported. An error may occur", value_1, unit_1, value_2, unit_2);
+      return true;
+    }
+  }
+  return false;
+}
+
 /// extension of the realloc function to check memory allocation errors
 void* realloc_las(void* ptr, size_t size) {
+  bool warning = check_available_RAM(size);
+
   void* temp = realloc(ptr, size);
-  if (temp == NULL) {
-    LASMessage(LAS_WARNING, "realloc_las: memory allocation failed\n");
+  if (!temp && !warning) {
+    LASMessage(LAS_WARNING, "memory reallocation failed");
     return ptr;
   } else {
     return temp;
   }
+}
+
+/// extension of the malloc function to check memory allocation errors
+void* malloc_las(size_t size) {
+  bool warning = check_available_RAM(size);
+
+  void* ptr = malloc(size);
+  if (!ptr && !warning) {
+    LASMessage(LAS_WARNING, "memory allocation failed");
+  }
+  return ptr;
 }
 
 /// Wrapper for `vsscanf`
@@ -582,3 +800,140 @@ size_t StringCountChar(const std::string& in, const char toCount) {
     if (in[i] == toCount) count++;
   return count;
 }
+
+/// Function for determining the standard programme paths
+const char** getDefaultProgramPaths(size_t& numPaths) {
+#ifdef _WIN32
+  // Windows: Use environment variables or API for Program Files directories
+  static const char* defaultPaths[] = {getenv("ProgramFiles"), getenv("ProgramFiles(x86)"), "C:\\", nullptr};
+  // Count valid paths
+  numPaths = 0;
+  while (defaultPaths[numPaths] != nullptr) {
+    ++numPaths;
+  }
+  return defaultPaths;
+#elif __APPLE__
+  // macOS: Standard directories
+  static const char* defaultPaths[] = {"/Applications/", "/usr/local/", nullptr};
+  numPaths = sizeof(defaultPaths) / sizeof(defaultPaths[0]) - 1;
+  return defaultPaths;
+#else
+  // Linux/Unix: Standard directories
+  static const char* defaultPaths[] = {"/usr/local/", "/opt/", "/usr/share/", nullptr};
+  numPaths = sizeof(defaultPaths) / sizeof(defaultPaths[0]) - 1;
+  return defaultPaths;
+#endif
+}
+
+/// Function to get the home directory of the current user
+const char* getHomeDirectory() {
+#ifdef _WIN32
+  return getenv("USERPROFILE");
+#else
+  return getenv("HOME");
+#endif
+}
+
+/// Does the file exist
+BOOL file_exists(const std::string& path) {
+  FILE* file = std::fopen(path.c_str(), "r");
+  if (file) {
+    fclose(file);
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/// Get the digits
+I32 get_digits(F64 scale_factor) {
+  if (fp_equal(scale_factor, 0.01)) {
+    return 2;
+  } else if (fp_equal(scale_factor, 0.001)) {
+    return 3;
+  } else if (fp_equal(scale_factor, 0.0025) || fp_equal(scale_factor, 0.0001)) {
+    return 4;
+  } else if (fp_equal(scale_factor, 0.00025) || fp_equal(scale_factor, 0.00001)) {
+    return 5;
+  } else if (fp_equal(scale_factor, 0.000001)) {
+    return 6;
+  } else if (fp_equal(scale_factor, 0.0000001)) {
+    return 7;
+  } else if (fp_equal(scale_factor, 0.00000001)) {
+    return 8;
+  }
+  return -1;
+}
+
+/// endians 
+namespace Endian {
+/// Checks at runtime whether the system stores its multi-byte numbers in little-endian format in memory
+/// Initialisation when the programme starts, once only
+const bool IS_LITTLE_ENDIAN = []() {
+  uint16_t test = 1;
+  return *reinterpret_cast<uint8_t*>(&test) == 1;
+}();
+
+void to_big_endian(int* value) {
+  if (Endian::IS_LITTLE_ENDIAN) {
+    char help;
+    char* field = (char*)value;
+    help = field[0];
+    field[0] = field[3];
+    field[3] = help;
+    help = field[1];
+    field[1] = field[2];
+    field[2] = help;
+  }
+}
+
+void to_little_endian(int* value) {
+  if (!Endian::IS_LITTLE_ENDIAN) {
+    char help;
+    char* field = (char*)value;
+    help = field[0];
+    field[0] = field[3];
+    field[3] = help;
+    help = field[1];
+    field[1] = field[2];
+    field[2] = help;
+  }
+}
+
+void to_big_endian(double* value) {
+  if (Endian::IS_LITTLE_ENDIAN) {
+    char help;
+    char* field = (char*)value;
+    help = field[0];
+    field[0] = field[7];
+    field[7] = help;
+    help = field[1];
+    field[1] = field[6];
+    field[6] = help;
+    help = field[2];
+    field[2] = field[5];
+    field[5] = help;
+    help = field[3];
+    field[3] = field[4];
+    field[4] = help;
+  }
+}
+
+void to_little_endian(double* value) {
+  if (!Endian::IS_LITTLE_ENDIAN) {
+    char help;
+    char* field = (char*)value;
+    help = field[0];
+    field[0] = field[7];
+    field[7] = help;
+    help = field[1];
+    field[1] = field[6];
+    field[6] = help;
+    help = field[2];
+    field[2] = field[5];
+    field[5] = help;
+    help = field[3];
+    field[3] = field[4];
+    field[4] = help;
+  }
+}
+}  // namespace Endian

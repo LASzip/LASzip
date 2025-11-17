@@ -38,6 +38,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 LASzip::LASzip()
 {
@@ -618,6 +621,38 @@ bool LASzip::set_chunk_size(const U32 chunk_size)
   return false;
 }
 
+// returns the default value for "requested version" depending on point type and las version
+// makes version 4 the default version for las 1.5
+// shall be used to call LASzip::request_version()
+unsigned short LASzip::get_default_version(const unsigned char point_type, const unsigned char las_version_major, const unsigned char las_version_minor)
+{
+    if ((point_type & 63) <= 5) {
+        return 2;
+    }
+    else if (((point_type & 63) >= 6) && ((point_type & 63) <= 10)) {
+        if ((las_version_major >= 1) && (las_version_minor >= 5)) {
+            return 4;
+        }
+        else {
+            return 3;
+        }
+    }
+    else {
+        return 2;  // fall back
+    }
+}
+
+// 0: no compression, invalid value if compression is used
+// 1: legacy version for point types 0-5
+// 2: default version for point types 0-5
+// 3: default version for point types 6-10
+// 4: new, slightly fixed version for point types 6-10 (not default yet, until software versions are widely updated)
+// >=5: invalid
+
+// specifying value 3 or 4 for point types 0-5 will use version 2
+// specifying value 1 or 2 for point types 6-10 will use version 3
+// WAVEPACKET13 always uses version 1 
+
 bool LASzip::request_version(const U16 requested_version)
 {
   if (num_items == 0) return return_error("call setup() before requesting version");
@@ -628,7 +663,7 @@ bool LASzip::request_version(const U16 requested_version)
   else
   {
     if (requested_version < 1) return return_error("with compression version is at least 1");
-    if (requested_version > 2) return return_error("version larger than 2 not supported");
+    if (requested_version > 4) return return_error("version larger than 4 not supported");
   }
   U16 i;
   for (i = 0; i < num_items; i++)
@@ -639,17 +674,17 @@ bool LASzip::request_version(const U16 requested_version)
     case LASitem::GPSTIME11:
     case LASitem::RGB12:
     case LASitem::BYTE:
-      items[i].version = requested_version;
+      items[i].version = (std::min)((U16)2, requested_version);  // no version 3 or 4
       break;
     case LASitem::WAVEPACKET13:
-      items[i].version = 1; // no version 2
+      items[i].version = 1; // no version 2, 3 or 4
       break;
     case LASitem::POINT14:
     case LASitem::RGB14:
     case LASitem::RGBNIR14:
     case LASitem::WAVEPACKET14:
     case LASitem::BYTE14:
-      items[i].version = 3; // no version 1 or 2
+      items[i].version = (std::max)((U16)3, requested_version);  // no version 1 or 2
       break;
     default:
       return return_error("item type not supported");

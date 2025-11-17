@@ -55,6 +55,10 @@
 #include <stdlib.h>
 #include <cstdarg>
 #include <vector>
+#include <sys/stat.h>
+
+#include <cmath>
+#include <type_traits>
 
 extern void LASLIB_DLL LASMessage(LAS_MESSAGE_TYPE type, LAS_FORMAT_STRING(const char*), ...);
 
@@ -83,6 +87,12 @@ typedef double F64;
 typedef int BOOL;
 #else
 typedef bool BOOL;
+#endif
+
+#ifdef _WIN32
+typedef struct _stat64 las_stat_t;
+#else
+typedef struct stat las_stat_t;
 #endif
 
 typedef union U32I32F32 {
@@ -138,6 +148,15 @@ typedef union I64U32I32F32 {
 
 #define I64_MIN ((I64)0x8000000000000000)
 #define I64_MAX ((I64)0x7FFFFFFFFFFFFFFF)
+
+typedef union U32F32 {
+  U32 u32;
+  F32 f32;
+} U32F32;
+typedef union U64F64 {
+  U64 u64;
+  F64 f64;
+} U64F64;
 
 #define U8_FOLD(n) (((n) < U8_MIN) ? (n + U8_MAX_PLUS_ONE) : (((n) > U8_MAX) ? (n - U8_MAX_PLUS_ONE) : (n)))
 
@@ -236,11 +255,6 @@ typedef union I64U32I32F32 {
 #define strdup_las(string) strdup(string);
 #endif
 
-inline BOOL IS_LITTLE_ENDIAN() {
-  const U32 i = 1;
-  return (*((const U8*)&i) == 1);
-}
-
 #define ENDIANSWAP16(n) (((((U16)n) << 8) & 0xFF00) | ((((U16)n) >> 8) & 0x00FF))
 
 #define ENDIANSWAP32(n)                                                                                                                              \
@@ -301,8 +315,7 @@ inline void ENDIAN_SWAP_64(const U8* from, U8* to) {
   to[7] = from[0];
 }
 
-#if defined(_MSC_VER)
-#include <windows.h>
+#if defined(_WIN32)
 wchar_t* UTF8toUTF16(const char* utf8);
 wchar_t* ANSItoUTF16(const char* ansi);
 #endif
@@ -340,9 +353,10 @@ extern void LASLIB_DLL byebye();
   char* ANSItoUTF8(const char* ansi);
 #endif
 // Validates whether a given string is UTF-8 encoded.
-bool validate_utf8(const char* utf8) noexcept;
+bool validate_utf8(const char* utf8, bool restrict_to_two_bytes = false) noexcept;
 // Opens a file with the specified filename and mode, converting filename and mode to UTF-16 on Windows.
 FILE* LASfopen(const char* const filename, const char* const mode);
+void FileDelete(std::string filename, LAS_MESSAGE_TYPE onFailMsg = LAS_WARNING);
 const char* indent_text(const char* text, const char* indent);
 
 // las error message function which leads to an immediate program stop by default
@@ -366,6 +380,48 @@ void laserrorm(LAS_FORMAT_STRING(const char*) fmt, Args... args) {
   return;
 };
 
+// type-specific (float or double) equal compare
+template <typename T>
+inline bool fp_equal(T a, T b) {
+  static_assert(std::is_same<T, float>::value || std::is_same<T, double>::value, "fp_equal<T> only supports float or double types.");
+
+  constexpr T eps = std::is_same<T, float>::value ? static_cast<T>(1e-6f) : static_cast<T>(1e-12);
+  return std::fabs(a - b) < eps;
+}
+
+/// Moves the file pointer to offset, 64-bit capable, cross-platform
+inline int fseek_las(FILE* file, I64 offset, int origin) {
+#if defined(_WIN32) && !defined(__MINGW32__)
+  return _fseeki64(file, offset, origin);
+#elif defined(__MINGW32__)
+  return fseeko64(file, (off64_t)offset, origin);
+#else
+  return fseeko(file, (off_t)offset, origin);
+#endif
+}
+
+/// Returns the current file position as a 64-bit value, cross-platform
+inline I64 ftell_las(FILE* file) {
+#if defined _WIN32 && !defined(__MINGW32__)
+  return _ftelli64(file);
+#elif defined(__MINGW32__)
+  return (I64)ftello64(file);
+#else
+  return (I64)ftello(file);
+#endif
+}
+
+/// Reads file information (size, time, permissions) across platforms as a 64-bit compatible function
+inline int stat_las(const char* path, las_stat_t* buf) {
+#if defined(_WIN32) && !defined(__MINGW32__)
+  return _stati64(path, buf);
+#elif defined(__MINGW32__)
+  return stat64(path, buf);
+#else
+  return stat(path, buf);
+#endif
+}
+
 // 32bit/64bit detection
 #ifdef _WIN64
 #define IS64 true
@@ -381,8 +437,8 @@ void laserrorm(LAS_FORMAT_STRING(const char*) fmt, Args... args) {
 #define DIRECTORY_SLASH '/'
 #endif
 
-#ifndef MAX_PATH  // linux
-#define MAX_PATH FILENAME_MAX
+#ifndef MAX_PATH_LAS  // linux
+#define MAX_PATH_LAS FILENAME_MAX
 #endif
 
 // char helpers
@@ -392,6 +448,8 @@ void ExeNameToPathWithoutTrailingDelimiter(int& path_len, char* path);
 std::string exe_path();
 
 std::string dir_current();
+
+std::string temp_path(std::string temp_user = "");
 
 /// replace all occurrences of search in subject with replace and return new string
 std::string ReplaceString(const std::string& subject, const std::string& search, const std::string& replace);
@@ -405,12 +463,19 @@ bool HasFileExt(std::string fn, std::string ext);
 
 std::string FileExtSet(std::string fn_in, std::string ext_new);
 
+std::string getFileExtension(const char* filepath);
+
 bool IsLasLazFile(std::string fn);
 
 /// returns TRUE if 'val' is found in 'vec'
 bool StringInVector(const std::string& value, const std::vector<std::string>& array, bool casesense);
 
 void* realloc_las(void* ptr, size_t size);
+void* malloc_las(size_t size);
+void bytes_to_readable(size_t bytes, double* value_out, const char** unit_out);
+
+size_t get_available_RAM();
+bool check_available_RAM(size_t size);
 
 /// Wrapper for `sscanf` on other platforms than _MSC_VER and `sscanf_s` on Windows and ensures that the size is passed correctly for strings.
 int sscanf_las(const char* buffer, const char* format, ...);
@@ -454,6 +519,28 @@ std::string CcToUnderline(const std::string& in);
 
 /// returns the occurency count of 'toCount' in 'in'
 size_t StringCountChar(const std::string& in, const char toCount);
+
+/// Function for determining the standard programme paths
+const char** getDefaultProgramPaths(size_t& numPaths);
+
+/// Function to get the home directory of the current user
+const char* getHomeDirectory();
+
+/// Does the file exist
+BOOL file_exists(const std::string& path);
+
+/// Get the digits 
+I32 get_digits(F64 scale_factor); 
+
+/// Checks at runtime whether the system stores its multi-byte numbers in little-endian format in memory
+namespace Endian {
+extern const bool IS_LITTLE_ENDIAN;
+
+void to_big_endian(int* value);
+void to_little_endian(int* value);
+void to_big_endian(double* value);
+void to_little_endian(double* value);
+}
 
 #endif
 
