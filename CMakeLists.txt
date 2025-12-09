@@ -7,9 +7,9 @@ string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
 
 if (MSVC)
-  add_compile_options("/std:c++17")
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/std:c++17>)
 else()
-  add_compile_options(-std=c++17)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++17>)
 endif()
 
 if(CMAKE_GNU_COMPILER_ID OR CMAKE_Clang_COMPILER_ID)
@@ -128,4 +128,3 @@ add_subdirectory(dll)
 
 #
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
-
