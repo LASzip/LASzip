@@ -348,109 +348,6 @@ const char* indent_text(const char* text, const char* indent) {
 }
 
 /// <summary>
-/// Trim path to part prior last directory separator
-/// Sample: c:\temp\a.exe >> c:\temp || /temp/a >> /temp
-/// </summary>
-/// <param name="path_len">current len of path</param>
-/// <param name="path">pointer to path char</param>
-void ExeNameToPathWithoutTrailingDelimiter(int& path_len, char* path) {
-  while ((path_len > 0) && (path[path_len] != DIRECTORY_SLASH) && (path[path_len] != ':')) path_len--;
-  path[path_len] = 0;
-}
-
-/// get the path of the exe file (incl. trailing path delimiter)
-std::string exe_path() {
-  size_t len = 0;
-#ifdef _WIN32
-  TCHAR path[MAX_PATH_LAS];
-  GetModuleFileName(NULL, path, MAX_PATH_LAS);
-#ifdef UNICODE
-  len = wcslen(path);
-#else
-  len = strlen(path);
-#endif
-#else
-  char path[MAX_PATH_LAS];
-  len = readlink("/proc/self/exe", path, MAX_PATH_LAS);
-#endif
-  while (len && (path[len] != '\\') && (path[len] != '/')) len--;
-  path[len] = '\0';
-  //
-#if defined(_WIN32) && defined(UNICODE)
-  return bufferWToString(path, len) + DIRECTORY_SLASH;
-#else
-  return std::string(path, len) + DIRECTORY_SLASH;
-#endif
-}
-
-/// <summary>
-/// get the current directory (exclude trailing delimiter)
-/// </summary>
-std::string dir_current() {
-  char curr_directory[MAX_PATH_LAS];
-#ifdef _WIN32
-  GetCurrentDirectory(MAX_PATH_LAS, curr_directory);
-#else
-  getcwd(curr_directory, MAX_PATH_LAS);
-#endif
-  return std::string(curr_directory);
-}
-
-/// <summary>
-/// get the temp path include trailing delimiter. system default or temp_user.
-/// responsitility of the user if temp_user is a valid and terminated path.
-/// </summary>
-/// <param name="temp_user">optional user defined temp path</param>
-/// <returns>temp path to use</returns>
-std::string temp_path(std::string temp_user) {
-  std::string td;
-  if (temp_user.empty()) {
-    td = std::filesystem::temp_directory_path().string();
-    if (td.empty()) {
-      td = ".";
-    }
-  } else {
-    td = temp_user;
-  }
-  if (td.back() != DIRECTORY_SLASH) {
-    td += DIRECTORY_SLASH;
-  }
-  return td;
-}
-
-/// replace all occurrences of search in subject with replace and return new string
-std::string ReplaceString(const std::string& subject, const std::string& search, const std::string& replace) {
-  // 'abc','a','ab' -> 'abbc'
-  // 'abc','ab','a' -> 'ac'
-  // 'aaa','a','aa' -> 'aaaaaa'
-  // '1|   2','| ','|' -> '1,2'
-  std::string result = subject;
-  size_t pos = 0;
-  size_t add = 0;
-  // avoid endless replace if replace contains search token
-  if (replace.find(search) != std::string::npos) {
-    add = replace.length();
-  }
-  // replace loop
-  while ((pos = result.find(search, pos)) != std::string::npos) {
-    result.replace(pos, search.length(), replace);
-    pos += add;  // set startpoint for next loop
-  }
-  return result;
-}
-
-/// replace all occurrences of search in subject with replace
-void ReplaceStringInPlace(std::string& subject, const std::string& search, const std::string& replace) {
-  subject = ReplaceString(subject, search, replace);
-}
-
-/// checks if a fullString ends with a certain ending
-bool StringEndsWith(const std::string& fullString, const std::string& ending) {
-  if (ending.size() > fullString.size()) return false;
-  return fullString.compare(fullString.size() - ending.size(), ending.size(), ending) == 0;
-}
-
-/// <summary>
 /// Check if file has a certain file extension (case insensitive)
 /// </summary>
 /// <param name="fn">filename</param>
@@ -477,34 +374,6 @@ std::string FileExtSet(std::string fn_in, std::string ext_new) {
     return fn_in  + ext_new;
   } else {
     return fn_in.substr(0, pos) + ext_new;
-  }
-}
-
-/// Returns the extension of the file
-std::string getFileExtension(const char* filepath) {
-  if (!filepath) return "";
-
-  const char* dot = strrchr(filepath, '.');
-  if (!dot || *(dot + 1) == '\0') return "";  // No point or nothing after that
-
-  std::string ext(dot + 1);
-  // Optional: in lowercase letters
-  for (char& c : ext) c = std::tolower(static_cast<unsigned char>(c));
-  return ext;
-}
-
-// checks if given file is a las/laz file
-bool IsLasLazFile(std::string fn) {
-  return HasFileExt(fn, "las") || HasFileExt(fn, "laz");
-}
-
-/// returns TRUE if 'val' is found in 'vec'
-bool StringInVector(const std::string& val, const std::vector<std::string>& vec, bool casesense) {
-  if (casesense) {
-    return std::find(vec.begin(), vec.end(), val) != vec.end();
-  } else {
-    auto iterator = std::find_if(vec.begin(), vec.end(), [&](std::string s) { return (to_lower_copy(s).compare(to_lower_copy(val)) == 0); });
-    return iterator != vec.end();
   }
 }
 
@@ -706,63 +575,6 @@ std::string trim(const std::string& in) {
 }
 #endif
 
-/// <summary>
-/// Get next token till end of input
-/// </summary>
-/// <param name="in"></param>
-/// <param name="delim"></param>
-/// <param name="out"></param>
-/// <returns></returns>
-bool GetTokenNext(std::string& in, std::string delim, std::string& out) {
-  size_t pos = in.find(delim);
-  if (pos != std::string::npos) {
-    out = in.substr(0, pos);
-    in = in.substr(pos + delim.length(), in.length());
-  } else {
-    out = in;
-    in = "";
-  }
-  return !(in.empty() && out.empty());
-}
-
-/// returns next token, "" if done or first empty token
-std::string TokenNext(std::string& in, std::string delim) {
-  std::string out;
-  if (GetTokenNext(in, delim, out)) {
-    return out;
-  } else {
-    return "";
-  }
-}
-
-/// output all vector values separated by delimiter
-std::string VectorDelimited(const std::vector<std::string>& items, const std::string& delimiter) {
-  if (items.empty()) {
-    return "";
-  }
-  std::string result = items[0];
-  for (size_t i = 1; i < items.size(); ++i) {
-    result += delimiter + items[i];
-  }
-  return result;
-}
-
-int stoidefault(const std::string& val, int def) {
-  try {
-    return std::stoi(val);
-  } catch (const std::exception&) {
-    return def;
-  }
-}
-
-double stoddefault(const std::string& val, double def) {
-  try {
-    return std::stod(val);
-  } catch (const std::exception&) {
-    return def;
-  }
-}
-
 double DoubleRound(double value, int decimals) {
   double scale = pow(10.0, decimals);  // e.g. 10^10 for 10 decimal places
   return std::round(value * scale) / scale;
@@ -780,98 +592,11 @@ std::string DoubleToString(double dd, short decimals, bool trim_right_zeros) {
   return xx;
 }
 
-std::string CcToUnderline(const std::string& in) {
-  std::string res;
-  res.reserve(in.size() * 2);
-  for (size_t ii = 0; ii < in.size(); ii++) {
-    if (isupper(in[ii])) {
-      if (ii > 0) {
-        res.push_back('_');
-      }
-      res.push_back(tolower(in[ii]));
-    } else {
-      res.push_back(in[ii]);
-    }
-  }
-  return res;
-}
-
-/// returns the occurency count of 'toCount' in 'in'
-size_t StringCountChar(const std::string& in, const char toCount) {
-  int count = 0;
-  for (size_t i = 0; i < in.size(); i++)
-    if (in[i] == toCount) count++;
-  return count;
-}
-
-/// Function for determining the standard programme paths
-const char** getDefaultProgramPaths(size_t& numPaths) {
-#ifdef _WIN32
-  // Windows: Use environment variables or API for Program Files directories
-  static const char* defaultPaths[] = {getenv("ProgramFiles"), getenv("ProgramFiles(x86)"), "C:\\", nullptr};
-  // Count valid paths
-  numPaths = 0;
-  while (defaultPaths[numPaths] != nullptr) {
-    ++numPaths;
-  }
-  return defaultPaths;
-#elif __APPLE__
-  // macOS: Standard directories
-  static const char* defaultPaths[] = {"/Applications/", "/usr/local/", nullptr};
-  numPaths = sizeof(defaultPaths) / sizeof(defaultPaths[0]) - 1;
-  return defaultPaths;
-#else
-  // Linux/Unix: Standard directories
-  static const char* defaultPaths[] = {"/usr/local/", "/opt/", "/usr/share/", nullptr};
-  numPaths = sizeof(defaultPaths) / sizeof(defaultPaths[0]) - 1;
-  return defaultPaths;
-#endif
-}
-
-/// Function to get the home directory of the current user
-const char* getHomeDirectory() {
-#ifdef _WIN32
-  return getenv("USERPROFILE");
-#else
-  return getenv("HOME");
-#endif
-}
-
-/// Does the file exist
-BOOL file_exists(const std::string& path) {
-  FILE* file = std::fopen(path.c_str(), "r");
-  if (file) {
-    fclose(file);
-    return TRUE;
-  }
-  return FALSE;
-}
-
-/// Get the digits
-I32 get_digits(F64 scale_factor) {
-  if (fp_equal(scale_factor, 0.01)) {
-    return 2;
-  } else if (fp_equal(scale_factor, 0.001)) {
-    return 3;
-  } else if (fp_equal(scale_factor, 0.0025) || fp_equal(scale_factor, 0.0001)) {
-    return 4;
-  } else if (fp_equal(scale_factor, 0.00025) || fp_equal(scale_factor, 0.00001)) {
-    return 5;
-  } else if (fp_equal(scale_factor, 0.000001)) {
-    return 6;
-  } else if (fp_equal(scale_factor, 0.0000001)) {
-    return 7;
-  } else if (fp_equal(scale_factor, 0.00000001)) {
-    return 8;
-  }
-  return -1;
-}
-
 /// endians 
 namespace Endian {
 /// Checks at runtime whether the system stores its multi-byte numbers in little-endian format in memory
 /// Initialisation when the programme starts, once only
-const bool IS_LITTLE_ENDIAN = []() {
+const bool IS_LITTLE_ENDIAN = [] {
   uint16_t test = 1;
   return *reinterpret_cast<uint8_t*>(&test) == 1;
 }();

@@ -446,34 +446,7 @@ inline int stat_las(const char* path, las_stat_t* buf) {
 #define MAX_PATH_LAS FILENAME_MAX
 #endif
 
-// char helpers
-void ExeNameToPathWithoutTrailingDelimiter(int& path_len, char* path);
-
-// string helpers
-std::string exe_path();
-
-std::string dir_current();
-
-std::string temp_path(std::string temp_user = "");
-
-/// replace all occurrences of search in subject with replace and return new string
-std::string ReplaceString(const std::string& subject, const std::string& search, const std::string& replace);
-
-/// replace all occurrences of search in subject with replace
-void ReplaceStringInPlace(std::string& subject, const std::string& search, const std::string& replace);
-
-bool StringEndsWith(const std::string& fullString, const std::string& ending);
-
-bool HasFileExt(std::string fn, std::string ext);
-
 std::string FileExtSet(std::string fn_in, std::string ext_new);
-
-std::string getFileExtension(const char* filepath);
-
-bool IsLasLazFile(std::string fn);
-
-/// returns TRUE if 'val' is found in 'vec'
-bool StringInVector(const std::string& value, const std::vector<std::string>& array, bool casesense);
 
 void* realloc_las(void* ptr, size_t size);
 void* malloc_las(size_t size);
@@ -498,44 +471,11 @@ std::string to_upper_copy(const std::string& in);
 std::string trim(const std::string& in);
 #endif
 
-/// Get next token till end of input. Shortens <in>, result in <out>. return TRUE if out contains another token.
-bool GetTokenNext(std::string& in, std::string delim, std::string& out);
-
-/// returns next token, "" if done or first empty token
-std::string TokenNext(std::string& in, std::string delim);
-
-/// output all vector values as single string, separated by delimiter
-std::string VectorDelimited(const std::vector<std::string>& items, const std::string& delimiter);
-
-/// string to integer with default value (no exception)
-int stoidefault(const std::string& val, int def = 0);
-
-/// string to double with default value (no exception)
-double stoddefault(const std::string& val, double def = 0);
-
 /// Function for rounding to a specific number of decimal places
 double DoubleRound(double value, int decimals);
 
 /// return double as string rounded to a maximum number of decimal places. optional trim trailing 0s
 std::string DoubleToString(double dd, short decimals, bool trim_right_zeros = false);
-
-/// CamelCase to non_camel_case converter
-std::string CcToUnderline(const std::string& in);
-
-/// returns the occurency count of 'toCount' in 'in'
-size_t StringCountChar(const std::string& in, const char toCount);
-
-/// Function for determining the standard programme paths
-const char** getDefaultProgramPaths(size_t& numPaths);
-
-/// Function to get the home directory of the current user
-const char* getHomeDirectory();
-
-/// Does the file exist
-BOOL file_exists(const std::string& path);
-
-/// Get the digits 
-I32 get_digits(F64 scale_factor); 
 
 /// Checks at runtime whether the system stores its multi-byte numbers in little-endian format in memory
 namespace Endian {
@@ -548,4 +488,3 @@ void to_little_endian(double* value);
 }
 
 #endif
-
