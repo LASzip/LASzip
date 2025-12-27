@@ -2009,7 +2009,7 @@ laszip_prepare_header_for_write(
     laszip_dll_struct*                 laszip_dll
 )
 {
-  if ((laszip_dll->header.version_major != 1) || (laszip_dll->header.version_minor > 4))
+  if ((laszip_dll->header.version_major != 1) || (laszip_dll->header.version_minor > 5))
   {
     snprintf(laszip_dll->error, sizeof(laszip_dll->error), "unknown LAS version %d.%d", (I32)laszip_dll->header.version_major, (I32)laszip_dll->header.version_minor);
     return 1;
@@ -3554,6 +3554,19 @@ laszip_close_writer(
             snprintf(laszip_dll->error, sizeof(laszip_dll->error), "updating laszip_dll->inventory->extended_number_of_points_by_return[%d]\n", i);
             return 1;
           }
+        }
+      }
+      if (laszip_dll->header.version_minor >= 5) 
+      {
+        if (!laszip_dll->streamout->put64bitsLE((const U8*)&laszip_dll->inventory->max_gps_time))
+        {
+          snprintf(laszip_dll->error, sizeof(laszip_dll->error), "updating laszip_dll->inventory->max_gps_time\n");
+          return 1;
+        }
+        if (!laszip_dll->streamout->put64bitsLE((const U8*)&laszip_dll->inventory->min_gps_time))
+        {
+          snprintf(laszip_dll->error, sizeof(laszip_dll->error), "updating laszip_dll->inventory->min_gps_time\n");
+          return 1;
         }
       }
       laszip_dll->streamout->seekEnd();
