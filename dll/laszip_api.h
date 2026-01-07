@@ -57,7 +57,7 @@
 #include <laszip/laszip_api_version.h>
 #include <laszip/laszip_common.h>
 #else
-#include <laszip_common.h>
+#include <laszip/laszip_common.h>
 #endif
 
 #ifdef _WIN32
