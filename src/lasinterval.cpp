@@ -456,7 +456,7 @@ BOOL LASinterval::merge(const BOOL erase)
         if (diff > 0)
         {
           last_cell->end = cell->end;
-          merged_cells->total += diff;
+          merged_cells->total += static_cast<U32>(diff);
         }
         number_intervals--;
       }

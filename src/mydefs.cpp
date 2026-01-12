@@ -39,7 +39,6 @@
 #include <cstring>
 #include <filesystem>
 #include <string>
-#include <stdio.h>
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -294,19 +293,15 @@ FILE* LASfopen(const char* const filename, const char* const mode) {
 /// </summary>
 /// <param name="filename">absolute filename to delete</param>
 /// <param name="onFailMsg">message type on failure</param>
-void FileDelete(std::string filename, LAS_MESSAGE_TYPE onFailMsg) {
-  if (filename.empty()) return;
-  std::string cmd;
-#ifdef _WIN32
-  cmd = "del ";
-#else
-  cmd = "rm ";
-#endif
-  cmd += filename;
-  LASMessage(LAS_VERY_VERBOSE, "deleting '%s'", filename.c_str());
-  int res = system(cmd.c_str());
-  if (res != 0) {
-    LASMessage(onFailMsg, "delete of file '%s' failed [%d]", filename.c_str(), res);
+void FileDelete(std::filesystem::path file, LAS_MESSAGE_TYPE onFailMsg) {
+  if (file.string().empty()) return;
+  LASMessage(LAS_VERBOSE, "deleting '%s'", file.string().c_str());
+  try {
+    if (!std::filesystem::remove(file)) {
+      LASMessage(LAS_WARNING, "file not found: '%s'", file.string().c_str());
+    }
+  } catch (const std::filesystem::filesystem_error& e) {
+    LASMessage(onFailMsg, "delete of file '%s' failed [%s]", file.string().c_str(), e.what());
   }
 }
 

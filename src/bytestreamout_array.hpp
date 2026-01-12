@@ -137,7 +137,7 @@ inline BOOL ByteStreamOutArray::putBytes(const U8* bytes, U32 num_bytes)
 {
   if ((curr+num_bytes) > alloc)
   {
-    alloc += (4096+num_bytes);
+    alloc += (4096+static_cast<I64>(num_bytes));
     data = (U8*)realloc_las(data, (U32)alloc);
     if (data == 0)
     {

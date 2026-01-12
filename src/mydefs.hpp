@@ -53,11 +53,12 @@
 #include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
+#include <cstdint>
 #include <cstdarg>
 #include <vector>
 #include <sys/stat.h>
-
 #include <cmath>
+#include <filesystem>
 #include <type_traits>
 
 typedef char CHAR;
@@ -265,6 +266,30 @@ typedef union U64F64 {
 #define ENDIANSWAP32(n)                                                                                                                              \
   (((((U32)n) << 24) & 0xFF000000) | ((((U32)n) << 8) & 0x00FF0000) | ((((U32)n) >> 8) & 0x0000FF00) | ((((U32)n) >> 24) & 0x000000FF))
 
+#if defined(_MSC_VER)
+#include <intrin.h>
+#pragma intrinsic(__popcnt)
+inline int popcount(uint32_t x) {
+  return __popcnt(x);
+}
+
+#elif defined(__GNUC__) || defined(__clang__)
+inline int popcount(uint32_t x) {
+  return __builtin_popcount(x);
+}
+
+#else
+Fallback for other compilers: classic loop
+inline int popcount(uint32_t x) {
+  int count = 0;
+  while (x) {
+    x &= (x - 1);
+    count++;
+  }
+  return count;
+}
+#endif
+
 inline void ENDIAN_SWAP_16_(U8* field) {
   U8 help = field[0];
   field[0] = field[1];
@@ -320,6 +345,37 @@ inline void ENDIAN_SWAP_64(const U8* from, U8* to) {
   to[7] = from[0];
 }
 
+inline int swap_endian_int(int input) {
+  int output;
+  ((char*)&output)[0] = ((char*)&input)[3];
+  ((char*)&output)[1] = ((char*)&input)[2];
+  ((char*)&output)[2] = ((char*)&input)[1];
+  ((char*)&output)[3] = ((char*)&input)[0];
+  return output;
+}
+
+inline I64 swap_endian_I64(I64 input) {
+  I64 output;
+  ((char*)&output)[0] = ((char*)&input)[7];
+  ((char*)&output)[1] = ((char*)&input)[6];
+  ((char*)&output)[2] = ((char*)&input)[5];
+  ((char*)&output)[3] = ((char*)&input)[4];
+  ((char*)&output)[4] = ((char*)&input)[3];
+  ((char*)&output)[5] = ((char*)&input)[2];
+  ((char*)&output)[6] = ((char*)&input)[1];
+  ((char*)&output)[7] = ((char*)&input)[0];
+  return output;
+}
+
+inline unsigned int swap_endian_uint(unsigned int input) {
+  unsigned int output;
+  ((char*)&output)[0] = ((char*)&input)[3];
+  ((char*)&output)[1] = ((char*)&input)[2];
+  ((char*)&output)[2] = ((char*)&input)[1];
+  ((char*)&output)[3] = ((char*)&input)[0];
+  return output;
+}
+
 #if defined(_WIN32)
 wchar_t* UTF8toUTF16(const char* utf8);
 wchar_t* ANSItoUTF16(const char* ansi);
@@ -361,7 +417,7 @@ extern void LASLIB_DLL byebye();
 bool validate_utf8(const char* utf8, bool restrict_to_two_bytes = false) noexcept;
 // Opens a file with the specified filename and mode, converting filename and mode to UTF-16 on Windows.
 FILE* LASfopen(const char* const filename, const char* const mode);
-void FileDelete(std::string filename, LAS_MESSAGE_TYPE onFailMsg = LAS_WARNING);
+void FileDelete(std::filesystem::path file, LAS_MESSAGE_TYPE onFailMsg = LAS_WARNING);
 const char* indent_text(const char* text, const char* indent);
 
 // las error message function which leads to an immediate program stop by default

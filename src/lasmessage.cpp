@@ -47,7 +47,7 @@ static void* message_user_data = 0;
 static LAS_MESSAGE_TYPE las_message_level = LAS_INFO;
 
 struct LogData {
-  LAS_MESSAGE_TYPE type;
+  LAS_MESSAGE_TYPE type = LAS_INFO;
   U32 count = 0;
   U32 rep_times = 5;
 };
@@ -98,11 +98,10 @@ void buildMessage(char *buffer, LAS_MESSAGE_TYPE type, LAS_FORMAT_STRING(const c
 void LASMessage(LAS_MESSAGE_TYPE type, LAS_FORMAT_STRING(const char*) fmt, ...) {
   assert(type <= LAS_FATAL_ERROR);  // message type must be less than or equal to LAS_FATAL_ERROR (LAS_QUIET must not be used in LASMessage calls)
 
-  lasmessage_cnt[type]++;
+  if (type >= 0 && type <= LAS_QUIET) lasmessage_cnt[type]++;
 
   if (type < las_message_level) return;
 
-  bool clear_log_entry = false;
   va_list args;
   va_start(args, fmt);
   char buffer[LAS_MAX_MESSAGE_LENGTH];
@@ -133,7 +132,7 @@ void LASMessage(LAS_MESSAGE_TYPE type, LAS_FORMAT_STRING(const char*) fmt, ...) 
 void LASMessageExt(LAS_MESSAGE_TYPE type, unsigned int rep_times, LAS_FORMAT_STRING(const char*) fmt, ...) {
   assert(type <= LAS_FATAL_ERROR);  // message type must be less than or equal to LAS_FATAL_ERROR (LAS_QUIET must not be used in LASMessage calls)
 
-  lasmessage_cnt[type]++;
+  if (type >= 0 && type <= LAS_QUIET) lasmessage_cnt[type]++;
 
   if (type < las_message_level) return;
 

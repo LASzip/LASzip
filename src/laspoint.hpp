@@ -864,7 +864,7 @@ class LASLIB_DLL LASpoint {
   // get scan angle as string
   inline std::string get_scan_angle_string() const {
     if (extended_point_type)
-      return DoubleToString(0.006f * extended_scan_angle, 3);
+      return DoubleToString(0.006 * extended_scan_angle, 3);
     else
       return std::to_string(scan_angle_rank);
   };
