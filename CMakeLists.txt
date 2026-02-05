@@ -1,20 +1,27 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(LASZIP CXX C)
-set(CMAKE_CXX_STANDARD 17)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
 
+if (NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
+
+if (NOT CMAKE_C_STANDARD)
+    set(CMAKE_C_STANDARD 99)
+    set(CMAKE_C_STANDARD_REQUIRED ON)
+endif()
+
 if (MSVC)
   add_compile_options("/std:c++17")
-else()
-  add_compile_options(-std=c++17)
 endif()
 
 if(CMAKE_GNU_COMPILER_ID OR CMAKE_Clang_COMPILER_ID)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-format-security -Wno-format-truncation")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-format-security -Wno-format-truncation -std=c++17")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-format-security -Wno-format-truncation")
 endif()
 
 # the next line is the ONLY place in the entire laszip system where
