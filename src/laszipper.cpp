@@ -47,7 +47,7 @@ bool LASzipper::open(FILE* outfile, const LASzip* laszip)
   if (!writer) return return_error("alloc of LASwritePoint failed");
   if (!writer->setup(laszip->num_items, laszip->items, laszip)) return return_error("setup() of LASwritePoint failed");
   if (stream) delete stream;
-  if (IS_LITTLE_ENDIAN())
+  if (Endian::IS_LITTLE_ENDIAN)
     stream = new ByteStreamOutFileLE(outfile);
   else
     stream = new ByteStreamOutFileBE(outfile);
@@ -65,7 +65,7 @@ bool LASzipper::open(ostream& outstream, const LASzip* laszip)
   if (!writer) return return_error("alloc of LASwritePoint failed");
   if (!writer->setup(laszip->num_items, laszip->items, laszip)) return return_error("setup() of LASwritePoint failed");
   if (stream) delete stream;
-  if (IS_LITTLE_ENDIAN())
+  if (Endian::IS_LITTLE_ENDIAN)
     stream = new ByteStreamOutOstreamLE(outstream);
   else
     stream = new ByteStreamOutOstreamBE(outstream);

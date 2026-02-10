@@ -47,7 +47,7 @@ bool LASunzipper::open(FILE* infile, const LASzip* laszip)
   if (!reader) return return_error("alloc of LASreadPoint failed");
   if (!reader->setup(laszip->num_items, laszip->items, laszip)) return return_error("setup() of LASreadPoint failed");
   if (stream) delete stream;
-  if (IS_LITTLE_ENDIAN())
+  if (Endian::IS_LITTLE_ENDIAN)
     stream = new ByteStreamInFileLE(infile);
   else
     stream = new ByteStreamInFileBE(infile);
@@ -65,7 +65,7 @@ bool LASunzipper::open(istream& instream, const LASzip* laszip)
   if (!reader) return return_error("alloc of LASreadPoint failed");
   if (!reader->setup(laszip->num_items, laszip->items, laszip)) return return_error("setup() of LASreadPoint failed");
   if (stream) delete stream;
-  if (IS_LITTLE_ENDIAN())
+  if (Endian::IS_LITTLE_ENDIAN)
     stream = new ByteStreamInIstreamLE(instream);
   else
     stream = new ByteStreamInIstreamBE(instream);
