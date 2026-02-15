@@ -851,8 +851,8 @@ inline void LASreadItemCompressed_POINT14_v3::read(U8* item, U32& context)
 
   // create single (3) / first (1) / last (2) / intermediate (0) return context for current point
 
-  I32 cpr = (r == 1 ? 2 : 0); // first ?
-  cpr += (r >= n ? 1 : 0); // last ?
+  I32 cpr = (r == 1 ? 1 : 0); // first ?
+  cpr += (r >= n ? 2 : 0); // last ?
 
   U32 k_bits;
   I32 median, diff;
