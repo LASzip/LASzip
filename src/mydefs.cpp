@@ -862,6 +862,87 @@ I32 get_digits(F64 scale_factor) {
   return -1;
 }
 
+
+/// Correctly encapsulates CSV special characters and doubles quotation marks for valid CSV
+std::string escape_csv_value(const std::string& value) {
+  // only escape if special " characters present
+  std::string escaped;
+  escaped.reserve(value.size());
+
+  for (char c : value) {
+    if (c == '"')
+      escaped += "\"\"";  // double quotation marks
+    else
+      escaped += c;
+  }
+  return escaped;
+}
+
+/// Converts all XML reserved characters in the string to their safe entity codes for valid XML
+std::string escape_xml_value(const std::string& value) {
+  std::string out;
+  out.reserve(value.size());
+
+  for (char c : value) {
+    switch (c) {
+      case '&':
+        out += "&amp;";
+        break;
+      case '<':
+        out += "&lt;";
+        break;
+      case '>':
+        out += "&gt;";
+        break;
+      default:
+        out += c;
+        break;
+    }
+  }
+  return out;
+}
+
+/// Compresses a sorted set of indices into readable ranges such as '3-7, 10-12, 20'.
+/// Consecutive values are grouped into ranges, whilst individual values are output separately.
+std::string compress_indices(const std::set<I32>& indices) {
+  if (indices.empty()) return "";
+
+  std::ostringstream oss;
+
+  std::set<I32>::const_iterator iter = indices.begin();
+  I32 range_start = *iter;
+  I32 previous_value = *iter;
+
+  ++iter;
+
+  for (; iter != indices.end(); ++iter) {
+    I32 current_value = *iter;
+
+    if (current_value == previous_value + 1) {
+      // Range continues
+      previous_value = current_value;
+    } else {
+      // Range ended, write it out
+      if (range_start == previous_value)
+        oss << range_start << ", ";
+      else
+        oss << range_start << "-" << previous_value << ", ";
+
+      range_start = previous_value = current_value;
+    }
+  }
+
+  // Last range
+  if (range_start == previous_value)
+    oss << range_start;
+  else
+    oss << range_start << "-" << previous_value;
+
+  return oss.str();
+}
+
+
+
 /// endians 
 namespace Endian {
 /// Checks at runtime whether the system stores its multi-byte numbers in little-endian format in memory
