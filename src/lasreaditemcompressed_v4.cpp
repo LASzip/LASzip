@@ -991,8 +991,12 @@ inline void LASreadItemCompressed_POINT14_v4::read(U8* item, U32& context)
     }
   }
 
+  // save deleted_flag because seek can overwrite internal fields during memcpy
+  U8 old_deleted_flag = ((LASpoint14*)item)->deleted_flag;
   // copy the last item
   memcpy(item, last_item, sizeof(LASpoint14));
+  // deleted_flag restore
+  ((LASpoint14*)item)->deleted_flag = old_deleted_flag;
   // remember if the last point had a gps_time_change
   ((LASpoint14*)last_item)->gps_time_change = gps_time_change;
 }

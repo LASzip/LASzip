@@ -309,6 +309,8 @@ class LASLIB_DLL LASpoint {
         case LASitem::POINT14:
           have_gps_time = TRUE;
           extended_point_type = 1;
+          this->point[i] = (U8*)this;
+          break;
         case LASitem::POINT10:
           this->point[i] = (U8*)&(this->X);
           break;
@@ -365,6 +367,8 @@ class LASLIB_DLL LASpoint {
         case LASitem::POINT14:
           have_gps_time = TRUE;
           extended_point_type = 1;
+          this->point[i] = (U8*)this;
+          break;
         case LASitem::POINT10:
           this->point[i] = (U8*)&(this->X);
           break;
