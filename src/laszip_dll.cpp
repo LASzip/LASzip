@@ -275,7 +275,7 @@ laszip_message_func(
 
 /*---------------------------------------------------------------------------*/
 LASZIP_API laszip_I32
-laszip_set_error_handler(
+laszip_set_las_message_handler(
     laszip_POINTER                     pointer
     , laszip_message_handler           callback
     , void*                            user_data
